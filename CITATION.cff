@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this proof artifact, please cite the latest paper DOI."
+title: "lutar-lean: Machine-checked Lean 4 proofs of the Lutar Invariant"
+authors:
+  - family-names: "Lutar"
+    given-names: "Stephen P."
+    name-suffix: "Jr."
+    email: "stephen@szlholdings.com"
+    affiliation: "SZL Holdings"
+    orcid: "https://orcid.org/0009-0001-0110-4173"
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/szl-holdings/lutar-lean"
+url: "https://github.com/szl-holdings/lutar-lean"
+keywords:
+  - lean4
+  - mathlib
+  - formal-verification
+  - audit-closure
+  - lutar-invariant
+  - ouroboros-thesis
+preferred-citation:
+  type: article
+  title: "The Λ-Ouroboros Substrate: Four Machine-Verified Mechanisms for Governed AI Runtimes"
+  authors:
+    - family-names: "Lutar"
+      given-names: "Stephen P."
+      name-suffix: "Jr."
+      orcid: "https://orcid.org/0009-0001-0110-4173"
+  year: 2026
+  doi: "10.5281/zenodo.20119582"
+  url: "https://doi.org/10.5281/zenodo.20119582"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20119582"
+    description: "Paper v11 (latest published)"
+  - type: doi
+    value: "10.5281/zenodo.19944926"
+    description: "Concept DOI (always resolves to latest)"

@@ -2,9 +2,14 @@
 
 **Machine-checked Lean 4 proofs of the Lutar Invariant.**
 
-This repository is the formal companion to *“The Λ-Ouroboros Substrate:
-Four Machine-Verified Mechanisms for Governed AI Runtimes”* (SZL Holdings,
-Paper v12). It contains the Lean 4 + Mathlib formalisation of:
+[![Lean 4](https://img.shields.io/badge/Lean-4-2D5BB9?style=flat-square&logo=lean&logoColor=white)](https://leanprover.github.io/)
+[![Mathlib](https://img.shields.io/badge/Mathlib-required-1F3B73?style=flat-square)](https://github.com/leanprover-community/mathlib4)
+[![Thesis v11](https://img.shields.io/badge/thesis%20v11-10.5281%2Fzenodo.20119582-1f78b4?style=flat-square)](https://doi.org/10.5281/zenodo.20119582)
+[![Concept DOI](https://img.shields.io/badge/Concept%20DOI-10.5281%2Fzenodo.19944926-1f78b4?style=flat-square)](https://doi.org/10.5281/zenodo.19944926)
+[![Runtime parity](https://img.shields.io/badge/runtime%20parity-bit--exact%20across%203%20runtimes-2DA44E?style=flat-square)](#reference-vector-parity)
+[![License](https://img.shields.io/badge/license-Apache--2.0-2DA44E?style=flat-square)](./LICENSE)
+
+This repository is the formal companion to the **Ouroboros Thesis** paper line ([`szl-holdings/ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis)). It contains the Lean 4 + Mathlib formalisation of:
 
 1. **Axioms A1–A4** — the four properties any Lutar-style invariant must satisfy.
 2. **Theorem 1 (Uniqueness)** — under A1–A4, the invariant `Λ_k` is unique.
@@ -27,6 +32,21 @@ stands on a machine-verified foundation. The kernel is the referee.
 | Theorem 1 (uniqueness) | `Lutar/Uniqueness.lean` | 🟡 stated, proof scaffolded |
 
 Track the remaining `sorry` count in every CI run summary.
+
+## Reference-vector parity (Wave 2)
+
+A new entry point — [`lake exe ref_vectors <path>`](./MainRef.lean) — reads a JSON file of golden Λ₉ inputs and asserts that Lean's reference implementation (Float-based, IEEE-754) produces values matching the production TypeScript runtime within an absolute tolerance of `1e-12` and relative tolerance of `1e-9`.
+
+The canonical vector set is checked into [`reference-vectors.json`](./reference-vectors.json) (10 golden vectors covering uniform, monotone, sparse, ground-truth, and adversarial-noisy axes). CI runs the parity check on every push:
+
+```yaml
+- name: Λ parity check
+  run: lake exe ref_vectors reference-vectors.json
+```
+
+On the platform side the same vectors are loaded by [`packages/ouroboros-invariant/test/reference-vectors.test.ts`](https://github.com/szl-holdings/platform) (private) and by every runtime's [`runtime-parity.test.ts`](https://github.com/szl-holdings/platform/blob/main/packages/a11oy-runtime/test/runtime-parity.test.ts) (private). Three runtimes — a11oy, amaru, sentra — are bit-exact equal to the Lean reference and to each other.
+
+**Caveat (honest).** Lean `Float` is IEEE-754 trusted at the builtin level; it is not kernel-verified. The mathematical correctness of `Λ_k(x) = (∏ xᵢ)^(1/k)` lives in the kernel-verified `Lutar/Invariant.lean`; the `ref_vectors` exe checks operational parity, not numerical truth.
 
 ## Build
 
@@ -72,6 +92,10 @@ Representative numbers (N = 10,000 each, Node 24, Linux x86_64):
 
 Composed: **Λ-gate reduces downstream error rate by 45.2%** on the
 synthetic-noisy mixed workload.
+
+## How to cite
+
+If you cite this proof artifact in academic or industry work, use the metadata in [`CITATION.cff`](./CITATION.cff) (or cite the latest paper DOI [`10.5281/zenodo.20119582`](https://doi.org/10.5281/zenodo.20119582)).
 
 ## License
 
