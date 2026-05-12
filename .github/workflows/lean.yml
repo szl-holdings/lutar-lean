@@ -32,3 +32,6 @@ jobs:
 
       - name: Run check executable
         run: lake exe check
+
+      - name: Run reference-vectors parity check
+        run: lake exe ref_vectors reference-vectors.json
