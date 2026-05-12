@@ -1,0 +1,25 @@
+# CODEOWNERS — lutar-lean
+#
+# Default reviewer for every change in this repository.
+# Add path-scoped owners below as the contributor pool grows.
+
+* @stephenlutar2-hash
+
+# Mathematical core (axioms, invariant, theorems) requires explicit Lutar review.
+/Lutar/         @stephenlutar2-hash
+/Lutar.lean     @stephenlutar2-hash
+/Main.lean      @stephenlutar2-hash
+/MainRef.lean   @stephenlutar2-hash
+/RefVectors.lean @stephenlutar2-hash
+/lakefile.lean  @stephenlutar2-hash
+/lean-toolchain @stephenlutar2-hash
+
+# Reference data — changes here invalidate the cited Zenodo deposits.
+/reference-vectors.json @stephenlutar2-hash
+
+# CI and meta files.
+/.github/   @stephenlutar2-hash
+/LICENSE    @stephenlutar2-hash
+/SECURITY.md @stephenlutar2-hash
+/README.md  @stephenlutar2-hash
+/CITATION.cff @stephenlutar2-hash
