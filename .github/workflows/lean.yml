@@ -17,6 +17,10 @@ jobs:
         with:
           # auto-discover from lean-toolchain file
           use-mathlib-cache: true
+          auto-config: false
+
+      - name: Lake update (generate lake-manifest.json)
+        run: lake update
 
       - name: Build (kernel-check the whole library)
         run: lake build
