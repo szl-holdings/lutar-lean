@@ -1,0 +1,34 @@
+name: Lean kernel check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan + Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          # auto-discover from lean-toolchain file
+          use-mathlib-cache: true
+
+      - name: Build (kernel-check the whole library)
+        run: lake build
+
+      - name: Count remaining sorrys
+        run: |
+          echo "## Remaining \`sorry\` axioms" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          COUNT=$(grep -rn '^[^-]*\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' | wc -l || echo "0")
+          echo "Total \`sorry\` markers: **$COUNT**" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          grep -rn '\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Run check executable
+        run: lake exe check
