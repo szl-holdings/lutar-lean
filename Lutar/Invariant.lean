@@ -10,7 +10,7 @@ fraction `1/k`. This is the concrete witness function whose uniqueness we
 prove in `Uniqueness.lean`.
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset
 import Lutar.Axioms
 
 namespace Lutar

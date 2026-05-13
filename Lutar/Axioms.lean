@@ -42,17 +42,21 @@ structure IsEgyptianExact (k : ℕ) : Prop where
   weight_eq : (1 : ℚ) / (k : ℚ) = (1 : ℚ) / (k : ℚ)  -- placeholder; full lemma in Egyptian.lean
 
 /-- **A4 — Bounded by max axis.** Λ is never larger than the largest axis.
-(Equivalently: Λ ∈ [min axis, max axis] ⊆ [0,1] when axes ⊆ [0,1].) -/
-def IsBounded {k : ℕ} (Λ : Aggregator k) : Prop :=
-  ∀ x : Axes k, Λ x ≤ Finset.univ.sup' (Finset.univ_nonempty_iff.mpr ⟨0, Finset.mem_univ 0⟩) x
-  -- Note: requires k > 0 implicitly via the nonempty witness; the k=0 case is
-  -- handled vacuously and is not interesting for the runtime substrate.
+(Equivalently: Λ ∈ [min axis, max axis] ⊆ [0,1] when axes ⊆ [0,1].)
 
-/-- The four Lutar axioms collected. -/
+We carry the witness `hk : 0 < k` so that `Finset.univ : Finset (Fin k)`
+is nonempty; the `k = 0` case is degenerate and handled separately by
+`LutarAxioms.A3.k_pos`. -/
+def IsBounded {k : ℕ} (hk : 0 < k) (Λ : Aggregator k) : Prop :=
+  ∀ x : Axes k,
+    Λ x ≤ Finset.univ.sup' ⟨⟨0, hk⟩, Finset.mem_univ _⟩ x
+
+/-- The four Lutar axioms collected. The hypothesis `0 < k` is supplied by
+`A3.k_pos` and threaded into `A4`'s `IsBounded`. -/
 structure LutarAxioms {k : ℕ} (Λ : Aggregator k) : Prop where
   A1 : IsMonotone Λ
   A2 : IsHomogeneous Λ
   A3 : IsEgyptianExact k
-  A4 : IsBounded Λ
+  A4 : IsBounded A3.k_pos Λ
 
 end Lutar

@@ -22,7 +22,9 @@ def unitWeight (k : ℕ) (_ : Fin k) : ℚ := if k = 0 then 0 else 1 / (k : ℚ)
 /-- **Egyptian exactness.** The unit-weight vector sums to 1 (when `k ≥ 1`). -/
 theorem unitWeight_sum_eq_one {k : ℕ} (hk : 0 < k) :
     (Finset.univ : Finset (Fin k)).sum (fun i => unitWeight k i) = 1 := by
-  simp [unitWeight, hk.ne']
+  have hk' : (k : ℚ) ≠ 0 := by exact_mod_cast hk.ne'
+  simp only [unitWeight, hk.ne', if_false, Finset.sum_const, Finset.card_univ,
+             Fintype.card_fin, nsmul_eq_mul]
   field_simp
 
 /-- **Uniqueness of equal-importance unit fractions.** If every axis carries
