@@ -1,3 +1,6 @@
+import Lean.Data.Json
+import Lean.Data.Json.FromToJson
+
 /-!
 # RefVectors — golden vectors cross-runtime check
 
@@ -16,9 +19,6 @@ correctness of the definition itself lives in `Lutar/Invariant.lean`
 This file checks _operational_ parity between Lean and TS on golden
 inputs, which is what CI needs to catch regressions in either runtime.
 -/
-
-import Lean.Data.Json
-import Lean.Data.Json.FromToJson
 
 open Lean
 

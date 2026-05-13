@@ -12,10 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install elan + Lean toolchain
+      # The repo doesn't commit lake-manifest.json (per .gitignore best practice).
+      # Install elan first so we can run `lake update` to generate the manifest
+      # before lean-action's configure step (which requires it).
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: Resolve toolchain from lean-toolchain
+        run: |
+          # elan auto-installs the toolchain pinned in ./lean-toolchain on first lake use
+          lake --version
+
+      - name: Generate lake-manifest.json (lake update)
+        run: lake update -R
+
+      - name: Install Lean + Mathlib cache via lean-action
         uses: leanprover/lean-action@v1
         with:
-          # auto-discover from lean-toolchain file
           use-mathlib-cache: true
 
       - name: Build (kernel-check the whole library)
