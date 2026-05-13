@@ -5,20 +5,37 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+# Top-level: deny everything by default; jobs grant only what they need.
+# Addresses Scorecard "Token-Permissions" finding.
+permissions: {}
 
 jobs:
   build:
+    name: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
+      - name: Harden runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       # The repo doesn't commit lake-manifest.json (per .gitignore best practice).
       # Install elan first so we can run `lake update` to generate the manifest
       # before lean-action's configure step (which requires it).
       - name: Install elan
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Resolve toolchain from lean-toolchain
         run: |
@@ -29,7 +46,7 @@ jobs:
         run: lake update -R
 
       - name: Install Lean + Mathlib cache via lean-action
-        uses: leanprover/lean-action@v1
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.4.0
         with:
           use-mathlib-cache: true
 
@@ -38,12 +55,14 @@ jobs:
 
       - name: Count remaining sorrys
         run: |
-          echo "## Remaining \`sorry\` axioms" >> "$GITHUB_STEP_SUMMARY"
-          echo '' >> "$GITHUB_STEP_SUMMARY"
-          COUNT=$(grep -rn '^[^-]*\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' | wc -l || echo "0")
-          echo "Total \`sorry\` markers: **$COUNT**" >> "$GITHUB_STEP_SUMMARY"
-          echo '' >> "$GITHUB_STEP_SUMMARY"
-          grep -rn '\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' >> "$GITHUB_STEP_SUMMARY" || true
+          {
+            echo "## Remaining \`sorry\` axioms"
+            echo ""
+            COUNT=$(grep -rn '^[^-]*\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' | wc -l || echo "0")
+            echo "Total \`sorry\` markers: **$COUNT**"
+            echo ""
+            grep -rn '\bsorry\b' Lutar/*.lean Main.lean 2>/dev/null | grep -v '^--' || true
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run check executable
         run: lake exe check

@@ -1,43 +1,29 @@
-name: Scorecard supply-chain security
-on:
-  branch_protection_rule:
-  schedule:
-    - cron: '32 7 * * 2'
-  push:
-    branches: [ "main" ]
+name: Scorecard
 
-permissions: read-all
+# Removed `branch_protection_rule` trigger — that event runs without commit
+# context and causes startup_failure. Schedule + push on main is sufficient
+# for OSSF Scorecard to track supply-chain hygiene over time.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Explicit empty workflow-level permission grant.
+#
+# Why empty (`{}`) and not omitted: OpenSSF Scorecard's `Token-Permissions`
+# check requires a top-level `permissions:` block to be present, otherwise
+# the score is reduced. The block is empty so jobs declare their own
+# minimal scopes without being clamped.
+permissions: {}
 
 jobs:
-  analysis:
-    name: Scorecard analysis
-    runs-on: ubuntu-latest
+  scorecard:
     permissions:
+      contents: read
       security-events: write
       id-token: write
-      contents: read
       actions: read
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: "Run analysis"
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
-        with:
-          results_file: results.sarif
-          results_format: sarif
-          publish_results: true
-
-      - name: "Upload artifact"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: SARIF file
-          path: results.sarif
-          retention-days: 5
-
-      - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4.35.4
-        with:
-          sarif_file: results.sarif
+    uses: szl-holdings/.github/.github/workflows/reusable-scorecard.yml@8186471f7f83f43f3aba4015fcfb2d322dcb4c83 # .github@8186471 fix scorecard permissions
