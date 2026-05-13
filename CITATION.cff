@@ -1,0 +1,49 @@
+cff-version: 1.2.0
+message: "If you use this Lean 4 formalization, please cite the SZL Holdings research thesis (Ouroboros Thesis v9) which introduces the Lutar Invariant Λ, and reference this proof artifact."
+title: "lutar-lean — Lean 4 formalization of the Lutar Invariant Λ uniqueness theorem"
+abstract: >-
+  Lean 4 + Mathlib formalization of the four-axiom characterization of the
+  Lutar Invariant Λ_k as the weighted geometric mean with Egyptian unit-fraction
+  weights. Provides machine-checked statements for the uniqueness theorem
+  (Theorem 1) and the min/max bound (Theorem 2), and a runtime parity check
+  between the Lean Float implementation and the production TypeScript runtime.
+type: software
+authors:
+  - family-names: Lutar
+    given-names: Stephen
+    name-particle: P.
+    affiliation: SZL Holdings
+    orcid: "https://orcid.org/0009-0001-0110-4173"
+license: Apache-2.0
+url: "https://github.com/szl-holdings/lutar-lean"
+repository-code: "https://github.com/szl-holdings/lutar-lean"
+keywords:
+  - lean4
+  - mathlib
+  - formal-verification
+  - lutar-invariant
+  - geometric-mean
+  - egyptian-fractions
+  - szl-holdings
+  - ouroboros-thesis
+identifiers:
+  - description: "Ouroboros Thesis v9 — unified operational account of the Lutar Invariant family (Zenodo)"
+    type: doi
+    value: "10.5281/zenodo.20053148"
+  - description: "Ouroboros Thesis concept DOI — always-latest"
+    type: doi
+    value: "10.5281/zenodo.19944926"
+  - description: "ORCID iD of the principal author"
+    type: other
+    value: "https://orcid.org/0009-0001-0110-4173"
+preferred-citation:
+  type: software
+  title: "lutar-lean — Lean 4 formalization of the Lutar Invariant Λ uniqueness theorem"
+  authors:
+    - family-names: Lutar
+      given-names: Stephen
+      name-particle: P.
+      affiliation: SZL Holdings
+      orcid: "https://orcid.org/0009-0001-0110-4173"
+  year: 2026
+  url: "https://github.com/szl-holdings/lutar-lean"
