@@ -11,6 +11,11 @@ require mathlib from git
 lean_lib «Lutar» where
   -- Library root: Lutar/
 
+lean_lib «RefVectors» where
+  -- Top-level module imported by MainRef; declared as its own lean_lib so
+  -- `lake exe ref_vectors` can resolve `import RefVectors`.
+  roots := #[`RefVectors]
+
 @[default_target]
 lean_exe «check» where
   root := `Main
