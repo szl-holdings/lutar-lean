@@ -21,12 +21,12 @@ open NNReal
 
 /-- Λ never exceeds the max axis (Axiom A4 realised). -/
 theorem Λ_le_max {k : ℕ} (hk : 0 < k) (x : Axes k) :
-    Λ k x ≤ Finset.univ.sup' (Finset.univ_nonempty_iff.mpr ⟨⟨0, hk⟩, Finset.mem_univ _⟩) x := by
+    Λ k x ≤ Finset.univ.sup' ⟨⟨0, hk⟩, Finset.mem_univ _⟩ x := by
   sorry
 
 /-- Λ is at least the min axis. -/
 theorem min_le_Λ {k : ℕ} (hk : 0 < k) (x : Axes k) :
-    Finset.univ.inf' (Finset.univ_nonempty_iff.mpr ⟨⟨0, hk⟩, Finset.mem_univ _⟩) x ≤ Λ k x := by
+    Finset.univ.inf' ⟨⟨0, hk⟩, Finset.mem_univ _⟩ x ≤ Λ k x := by
   sorry
 
 end Lutar
