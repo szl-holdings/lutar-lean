@@ -98,7 +98,12 @@ is satisfied by `o`.  -/
 structure Output where
   /-- The six violation flags, one per `HarmCategory`. -/
   violatesFlag : HarmCategory → Bool
-deriving Repr
+-- Note: `deriving Repr` is intentionally omitted: function-typed fields
+-- (`HarmCategory → Bool`) have no canonical `Repr` instance in Lean 4. This
+-- is by design under the Doctrine V3 §6 formalization choice — we keep the
+-- decision procedure as a function rather than enumerate it as a tuple, so
+-- that adding harm categories does not perturb the proof. The structure is
+-- still `DecidableEq`-extensible if needed via function extensionality.
 
 /-- `violates o h` is the Prop-valued violation predicate, defined as the
 truth of the Boolean flag in `o`. -/
