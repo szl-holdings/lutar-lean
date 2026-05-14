@@ -3,3 +3,4 @@
 /.cache
 *.olean
 .DS_Store
+node_modules/

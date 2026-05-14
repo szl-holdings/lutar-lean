@@ -1,0 +1,11 @@
+{
+  "name": "fix-squad-07",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.21.0",
+    "@types/node": "^22.10.0"
+  }
+}
