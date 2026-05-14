@@ -75,4 +75,4 @@ synthetic-noisy mixed workload.
 
 ## License
 
-Apache-2.0. © 2026 Stephen P. Lutar Jr. / SZL Holdings.
+Apache-2.0. © 2026 Stephen P. Lutar / SZL Holdings.
