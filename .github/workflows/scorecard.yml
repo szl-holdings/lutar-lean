@@ -1,29 +1,52 @@
-name: Scorecard
-
-# Removed `branch_protection_rule` trigger — that event runs without commit
-# context and causes startup_failure. Schedule + push on main is sufficient
-# for OSSF Scorecard to track supply-chain hygiene over time.
+name: Scorecard supply-chain security
 
 on:
   schedule:
-    - cron: '17 6 * * 1'
+    - cron: '32 7 * * 2'
   push:
     branches: [main]
   workflow_dispatch:
 
-# Explicit empty workflow-level permission grant.
-#
-# Why empty (`{}`) and not omitted: OpenSSF Scorecard's `Token-Permissions`
-# check requires a top-level `permissions:` block to be present, otherwise
-# the score is reduced. The block is empty so jobs declare their own
-# minimal scopes without being clamped.
+# Empty top-level permissions block: satisfies OpenSSF Token-Permissions check
+# while allowing job-level write grants below. See:
+# https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions
 permissions: {}
 
 jobs:
-  scorecard:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
       security-events: write
       id-token: write
+      contents: read
       actions: read
-    uses: szl-holdings/.github/.github/workflows/reusable-scorecard.yml@8186471f7f83f43f3aba4015fcfb2d322dcb4c83 # .github@8186471 fix scorecard permissions
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 7
+
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@7fd177fa680c9881b53cdab4d346d32574c9f7f4 # v3.35.4
+        with:
+          sarif_file: results.sarif

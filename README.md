@@ -2,6 +2,12 @@
 
 **Machine-checked Lean 4 proofs of the Lutar Invariant.**
 
+[![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml)
+[![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
+[![License](https://img.shields.io/badge/license-Apache--2.0-2DA44E?style=flat-square)](./LICENSE)
+
+
 This repository is the formal companion to *“The Λ-Ouroboros Substrate:
 Four Machine-Verified Mechanisms for Governed AI Runtimes”* (SZL Holdings,
 Paper v12). It contains the Lean 4 + Mathlib formalisation of:
