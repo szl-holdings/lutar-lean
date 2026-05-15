@@ -1,5 +1,5 @@
 /-
-Copyright © 2026 Stephen P. Lutar Jr. (SZL Holdings).
+Copyright © 2026 Lutar, Stephen P. (SZL Holdings).
 Released under the Apache-2.0 License.
 ORCID: 0009-0001-0110-4173
 Date:  2026-05-14
