@@ -1,5 +1,5 @@
 /-
-Copyright © 2026 Stephen P. Lutar Jr. (SZL Holdings).
+Copyright © 2026 Lutar, Stephen P. (SZL Holdings).
 Released under the Apache-2.0 License.
 
 # Lutar — Axioms A1..A4
