@@ -33,9 +33,14 @@ jobs:
       # before lean-action's configure step (which requires it).
       - name: Install elan
         run: |
-          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/v4.2.1/elan-init.sh \
-            | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          # Pinned to leanprover/elan commit SHA 3d5138e1526a569a23901b8ee559032793cf445e (v4.2.1)
+          # SHA-256 of elan-init.sh at this commit: 4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
+          ELAN_SHA=3d5138e1526a569a23901b8ee559032793cf445e
+          EXPECTED=4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
+          curl -sSfL "https://raw.githubusercontent.com/leanprover/elan/$ELAN_SHA/elan-init.sh" -o /tmp/elan-init.sh
+          echo "$EXPECTED  /tmp/elan-init.sh" | sha256sum -c
+          sh /tmp/elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH" 
 
       - name: Resolve toolchain from lean-toolchain
         run: |
