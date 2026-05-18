@@ -11,6 +11,7 @@ type: software
 authors:
   - family-names: Lutar
     given-names: "Stephen P."
+    name-suffix: "Jr."
 
     email: stephen@szlholdings.com
     affiliation: SZL Holdings
@@ -43,6 +44,7 @@ preferred-citation:
   authors:
     - family-names: Lutar
       given-names: "Stephen P."
+      name-suffix: "Jr."
 
       email: stephen@szlholdings.com
       affiliation: SZL Holdings
