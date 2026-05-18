@@ -8,10 +8,12 @@ abstract: >-
   (Theorem 1) and the min/max bound (Theorem 2), and a runtime parity check
   between the Lean Float implementation and the production TypeScript runtime.
 type: software
+version: "v0.1.0"
+date-released: "2026-05-18"
 authors:
   - family-names: Lutar
     given-names: "Stephen P."
-
+    name-suffix: "Jr."
     email: stephen@szlholdings.com
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
@@ -28,9 +30,15 @@ keywords:
   - szl-holdings
   - ouroboros-thesis
 identifiers:
+  - description: "lutar-lean v0.1.0 — Zenodo software DOI (pending mint)"
+    type: doi
+    value: "10.5281/zenodo.PENDING"
   - description: "Ouroboros Thesis v9 — unified operational account of the Lutar Invariant family (Zenodo)"
     type: doi
     value: "10.5281/zenodo.20053148"
+  - description: "Ouroboros Thesis v10 — Λ₁₀ paper"
+    type: doi
+    value: "10.5281/zenodo.20053163"
   - description: "Ouroboros Thesis concept DOI — always-latest"
     type: doi
     value: "10.5281/zenodo.19944926"
@@ -43,7 +51,7 @@ preferred-citation:
   authors:
     - family-names: Lutar
       given-names: "Stephen P."
-
+      name-suffix: "Jr."
       email: stephen@szlholdings.com
       affiliation: SZL Holdings
       orcid: "https://orcid.org/0009-0001-0110-4173"
