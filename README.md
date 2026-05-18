@@ -1,5 +1,7 @@
 # lutar-lean
 
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.PENDING.svg)](https://doi.org/10.5281/zenodo.PENDING)
+
 **Machine-checked Lean 4 proofs of the Lutar Invariant.**
 
 This repository is the formal companion to *“The Λ-Ouroboros Substrate:
