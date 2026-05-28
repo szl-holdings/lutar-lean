@@ -19,6 +19,8 @@ Runtime counterparts:
 v16 ancient-foundations graft R4-I2.
 -/
 
+import Mathlib.Logic.Function.Basic
+
 namespace Lutar.Brahmi
 
 /-- An axis value distinguishes the Brahmi place-value zero from absence.

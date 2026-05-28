@@ -29,7 +29,7 @@
     • A single-fault detection theorem is proved on the receipt bundle.
 -/
 
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 import Mathlib.Data.Vector.Basic
 
 namespace Lutar.QEC.Shor

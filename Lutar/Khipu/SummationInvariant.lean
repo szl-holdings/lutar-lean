@@ -39,7 +39,7 @@ G7 close (feat/close-G6-G7-pinsker-khipu):
   Sorry count before: 2.  Sorry count after: 0.
 -/
 import Mathlib.Data.List.Basic
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 import Mathlib.Algebra.BigOperators.Group.List
 
 namespace Lutar.Khipu

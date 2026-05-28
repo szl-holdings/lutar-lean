@@ -21,8 +21,8 @@ Encryption Function". CRYPTO 1987, LNCS 293, pp. 369–378.
 -/
 
 import Mathlib.Data.Nat.Log
-import Mathlib.Data.Nat.Basic
-import Mathlib.Algebra.Order.Monoid.Lemmas
+import Mathlib.Data.Nat.Defs
+import Mathlib.Algebra.Order.Monoid.Defs
 import Mathlib.Tactic
 
 namespace Lutar.DPI.Merkle

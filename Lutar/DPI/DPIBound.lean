@@ -61,7 +61,7 @@ machine-checked by the Lean 4 kernel with Mathlib 4.13.0.
 -/
 
 import Mathlib.Tactic
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 
 namespace Lutar.DPI
 

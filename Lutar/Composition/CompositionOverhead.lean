@@ -15,9 +15,9 @@ For a composition of N systems each with overhead ≤ C, the total overhead
 of the composed pipeline is ≤ N * C.
 -/
 
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 import Mathlib.Data.List.Basic
-import Mathlib.Algebra.Order.Ring.Lemmas
+import Mathlib.Algebra.Order.Ring.Defs
 import Mathlib.Tactic
 
 namespace Lutar.Composition.Overhead

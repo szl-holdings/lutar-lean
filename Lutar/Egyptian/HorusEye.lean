@@ -17,6 +17,7 @@ Runtime counterpart: `rosie/src/horus-eye-weights.ts`.
 v16 ancient-foundations graft R1-G2.
 -/
 import Mathlib.Data.Rat.Defs
+import Mathlib.Algebra.BigOperators.Group.List
 import Mathlib.Tactic.NormNum
 
 namespace Lutar.Egyptian.HorusEye

@@ -30,7 +30,7 @@ Sources:
     MIT Press, ch. 5.
 -/
 import Mathlib.Data.Rat.Defs
-import Mathlib.Data.Rat.Order
+import Mathlib.Algebra.Order.Field.Rat
 import Mathlib.Algebra.BigOperators.Group.List
 import Mathlib.Tactic.NormNum
 

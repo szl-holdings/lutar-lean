@@ -50,7 +50,7 @@
   DOIs; innovations beyond the prior art explicitly enumerated.
 -/
 
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 
 namespace Lutar.Shannon
 

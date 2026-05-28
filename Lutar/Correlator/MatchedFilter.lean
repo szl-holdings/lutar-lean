@@ -51,7 +51,7 @@
   Doctrine v6 clean.
 -/
 
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 import Mathlib.Data.List.Basic
 
 namespace Lutar.Correlator
