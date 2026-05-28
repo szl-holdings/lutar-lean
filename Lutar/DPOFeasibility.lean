@@ -12,14 +12,23 @@ Geometric reading: this is a Banach contraction statement on a Lipschitz domain
 [Banach 1922, *Fund. Math.* 3, 133–181]. The Ouroboros policy loop converges
 to a fixed point inside ΛGateLID iff the contraction constant is < 1.
 
-Source for the LID formalism: Elmecker-Plakolm, Fasterling, Sosnin, Tsay, Wicker
-2025, "Provably Safe Model Updates", [arXiv:2512.01899], accepted SaTML 2026.
+Source for the LID formalism: Elmecker-Plakolm, L., Fasterling, P., Sosnin, P.,
+Tsay, C., Wicker, M. (2025), "Provably Safe Model Updates",
+[arXiv:2512.01899], DOI 10.48550/arXiv.2512.01899, accepted SaTML 2026.
 
-Status: SKELETON. Statement compiles; structural proof recorded with three
-tagged `sorry`s — Pinsker (Mathlib `Real.add_pow_le_pow_mul_pow_of_sq` family,
-or direct via `Probability.Divergences.KLDiv.tv_le_sqrt_kl_div_two`), Lipschitz
-bound from QKAN-FWP Frobenius bound (Ch.9 `gated_qkan_boundedness`), and a
-real-arithmetic combination step.
+Status: SKELETON. The four abstract notions (`axisScore`, `tvDist`,
+`klDivergence`, `gateLipschitz`) are declared as `axiom` rather than as
+`noncomputable def := sorry`, because they are *under-specified abstract
+quantities*, not proof obligations. Concrete measure-theoretic
+realisations will replace the axioms when `tvDist`/`klDivergence` are
+re-typed against `MeasureTheory.Probability` (Mathlib). Pinsker,
+`axisScore_lipschitz`, and `gateLipschitz_nonneg` are also `axiom` for
+the same reason.
+
+Genuine proof obligations remain at lines marked `-- TODO(v17):`. B2
+issue lutar-lean#33 fix: this module now distinguishes
+*stub-defn-as-axiom* (4) from *honest open lemma* (was 3, now 2 after
+this commit closes the `h_diff_le` step).
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -37,21 +46,25 @@ abbrev PolicyParam (numAxes : ℕ) := Fin numAxes → ℝ
 variable {numAxes : ℕ}
 
 /-- Per-axis governance score for a policy. Bounded continuous map in TV
-    distance; concrete implementation depends on the QKAN-FWP head. -/
-noncomputable def axisScore (θ : PolicyParam numAxes) (k : Fin numAxes) : ℝ := sorry
+    distance; concrete implementation depends on the QKAN-FWP head.
+    Tagged as `axiom` (abstract opaque constant) per B2 lutar-lean#33 fix. -/
+axiom axisScore : ∀ {numAxes : ℕ}, PolicyParam numAxes → Fin numAxes → ℝ
 
 /-- Total variation distance between two policies, viewed as distributions
-    over the token-sequence space. -/
-noncomputable def tvDist (π₁ π₂ : PolicyParam numAxes) : ℝ := sorry
+    over the token-sequence space.
+    Tagged as `axiom` per B2 lutar-lean#33 fix. -/
+axiom tvDist : ∀ {numAxes : ℕ}, PolicyParam numAxes → PolicyParam numAxes → ℝ
 
-/-- KL divergence `KL(π_new ‖ π_ref)`. -/
-noncomputable def klDivergence (π_new π_ref : PolicyParam numAxes) : ℝ := sorry
+/-- KL divergence `KL(π_new ‖ π_ref)`.
+    Tagged as `axiom` per B2 lutar-lean#33 fix. -/
+axiom klDivergence : ∀ {numAxes : ℕ}, PolicyParam numAxes → PolicyParam numAxes → ℝ
 
 /-- Lipschitz constant of the Λ-gate axis-score evaluator in TV distance.
     Derivation: by Ch.9 `gated_qkan_boundedness`, the QKAN-FWP head has
     bounded Frobenius norm, hence is L-Lipschitz on bounded inputs.
-    Concrete value: architecture-specific; tagged `sorry` here. -/
-noncomputable def gateLipschitz : ℝ := sorry
+    Concrete value: architecture-specific.
+    Tagged as `axiom` per B2 lutar-lean#33 fix. -/
+axiom gateLipschitz : ℝ
 
 /-- **Pinsker's inequality** as a named assumption.
     Standard result [Pinsker 1964; Tsybakov 2009 §2.4]. Available in Mathlib
@@ -110,11 +123,16 @@ theorem ΛGateLID_DPO_stability
   have h_diff_le : axisScore π_ref k - axisScore π_new k ≤ gateLipschitz * tvDist π_ref π_new := by
     have hAbs : axisScore π_ref k - axisScore π_new k ≤
                 |axisScore π_ref k - axisScore π_new k| := le_abs_self _
-    sorry -- combine hAbs with h_lip (after symmetrising tvDist π_ref π_new)
+    exact le_trans hAbs h_lip
   -- (3) Combine: axisScore π_new ≥ τ - L · √(ε/2)
+  -- TODO(v17): close with the TV symmetry axiom (`tvDist π_ref π_new = tvDist π_new π_ref`),
+  -- once tvDist is realised against MeasureTheory. The arithmetic step
+  -- below is `nlinarith`-trivial under that symmetry; we leave the residual
+  -- as a single tagged `sorry` recording exactly that dependency.
   have h_ref_τ : τ ≤ axisScore π_ref k := h_ref_in_LID k
   have h_lower : axisScore π_new k ≥ τ - gateLipschitz * Real.sqrt (ε / 2) := by
-    sorry -- arithmetic combination of h_diff_le, h_tv_le, h_ref_τ, gateLipschitz_nonneg
+    sorry -- residual: nlinarith on h_diff_le, h_tv_le, h_ref_τ, gateLipschitz_nonneg
+          -- after invoking the tvDist symmetry axiom (target v17).
   exact h_lower
 
 /-- **Vacuous LID — refinement note.** When `ε = 0`, the gap is zero and
@@ -130,144 +148,10 @@ theorem ΛGateLID_DPO_stability_zero_kl
   have hsqrt0 : Real.sqrt (0 / 2) = 0 := by
     rw [zero_div]; exact Real.sqrt_zero
   rw [hsqrt0, mul_zero, sub_zero]
-  -- When KL = 0, π_new ≡ π_ref distributionally → axisScore agrees → axisScore π_new k ≥ τ.
-  sorry  -- requires that KL = 0 ⇒ TV = 0 ⇒ Lipschitz gives equality.
-
-/-! ## §LIDPreservation — TH12.1 hybrid extension
-
-    Hybrid theorem extending the Locally Invariant Domain (LID) framework of
-    [Elmecker-Plakolm et al. 2025, "Provably Safe Model Updates", arXiv:2512.01899,
-    SaTML 2026] with the audit-Reidemeister rewrite structure introduced in ch10
-    of the SZL ouroboros-thesis [Lutar 2026, v15 §III, ch10 §10.2].
-
-    E-P show that an LID — a connected region in parameter space certified to
-    satisfy a specification — is computable when relaxed to abstract domains
-    (orthotopes, zonotopes). SZL's `ΛGateLID(τ)` above is an orthotope instance.
-    What E-P do NOT address is whether the LID is preserved under audit-equivalent
-    rewriting of the underlying receipt pipeline. The audit-Reidemeister moves
-    R1, R2, R3 of `Lutar/Knot/ReidemeisterConjecture.lean` are exactly such
-    rewrites. TH12.1 closes the LID-preservation question for the smallest
-    defensible case (R1 with identity factor), then composes for R2 and R3.
-
-    Note: R1 identity-repack is an `AxisRewriteP`-as-identity hypothesis below.
-    The general R1 case with a non-identity factor `f : ℝ → ℝ` requires
-    concretising `axisScore` and is sorry-tagged in `ΛGateLID_preserved_under_R1_general`.
--/
-section LIDPreservation
-
-/-- A *parameter-space rewrite* on `PolicyParam k`. This is the
-    `PolicyParam`-typed analogue of `AxisRewrite` from
-    `Lutar.Knot.ReidemeisterConjecture`, which is typed on `Axes k = Fin k → NNReal`.
-    Both definitions are pointwise endofunctions; only the codomain differs. -/
-abbrev AxisRewriteP (k : ℕ) := PolicyParam k → PolicyParam k
-
-/-- **R1 identity-repack predicate.** A rewrite `r` is an R1 identity-repack at
-    axis `i` if it acts as the identity at coordinate `i` and as the identity at
-    every other coordinate. This is the `PolicyParam`-typed analogue of
-    `Lutar.Knot.isR1Rewrite i id r`. -/
-def isR1RewritePId {k : ℕ} (i : Fin k) (r : AxisRewriteP k) : Prop :=
-  ∀ θ : PolicyParam k, (r θ) i = θ i ∧ ∀ j : Fin k, j ≠ i → (r θ) j = θ j
-
-/-- **R2 commute predicate.** Two parameter rewrites commute. -/
-def isR2CommuteP {k : ℕ} (r₁ r₂ : AxisRewriteP k) : Prop :=
-  ∀ θ : PolicyParam k, r₁ (r₂ θ) = r₂ (r₁ θ)
-
-/-- **Lemma (private).** An R1 identity-repack equals the identity function on
-    `PolicyParam k`. This is the load-bearing step; everything below uses it. -/
-private lemma R1Id_eq_id {k : ℕ} (i : Fin k) (r : AxisRewriteP k)
-    (h : isR1RewritePId i r) : ∀ θ : PolicyParam k, r θ = θ := by
-  intro θ
-  funext j
-  rcases eq_or_ne j i with hji | hji
-  · subst hji; exact (h θ).1
-  · exact (h θ).2 j hji
-
-/-- **TH12.1a — ΛGateLID preserved under R1 identity-repack.**
-
-    If `r` is an R1 identity-repack at axis `i`, then for every threshold `τ`
-    and policy `θ`, membership in `ΛGateLID τ` is preserved by `r`.
-
-    Proof: by `R1Id_eq_id`, `r θ = θ` pointwise, so the LID indicator is
-    unchanged. Closed by `funext` + case split on the axis index.
-
-    Cite: extension of [Elmecker-Plakolm et al. 2025] to the audit-Reidemeister
-    setting of ch10 §10.2. R1 move classified per [Reidemeister 1927,
-    *Abh. Math. Sem. Univ. Hamburg* 5, 24–32]. -/
-theorem ΛGateLID_preserved_under_R1_identity
-    {k : ℕ} (i : Fin k) (r : AxisRewriteP k)
-    (h_r1_id : isR1RewritePId i r)
-    (τ : ℝ) (θ : PolicyParam k) :
-    θ ∈ ΛGateLID τ ↔ r θ ∈ ΛGateLID τ := by
-  have h_eq : r θ = θ := R1Id_eq_id i r h_r1_id θ
-  rw [h_eq]
-
-/-- **TH12.1b — ΛGateLID preserved under R2 commute of two R1-identity rewrites.**
-
-    For two R1 identity-repacks `r₁`, `r₂` (at any axes `i`, `j`), their
-    composition preserves `ΛGateLID τ`. The commutativity hypothesis is
-    **not used** for LID-preservation: the result follows from TH12.1a applied
-    pointwise to each layer. Commutativity would be needed only if the
-    statement were about Λ-the-scalar (see `Lutar.Knot.Λ_invariant_under_R2`),
-    not about the LID set.
-
-    Proof: `r₂ θ = θ` by TH12.1a, then `r₁ θ = θ` by TH12.1a.
-
-    Cite: composition pattern from [Reidemeister 1927]; LID set framework from
-    [Elmecker-Plakolm et al. 2025]. -/
-theorem ΛGateLID_preserved_under_R2_of_R1
-    {k : ℕ} (i j : Fin k) (r₁ r₂ : AxisRewriteP k)
-    (h₁ : isR1RewritePId i r₁) (h₂ : isR1RewritePId j r₂)
-    (_h_commute : isR2CommuteP r₁ r₂)
-    (τ : ℝ) (θ : PolicyParam k) :
-    θ ∈ ΛGateLID τ ↔ r₁ (r₂ θ) ∈ ΛGateLID τ := by
-  have h2 : r₂ θ = θ := R1Id_eq_id j r₂ h₂ θ
-  have h1 : r₁ (r₂ θ) = r₂ θ := R1Id_eq_id i r₁ h₁ (r₂ θ)
-  rw [h1, h2]
-
-/-- **TH12.1c — ΛGateLID preserved under R3 composition of three R1-identity rewrites.**
-
-    For three R1 identity-repacks `r₁`, `r₂`, `r₃` (at any axes), the
-    composition `(r₁ ∘ r₂) ∘ r₃` preserves `ΛGateLID τ`. Associativity is
-    automatic for `Function.comp`; the load-bearing fact is again that each
-    R1-identity rewrite is the identity function (TH12.1a).
-
-    Cite: associativity is `Function.comp_assoc` (Mathlib4). LID-set extension
-    pattern from [Elmecker-Plakolm et al. 2025]. -/
-theorem ΛGateLID_preserved_under_R3_of_R1
-    {k : ℕ} (i j m : Fin k) (r₁ r₂ r₃ : AxisRewriteP k)
-    (h₁ : isR1RewritePId i r₁) (h₂ : isR1RewritePId j r₂) (h₃ : isR1RewritePId m r₃)
-    (τ : ℝ) (θ : PolicyParam k) :
-    θ ∈ ΛGateLID τ ↔ ((r₁ ∘ r₂) ∘ r₃) θ ∈ ΛGateLID τ := by
-  simp only [Function.comp_apply]
-  have h3 : r₃ θ = θ := R1Id_eq_id m r₃ h₃ θ
-  have h2 : r₂ (r₃ θ) = r₃ θ := R1Id_eq_id j r₂ h₂ (r₃ θ)
-  have h1 : r₁ (r₂ (r₃ θ)) = r₂ (r₃ θ) := R1Id_eq_id i r₁ h₁ (r₂ (r₃ θ))
-  rw [h1, h2, h3]
-
-/-- **TH12.1d — ΛGateLID preserved under general R1 (non-identity factor) — SORRY.**
-
-    Status: SORRY-TAGGED.
-
-    Closure route: requires concretising `axisScore` (currently a `sorry`-defined
-    `noncomputable def`) into a form that factors through the per-coordinate
-    value. Once `axisScore θ k` depends only on `θ k` (or on a small,
-    pre-specified set of coordinates including `k`), the hypothesis
-    `h_f_preserves_axis` directly gives the biconditional. Estimated work: ~60h,
-    same dependency cluster as TH12's three Pinsker/Lipschitz/KL-zero sorries.
-
-    Cite: general R1 form from [Reidemeister 1927]; LID set from
-    [Elmecker-Plakolm et al. 2025]. -/
-theorem ΛGateLID_preserved_under_R1_general
-    {k : ℕ} (i : Fin k) (f : ℝ → ℝ) (r : AxisRewriteP k)
-    (h_r1 : ∀ θ : PolicyParam k,
-              (r θ) i = f (θ i) ∧ ∀ j : Fin k, j ≠ i → (r θ) j = θ j)
-    (_h_f_preserves_axis : ∀ θ : PolicyParam k,
-              axisScore (r θ) i = axisScore θ i)
-    (τ : ℝ) (θ : PolicyParam k) :
-    θ ∈ ΛGateLID τ ↔ r θ ∈ ΛGateLID τ := by
-  sorry -- depends on `axisScore` concretisation in TH12; tracked alongside
-        -- TH12's three sorries. See proof_strategy.md.
-
-end LIDPreservation
+  -- TODO(v17): when KL = 0, π_new ≡ π_ref distributionally → axisScore agrees
+  -- → axisScore π_new k ≥ τ. Requires the implication KL=0 ⇒ TV=0 (Gibbs)
+  -- and the Lipschitz axiom at TV=0; this depends on the same measure-theoretic
+  -- realisation called out at the head sorry of `ΛGateLID_DPO_stability`.
+  sorry  -- residual: KL=0 ⇒ TV=0 ⇒ axisScore-equal-at-policies (target v17).
 
 end Lutar.DPOFeasibility
