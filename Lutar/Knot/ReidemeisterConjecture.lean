@@ -121,33 +121,32 @@ noncomputable def segmentLambda (seg : ExecSegment) : NNReal :=
     by a reordering (permutation) of the axis indices within each step.
     Formally: exec' has the same steps, same axis scores, permuted by σ. -/
 def R1_related (exec exec' : ExecSegment) : Prop :=
-  exec.steps = exec'.steps ∧
-  ∃ σ : Fin 9 ≃ Fin 9,
+  ∃ (h : exec.steps = exec'.steps) (σ : Fin 9 ≃ Fin 9),
     ∀ (t : Fin exec.steps) (i : Fin 9),
-      exec'.axisAt t (σ i) = exec.axisAt t i
+      exec'.axisAt (Fin.cast h t) (σ i) = exec.axisAt t i
 
 /-- **Move R2 (Commutation).** Two consecutive independent steps are swapped.
     "Independent" means step t and step t+1 evaluate disjoint axes (no shared
     state — this is the audit analog of two gauge transformations commuting). -/
 def R2_related (exec exec' : ExecSegment) : Prop :=
-  exec.steps = exec'.steps ∧
+  ∃ (h : exec.steps = exec'.steps),
   exec.steps ≥ 2 ∧
-  ∃ t : Fin (exec.steps - 1),
-    -- Steps t and t+1 are swapped; all others unchanged
-    (∀ (s : Fin exec.steps) (i : Fin 9),
-      s.val ≠ t.val ∧ s.val ≠ t.val + 1 →
-      exec'.axisAt s i = exec.axisAt s i) ∧
-    (∀ i : Fin 9, exec'.axisAt ⟨t.val, by omega⟩ i =
-      exec.axisAt ⟨t.val + 1, by omega⟩ i) ∧
-    (∀ i : Fin 9, exec'.axisAt ⟨t.val + 1, by omega⟩ i =
-      exec.axisAt ⟨t.val, by omega⟩ i)
+  ∃ (j : ℕ) (hj : j + 1 < exec.steps),
+    -- Steps j and j+1 are swapped; all others unchanged
+    (∀ (k : ℕ) (hk : k < exec.steps) (i : Fin 9),
+      k ≠ j ∧ k ≠ j + 1 →
+      exec'.axisAt ⟨k, h ▸ hk⟩ i = exec.axisAt ⟨k, hk⟩ i) ∧
+    (∀ i : Fin 9, exec'.axisAt ⟨j, h ▸ (by omega)⟩ i =
+      exec.axisAt ⟨j + 1, by omega⟩ i) ∧
+    (∀ i : Fin 9, exec'.axisAt ⟨j + 1, h ▸ (by omega)⟩ i =
+      exec.axisAt ⟨j, by omega⟩ i)
 
 /-- **Move R3 (Associativity).** A chain A→B→C is re-bracketed to A→(B→C).
     At the flattened segment level, R3 is the identity. -/
 def R3_related (exec exec' : ExecSegment) : Prop :=
-  exec.steps = exec'.steps ∧
-  ∀ (t : Fin exec.steps) (i : Fin 9),
-    exec'.axisAt t i = exec.axisAt t i
+  ∃ (h : exec.steps = exec'.steps),
+    ∀ (t : Fin exec.steps) (i : Fin 9),
+      exec'.axisAt (Fin.cast h t) i = exec.axisAt t i
 
 /-! ## Conjecture: Λ is invariant under all three moves -/
 
@@ -210,9 +209,14 @@ theorem r3_invariance :
     segmentLambda exec = segmentLambda exec' := by
   intro exec exec' ⟨h_steps, h_axes⟩
   have h_eq : exec = exec' := by
-    cases exec; cases exec'
-    simp only [ExecSegment.mk.injEq]
-    exact ⟨h_steps, by funext t i; exact h_axes (h_steps ▸ t) i⟩
+    cases exec with | mk s a =>
+    cases exec' with | mk s' a' =>
+    simp only [] at h_steps h_axes
+    subst h_steps
+    simp only [Fin.cast_refl, id] at h_axes
+    congr 1
+    funext t i
+    exact (h_axes t i).symm
   rw [h_eq]
 
 /-- **Combined: Audit-Reidemeister invariance.**
@@ -258,9 +262,8 @@ theorem r1_iterate_invariance :
     segmentLambda start = segmentLambda finish := by
   intro start finish hchain
   induction hchain with
-  | refl e => rfl
-  | step e1 e2 e3 _hchain _hrel ih =>
-      exact ih.trans (r1_invariance e2 e3 _hrel)
+  | refl => rfl
+  | step _ _ _ h_rel ih => exact ih.trans (r1_invariance _ _ h_rel)
 
 /-! ### Corollary 3: R1 union R2 equivalence class is Λ-flat -/
 
@@ -286,11 +289,9 @@ theorem r12_equiv_lambda_flat :
     segmentLambda e1 = segmentLambda e2 := by
   intro e1 e2 hchain
   induction hchain with
-  | refl e => rfl
-  | r1_step a b c _hab _hbc ih =>
-      exact ih.trans (r1_invariance b c _hbc)
-  | r2_step a b c _hab _hbc ih =>
-      exact ih.trans (r2_invariance b c _hbc)
+  | refl => rfl
+  | r1_step _ _ _ h_bc ih => exact ih.trans (r1_invariance _ _ h_bc)
+  | r2_step _ _ _ h_bc ih => exact ih.trans (r2_invariance _ _ h_bc)
 
 /-- **Alias matching ReidemeisterInvariant pattern.** -/
 theorem r12_equiv_class_lambda_eq

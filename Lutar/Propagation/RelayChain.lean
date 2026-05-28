@@ -49,8 +49,9 @@ theorem relay_chain_bounded_latency
     have h_tail : ∀ x ∈ tl, x.latency ≤ cap := fun x hx =>
       h_each x (List.mem_cons_of_mem _ hx)
     have ih' := ih h_tail
-    simp [totalLatency, List.map_cons, List.sum_cons, List.length_cons,
-          Nat.cast_succ, add_mul, one_mul]
+    simp only [totalLatency] at ih'
+    simp only [totalLatency, List.map_cons, List.sum_cons, List.length_cons,
+               Nat.cast_add, Nat.cast_one, add_mul, one_mul]
     linarith
 
 /-- Corollary: an empty chain has zero latency. -/
@@ -62,7 +63,8 @@ theorem totalLatency_nonneg (chain : RelayChain) : 0 ≤ totalLatency chain := b
   induction chain with
   | nil => simp [totalLatency]
   | cons h tl ih =>
-    simp [totalLatency, List.map_cons, List.sum_cons]
-    linarith [h.nonneg, ih]
+    simp only [totalLatency] at ih
+    simp only [totalLatency, List.map_cons, List.sum_cons]
+    linarith [h.nonneg]
 
 end Lutar.Propagation.Relay

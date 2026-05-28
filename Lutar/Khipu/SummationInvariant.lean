@@ -114,9 +114,9 @@ private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
       -- Since i + 1 ≠ 0 for all i, this is the identity on every element.
       have htail : (tl.mapIdx (fun i v => if i + 1 = 0 then v + δ else v)).sum = tl.sum := by
         congr 1
-        apply List.mapIdx_eq_mapIdx_iff.mpr
-        intro i _ _
-        simp [Nat.succ_ne_zero]
+        apply List.ext_getElem?
+        intro n
+        simp [List.getElem?_mapIdx, Nat.succ_ne_zero]
       rw [htail]
       omega
     | succ k =>
@@ -127,9 +127,9 @@ private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
       have hshift : (tl.mapIdx (fun i v => if i + 1 = k + 1 then v + δ else v)).sum =
                    (tl.mapIdx (fun i v => if i = k then v + δ else v)).sum := by
         congr 1
-        apply List.mapIdx_eq_mapIdx_iff.mpr
-        intro i _ _
-        simp [Nat.succ_inj]
+        apply List.ext_getElem?
+        intro n
+        simp [List.getElem?_mapIdx, Nat.succ_inj]
       rw [hshift, ih k hk]
       omega
 
@@ -159,14 +159,15 @@ private lemma map_value_mapIdx_bump
     (decisions.mapIdx (fun i d =>
         if i = j then { d with value := d.value + δ } else d)).map (·.value) =
     decisions.map (·.value) |>.mapIdx (fun i v => if i = j then v + δ else v) := by
-  apply List.ext_getElem
-  · simp [List.length_mapIdx, List.length_map]
-  · intro n h1 h2
-    simp only [List.length_mapIdx, List.length_map] at *
-    simp only [List.getElem_map, List.getElem_mapIdx]
+  apply List.ext_getElem?
+  intro n
+  simp only [List.getElem?_map, List.getElem?_mapIdx]
+  cases hd : decisions[n]? with
+  | none => simp [hd]
+  | some d =>
     by_cases hn : n = j
-    · simp [hn]
-    · simp [hn]
+    · simp [hd, hn]
+    · simp [hd, hn]
 
 /-- **pendantValue_bump** — G7 close.
 
@@ -228,21 +229,25 @@ theorem khipuReceipt_checksum_invariant
     have hkey : (r.organs.mapIdx (fun k o =>
           if k = i then o.bumpDecisionAt j δ else o)).map pendantValue =
         r.organs.map pendantValue |>.mapIdx (fun k v => if k = i then v + δ else v) := by
-      apply List.ext_getElem
-      · simp [List.length_mapIdx, List.length_map]
-      · intro n h1 h2
-        simp only [List.length_mapIdx, List.length_map] at *
-        simp only [List.getElem_map, List.getElem_mapIdx]
+      apply List.ext_getElem?
+      intro n
+      simp only [List.getElem?_map, List.getElem?_mapIdx]
+      by_cases hn_range : n < r.organs.length
+      · -- n is in range; look up the organ at position n
+        have ho : r.organs[n]? = some r.organs[n] := List.getElem?_eq_getElem hn_range
+        rw [ho]
         by_cases hn : n = i
         · subst hn
-          simp only [ite_true]
-          -- apply pendantValue_bump: need j < (r.organs[n]).decisions.length
-          apply pendantValue_bump
-          -- hj : j < (r.organs.get ⟨i, hi⟩).decisions.length
-          -- = j < r.organs[i].decisions.length
-          convert hj using 2
-          simp [List.get_eq_getElem]
+          have hi_eq : r.organs[n] = r.organs.get ⟨n, hn_range⟩ := by
+            simp [List.get_eq_getElem]
+          have hjlt : j < r.organs[n].decisions.length := by
+            rw [hi_eq]; exact hj
+          simp only [Option.map_some, ite_true]
+          exact pendantValue_bump r.organs[n] j δ hjlt
         · simp [hn]
+      · -- n is out of range; both sides are none
+        have ho : r.organs[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn_range)
+        simp [ho]
     rw [hkey]
     apply List.sum_bump_at
     simpa [List.length_map] using hi

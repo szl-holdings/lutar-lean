@@ -41,7 +41,7 @@ jobs:
             echo "doi.org status: $doi_status ✓"
 
             # Step 2: Fetch Zenodo API metadata
-            meta=$(curl -sS --max-time 15 "https://zenodo.org/api/records/$id")
+            meta=$(curl -sS --max-time 15 --location "https://zenodo.org/api/records/$id")
             http_ok=$(echo "$meta" | jq -e '.id' > /dev/null 2>&1 && echo "yes" || echo "no")
             if [ "$http_ok" != "yes" ]; then
               echo "::error::DOI-API FAILURE: zenodo.$id — Zenodo API returned no record"
