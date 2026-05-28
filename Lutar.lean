@@ -26,6 +26,9 @@ import Lutar.Banach.LiuHuiPi
 import Lutar.Precision.SexagesimalRegular
 import Lutar.Propagation.RelayChain
 import Lutar.Transduction.ReceiptInvariant
+-- v16 Feynman grafts (PR #41)
+import Lutar.Feynman.FeynmanLineage
+import Lutar.Feynman.PathIntegralAuditSum
 
 /-!
 # Lutar — root module
@@ -42,4 +45,9 @@ Babylonian (YBC 7289) sqrt iteration as Banach contraction,
 Liu Hui polygon-doubling π, sexagesimal regular-number criterion,
 Qhapaq Ñan chasqui relay-chain latency bound, receipt
 transduction invariant (b5_ouroboros_foundations).
+
+v16 Feynman additions (PR #41):
+- `Lutar.Feynman.FeynmanLineage` — citation chain as compilable data (0 sorries, 0 axioms)
+- `Lutar.Feynman.PathIntegralAuditSum` — Z_Λ over audit fiber (4 SORRY_v16_OPEN)
+- `Lutar.Knot.ReidemeisterConjecture` — R1/R2 axiom; R3 proved at flat-segment level
 -/
