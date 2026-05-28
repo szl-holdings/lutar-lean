@@ -211,8 +211,9 @@ theorem r3_invariance :
   intro exec exec' ⟨h_steps, h_axes⟩
   have h_eq : exec = exec' := by
     cases exec; cases exec'
-    simp only [ExecSegment.mk.injEq]
-    exact ⟨h_steps, by funext t i; exact h_axes (h_steps ▸ t) i⟩
+    simp only [ExecSegment.mk.injEq] at *
+    subst h_steps
+    exact ⟨rfl, funext (fun t => funext (fun i => h_axes t i))⟩
   rw [h_eq]
 
 /-- **Combined: Audit-Reidemeister invariance.**

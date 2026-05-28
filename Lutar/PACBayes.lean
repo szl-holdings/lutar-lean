@@ -110,7 +110,7 @@ theorem pacBayesBound_mono_kl
     linarith
   have h_div : (kl₁ + Real.log (2 * Real.sqrt n / δ)) / (2 * n)
              ≤ (kl₂ + Real.log (2 * Real.sqrt n / δ)) / (2 * n) := by
-    apply div_le_div_of_nonneg_right _ h2n |>.mp |> id <;> linarith
+    exact div_le_div_of_nonneg_right (by linarith) h2n.le
   linarith [Real.sqrt_le_sqrt h_div]
 
 theorem pacBayes_inequality_form
@@ -135,7 +135,13 @@ theorem pacBayesBound_nonvacuous_iff
   have h_arg_nn : 0 ≤ (kl + Real.log (2 * Real.sqrt n / δ)) / (2 * n) :=
     div_nonneg (by linarith) (le_of_lt h2n_pos)
   rw [zero_add]
-  exact ⟨(Real.sqrt_lt_one h_arg_nn).mp, (Real.sqrt_lt_one h_arg_nn).mpr⟩
+  constructor
+  · intro h
+    have h1 := (Real.sqrt_lt h_arg_nn zero_le_one).mp h
+    simpa using h1
+  · intro h
+    apply (Real.sqrt_lt h_arg_nn zero_le_one).mpr
+    simpa using h
 
 theorem governanceHead_PACBayes_bound
     (empiricalLoss kl : ℝ) (n : ℕ) (δ : ℝ)
@@ -226,7 +232,7 @@ axiom MomentSubGaussian {n : ℕ} (hn : 0 < n)
     (h_meas : Measurable empiricalRisk)
     (h_bounded : ∀ S : Fin n → Z, |expectedRisk - empiricalRisk S| ≤ 1)
     (t : ℝ) :
-    (Measure.pi (fun _ : Fin n ⇒ D))[fun S ⇒
+    (Measure.pi (fun _ : Fin n => D))[fun S =>
         Real.exp (t * (expectedRisk - empiricalRisk S))]
     ≤ Real.exp (t ^ 2 / (8 * (n : ℝ)))
 
@@ -241,9 +247,9 @@ theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
     (h_meas : Measurable empiricalRisk)
     (h_bounded : ∀ S : Fin n → Z, |expectedRisk - empiricalRisk S| ≤ 1)
     (h_slack_pos : 0 < slack kl n δ) :
-    ((Measure.pi (fun _ : Fin n ⇒ D)) (badEvent empiricalRisk expectedRisk kl δ)).toReal
+    ((Measure.pi (fun _ : Fin n => D)) (badEvent empiricalRisk expectedRisk kl δ)).toReal
     ≤ δ := by
-  set μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n ⇒ D)
+  set μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n => D)
   haveI : IsProbabilityMeasure μ := inferInstance
   set ε := slack kl n δ
   set t := 4 * (n : ℝ) * ε
@@ -253,16 +259,16 @@ theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
       (μ (badEvent empiricalRisk expectedRisk kl δ)).toReal ≤
       (μ {S | ε ≤ expectedRisk - empiricalRisk S}).toReal :=
     ENNReal.toReal_le_toReal (measure_ne_top μ _) (measure_ne_top μ _) |>.mpr
-      (measure_mono (fun S hS ⇒ le_of_lt hS))
-  have h_int : Integrable (fun S : Fin n → Z ⇒
+      (measure_mono (fun S hS => show ε ≤ expectedRisk - empiricalRisk S from le_of_lt hS))
+  have h_int : Integrable (fun S : Fin n → Z =>
       Real.exp (t * (expectedRisk - empiricalRisk S))) μ := by
     sorry -- BoundedIntegrability: Mathlib.MeasureTheory.Function.Integrable (v4.13.0)
   have hchernoff :
       (μ {S | ε ≤ expectedRisk - empiricalRisk S}).toReal ≤
-      Real.exp (-t * ε) * mgf (fun S ⇒ expectedRisk - empiricalRisk S) μ t :=
+      Real.exp (-t * ε) * mgf (fun S => expectedRisk - empiricalRisk S) μ t :=
     measure_ge_le_exp_mul_mgf ε ht_nn h_int
   have hmgf :
-      mgf (fun S ⇒ expectedRisk - empiricalRisk S) μ t ≤
+      mgf (fun S => expectedRisk - empiricalRisk S) μ t ≤
       Real.exp (t ^ 2 / (8 * (n : ℝ))) :=
     MomentSubGaussian hn D empiricalRisk expectedRisk h_meas h_bounded t
   have hge_le_exp :
@@ -293,8 +299,8 @@ theorem th13_pacBayes_probabilistic_wrapper {n : ℕ} (hn : 0 < n)
     (h_bounded : ∀ S : Fin n → Z, |expectedRisk - empiricalRisk S| ≤ 1)
     (h_slack_pos : 0 < slack kl n δ) :
     ENNReal.ofReal (1 - δ) ≤
-    (Measure.pi (fun _ : Fin n ⇒ D)) ((badEvent empiricalRisk expectedRisk kl δ)ᶜ) := by
-  set μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n ⇒ D)
+    (Measure.pi (fun _ : Fin n => D)) ((badEvent empiricalRisk expectedRisk kl δ)ᶜ) := by
+  set μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n => D)
   haveI : IsProbabilityMeasure μ := inferInstance
   have hmeas_bad : MeasurableSet (badEvent empiricalRisk expectedRisk kl δ) :=
     badEvent_measurable empiricalRisk expectedRisk kl δ h_meas
@@ -305,7 +311,7 @@ theorem th13_pacBayes_probabilistic_wrapper {n : ℕ} (hn : 0 < n)
   rw [MeasureTheory.measure_compl hmeas_bad (measure_ne_top μ _), measure_univ]
   rw [ENNReal.ofReal_le_iff_le_toReal (ENNReal.sub_ne_top ENNReal.one_ne_top)]
   rw [ENNReal.toReal_sub_of_le
-    (by simpa using measure_mono (Set.subset_univ _)) ENNReal.one_ne_top]
+    prob_le_one ENNReal.one_ne_top]
   simp only [ENNReal.one_toReal]
   linarith
 
@@ -355,10 +361,10 @@ theorem hoeffding_mgf_tail_bound {n : ℕ} (hn : 0 < n)
     -- BoundedIntegrability as explicit hypothesis (discharge: Integrable.mono +
     -- integrable_const, Mathlib.MeasureTheory.Function.Integrable v4.13.0).
     (h_int : ∀ (t : ℝ),
-        Integrable (fun S : Fin n → Z ⇒
+        Integrable (fun S : Fin n → Z =>
             Real.exp (t * (expectedRisk - empiricalRisk S)))
-          (Measure.pi (fun _ : Fin n ⇒ D))) :
-    let μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n ⇒ D)
+          (Measure.pi (fun _ : Fin n => D))) :
+    let μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n => D)
     let excess := fun S : Fin n → Z ↦ expectedRisk - empiricalRisk S
     (μ {S | ε ≤ excess S}).toReal ≤
       Real.exp (-2 * (n : ℝ) * ε ^ 2) := by
@@ -434,12 +440,12 @@ theorem sub_gaussian_implies_psi2_bound {n : ℕ} (hn : 0 < n)
     (expectedRisk : ℝ)
     (h_meas : Measurable empiricalRisk)
     (h_bounded : ∀ S : Fin n → Z, |expectedRisk - empiricalRisk S| ≤ 1) :
-    let μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n ⇒ D)
+    let μ : Measure (Fin n → Z) := Measure.pi (fun _ : Fin n => D)
     let excess := fun S : Fin n → Z ↦ expectedRisk - empiricalRisk S
     let t_psi2 := Real.sqrt (2 * (n : ℝ))
     -- MGF at the psi2-scale t = sqrt(2n) is bounded by exp(1/4),
     -- establishing ||excess||_psi2 <= sqrt(2/n).
-    μ[fun S ⇒ Real.exp (t_psi2 * excess S)] ≤ Real.exp (1 / 4) := by
+    μ[fun S => Real.exp (t_psi2 * excess S)] ≤ Real.exp (1 / 4) := by
   intro μ excess t_psi2
   -- Apply MomentSubGaussian at t = sqrt(2n)
   have h_mgf := MomentSubGaussian hn D empiricalRisk expectedRisk h_meas h_bounded t_psi2
