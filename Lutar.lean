@@ -78,3 +78,5 @@ import Lutar.QEC.HammingFoundations
 import Lutar.QEC.ShorReceiptCode
 import Lutar.QEC.CSSBridge
 import Lutar.QEC.KitaevSurface
+
+import Lutar.Correlator.MatchedFilter
