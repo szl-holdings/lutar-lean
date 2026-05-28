@@ -1,20 +1,18 @@
-# Per-repo Dependabot config for lutar-lean.
-# Lean toolchain (elan + Mathlib) is pinned in `lean-toolchain` and `lakefile.lean`
-# respectively; Dependabot does not understand Lake, so we only track GitHub Actions.
-
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "America/New_York"
     open-pull-requests-limit: 10
-    commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
     labels:
       - "dependencies"
       - "github-actions"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "javascript"
