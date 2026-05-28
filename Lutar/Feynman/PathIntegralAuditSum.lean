@@ -356,11 +356,11 @@ theorem z_lambda_insert_mono
     (h_new_not_in : exec_new ∉ fiber)
     (hne : 0 < fiber.card)
     (h_above_avg : Z_Λ fiber < execLambda exec_new) :
-    Z_Λ fiber < Z_Λ (Finset.insert exec_new fiber) := by
+    Z_Λ fiber < Z_Λ (insert exec_new fiber) := by
   have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
-  have hins_card : (Finset.insert exec_new fiber).card = fiber.card + 1 :=
+  have hins_card : (insert exec_new fiber).card = fiber.card + 1 :=
     Finset.card_insert_of_not_mem h_new_not_in
-  have hins_card_ne : (Finset.insert exec_new fiber).card ≠ 0 := by rw [hins_card]; omega
+  have hins_card_ne : (insert exec_new fiber).card ≠ 0 := by rw [hins_card]; omega
   -- NNReal positivity facts
   have hn_nn : (0 : NNReal) < (fiber.card : NNReal) := by exact_mod_cast hne
   have hn1_nn : (0 : NNReal) < (fiber.card : NNReal) + 1 := by
@@ -376,18 +376,18 @@ theorem z_lambda_insert_mono
     rwa [mul_comm] at h_above_avg
   -- Unfold Z_Λ on both sides of the goal
   simp only [Z_Λ, hne', hins_card_ne, dite_false]
-  -- After simp, goal references `Finset.insert exec_new fiber`; push_cast to normalise card.
+  -- After simp, goal references `insert exec_new fiber`; push_cast to normalise card.
   set S := ∑ e ∈ fiber, execLambda e
   set L := execLambda exec_new
   set n := (fiber.card : NNReal)
   -- Rewrite sum and card of the inserted fiber.
-  have hsum_ins : ∑ e ∈ Finset.insert exec_new fiber, execLambda e = L + S := by
+  have hsum_ins : ∑ e ∈ insert exec_new fiber, execLambda e = L + S := by
     rw [Finset.sum_insert h_new_not_in]
-  have hcard_ins : ((Finset.insert exec_new fiber).card : NNReal) = n + 1 := by
+  have hcard_ins : ((insert exec_new fiber).card : NNReal) = n + 1 := by
     rw [hins_card]; push_cast; ring
   rw [hsum_ins, hcard_ins]
   -- Goal: S / n < (L + S) / (n + 1)
-  rw [div_lt_div_iff hn_nn hn1_nn]
+  rw [div_lt_div_iff₀ hn_nn hn1_nn]
   -- Goal: S * (n + 1) < (L + S) * n
   -- i.e. S*n + S < L*n + S*n, i.e. S < L*n = hmul_nn
   nlinarith [hmul_nn, hn_nn.le]

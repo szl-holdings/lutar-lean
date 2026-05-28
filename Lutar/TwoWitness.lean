@@ -174,15 +174,22 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
     -- contexts has length 9 and h forces every ctxCount = 1.
     have : (contexts.map (ctxCount f)) = List.replicate 9 1 := by
       have hlen : contexts.length = 9 := contexts_length
-      -- List.ext_getElem in Mathlib v4.13.0: separate length + per-element goals
-      apply List.ext_getElem
-      · simp [hlen]
-      · intro i hi hi'
-        have hi_ctx : i < contexts.length := by simpa [hlen] using hi'
-        -- List.getElem_mem in Mathlib v4.13.0: single bound-proof argument
-        have hmem : contexts[i] ∈ contexts := List.getElem_mem hi_ctx
-        have := h contexts[i] hmem
-        simp [this, List.getElem_replicate]
+      -- Use ext_getElem? which avoids the replicate literal indexing issue.
+      apply List.ext_getElem?
+      intro n
+      simp only [List.getElem?_map, List.getElem?_replicate]
+      -- Goal: (fun x => some (ctxCount f x)) <$> contexts[n]?
+      --       = if n < 9 then some 1 else none
+      by_cases hn : n < contexts.length
+      · have : contexts[n]? = some contexts[n] := List.getElem?_eq_getElem hn
+        rw [this]
+        simp only [Option.map_some]
+        have hmem : contexts[n] ∈ contexts := List.getElem_mem hn
+        have h1 := h contexts[n] hmem
+        simp [h1, show n < 9 from hlen ▸ hn]
+      · have : contexts[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn)
+        rw [this]
+        simp [show ¬n < 9 from hlen ▸ hn]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2

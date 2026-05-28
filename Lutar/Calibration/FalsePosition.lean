@@ -27,6 +27,8 @@ Runtime counterpart:
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.LinearCombination
 
 namespace Lutar.Calibration
 
@@ -57,9 +59,9 @@ theorem false_position_correct
   -- After unfolding, the denominator is `-(m * x₁) + m * x₂`.
   -- hdy says `m * x₂ + c - (m * x₁ + c) ≠ 0`; ring-simplify to get the right form.
   have hden_ne : -(m * x₁) + m * x₂ ≠ 0 := by
-    intro h
-    apply hdy
-    linarith
+    intro h; apply hdy
+    -- Goal: `m * x₂ + c - (m * x₁ + c) = 0`; equals `-(m * x₁) + m * x₂` by ring.
+    linear_combination h
   field_simp [hden_ne]
   ring
 
