@@ -20,8 +20,8 @@ invariant Λ. They are:
   R3 — receipt-chain associativity: re-parenthesising a chain
        ((a∘b)∘c) ↔ (a∘(b∘c)) leaves Λ unchanged.
 
-All three are stated as `Conjecture` with `sorry`. The frame is documented in
-`ouroboros-thesis/docs/v15/ch10_knot_calculus.md` §10.2 (Conjecture).
+All three are tagged as `axiom` (see Status note below). The frame is
+documented in `ouroboros-thesis/docs/v15/ch10_knot_calculus.md` §10.2.
 Target v16 closure.
 
 Geometric reading: Λ is a *knot invariant* of the receipt-chain braid in
@@ -29,9 +29,15 @@ B_n, where n is the number of concurrent actors. Khipu hierarchy supplies
 the chord-diagram skeleton [Bar-Natan 1995, *Topology* 34, 423–472;
 Vassiliev 1990, *Adv. Sov. Math.* 1, 23–69; Kontsevich 1993].
 
-Status: ALL STATEMENTS ARE CONJECTURE-TAGGED. None of the three claims is
-proved in this module. The `sorry`s are intentional and explicitly tagged
-so that downstream callers cannot mistake the status of these results.
+Status: ALL THREE STATEMENTS ARE TAGGED AS `axiom`, not `theorem`. They are
+not proved in this module. Using `axiom` rather than `theorem ... := sorry`
+is the doctrinally honest spelling: Lean's `#print axioms` machinery will
+flag any downstream theorem that depends on R1/R2/R3, so callers cannot
+mistake conjectural facts for proven ones (B2 issue lutar-lean#32 fix).
+
+Each axiom is intended to become a `theorem` once the Reidemeister-move
+equivalence on the receipt-rewriting calculus is fully formalized.
+Target: v17.
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Lutar.Invariant
@@ -78,13 +84,11 @@ def isR3Associative {k : ℕ} (r₁ r₂ r₃ : AxisRewrite k) : Prop :=
     by `rfl`. The general statement (any `f` such that `f` is the identity
     on the i-th factor in the multiplicative sense) is open.
 
-    Target: v16. -/
-theorem Λ_invariant_under_R1
+    Target: v16. Tagged as `axiom` per B2 issue lutar-lean#32. -/
+axiom Λ_invariant_under_R1
     {k : ℕ} (hk : 0 < k) (i : Fin k) (r : AxisRewrite k)
     (h_r1 : isR1Rewrite i id r) :
-    ∀ x : Axes k, Λ k (r x) = Λ k x := by
-  sorry  -- CONJECTURE: depends on geomean-as-product-then-root being preserved
-         -- under identity on each coordinate.
+    ∀ x : Axes k, Λ k (r x) = Λ k x
 
 /-- **Conjecture R2 (audit-Reidemeister).**
     For any two rewrites `r₁`, `r₂` that commute (act on disjoint axis subsets),
@@ -93,14 +97,13 @@ theorem Λ_invariant_under_R1
     Status: Conjecture. Proof route: from `isR2Commute` plus the symmetry of
     the geometric mean under permutation.
 
-    Target: v16. -/
-theorem Λ_invariant_under_R2
+    Target: v16. Tagged as `axiom` per B2 issue lutar-lean#32. -/
+axiom Λ_invariant_under_R2
     {k : ℕ} (hk : 0 < k) (r₁ r₂ : AxisRewrite k)
     (h_r2 : isR2Commute r₁ r₂)
     (h_inv_r₁ : ∀ x, Λ k (r₁ x) = Λ k x)
     (h_inv_r₂ : ∀ x, Λ k (r₂ x) = Λ k x) :
-    ∀ x : Axes k, Λ k (r₁ (r₂ x)) = Λ k x := by
-  sorry  -- CONJECTURE: chains h_inv_r₁ and h_inv_r₂ via h_r2.
+    ∀ x : Axes k, Λ k (r₁ (r₂ x)) = Λ k x
 
 /-- **Conjecture R3 (audit-Reidemeister).**
     For any three rewrites `r₁`, `r₂`, `r₃`, associativity of composition
@@ -110,14 +113,13 @@ theorem Λ_invariant_under_R2
     Mathlib; the remaining content is that Λ-invariance is closed under
     composition of invariant rewrites.
 
-    Target: v16. -/
-theorem Λ_invariant_under_R3
+    Target: v16. Tagged as `axiom` per B2 issue lutar-lean#32. -/
+axiom Λ_invariant_under_R3
     {k : ℕ} (hk : 0 < k) (r₁ r₂ r₃ : AxisRewrite k)
     (h_r3 : isR3Associative r₁ r₂ r₃)
     (h_inv_r₁ : ∀ x, Λ k (r₁ x) = Λ k x)
     (h_inv_r₂ : ∀ x, Λ k (r₂ x) = Λ k x)
     (h_inv_r₃ : ∀ x, Λ k (r₃ x) = Λ k x) :
-    ∀ x : Axes k, Λ k (((r₁ ∘ r₂) ∘ r₃) x) = Λ k x := by
-  sorry  -- CONJECTURE: composes h_inv_r₁, h_inv_r₂, h_inv_r₃ via h_r3.
+    ∀ x : Axes k, Λ k (((r₁ ∘ r₂) ∘ r₃) x) = Λ k x
 
 end Lutar.Knot
