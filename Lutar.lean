@@ -80,3 +80,7 @@ import Lutar.QEC.CSSBridge
 import Lutar.QEC.KitaevSurface
 
 import Lutar.Correlator.MatchedFilter
+
+-- v17 Gleason + Schur modules (§XVII open obligations)
+import Lutar.Lambda.SchurConcave
+import Lutar.Gates.GleasonMod8
