@@ -12,8 +12,8 @@ Geometric reading: this is a Banach contraction statement on a Lipschitz domain
 [Banach 1922, *Fund. Math.* 3, 133–181]. The Ouroboros policy loop converges
 to a fixed point inside ΛGateLID iff the contraction constant is < 1.
 
-Source for the LID formalism: Bai et al. 2025, "Provably Safe Model Updates",
-[arXiv:2512.01899], accepted SaTML 2026.
+Source for the LID formalism: Elmecker-Plakolm, Fasterling, Sosnin, Tsay, Wicker
+2025, "Provably Safe Model Updates", [arXiv:2512.01899], accepted SaTML 2026.
 
 Status: SKELETON. Statement compiles; structural proof recorded with three
 tagged `sorry`s — Pinsker (Mathlib `Real.add_pow_le_pow_mul_pow_of_sq` family,
@@ -132,5 +132,142 @@ theorem ΛGateLID_DPO_stability_zero_kl
   rw [hsqrt0, mul_zero, sub_zero]
   -- When KL = 0, π_new ≡ π_ref distributionally → axisScore agrees → axisScore π_new k ≥ τ.
   sorry  -- requires that KL = 0 ⇒ TV = 0 ⇒ Lipschitz gives equality.
+
+/-! ## §LIDPreservation — TH12.1 hybrid extension
+
+    Hybrid theorem extending the Locally Invariant Domain (LID) framework of
+    [Elmecker-Plakolm et al. 2025, "Provably Safe Model Updates", arXiv:2512.01899,
+    SaTML 2026] with the audit-Reidemeister rewrite structure introduced in ch10
+    of the SZL ouroboros-thesis [Lutar 2026, v15 §III, ch10 §10.2].
+
+    E-P show that an LID — a connected region in parameter space certified to
+    satisfy a specification — is computable when relaxed to abstract domains
+    (orthotopes, zonotopes). SZL's `ΛGateLID(τ)` above is an orthotope instance.
+    What E-P do NOT address is whether the LID is preserved under audit-equivalent
+    rewriting of the underlying receipt pipeline. The audit-Reidemeister moves
+    R1, R2, R3 of `Lutar/Knot/ReidemeisterConjecture.lean` are exactly such
+    rewrites. TH12.1 closes the LID-preservation question for the smallest
+    defensible case (R1 with identity factor), then composes for R2 and R3.
+
+    Note: R1 identity-repack is an `AxisRewriteP`-as-identity hypothesis below.
+    The general R1 case with a non-identity factor `f : ℝ → ℝ` requires
+    concretising `axisScore` and is sorry-tagged in `ΛGateLID_preserved_under_R1_general`.
+-/
+section LIDPreservation
+
+/-- A *parameter-space rewrite* on `PolicyParam k`. This is the
+    `PolicyParam`-typed analogue of `AxisRewrite` from
+    `Lutar.Knot.ReidemeisterConjecture`, which is typed on `Axes k = Fin k → NNReal`.
+    Both definitions are pointwise endofunctions; only the codomain differs. -/
+abbrev AxisRewriteP (k : ℕ) := PolicyParam k → PolicyParam k
+
+/-- **R1 identity-repack predicate.** A rewrite `r` is an R1 identity-repack at
+    axis `i` if it acts as the identity at coordinate `i` and as the identity at
+    every other coordinate. This is the `PolicyParam`-typed analogue of
+    `Lutar.Knot.isR1Rewrite i id r`. -/
+def isR1RewritePId {k : ℕ} (i : Fin k) (r : AxisRewriteP k) : Prop :=
+  ∀ θ : PolicyParam k, (r θ) i = θ i ∧ ∀ j : Fin k, j ≠ i → (r θ) j = θ j
+
+/-- **R2 commute predicate.** Two parameter rewrites commute. -/
+def isR2CommuteP {k : ℕ} (r₁ r₂ : AxisRewriteP k) : Prop :=
+  ∀ θ : PolicyParam k, r₁ (r₂ θ) = r₂ (r₁ θ)
+
+/-- **Lemma (private).** An R1 identity-repack equals the identity function on
+    `PolicyParam k`. This is the load-bearing step; everything below uses it. -/
+private lemma R1Id_eq_id {k : ℕ} (i : Fin k) (r : AxisRewriteP k)
+    (h : isR1RewritePId i r) : ∀ θ : PolicyParam k, r θ = θ := by
+  intro θ
+  funext j
+  rcases eq_or_ne j i with hji | hji
+  · subst hji; exact (h θ).1
+  · exact (h θ).2 j hji
+
+/-- **TH12.1a — ΛGateLID preserved under R1 identity-repack.**
+
+    If `r` is an R1 identity-repack at axis `i`, then for every threshold `τ`
+    and policy `θ`, membership in `ΛGateLID τ` is preserved by `r`.
+
+    Proof: by `R1Id_eq_id`, `r θ = θ` pointwise, so the LID indicator is
+    unchanged. Closed by `funext` + case split on the axis index.
+
+    Cite: extension of [Elmecker-Plakolm et al. 2025] to the audit-Reidemeister
+    setting of ch10 §10.2. R1 move classified per [Reidemeister 1927,
+    *Abh. Math. Sem. Univ. Hamburg* 5, 24–32]. -/
+theorem ΛGateLID_preserved_under_R1_identity
+    {k : ℕ} (i : Fin k) (r : AxisRewriteP k)
+    (h_r1_id : isR1RewritePId i r)
+    (τ : ℝ) (θ : PolicyParam k) :
+    θ ∈ ΛGateLID τ ↔ r θ ∈ ΛGateLID τ := by
+  have h_eq : r θ = θ := R1Id_eq_id i r h_r1_id θ
+  rw [h_eq]
+
+/-- **TH12.1b — ΛGateLID preserved under R2 commute of two R1-identity rewrites.**
+
+    For two R1 identity-repacks `r₁`, `r₂` (at any axes `i`, `j`), their
+    composition preserves `ΛGateLID τ`. The commutativity hypothesis is
+    **not used** for LID-preservation: the result follows from TH12.1a applied
+    pointwise to each layer. Commutativity would be needed only if the
+    statement were about Λ-the-scalar (see `Lutar.Knot.Λ_invariant_under_R2`),
+    not about the LID set.
+
+    Proof: `r₂ θ = θ` by TH12.1a, then `r₁ θ = θ` by TH12.1a.
+
+    Cite: composition pattern from [Reidemeister 1927]; LID set framework from
+    [Elmecker-Plakolm et al. 2025]. -/
+theorem ΛGateLID_preserved_under_R2_of_R1
+    {k : ℕ} (i j : Fin k) (r₁ r₂ : AxisRewriteP k)
+    (h₁ : isR1RewritePId i r₁) (h₂ : isR1RewritePId j r₂)
+    (_h_commute : isR2CommuteP r₁ r₂)
+    (τ : ℝ) (θ : PolicyParam k) :
+    θ ∈ ΛGateLID τ ↔ r₁ (r₂ θ) ∈ ΛGateLID τ := by
+  have h2 : r₂ θ = θ := R1Id_eq_id j r₂ h₂ θ
+  have h1 : r₁ (r₂ θ) = r₂ θ := R1Id_eq_id i r₁ h₁ (r₂ θ)
+  rw [h1, h2]
+
+/-- **TH12.1c — ΛGateLID preserved under R3 composition of three R1-identity rewrites.**
+
+    For three R1 identity-repacks `r₁`, `r₂`, `r₃` (at any axes), the
+    composition `(r₁ ∘ r₂) ∘ r₃` preserves `ΛGateLID τ`. Associativity is
+    automatic for `Function.comp`; the load-bearing fact is again that each
+    R1-identity rewrite is the identity function (TH12.1a).
+
+    Cite: associativity is `Function.comp_assoc` (Mathlib4). LID-set extension
+    pattern from [Elmecker-Plakolm et al. 2025]. -/
+theorem ΛGateLID_preserved_under_R3_of_R1
+    {k : ℕ} (i j m : Fin k) (r₁ r₂ r₃ : AxisRewriteP k)
+    (h₁ : isR1RewritePId i r₁) (h₂ : isR1RewritePId j r₂) (h₃ : isR1RewritePId m r₃)
+    (τ : ℝ) (θ : PolicyParam k) :
+    θ ∈ ΛGateLID τ ↔ ((r₁ ∘ r₂) ∘ r₃) θ ∈ ΛGateLID τ := by
+  simp only [Function.comp_apply]
+  have h3 : r₃ θ = θ := R1Id_eq_id m r₃ h₃ θ
+  have h2 : r₂ (r₃ θ) = r₃ θ := R1Id_eq_id j r₂ h₂ (r₃ θ)
+  have h1 : r₁ (r₂ (r₃ θ)) = r₂ (r₃ θ) := R1Id_eq_id i r₁ h₁ (r₂ (r₃ θ))
+  rw [h1, h2, h3]
+
+/-- **TH12.1d — ΛGateLID preserved under general R1 (non-identity factor) — SORRY.**
+
+    Status: SORRY-TAGGED.
+
+    Closure route: requires concretising `axisScore` (currently a `sorry`-defined
+    `noncomputable def`) into a form that factors through the per-coordinate
+    value. Once `axisScore θ k` depends only on `θ k` (or on a small,
+    pre-specified set of coordinates including `k`), the hypothesis
+    `h_f_preserves_axis` directly gives the biconditional. Estimated work: ~60h,
+    same dependency cluster as TH12's three Pinsker/Lipschitz/KL-zero sorries.
+
+    Cite: general R1 form from [Reidemeister 1927]; LID set from
+    [Elmecker-Plakolm et al. 2025]. -/
+theorem ΛGateLID_preserved_under_R1_general
+    {k : ℕ} (i : Fin k) (f : ℝ → ℝ) (r : AxisRewriteP k)
+    (h_r1 : ∀ θ : PolicyParam k,
+              (r θ) i = f (θ i) ∧ ∀ j : Fin k, j ≠ i → (r θ) j = θ j)
+    (_h_f_preserves_axis : ∀ θ : PolicyParam k,
+              axisScore (r θ) i = axisScore θ i)
+    (τ : ℝ) (θ : PolicyParam k) :
+    θ ∈ ΛGateLID τ ↔ r θ ∈ ΛGateLID τ := by
+  sorry -- depends on `axisScore` concretisation in TH12; tracked alongside
+        -- TH12's three sorries. See proof_strategy.md.
+
+end LIDPreservation
 
 end Lutar.DPOFeasibility
