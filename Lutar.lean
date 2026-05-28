@@ -43,3 +43,9 @@ Liu Hui polygon-doubling π, sexagesimal regular-number criterion,
 Qhapaq Ñan chasqui relay-chain latency bound, receipt
 transduction invariant (b5_ouroboros_foundations).
 -/
+-- integrity-remediation 2026-05-28: three publicly-claimed theorems + doctrine evolution
+import Lutar.HUKLLA.HaltEligibility
+import Lutar.OVERWATCH.ReadOnly
+import Lutar.DPI.DPIBound
+import Lutar.Doctrine.PublicClaims
+import Lutar.Doctrine.CrossComponentInvariant
