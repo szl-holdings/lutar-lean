@@ -50,9 +50,9 @@ noncomputable def madhavaRemainderBound (x : ℝ) (N : ℕ) : ℝ :=
 theorem madhavaRemainderBound_nonneg (x : ℝ) (N : ℕ) :
     0 ≤ madhavaRemainderBound x N := by
   unfold madhavaRemainderBound
-  have hnum : 0 ≤ |x|^(2*N+1) := pow_nonneg (abs_nonneg x) _
-  have hden : (0 : ℝ) < (2*N+1 : ℕ) := by exact_mod_cast Nat.succ_pos (2*N)
-  exact div_nonneg hnum (le_of_lt hden)
+  apply div_nonneg
+  · exact pow_nonneg (abs_nonneg x) _
+  · exact_mod_cast Nat.zero_le _
 
 /-- The remainder bound at `x = 0` is exactly zero. -/
 theorem madhavaRemainderBound_at_zero (N : ℕ) :
@@ -71,10 +71,13 @@ theorem madhavaRemainderBound_anti
     pow_le_pow_of_le_one habs_nn hx (by omega)
   have hden_pos1 : (0 : ℝ) < (2*N+1 : ℕ) := by exact_mod_cast Nat.succ_pos (2*N)
   have hden_pos2 : (0 : ℝ) < (2*(N+1)+1 : ℕ) := by exact_mod_cast Nat.succ_pos (2*(N+1))
-  have hden_le : ((2*N+1 : ℕ) : ℝ) ≤ ((2*(N+1)+1 : ℕ) : ℝ) := by exact_mod_cast (by omega : 2*N+1 ≤ 2*(N+1)+1)
-  exact le_trans
-    (div_le_div_of_nonneg_right hnum_le hden_pos2)
-    (div_le_div_of_nonneg_left (pow_nonneg habs_nn _) hden_pos1 hden_le)
+  have hden_le : ((2*N+1 : ℕ) : ℝ) ≤ ((2*(N+1)+1 : ℕ) : ℝ) :=
+    by exact_mod_cast (by omega : 2*N+1 ≤ 2*(N+1)+1)
+  calc |x| ^ (2 * (N + 1) + 1) / ↑(2 * (N + 1) + 1)
+      ≤ |x| ^ (2 * N + 1) / ↑(2 * (N + 1) + 1) :=
+        div_le_div_of_nonneg_right hnum_le hden_pos2.le
+    _ ≤ |x| ^ (2 * N + 1) / ↑(2 * N + 1) :=
+        div_le_div_of_nonneg_left (pow_nonneg habs_nn _) hden_pos1 hden_le
 
 /-- The **Mādhava–Leibniz alternating-series bound** (generic).
 
@@ -105,7 +108,10 @@ theorem madhava_alt_series_bound
       hanti.alternating_series_le_tendsto h_lim k
     have hge : L ≤ ∑ i ∈ range (2 * k + 1), (-1 : ℝ) ^ i * a i :=
       hanti.tendsto_le_alternating_series h_lim k
-    rw [sum_range_succ, Even.neg_one_pow ⟨k, rfl⟩, one_mul] at hge
+    rw [sum_range_succ] at hge
+    have hpow : (-1 : ℝ) ^ (2 * k) = 1 := by
+      rw [pow_mul]; norm_num
+    rw [hpow, one_mul] at hge
     subst hk
     rw [abs_of_nonpos (by linarith)]
     linarith
@@ -114,8 +120,10 @@ theorem madhava_alt_series_bound
       hanti.tendsto_le_alternating_series h_lim k
     have hle2 : ∑ i ∈ range (2 * (k + 1)), (-1 : ℝ) ^ i * a i ≤ L :=
       hanti.alternating_series_le_tendsto h_lim (k + 1)
-    rw [show 2 * (k + 1) = 2 * k + 1 + 1 by ring, sum_range_succ,
-        Odd.neg_one_pow ⟨k, rfl⟩, neg_one_mul] at hle2
+    rw [show 2 * (k + 1) = 2 * k + 1 + 1 by ring, sum_range_succ] at hle2
+    have hpow2 : (-1 : ℝ) ^ (2 * k + 1) = -1 := by
+      rw [pow_add, pow_mul]; norm_num
+    rw [hpow2, neg_one_mul] at hle2
     subst hk
     rw [abs_of_nonneg (by linarith)]
     linarith
@@ -128,10 +136,11 @@ private lemma madhava_arctan_bound_nonneg
   have hx_norm : ‖x‖ < 1 := by rwa [Real.norm_eq_abs, hx_abs]
   -- Antitone sequence a n = x^(2n+1)/(2n+1)
   set a : ℕ → ℝ := fun n => x ^ (2 * n + 1) / (2 * n + 1)
-  have ha_nn : ∀ n, 0 ≤ a n := fun n =>
-    div_nonneg (pow_nonneg hx_nn _) (by exact_mod_cast (Nat.succ_pos (2*n)).le)
+  have ha_nn : ∀ n, 0 ≤ a n := fun n => by
+    apply div_nonneg (pow_nonneg hx_nn _)
+    exact_mod_cast Nat.zero_le _
   have ha_dec : ∀ n, a (n + 1) ≤ a n := fun n => by
-    have h' := madhavaRemainderBound_anti x (by rwa [hx_abs]) n
+    have h' := madhavaRemainderBound_anti x (by rw [hx_abs]; linarith) n
     unfold madhavaRemainderBound at h'; rw [hx_abs] at h'
     convert h' using 2 <;> ring
   -- Tendsto via Real.hasSum_arctan (Mathlib.Analysis.SpecialFunctions.Complex.Arctan)
@@ -139,11 +148,14 @@ private lemma madhava_arctan_bound_nonneg
       (fun M => ∑ n ∈ range M, (-1 : ℝ) ^ n * a n)
       Filter.atTop (nhds (Real.arctan x)) := by
     refine (Real.hasSum_arctan hx_norm).tendsto_sum_nat.congr'
-            (eventually_of_forall fun M => ?_)
-    congr 1; ext n; simp [a, mul_div_assoc]
+            (Filter.Eventually.of_forall fun M => ?_)
+    apply Finset.sum_congr rfl
+    intro n _; simp [a, mul_div_assoc]
   have hbound := madhava_alt_series_bound a (Real.arctan x) N ha_nn ha_dec htend
   convert hbound using 2
-  · unfold madhavaArctanPartial; congr 1; ext n; simp [a, mul_div_assoc]
+  · unfold madhavaArctanPartial
+    apply Finset.sum_congr rfl
+    intro n _; simp [a, mul_div_assoc]
   · unfold madhavaRemainderBound; rw [hx_abs]
 
 /-- **R4-I1 specialisation.** For `|x| ≤ 1`, the Mādhava partial sum
@@ -175,7 +187,7 @@ theorem madhava_arctan_remainder
   have hparity : ∀ y : ℝ, madhavaArctanPartial (-y) N = -madhavaArctanPartial y N := fun y => by
     unfold madhavaArctanPartial
     rw [← sum_neg_distrib]
-    congr 1; ext n
+    apply Finset.sum_congr rfl; intro n _
     have : (-y) ^ (2 * n + 1) = -(y ^ (2 * n + 1)) := by
       rw [Odd.neg_pow ⟨n, rfl⟩]
     rw [this]; ring
@@ -188,6 +200,8 @@ theorem madhava_arctan_remainder
       |madhavaArctanPartial y N - Real.arctan y| := fun y => by
     rw [hparity, Real.arctan_neg, show -madhavaArctanPartial y N - (-Real.arctan y) =
         -(madhavaArctanPartial y N - Real.arctan y) by ring, abs_neg]
+  -- The filter nhdsWithin 1 (Iio 1) is NeBot on ℝ (NoMinOrder instance)
+  haveI hnebot : (nhdsWithin (1 : ℝ) (Iio 1)).NeBot := inferInstance
   -- Main case analysis: x ≥ 0 vs x < 0
   rcases le_or_lt 0 x with hx_nn | hx_neg
   · -- x ≥ 0: |x| = x ≤ 1
@@ -198,19 +212,18 @@ theorem madhava_arctan_remainder
     · -- x = 1: boundary, left limit
       have hx1 : x = 1 := by linarith [hx_abs ▸ hx_eq.symm]
       subst hx1
-      -- G(1) ≤ H(1) via left limit: G(y) ≤ H(y) for all y ∈ (1/2, 1) ⊆ 𝓝[<] 1
-      -- nhdsWithin 1 (Iio 1) is NeBot since ℝ has NoMinOrder
-      haveI : (nhdsWithin (1 : ℝ) (Iio 1)).NeBot := nhdsWithin_Iio_self_neBot'
+      -- G(1) ≤ H(1) via left limit: G(y) ≤ H(y) for y ∈ (1/2, 1) ⊆ 𝓝[<] 1
       apply le_of_tendsto_of_tendsto
               (f := fun y => |madhavaArctanPartial y N - Real.arctan y|)
               (g := fun y => madhavaRemainderBound y N)
       · exact hG_cont.continuousAt.continuousWithinAt
       · exact hH_cont.continuousAt.continuousWithinAt
-      · -- G(y) ≤ H(y) for y ∈ Ioo (1/2) 1, which is a member of 𝓝[<] 1
-        filter_upwards [Ioo_mem_nhdsWithin_Iio.mpr ⟨1/2, by norm_num, Subset.refl _⟩]
-          with y hy
-        simp only [mem_Ioo] at hy
-        exact madhava_arctan_bound_nonneg y (by linarith) hy.2 N
+      · -- G(y) ≤ H(y) for y ∈ Ioo (1/2) 1, which is in 𝓝[<] 1
+        rw [Filter.Eventually, mem_nhdsWithin]
+        refine ⟨Set.Ioo (1/2) 1, isOpen_Ioo, by norm_num, ?_⟩
+        intro y hy
+        simp only [Set.mem_inter_iff, Set.mem_Ioo, Set.mem_Iio] at hy
+        exact madhava_arctan_bound_nonneg y (by linarith [hy.1.1]) hy.1.2 N
   · -- x < 0: reduce to x' = -x > 0 via parity
     have hmx_nn : 0 ≤ -x := by linarith
     have hmx_hx : |-x| ≤ 1 := by rwa [abs_neg]
@@ -222,20 +235,18 @@ theorem madhava_arctan_remainder
     rcases lt_or_eq_of_le (hmx_abs ▸ hmx_hx) with hmx_lt | hmx_eq
     · exact madhava_arctan_bound_nonneg (-x) hmx_nn hmx_lt N
     · -- -x = 1: boundary (x = -1)
-      have hmx1 : -x = 1 := by linarith [hmx_abs ▸ hmx_eq.symm]
-      -- Substitute -x = 1
-      rw [hmx1]
+      -- hmx_eq : -x = 1 directly from lt_or_eq_of_le
+      rw [hmx_eq]
       -- Now goal: |madhavaArctanPartial 1 N - arctan 1| ≤ madhavaRemainderBound 1 N
-      -- Same left-limit argument as the x = 1 case above
-      haveI : (nhdsWithin (1 : ℝ) (Iio 1)).NeBot := nhdsWithin_Iio_self_neBot'
       apply le_of_tendsto_of_tendsto
               (f := fun y => |madhavaArctanPartial y N - Real.arctan y|)
               (g := fun y => madhavaRemainderBound y N)
       · exact hG_cont.continuousAt.continuousWithinAt
       · exact hH_cont.continuousAt.continuousWithinAt
-      · filter_upwards [Ioo_mem_nhdsWithin_Iio.mpr ⟨1/2, by norm_num, Subset.refl _⟩]
-          with y hy
-        simp only [mem_Ioo] at hy
-        exact madhava_arctan_bound_nonneg y (by linarith) hy.2 N
+      · rw [Filter.Eventually, mem_nhdsWithin]
+        refine ⟨Set.Ioo (1/2) 1, isOpen_Ioo, by norm_num, ?_⟩
+        intro y hy
+        simp only [Set.mem_inter_iff, Set.mem_Ioo, Set.mem_Iio] at hy
+        exact madhava_arctan_bound_nonneg y (by linarith [hy.1.1]) hy.1.2 N
 
 end Lutar.PACBayes
