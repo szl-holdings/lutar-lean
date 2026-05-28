@@ -5,7 +5,7 @@
 [![CI (lean)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml)
 [![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://scorecard.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
-[![DOI v18.0](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434308-blue?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434308)
+[![DOI v18.0.0](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434308-blue?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434308)
 [![Thesis DOI](https://img.shields.io/badge/thesis%20DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
 [![License](https://img.shields.io/badge/license-Apache%202.0-2DA44E?style=flat-square)](./LICENSE)
 [![Lean toolchain](https://img.shields.io/badge/lean4-v4.13.0-blue?style=flat-square)](https://github.com/leanprover/lean4/releases/tag/v4.13.0)
