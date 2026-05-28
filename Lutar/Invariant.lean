@@ -47,9 +47,8 @@ Proof (V14PF-T1 Mathlib chain):
   3. `NNReal.rpow_mul`: `(c ^ (k : ℝ)) ^ (1/k) = c ^ (k · (1/k)) = c ^ 1`.
   4. `NNReal.rpow_one`: `c ^ 1 = c`. -/
 theorem a3_normalize_proof (k : ℕ) (hk : 0 < k) (c : NNReal) :
-    Λ k (fun _ => c) = c := by
-  simp only [Λ, hk.ne', dite_false]
+    Lutar.Λ k (fun _ => c) = c := by
+  simp only [Lutar.Λ, hk.ne', dite_false]
   rw [Finset.prod_const, Finset.card_fin]
   rw [← NNReal.rpow_natCast c k, ← NNReal.rpow_mul]
-  · simp [hk.ne']
-  · norm_num
+  simp [hk.ne']
