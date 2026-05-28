@@ -67,3 +67,8 @@ import Lutar.DPI.MerkleDAGBuild
 import Lutar.DPI.SCITTMaskEntropy
 import Lutar.Topology.PersistentHomologyChain
 import Lutar.PRNG.K10v2_ReplayRoot
+
+
+-- v17 Wheeler delayed-choice graft
+import Lutar.Wheeler.DelayedChoiceClosure
+import Lutar.Shannon.DoctrineEntropy
