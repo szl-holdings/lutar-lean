@@ -120,8 +120,9 @@ private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
       rw [htail]
       omega
     | succ k =>
-      -- head condition 0 = k+1 is false; Mathlib v4.13.0: use Nat.succ_ne_zero.symm
-      simp only [show (0 : Nat) ≠ Nat.succ k from (Nat.succ_ne_zero k).symm, ite_false]
+      -- head condition is 0 = k+1 which is false; use explicit proof
+      have h0 : (0 : Nat) ≠ Nat.succ k := Nat.zero_ne_succ k
+      simp only [h0, ite_false]
       have hk : k < tl.length := by omega
       -- The tail's mapIdx: `fun i v => if i + 1 = k + 1 then v + δ else v`
       -- This equals `fun i v => if i = k then v + δ else v` by Nat.succ_inj.
@@ -159,8 +160,7 @@ private lemma map_value_mapIdx_bump
     (decisions : List DecisionReceipt) (j δ : Nat) :
     (decisions.mapIdx (fun i d =>
         if i = j then { d with value := d.value + δ } else d)).map (·.value) =
-    List.mapIdx (fun i v => if i = j then v + δ else v) (decisions.map (·.value)) := by
-  -- Mathlib v4.13.0: avoid |> chaining on List.mapIdx (field notation issue)
+    decisions.map (·.value) |>.mapIdx (fun i v => if i = j then v + δ else v) := by
   apply List.ext_getElem?
   intro n
   simp only [List.getElem?_map, List.getElem?_mapIdx]
@@ -230,7 +230,7 @@ theorem khipuReceipt_checksum_invariant
     -- = organs.map pendantValue |>.mapIdx (fun k v => if k = i then v + δ else v)
     have hkey : (r.organs.mapIdx (fun k o =>
           if k = i then o.bumpDecisionAt j δ else o)).map pendantValue =
-        List.mapIdx (fun k v => if k = i then v + δ else v) (r.organs.map pendantValue) := by
+        r.organs.map pendantValue |>.mapIdx (fun k v => if k = i then v + δ else v) := by
       apply List.ext_getElem?
       intro n
       simp only [List.getElem?_map, List.getElem?_mapIdx]
@@ -245,8 +245,7 @@ theorem khipuReceipt_checksum_invariant
           have hjlt : j < r.organs[n].decisions.length := by
             rw [hi_eq]; exact hj
           simp only [Option.map_some, ite_true]
-          -- Goal: some (pendantValue (bumpDecisionAt ...)) = some (pendantValue ... + δ)
-          exact congrArg some (pendantValue_bump r.organs[n] j δ hjlt)
+          exact pendantValue_bump r.organs[n] j δ hjlt
         · simp [hn]
       · -- n is out of range; both sides are none
         have ho : r.organs[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn_range)
