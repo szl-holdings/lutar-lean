@@ -151,16 +151,10 @@ theorem double_count (f : NCHV) :
   --   lhs v := (count of contexts containing v) * (if f v then 1 else 0)
   --   rhs v := 2 * (if f v then 1 else 0)
   -- and show `lhs = rhs` pointwise (since count = 2 for every v).
-  unfold totalCtxCount totalTrue ctxCount
-  -- Expose `contexts` as a literal list, then reduce both sides over
-  -- the indicator function `b v = if f v then 1 else 0`.
-  -- A full mechanised proof requires either Mathlib's `Finset.sum_comm`
-  -- on the bipartite incidence relation, or a brute-force `decide`
-  -- after fixing all 18 bool values. The 2^18 enumeration is feasible
-  -- but slow. We leave this as a `sorry` tagged with the proof obligation:
-  --   "Each vector v ∈ Fin 18 occurs in exactly 2 of the 9 contexts;
-  --    the double-counting identity follows by Finset.sum_bij."
-  sorry
+  -- Each of the 18 KS vectors appears in exactly 2 of the 9 contexts;
+  -- double-counting is verified by native compilation over 2^18 cases.
+  have h : ∀ g : NCHV, totalCtxCount g = 2 * totalTrue g := by native_decide
+  exact h f
 
 /-- **Theorem (no NCHV).** No function `f : Fin 18 → Bool` is exactly-
 one-true-per-context on the Cabello 18 / 9 structure. (KS theorem.)
