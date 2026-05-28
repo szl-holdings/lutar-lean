@@ -45,7 +45,8 @@ def PairwiseCoprime (ms : List ℕ) : Prop :=
     map ("encode") in the sense of `RingEquiv`. -/
 noncomputable def crtTwoModulus {m n : ℕ} (h : Nat.Coprime m n) :
     ZMod (m * n) ≃+* ZMod m × ZMod n :=
-  ZMod.chineseRemainderₓ h
+  -- ZMod.chineseRemainderₓ renamed to ZMod.chineseRemainder in Mathlib v4.13.0
+  ZMod.chineseRemainder h
 
 /-- `crt_chunking_correct` (two-modulus form): the CRT isomorphism is, by
     construction, a `RingEquiv`. In particular, applying it then its
