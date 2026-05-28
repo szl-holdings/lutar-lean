@@ -35,7 +35,6 @@
 
   (c) 2024–2026 SZL Holdings, LLC. All rights reserved.
 
-
 ## Developer Certificate of Origin (DCO)
 
 All contributions to this repository are made under the [Developer Certificate of Origin v1.1](https://developercertificate.org/). By submitting a pull request, you certify that:
@@ -45,4 +44,4 @@ All contributions to this repository are made under the [Developer Certificate o
 3. The contribution was provided directly to you by some other person who certified items 1, 2, or 3 and you have not modified it.
 4. You understand and agree that this project and the contribution are public and that a record of the contribution (including all personal information you submit with it, including your sign-off) is maintained indefinitely and may be redistributed consistent with this project or the open source license(s) involved.
 
-Sign off your commits with `git commit -s`. Each commit must include a `Signed-off-by: Name <email>` trailer matching the commit author. PRs without a DCO sign-off on every commit will be blocked by CI (see `.github/workflows/dco.yml`).
+Sign off your commits with `git commit -s`. Each commit must include a `Signed-off-by: Name <email>` trailer matching the commit author.
