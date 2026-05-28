@@ -186,12 +186,12 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
         have hmem : contexts[n] ∈ contexts := List.getElem_mem hn
         have hcount : ctxCount f contexts[n] = 1 := h contexts[n] hmem
         rw [hget]
-        simp only [Option.map_some, hn9, ite_true, Option.some.injEq]
+        simp only [Option.map_some', hn9, ite_true, Option.some.injEq]
         exact hcount
       · have hget : contexts[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn)
         have hn9 : ¬n < 9 := hlen ▸ hn
         rw [hget]
-        simp only [Option.map_none, hn9, ite_false]
+        simp only [Option.map_none', hn9, ite_false]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2
