@@ -84,3 +84,7 @@ import Lutar.Correlator.MatchedFilter
 -- v17 Gleason + Schur modules (§XVII open obligations)
 import Lutar.Lambda.SchurConcave
 import Lutar.Gates.GleasonMod8
+
+-- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
+import Lutar.GraphLambda
+import Lutar.PositionAware
