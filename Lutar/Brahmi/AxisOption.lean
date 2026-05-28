@@ -70,10 +70,7 @@ def serialize : AxisValue → Option Int
 theorem serialize_injective :
     Function.Injective serialize := by
   intro a b h
-  cases a <;> cases b <;> simp [serialize] at h
-  · -- both measured: h : va = vb after simp, goal: measured va = measured vb
-    subst h
-    rfl
+  cases a <;> cases b <;> simp_all [serialize]
 
 /-- Specifically: the serialization of `measured 0` (i.e. `some 0`) is not
     equal to the serialization of `absent` (i.e. `none`). This is the
