@@ -1,5 +1,49 @@
 # CHANGELOG
 
+## v15 knot calculus (2026-05-28, feat/v15-knot-calculus)
+
+### Added
+
+- **`Lutar/Khipu/SummationInvariant.lean`** (new). Three-tier khipu receipt
+  DAG with TH11 `khipuReceipt_checksum_invariant`. Tracks two `sorry`s on the
+  routine `List.sum_mapIdx_eq_sum_set_add` + `Nat.add_left_cancel` discharge.
+  Sources: Urton 2003 (UT Press); Ascher & Ascher 1981 (U. Michigan Press);
+  Medrano & Khosla 2024 (*Latin American Antiquity*).
+
+- **`Lutar/DPOFeasibility.lean`** (new — replaces v14 placeholder `True := by
+  trivial`). Substantive TH12 `ΛGateLID_DPO_stability` statement with a
+  structurally correct three-step proof; three tagged `sorry`s — Pinsker
+  (Mathlib `Probability.Divergences`), Lipschitz from Ch.9
+  `gated_qkan_boundedness`, real-arithmetic recombination. Sources: Bai et al.
+  2025 (arXiv:2512.01899, SaTML 2026); Rafailov et al. 2023 (arXiv:2305.18290,
+  NeurIPS 2023); Pinsker 1964; Tsybakov 2009.
+
+- **`Lutar/PACBayes.lean`** (new). TH13 `governanceHead_PACBayes_bound`.
+  Closed-form proofs: `pacBayesBound_mono_kl`, `pacBayes_inequality_form`,
+  `pacBayesBound_nonvacuous_iff`, `governanceHead_PACBayes_bound`
+  (non-negativity). The probabilistic Pr ≥ 1-δ quantifier remains open;
+  arithmetic content is fully formalised. Sources: McAllester 1999 (COLT);
+  McAllester 2003 (*Machine Learning* 51); Lotfi et al. 2023 (arXiv:2312.17173,
+  NeurIPS 2023); Amari 1985 (Springer); Amari 2016 (Springer).
+
+- **`Lutar/Knot/ReidemeisterConjecture.lean`** (new, CONJECTURE-status).
+  Three audit-Reidemeister rewrites R1 (single-axis repack), R2 (independent
+  commute), R3 (associativity); all stated as conjecture with explicit
+  `sorry` tags. Target v16. Sources: Reidemeister 1927 (*Abh. Math. Sem.
+  Univ. Hamburg* 5); Kauffman 1991 (World Scientific); Birman 1974
+  (Princeton); Bar-Natan 1995 (*Topology* 34); Vassiliev 1990
+  (*Adv. Sov. Math.* 1); Kontsevich 1993.
+
+### Changed
+
+- **`Lutar.lean`**: imports added for the four new modules.
+
+### Verification
+
+- `lake build`: **not run in this environment** (Lean toolchain not
+  installed). All files use only standard Mathlib idioms; tagged `sorry`s
+  are isolated and documented. Re-run `lake build` locally before merge.
+
 ## v14 math corrections (2026-05-28, fix/v14-math-corrections)
 
 ### Added

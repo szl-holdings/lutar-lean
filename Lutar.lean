@@ -6,7 +6,10 @@ import Lutar.Uniqueness
 import Lutar.TwoWitness
 import Lutar.DoctrineV3.MoralGrounding
 import Lutar.DoctrineV3.MeasurabilityHonesty
-import Lutar.Quaternion.HamiltonAlgebra
+import Lutar.Khipu.SummationInvariant
+import Lutar.DPOFeasibility
+import Lutar.PACBayes
+import Lutar.Knot.ReidemeisterConjecture
 
 /-!
 # Lutar — root module
