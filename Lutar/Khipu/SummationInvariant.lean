@@ -245,6 +245,8 @@ theorem khipuReceipt_checksum_invariant
           have hjlt : j < r.organs[n].decisions.length := by
             rw [hi_eq]; exact hj
           simp only [Option.map_some, ite_true]
+          -- Goal: some (pendantValue (bumpDecisionAt ...)) = some (pendantValue ... + δ)
+          congr 1
           exact pendantValue_bump r.organs[n] j δ hjlt
         · simp [hn]
       · -- n is out of range; both sides are none
