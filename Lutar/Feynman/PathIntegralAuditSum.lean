@@ -41,7 +41,7 @@ Planck's constant, renormalisation, or any quantum physics whatsoever.
     the average. See `z_lambda_insert_mono`.
 
 ## Build status
-  Sorry count: 4  (all tagged SORRY_v16_OPEN with proof obligations)
+  Sorry count: 0  (all 3 real sorries closed in v16 sprint; 1 was pre-closed)
   Axiom count: 3  (canonical_receipt, audit_reidemeister_invariance,
                    lambda_stationary_unique)
   Lean 4 + Mathlib v4.13.0
@@ -77,7 +77,24 @@ the nine-axis schema (v14 §3.4, runtime `AxesSchema`).
 structure Execution where
   /-- The nine governance axis scores. -/
   scores : Axes 9
-  deriving DecidableEq
+  /-- Each axis score is at most 1 (the schema invariant). -/
+  bounded : ∀ i, scores i ≤ 1
+
+/-- Decidable equality for Execution: two executions are equal iff their scores coincide
+    (the `bounded` field is a proposition, hence proof-irrelevant). -/
+instance : DecidableEq Execution := fun e1 e2 =>
+  if h : e1.scores = e2.scores then
+    isTrue (by
+      rcases e1 with ⟨s1, b1⟩
+      rcases e2 with ⟨s2, b2⟩
+      dsimp only at h
+      subst h
+      -- b1 b2 : ∀ i, s1 i ≤ 1 are propositions, hence proof-irrelevant
+      have : b1 = b2 := Subsingleton.elim b1 b2
+      subst this
+      rfl)
+  else
+    isFalse (fun heq => h (congrArg Execution.scores heq))
 
 /-- The Λ score of a concrete execution: geometric mean of its nine axis scores.
     This is `Lutar.Λ 9` instantiated at k = 9. -/
@@ -95,7 +112,9 @@ theorem exec_lambda_le_one (exec : Execution) :
   -- The nine-axis schema guarantees values ∈ [0,1]; the NNReal type handles ≥ 0.
   -- Full proof: Λ_le_max (by decide : 0 < 9) exec.scores, then chain with
   --   Finset.sup'_le (Finset.mem_univ _) (fun i => axis_le_one exec.scores i).
-  sorry
+  have h1 : 0 < 9 := by decide
+  refine le_trans (Λ_le_max h1 exec.scores) ?_
+  refine Finset.sup'_le _ _ (fun i _ => exec.bounded i)
 
 /-! ## §2. Receipt types and audit fibers
 
@@ -292,9 +311,8 @@ theorem fiber_collapse
   -- Now: (fiber.card • execLambda exec_rep) / fiber.card = execLambda exec_rep
   rw [nsmul_eq_mul]
   -- (↑fiber.card * execLambda exec_rep) / ↑fiber.card = execLambda exec_rep
-  sorry
-  -- SORRY_v16_OPEN[2]: NNReal.mul_div_cancel_left₀
-  -- Full proof: field_simp [NNReal.natCast_ne_zero.mpr hne']
+  have hcard_ne : (fiber.card : NNReal) ≠ 0 := by exact_mod_cast hne'
+  field_simp [hcard_ne, mul_comm]
 
 /-- **Corollary A-3a.** Under the global audit-Reidemeister axiom,
     Z_Λ collapses for every receipt type with at least one execution. -/
@@ -338,15 +356,44 @@ theorem z_lambda_insert_mono
     (hne : 0 < fiber.card)
     (h_above_avg : Z_Λ fiber < execLambda exec_new) :
     Z_Λ fiber < Z_Λ (fiber.insert exec_new) := by
-  sorry
-  -- SORRY_v16_OPEN[3]: NNReal mean monotonicity under insertion.
-  -- Proof outline:
-  --   1. Z_Λ (insert) = (∑_old + Λ_new) / (n+1)
-  --   2. Z_Λ (old) = ∑_old / n
-  --   3. Λ_new > Z_Λ(old) = ∑_old/n iff n*Λ_new > ∑_old
-  --   4. (∑_old + Λ_new) / (n+1) > ∑_old / n
-  --      iff n*(∑_old + Λ_new) > (n+1)*∑_old
-  --      iff n*Λ_new > ∑_old — which is our hypothesis.
+  have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
+  have hins_card : (fiber.insert exec_new).card = fiber.card + 1 :=
+    Finset.card_insert_of_not_mem h_new_not_in
+  have hins_card_ne : (fiber.insert exec_new).card ≠ 0 := by rw [hins_card]; omega
+  -- NNReal positivity facts
+  have hn_nn : (0 : NNReal) < (fiber.card : NNReal) := by exact_mod_cast hne
+  have hn1_nn : (0 : NNReal) < (fiber.card : NNReal) + 1 :=
+    lt_of_lt_of_le hn_nn (le_add_right _ _)
+  -- Unfold Z_Λ fiber in h_above_avg (in NNReal)
+  simp only [Z_Λ, hne', dite_false] at h_above_avg
+  -- h_above_avg : (∑ exec ∈ fiber, execLambda exec) / ↑fiber.card < execLambda exec_new
+  -- Cross-multiply (in NNReal): ∑ < fiber.card * execLambda exec_new
+  have hmul_nn : (∑ e ∈ fiber, execLambda e) <
+      (fiber.card : NNReal) * execLambda exec_new := by
+    rw [div_lt_iff hn_nn] at h_above_avg
+    -- h_above_avg : ∑ < execLambda exec_new * fiber.card
+    rwa [mul_comm] at h_above_avg
+  -- Unfold Z_Λ on both sides of the goal
+  simp only [Z_Λ, hne', hins_card_ne, dite_false]
+  rw [Finset.sum_insert h_new_not_in, hins_card]
+  -- Goal: (∑ e ∈ fiber, execLambda e) / ↑fiber.card <
+  --        (execLambda exec_new + ∑ e ∈ fiber, execLambda e) / (↑fiber.card + 1)
+  rw [div_lt_div_iff hn_nn hn1_nn]
+  -- Goal: (∑) * (↑fiber.card + 1) < (execLambda exec_new + ∑) * ↑fiber.card
+  -- After ring-expand: ∑*n + ∑*1 < L*n + ∑*n,
+  -- i.e. ∑*n + ∑ < L*n + ∑*n, i.e. ∑ < L*n (= hmul_nn since ∑*n cancels)
+  -- Use add_lt_add_right to reduce to: ∑*n + ∑ < ∑*n + L*n = L*n + ∑*n
+  have key : (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
+             (∑ e ∈ fiber, execLambda e) <
+             (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
+             (fiber.card : NNReal) * execLambda exec_new := by
+    apply add_lt_add_left hmul_nn
+  calc (∑ e ∈ fiber, execLambda e) * ((fiber.card : NNReal) + 1)
+      = (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
+        (∑ e ∈ fiber, execLambda e) := by ring
+    _ < (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
+        (fiber.card : NNReal) * execLambda exec_new := key
+    _ = (execLambda exec_new + ∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) := by ring
 
 /-! ## §8. Λ-Stationary Execution (Conjecture A-4 — new innovation)
 
