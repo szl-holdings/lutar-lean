@@ -182,7 +182,7 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
         -- List.getElem_mem in Mathlib v4.13.0: single bound-proof argument
         have hmem : contexts[i] ∈ contexts := List.getElem_mem hi_ctx
         have := h contexts[i] hmem
-        simp [this]
+        simp [this, List.getElem_replicate]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2
