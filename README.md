@@ -2,15 +2,16 @@
 
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis governance framework — Λ-gate theorems, audit-fiber invariants, knot-calculus / Feynman-grafts.
 
-[![CI (lean)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml)
+[![Lean kernel](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml)
+[![Mathlib4 v4.13.0](https://img.shields.io/badge/mathlib4-v4.13.0-01696F?style=flat-square)](https://github.com/szl-holdings/lutar-lean)
 [![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://scorecard.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
-[![DOI v18.0.0](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434308-blue?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434308)
-[![Thesis DOI](https://img.shields.io/badge/thesis%20DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
-[![License](https://img.shields.io/badge/license-Apache%202.0-2DA44E?style=flat-square)](./LICENSE)
-[![Lean toolchain](https://img.shields.io/badge/lean4-v4.13.0-blue?style=flat-square)](https://github.com/leanprover/lean4/releases/tag/v4.13.0)
-[![Mathlib4](https://img.shields.io/badge/mathlib4-v4.13.0-purple?style=flat-square)](https://github.com/leanprover-community/mathlib4)
-[![Doctrine v6](https://img.shields.io/badge/doctrine-v6-01696F?style=flat-square)](https://github.com/szl-holdings/ouroboros-thesis)
+[![License](https://img.shields.io/badge/license-Apache--2.0-2DA44E?style=flat-square)](./LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
+[![Series-A Engineering](https://img.shields.io/badge/Series--A-Engineering-success?style=flat-square)](https://github.com/szl-holdings)
+[![Λ-gate theorems](https://img.shields.io/badge/Frontier-Λ--gate%20theorems-28251D?style=flat-square)](https://doi.org/10.5281/zenodo.20434276)
+[![Doctrine v6](https://img.shields.io/badge/Doctrine--v6-passing-success?style=flat-square)](https://github.com/szl-holdings/platform/blob/main/docs/doctrine/szl-doctrine.md)
 
 
 > **Frontier Capability** — first kernel-verified Λ-axis governance system.  
