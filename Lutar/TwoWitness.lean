@@ -172,15 +172,19 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
   have h1 : totalCtxCount f = 9 := by
     unfold totalCtxCount
     -- contexts has length 9 and h forces every ctxCount = 1.
-    have : (contexts.map (ctxCount f)) = List.replicate 9 1 := by
-      have hlen : contexts.length = 9 := contexts_length
-      apply List.ext_getElem (by simp [hlen])
-      intro i hi _
-      have hi' : i < contexts.length := by simp_all
-      have hmem : contexts[i] ∈ contexts := List.getElem_mem _ _ _
-      have := h contexts[i] hmem
-      simp [this]
-    rw [this]; simp
+    -- Every entry of `contexts.map (ctxCount f)` equals 1, and the list has
+    -- length 9, so it equals `replicate 9 1`. We use `List.eq_replicate_iff`
+    -- (length + pointwise membership predicate) to avoid the
+    -- `ext_getElem`/`getElem_mem` API surface, whose argument shapes have
+    -- drifted across Mathlib revisions.
+    have hlen : contexts.length = 9 := contexts_length
+    have hmap : (contexts.map (ctxCount f)) = List.replicate 9 1 := by
+      rw [List.eq_replicate_iff]
+      refine ⟨by simp [hlen], ?_⟩
+      intro b hb
+      rcases List.mem_map.mp hb with ⟨c, hc, rfl⟩
+      exact h c hc
+    rw [hmap]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2
   -- 9 is odd; 2 * n is even.
