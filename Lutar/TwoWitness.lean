@@ -171,9 +171,10 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
       apply List.ext_getElem (by simp [hlen])
       intro i hi _
       have hi' : i < contexts.length := by simp_all
-      have hmem : contexts[i] ∈ contexts := List.getElem_mem _ _ _
-      have := h contexts[i] hmem
-      simp [this]
+      have hmem : contexts[i] ∈ contexts := List.getElem_mem hi'
+      have hctx := h contexts[i] hmem
+      -- goal: (contexts.map (ctxCount f))[i] = (List.replicate 9 1)[i]
+      simp [List.getElem_map, List.getElem_replicate, hctx]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2
