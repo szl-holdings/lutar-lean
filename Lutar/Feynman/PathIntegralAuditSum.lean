@@ -82,7 +82,7 @@ structure Execution where
 
 /-- Decidable equality for Execution: two executions are equal iff their scores coincide
     (the `bounded` field is a proposition, hence proof-irrelevant). -/
-instance : DecidableEq Execution := fun e1 e2 =>
+noncomputable instance : DecidableEq Execution := fun e1 e2 =>
   if h : e1.scores = e2.scores then
     isTrue (by
       rcases e1 with ⟨s1, b1⟩
@@ -149,7 +149,7 @@ axiom canonicalReceipt : Execution → ReceiptType
 def inFiber (R : ReceiptType) (exec : Execution) : Prop :=
   canonicalReceipt exec = R
 
-instance (R : ReceiptType) (exec : Execution) :
+noncomputable instance (R : ReceiptType) (exec : Execution) :
     Decidable (inFiber R exec) := by
   unfold inFiber
   exact inferInstance
@@ -217,7 +217,8 @@ theorem z_lambda_le_one (fiber : Finset Execution) (hne : 0 < fiber.card) :
   simp [Z_Λ, hne']
   -- Need: (∑ exec ∈ fiber, execLambda exec) / fiber.card ≤ 1
   -- i.e.  ∑ exec ∈ fiber, execLambda exec ≤ fiber.card
-  rw [NNReal.div_le_one (by exact_mod_cast hne)]
+  -- Mathlib v4.13.0: NNReal.div_le_one renamed; use NNReal.div_le_one_iff or direct approach.
+  rw [div_le_one (by exact_mod_cast hne : (0 : NNReal) < fiber.card)]
   -- Now: ∑ execLambda ≤ fiber.card
   -- Each execLambda ≤ 1, sum of n terms each ≤ 1 is ≤ n
   have h_bound : ∀ exec ∈ fiber, execLambda exec ≤ 1 :=
@@ -355,45 +356,41 @@ theorem z_lambda_insert_mono
     (h_new_not_in : exec_new ∉ fiber)
     (hne : 0 < fiber.card)
     (h_above_avg : Z_Λ fiber < execLambda exec_new) :
-    Z_Λ fiber < Z_Λ (fiber.insert exec_new) := by
+    Z_Λ fiber < Z_Λ (Finset.insert exec_new fiber) := by
   have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
-  have hins_card : (fiber.insert exec_new).card = fiber.card + 1 :=
+  have hins_card : (Finset.insert exec_new fiber).card = fiber.card + 1 :=
     Finset.card_insert_of_not_mem h_new_not_in
-  have hins_card_ne : (fiber.insert exec_new).card ≠ 0 := by rw [hins_card]; omega
+  have hins_card_ne : (Finset.insert exec_new fiber).card ≠ 0 := by rw [hins_card]; omega
   -- NNReal positivity facts
   have hn_nn : (0 : NNReal) < (fiber.card : NNReal) := by exact_mod_cast hne
-  have hn1_nn : (0 : NNReal) < (fiber.card : NNReal) + 1 :=
-    lt_of_lt_of_le hn_nn (le_add_right _ _)
+  have hn1_nn : (0 : NNReal) < (fiber.card : NNReal) + 1 := by
+    exact lt_of_lt_of_le hn_nn (le_add_of_nonneg_right (zero_le 1))
   -- Unfold Z_Λ fiber in h_above_avg (in NNReal)
   simp only [Z_Λ, hne', dite_false] at h_above_avg
   -- h_above_avg : (∑ exec ∈ fiber, execLambda exec) / ↑fiber.card < execLambda exec_new
   -- Cross-multiply (in NNReal): ∑ < fiber.card * execLambda exec_new
   have hmul_nn : (∑ e ∈ fiber, execLambda e) <
       (fiber.card : NNReal) * execLambda exec_new := by
-    rw [div_lt_iff hn_nn] at h_above_avg
+    rw [div_lt_iff₀ hn_nn] at h_above_avg
     -- h_above_avg : ∑ < execLambda exec_new * fiber.card
     rwa [mul_comm] at h_above_avg
   -- Unfold Z_Λ on both sides of the goal
   simp only [Z_Λ, hne', hins_card_ne, dite_false]
-  rw [Finset.sum_insert h_new_not_in, hins_card]
-  -- Goal: (∑ e ∈ fiber, execLambda e) / ↑fiber.card <
-  --        (execLambda exec_new + ∑ e ∈ fiber, execLambda e) / (↑fiber.card + 1)
+  -- After simp, goal references `Finset.insert exec_new fiber`; push_cast to normalise card.
+  set S := ∑ e ∈ fiber, execLambda e
+  set L := execLambda exec_new
+  set n := (fiber.card : NNReal)
+  -- Rewrite sum and card of the inserted fiber.
+  have hsum_ins : ∑ e ∈ Finset.insert exec_new fiber, execLambda e = L + S := by
+    rw [Finset.sum_insert h_new_not_in]
+  have hcard_ins : ((Finset.insert exec_new fiber).card : NNReal) = n + 1 := by
+    rw [hins_card]; push_cast; ring
+  rw [hsum_ins, hcard_ins]
+  -- Goal: S / n < (L + S) / (n + 1)
   rw [div_lt_div_iff hn_nn hn1_nn]
-  -- Goal: (∑) * (↑fiber.card + 1) < (execLambda exec_new + ∑) * ↑fiber.card
-  -- After ring-expand: ∑*n + ∑*1 < L*n + ∑*n,
-  -- i.e. ∑*n + ∑ < L*n + ∑*n, i.e. ∑ < L*n (= hmul_nn since ∑*n cancels)
-  -- Use add_lt_add_right to reduce to: ∑*n + ∑ < ∑*n + L*n = L*n + ∑*n
-  have key : (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
-             (∑ e ∈ fiber, execLambda e) <
-             (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
-             (fiber.card : NNReal) * execLambda exec_new := by
-    apply add_lt_add_left hmul_nn
-  calc (∑ e ∈ fiber, execLambda e) * ((fiber.card : NNReal) + 1)
-      = (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
-        (∑ e ∈ fiber, execLambda e) := by ring
-    _ < (∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) +
-        (fiber.card : NNReal) * execLambda exec_new := key
-    _ = (execLambda exec_new + ∑ e ∈ fiber, execLambda e) * (fiber.card : NNReal) := by ring
+  -- Goal: S * (n + 1) < (L + S) * n
+  -- i.e. S*n + S < L*n + S*n, i.e. S < L*n = hmul_nn
+  nlinarith [hmul_nn, hn_nn.le]
 
 /-! ## §8. Λ-Stationary Execution (Conjecture A-4 — new innovation)
 
