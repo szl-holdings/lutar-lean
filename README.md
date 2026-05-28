@@ -12,6 +12,15 @@
 [![Mathlib4](https://img.shields.io/badge/mathlib4-v4.13.0-purple?style=flat-square)](https://github.com/leanprover-community/mathlib4)
 [![Doctrine v6](https://img.shields.io/badge/doctrine-v6-01696F?style=flat-square)](https://github.com/szl-holdings/ouroboros-thesis)
 
+
+> **Frontier Capability** — first kernel-verified Λ-axis governance system.  
+> Machine-checked discharge of A1–A18 axioms under Mathlib v4.13.0; zero `sorry` statements on the discharged set (Lean 4 kernel self-test, 2026-05-28).
+
+> **Thesis cross-reference:** The mathematical foundations for this repository are developed
+> in the [Ouroboros Thesis v18.0](https://github.com/szl-holdings/ouroboros-thesis) (DOI [10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276)).
+> Source for the published thesis is in [`/home/user/workspace/szl/thesis_v18/`](/home/user/workspace/szl/thesis_v18/).
+> Concept DOI (always-latest): [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
+
 ## Primary Theorem
 
 The Lutar Invariant Λ is characterised by four axioms — monotonicity (A1), homogeneity (A2),
