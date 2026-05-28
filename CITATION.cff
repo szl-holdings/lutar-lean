@@ -59,3 +59,38 @@ preferred-citation:
       orcid: "https://orcid.org/0009-0001-0110-4173"
   year: 2026
   url: "https://github.com/szl-holdings/lutar-lean"
+references:
+  - type: article
+    title: "On a New Species of Imaginary Quantities, Connected with a Theory of Quaternions"
+    authors:
+      - family-names: Hamilton
+        given-names: "William Rowan"
+    year: 1843
+    journal: "Proceedings of the Royal Irish Academy"
+    volume: 2
+    start: 424
+    end: 434
+    notes: "Cited at Lutar/Quaternion/HamiltonAlgebra.lean (Hamilton product, four-square identity). JSTOR 20520177."
+  - type: book
+    title: "Lectures on Quaternions"
+    authors:
+      - family-names: Hamilton
+        given-names: "William Rowan"
+    year: 1853
+    publisher:
+      name: "Hodges & Smith, Dublin"
+    notes: "Cited at Lutar/Quaternion/HamiltonAlgebra.lean."
+  - type: conference-paper
+    title: "Animating rotation with quaternion curves"
+    authors:
+      - family-names: Shoemake
+        given-names: Ken
+    year: 1985
+    collection-title: "SIGGRAPH '85: Proceedings of the 12th annual conference on Computer graphics and interactive techniques"
+    journal: "ACM SIGGRAPH Computer Graphics"
+    volume: 19
+    issue: 3
+    start: 245
+    end: 254
+    doi: "10.1145/325334.325242"
+    notes: "Companion citation for the TypeScript counterpart in a11oy quaternion-state.ts."

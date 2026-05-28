@@ -5,6 +5,7 @@ import Lutar.Bound
 import Lutar.Uniqueness
 import Lutar.DoctrineV3.MoralGrounding
 import Lutar.DoctrineV3.MeasurabilityHonesty
+import Lutar.Quaternion.HamiltonAlgebra
 
 /-!
 # Lutar — root module
