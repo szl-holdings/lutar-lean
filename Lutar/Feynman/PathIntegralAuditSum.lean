@@ -387,7 +387,7 @@ theorem z_lambda_insert_mono
     rw [hins_card]; push_cast; ring
   rw [hsum_ins, hcard_ins]
   -- Goal: S / n < (L + S) / (n + 1)
-  rw [div_lt_div_iff₀ hn_nn hn1_nn]
+  rw [div_lt_div_iff hn_nn hn1_nn]
   -- Goal: S * (n + 1) < (L + S) * n
   -- i.e. S*n + S < L*n + S*n, i.e. ∑ < n * L, which is hmul_nn
   have key : S * n + S < S * n + n * L := by
