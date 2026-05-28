@@ -61,36 +61,45 @@ preferred-citation:
   url: "https://github.com/szl-holdings/lutar-lean"
 references:
   - type: article
-    title: "On a New Species of Imaginary Quantities, Connected with a Theory of Quaternions"
+    title: "Provably Safe Model Updates"
     authors:
-      - family-names: Hamilton
-        given-names: "William Rowan"
-    year: 1843
-    journal: "Proceedings of the Royal Irish Academy"
-    volume: 2
-    start: 424
-    end: 434
-    notes: "Cited at Lutar/Quaternion/HamiltonAlgebra.lean (Hamilton product, four-square identity). JSTOR 20520177."
+      - family-names: Bai
+        given-names: Yuntao
+    year: 2025
+    doi: "10.48550/arXiv.2512.01899"
+    notes: "Cited at Lutar/DPOFeasibility.lean (TH12 LID-DPO stability). SaTML 2026."
+  - type: article
+    title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model"
+    authors:
+      - family-names: Rafailov
+        given-names: Rafael
+    year: 2023
+    doi: "10.48550/arXiv.2305.18290"
+    notes: "Cited at Lutar/DPOFeasibility.lean. NeurIPS 2023."
+  - type: article
+    title: "PAC-Bayes Bounds for Stable Algorithms with Instance-Dependent Priors"
+    authors:
+      - family-names: McAllester
+        given-names: "David A."
+    year: 2003
+    journal: "Machine Learning"
+    volume: 51
+    notes: "Cited at Lutar/PACBayes.lean (TH13 PAC-Bayes bound)."
+  - type: article
+    title: "Elementare Begründung der Knotentheorie"
+    authors:
+      - family-names: Reidemeister
+        given-names: Kurt
+    year: 1927
+    journal: "Abhandlungen aus dem Mathematischen Seminar der Universität Hamburg"
+    volume: 5
+    notes: "Cited at Lutar/Knot/ReidemeisterConjecture.lean (R1/R2/R3 conjecture)."
   - type: book
-    title: "Lectures on Quaternions"
+    title: "Signs of the Inka Khipu: Binary Coding in the Andean Knotted-String Records"
     authors:
-      - family-names: Hamilton
-        given-names: "William Rowan"
-    year: 1853
+      - family-names: Urton
+        given-names: Gary
+    year: 2003
     publisher:
-      name: "Hodges & Smith, Dublin"
-    notes: "Cited at Lutar/Quaternion/HamiltonAlgebra.lean."
-  - type: conference-paper
-    title: "Animating rotation with quaternion curves"
-    authors:
-      - family-names: Shoemake
-        given-names: Ken
-    year: 1985
-    collection-title: "SIGGRAPH '85: Proceedings of the 12th annual conference on Computer graphics and interactive techniques"
-    journal: "ACM SIGGRAPH Computer Graphics"
-    volume: 19
-    issue: 3
-    start: 245
-    end: 254
-    doi: "10.1145/325334.325242"
-    notes: "Companion citation for the TypeScript counterpart in a11oy quaternion-state.ts."
+      name: "University of Texas Press"
+    notes: "Cited at Lutar/Khipu/SummationInvariant.lean (TH11 khipu receipt DAG)."
