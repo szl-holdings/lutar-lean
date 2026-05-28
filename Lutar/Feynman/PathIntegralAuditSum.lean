@@ -389,8 +389,14 @@ theorem z_lambda_insert_mono
   -- Goal: S / n < (L + S) / (n + 1)
   rw [div_lt_div_iff₀ hn_nn hn1_nn]
   -- Goal: S * (n + 1) < (L + S) * n
-  -- i.e. S*n + S < L*n + S*n, i.e. S < L*n = hmul_nn
-  nlinarith [hmul_nn, hn_nn.le]
+  -- i.e. S*n + S < L*n + S*n, i.e. ∑ < n * L, which is hmul_nn
+  have key : S * n + S < S * n + n * L := by
+    exact add_lt_add_left hmul_nn (S * n)
+  calc S * (n + 1)
+      = S * n + S * 1 := by ring
+    _ = S * n + S := by ring
+    _ < S * n + n * L := key
+    _ = (L + S) * n := by ring
 
 /-! ## §8. Λ-Stationary Execution (Conjecture A-4 — new innovation)
 
