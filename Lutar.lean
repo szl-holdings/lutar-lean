@@ -57,3 +57,13 @@ import Lutar.OVERWATCH.ReadOnly
 import Lutar.DPI.DPIBound
 import Lutar.Doctrine.PublicClaims
 import Lutar.Doctrine.CrossComponentInvariant
+-- phd-math: R1/R2/A15/K10 (45 theorems, 0 sorry, 0 axiom)
+import Lutar.Composition.TH1_Composition
+import Lutar.Composition.CompositionOverhead
+import Lutar.Composition.AdversarialRobustness
+import Lutar.Composition.R1Tests
+import Lutar.DPI.TH6_DPI_Soundness
+import Lutar.DPI.MerkleDAGBuild
+import Lutar.DPI.SCITTMaskEntropy
+import Lutar.Topology.PersistentHomologyChain
+import Lutar.PRNG.K10v2_ReplayRoot
