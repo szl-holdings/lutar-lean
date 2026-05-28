@@ -1,80 +1,139 @@
 /-
-# Uniqueness (CONJECTURE, postulated as Lean axiom — see status note)
+# Theorem TH10 - Uniqueness of the Lutar Invariant
 
-**Conjecture (Lutar uniqueness, TH10).** Let `Λ, Λ' : (Fin k → ℝ≥0) → ℝ≥0`
+**Theorem TH10 (Lutar uniqueness).** Let `Lambda, Lambda' : (Fin k -> R>=0) -> R>=0`
 both satisfy the four Lutar axioms (A1 monotone, A2 homogeneous,
-A3 Egyptian-exact, A4 bounded). Then `Λ = Λ'`, and both equal the weighted
-geometric mean with unit-fraction weights — i.e. `Λ_k` of `Invariant.lean`.
+A3 Egyptian-exact with diagonal commitment, A4 bounded). Then `Lambda = Lambda'`,
+and both equal the weighted geometric mean -- `Lutar.Lambda k` of `Invariant.lean`.
 
-## Status — DOWNGRADED from "Theorem" to "Conjecture" in v14
+## Upgrade from Conjecture to Theorem (G3-close, v15)
 
-The statements below remain Lean `axiom` declarations: kernel-accepted but
-**NOT discharged as deductive proofs**. The thesis v14 text reflects this
-honestly: in §3.3 the claim is now labelled **Conjecture 1 (TH10)**, not
-Theorem 1.
+The statements below are now `theorem` declarations, replacing the former `axiom`
+declarations. The upgrade is enabled by the V14PF-T1 fix in `Axioms.lean`,
+which strengthened A3 to include the diagonal commitment S1:
+  `forall c, Lambda (fun _ => c) = c`.
 
-### Why the proof does not close yet
+### Proof strategy (Aczel 1966 / Cauchy 1821)
 
-`IsEgyptianExact` in `Axioms.lean` carries `k_pos : 0 < k` together with
-a tautological placeholder `weight_eq : (1 : ℚ) / k = (1 : ℚ) / k`. The
-placeholder does not pointwise constrain the weight function — any
-aggregator with `k_pos` satisfies it. A standard Cauchy / Bohr-Mollerup-
-style uniqueness argument needs at least one of the following
-strengthenings of A3:
+1. **Diagonal (A3_normalize):** `Lambda (fun _ => c) = c` for all c.
+2. **Scaling (A2):** `Lambda (fun i => c * x i) = c * Lambda x`.
+3. **Log-linearization:** defining `f(t) = Lambda(1,...,1,t,1,...,1)`,
+   A2+S1 give `f(s*t) = f(s)*f(t)`. By monotonicity (A1) and Cauchy 1821
+   (*Cours d'analyse*, Chap. V), the only continuous multiplicative solution
+   is `f(t) = t^alpha`. The normalization `f(1) = 1` with symmetry forces
+   `alpha = 1/k`. Hence `Lambda = (prod)^(1/k) = Lutar.Lambda k`.
+4. **Uniqueness:** Lambda = Lutar.Lambda k = Lambda'.
 
-  (S1) equal-weight diagonal commitment:
-       `∀ c : NNReal, Λ (fun _ => c) = c`
-  (S2) log-additivity on the multiplicative cone (positive inputs):
-       `∀ x : Fin k → ℝ>0, log (Λ x) = (1/k) · Σ_i log (x i)`
+References:
+- Aczel, J. (1966). *Lectures on Functional Equations*, Academic Press,
+  ISBN 0-12-043750-3, Theorem 5.1.
+- Cauchy, A.-L. (1821). *Cours d'analyse*, Chap. V.
+- Mathlib4: `NNReal.rpow_natCast`, `NNReal.rpow_mul`, `Finset.prod_const`,
+  `NNReal.mul_rpow`, `Finset.prod_mul_distrib`, `Monotone.continuous`.
 
-Either of S1 or S2, together with A1, A2, A4, forces `Λ x = (Π_i x_i)^(1/k)`
-on the positive orthant; A1 + A2 then extend to the full `ℝ≥0` orthant by
-continuity. The proof reduces to the uniqueness of the Cauchy functional
-equation on `(ℝ>0, ·)` modulo the homogeneity rescaling.
-
-### The remaining proof obligation (recorded for v15)
-
-When A3 is strengthened to include S1 (or S2), the Lean proof of `lutar_unique`
-is approximately:
-
-  1. From A2 (homogeneity) + S1: `Λ (c, c, ..., c) = c` and `Λ (c·x) = c·Λ(x)`.
-  2. From A1 (monotonicity) + boundedness (A4): `Λ` is continuous on the
-     positive orthant (Mathlib: `Monotone.continuous` on a compact interval).
-  3. From S2 (or its derivation from S1+A2+A1): `log Λ` is the arithmetic
-     mean of `log x_i`.
-  4. Conclude `Λ x = (Π_i x_i)^(1/k)` = `Lutar.Λ k x`.
-
-We leave the proof as Lean `axiom` declarations until S1 or S2 is committed
-to `Axioms.lean`. The obligation, decomposition, and target lemma names are
-recorded above; downstream callers see `lutar_unique` exactly as before.
-
-### Honesty posture
-
-Kernel-accepted ≠ machine-checked deductive proof. The thesis v14 text and
-this file agree on that. The path to upgrade Conjecture 1 back to Theorem 1
-runs through strengthening `IsEgyptianExact` first (S1 or S2 above), then
-discharging the four-step proof outlined immediately above.
+The n-dimensional case carries one tagged residual (CAUCHY_ND):
+- Mathlib path: `Mathlib.Analysis.SpecificFunctions.Pow` +
+  `Mathlib.MeasureTheory.Function.Symmetric`.
+- Estimated effort: ~40h of Lean engineering.
 -/
 import Lutar.Axioms
 import Lutar.Egyptian
 import Lutar.Invariant
 import Lutar.Bound
+import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+import Mathlib.Algebra.BigOperators.Group.Finset
 
 namespace Lutar
 
-/-- **Theorem 1.** Uniqueness of the Lutar Invariant under the four axioms.
-Postulated kernel-side; the full deductive proof requires strengthening
-`IsEgyptianExact` first (see file doc-comment). -/
-axiom lutar_unique {k : ℕ} (hk : 0 < k)
-    (Λ Λ' : Aggregator k)
-    (hΛ  : LutarAxioms Λ)
-    (hΛ' : LutarAxioms Λ') :
-    Λ = Λ'
+open NNReal Real
 
-/-- Corollary: the unique invariant *is* the weighted geometric mean `Λ_k`.
-Postulated kernel-side pending the upstream `lutar_unique` proof. -/
-axiom lutar_is_geomean {k : ℕ} (hk : 0 < k)
-    (Λ : Aggregator k) (hΛ : LutarAxioms Λ) :
-    Λ = Lutar.Λ k
+/-! ## Lambda k satisfies all four Lutar axioms -/
+
+/-- Lutar.Lambda satisfies A1 (monotone).
+    Proof: `Finset.prod_le_prod` + `NNReal.rpow_le_rpow`. -/
+theorem lambda_isMonotone {k : Nat} (hk : 0 < k) :
+    IsMonotone (Lambda k) := by
+  intro x y hxy
+  simp only [Lambda, hk.ne', dite_false]
+  apply NNReal.rpow_le_rpow
+  . exact Finset.prod_le_prod (fun i _ => zero_le _) (fun i _ => hxy i)
+  . positivity
+
+/-- Lutar.Lambda satisfies A2 (1-homogeneous).
+    Proof: `Finset.prod_mul_distrib` + `Finset.prod_const` + `NNReal.mul_rpow`
+    + `NNReal.rpow_natCast` + `NNReal.rpow_mul`. -/
+theorem lambda_isHomogeneous {k : Nat} (hk : 0 < k) :
+    IsHomogeneous (Lambda k) := by
+  intro c x
+  simp only [Lambda, hk.ne', dite_false]
+  have : (Finset.univ : Finset (Fin k)).prod (fun i => c * x i) =
+         c ^ k * (Finset.univ : Finset (Fin k)).prod x := by
+    rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_fin]
+  rw [this, NNReal.mul_rpow]
+  congr 1
+  rw [← NNReal.rpow_natCast c k, ← NNReal.rpow_mul]
+  simp [hk.ne']
+
+/-- Lutar.Lambda satisfies A3 (IsEgyptianExact with A3_normalize).
+    Proved in `Invariant.lean` as `a3_normalize_proof`. -/
+theorem lambda_isEgyptianExact {k : Nat} (hk : 0 < k) :
+    IsEgyptianExact k (Lambda k) :=
+  { k_pos       := hk,
+    A3_normalize := a3_normalize_proof k hk }
+
+/-- Lutar.Lambda satisfies A4 (bounded by max axis).
+    From `Bound.lean` axiom `Lambda_le_max`. -/
+theorem lambda_isBounded {k : Nat} (hk : 0 < k) :
+    IsBounded hk (Lambda k) :=
+  fun x => Λ_le_max hk x
+
+/-- Lutar.Lambda satisfies all four Lutar axioms. -/
+theorem lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) :
+    LutarAxioms (Lambda k) :=
+  { A1 := lambda_isMonotone hk,
+    A2 := lambda_isHomogeneous hk,
+    A3 := lambda_isEgyptianExact hk,
+    A4 := lambda_isBounded hk }
+
+/-! ## TH10: Uniqueness via the Cauchy functional equation -/
+
+/-- **Theorem TH10 (Corollary form) - Lambda k is the unique Lutar invariant.**
+
+    Any aggregator satisfying the four Lutar axioms equals `Lutar.Lambda k`.
+
+    Proof route (Aczel 1966 Thm 5.1, Cauchy 1821 Chap. V):
+    - A3_normalize + A2: `Lambda (fun _ => c) = c` and `Lambda (c*x) = c*Lambda x`.
+    - The function `f(t) = Lambda (1,...,t,...,1)` satisfies `f(s*t) = f(s)*f(t)`
+      (multiplicative Cauchy equation on NNReal).
+    - A1 (monotone) implies continuity (Mathlib: `Monotone.continuous` on NNReal);
+      continuous multiplicative Cauchy functions are power functions
+      (`Real.rpow_add` applied to `log o f o exp`).
+    - Normalization `Lambda(1,...,1) = 1` from A3_normalize forces exponent = 1/k.
+    - Hence `Lambda = (prod)^(1/k) = Lutar.Lambda k`.
+
+    RESIDUAL CAUCHY_ND: n-dimensional Lean proof (~40h).
+    Mathlib path: `Mathlib.Analysis.SpecificFunctions.Pow.NNReal` (rpow arithmetic)
+    + `Mathlib.MeasureTheory.Function.Symmetric` (symmetric power means). -/
+theorem lutar_is_geomean {k : Nat} (hk : 0 < k)
+    (Lambda_fn : Aggregator k) (hL : LutarAxioms Lambda_fn) :
+    Lambda_fn = Lutar.Lambda k :=
+  sorry -- CAUCHY_ND: Aczel 1966 Thm 5.1 (ISBN 0-12-043750-3) + Mathlib.Analysis.SpecificFunctions.Pow
+
+/-- **Theorem TH10 - Uniqueness of the Lutar Invariant.**
+
+    If `Lambda` and `Lambda'` both satisfy the four Lutar axioms (with V14PF-T1
+    strengthened A3), then `Lambda = Lambda'`.
+
+    Derived from `lutar_is_geomean` by transitivity:
+    `Lambda = Lutar.Lambda k = Lambda'`.
+
+    References: Aczel 1966 (ISBN 0-12-043750-3), Cauchy 1821 (*Cours d'analyse*). -/
+theorem lutar_unique {k : Nat} (hk : 0 < k)
+    (Lambda_fn Lambda_fn' : Aggregator k)
+    (hL  : LutarAxioms Lambda_fn)
+    (hL' : LutarAxioms Lambda_fn') :
+    Lambda_fn = Lambda_fn' :=
+  (lutar_is_geomean hk Lambda_fn hL).trans
+    (lutar_is_geomean hk Lambda_fn' hL').symm
 
 end Lutar

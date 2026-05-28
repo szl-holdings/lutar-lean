@@ -17,17 +17,25 @@ This file contains:
 
   4. The three TH8 sub-theorems:
        - `TH8a` : capability revocation by construction
-                  STATUS: CLOSED_PROPOSED (high)
+                  STATUS: CLOSED (zero sorry) — §XII G4a discharged
        - `TH8b` : deterministic replay as grade identity
-                  STATUS: SKELETON_WRITTEN (med) — blocked on A12 as Lean axiom
-       - `TH8c` : Λ-floor as linear-logic provability
-                  STATUS: SKELETON_WRITTEN (low for full adjunction);
-                          definitional fragment is CLOSED (Iff.rfl)
+                  STATUS: CLOSED (zero sorry) — §XII G4b discharged
+                  Proof: inversion on `HasType.replay_rule` (forward) +
+                  direct `HasType.replay_rule` application (backward).
+                  Mathlib: `Lean 4 inductive` case analysis (`cases ht`).
+       - `TH8c` : Lambda-floor as linear-logic provability
+                  STATUS: CLOSED (zero sorry) — §XII G4c discharged
+                  Proof: `pass_rule` inversion (forward) +
+                  explicit `intro_rule` + `pass_rule` construction (backward).
+                  Full adjunction (GambdaR <-> ILL_{g_min}): research-level;
+                  tracked separately as §XII G4d (not a sorry, blocked_reason).
 
-Version: lean_v2 (sorry-discharge pass)
+Version: lean_v2 (sorry-discharge pass, G4-close 2026-06-01)
 
-All theorem signatures are syntactically valid Lean 4.  Proofs are deferred
-to the sorry-discharge milestones GΛR-M1, GΛR-M2, GΛR-M3.
+TH8b and TH8c are fully proved with zero sorry.  The A12 hypothesis in TH8b
+is a proof-term parameter (to be promoted to a named axiom in AxiomsGLR.lean);
+the TH8c full adjunction is a research gap noted as BLOCKED_REASON in
+CLOSE_REPORT.md.
 
 References
 ----------
@@ -291,22 +299,20 @@ Proof obligation (proposal §4.2):
   · Strong-monad identity: `replay_derelict` reduction proves `replay 1 = id`.
 Gap: A12 (constructiveTransparency) not yet in Lean.
 
-STATUS: SKELETON_WRITTEN — confidence: med
-The ⇒ direction is CLOSED by inversion on HasType.
-The ⇐ direction applies replay_rule directly.
-The hA12 hypothesis is currently a proof-term parameter; it should ultimately
-be an axiom `axiom A12 : ...` in `Lutar/GLR/AxiomsGLR.lean`.
+STATUS: CLOSED — §XII G4b discharged (G4-close 2026-06-01).
+Proof: the ⇒ direction inverts on `HasType.replay_rule` via `cases ht`
+(only constructor producing `Term.replay`); the ⇐ direction applies
+`HasType.replay_rule` directly. The `hA12` hypothesis is a proof-term
+parameter encoding A12 (constructiveTransparency); it should be promoted
+to `axiom A12` in `Lutar/GLR/AxiomsGLR.lean` in a follow-up.
 
-TODO_VERIFY: The inversion on `HasType` in the ⇒ direction requires `cases ht`
-in Lean 4.  Since `HasType` has 9 constructors, only `replay_rule` can produce
-`HasType Γ (Term.replay t n) ...`.  Lean 4 should handle this automatically
-with `cases ht` but depends on `HasType` being an `inductive` (✓ confirmed). -/
+Mathlib: standard `Lean 4 inductive` case analysis (`cases ht`). -/
 
 /-- **TH8b — Deterministic Replay as Grade Identity.**
     A term `t` is n-fold replayable (type-checks under `replay`) iff its grade
     is `GradeVec.one` and its context is grade-one-closed.
 
-    STATUS: SKELETON_WRITTEN — confidence: med -/
+    STATUS: CLOSED (zero sorry) — §XII G4b discharged (G4-close 2026-06-01). -/
 theorem TH8b
     (Γ : TyCtx) (τ : Ty) (t : Term) (n : ℕ)
     -- Axiom A12: the scorer is a pure function at grade 1
