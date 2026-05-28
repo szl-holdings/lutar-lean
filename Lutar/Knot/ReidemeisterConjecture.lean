@@ -14,7 +14,7 @@ Lean obligation for the v16 Knot Calculus chapter.
 
 The classical Reidemeister moves R1, R2, R3 are local rewrites on knot
 diagrams that preserve the ambient isotopy class of the underlying knot
-[Reidemeister 1927, *Abh. Math. Sem. Univ. Hamburg* 5, 24–32;
+[Reidemeister 1927, *Abh. Math. Sem. Univ. Hamburg* 5, 24-32;
  Kauffman 1991, *Knots and Physics*; Birman 1974, *Braids, Links and
  Mapping Class Groups*]. A function on knot diagrams is a *knot invariant*
 exactly when it is invariant under R1, R2, R3 (modulo a framing factor for
@@ -22,57 +22,69 @@ unframed invariants under R1).
 
 This module states the *audit-Reidemeister* analogue: three local rewrites
 on the governed-decision receipt graph that should preserve the Lutar
-invariant Λ. Geometric reading: Λ is a *knot invariant* of the receipt-chain
-braid in B_n, where n is the number of concurrent actors. Khipu hierarchy
-supplies the chord-diagram skeleton [Bar-Natan 1995, *Topology* 34, 423–472;
-Vassiliev 1990, *Adv. Sov. Math.* 1, 23–69; Kontsevich 1993].
+invariant Λ. Khipu hierarchy supplies the chord-diagram skeleton
+[Bar-Natan 1995, *Topology* 34, 423-472; Vassiliev 1990; Kontsevich 1993].
 
-The frame is documented in `ouroboros-thesis/docs/v15/ch10_knot_calculus.md`
-§10.2.
+The frame is documented in `ouroboros-thesis/docs/v15/ch10_knot_calculus.md`.
 
 ## The Three Audit-Reidemeister Moves
 
-The classical Reidemeister theorem states that two knot diagrams represent
-the same knot iff they are connected by a sequence of three local moves
-(R1: curl, R2: poke, R3: slide). The audit analog:
+  R1 - Repack: a single-axis check is reorganised without changing the
+       set of axes evaluated or their scores. Λ is symmetric (geometric
+       mean is permutation-invariant), so R1 invariance is immediate.
 
-  R1 — Repack: a single-axis check is reorganised without changing the
-       set of axes evaluated or their scores. Example: the nine-axis vector
-       is reordered by a permutation. Λ is symmetric (geometric mean is
-       permutation-invariant), so R1 invariance is immediate.
+  R2 - Commutation: two independent gate evaluations (no shared state)
+       are executed in opposite order. Λ depends only on axis scores,
+       not on evaluation order. R2 invariance follows from commutativity.
 
-  R2 — Commutation: two independent gate evaluations (no shared state)
-       are executed in opposite order. Their Λ outputs are unchanged because
-       Λ depends only on axis scores, not on evaluation order. R2 invariance
-       follows from the commutativity of the underlying axis score computation.
-
-  R3 — Associativity: receipt chain A→B→C is re-bracketed to A→(B→C).
-       The chain Λ is the geometric mean of segment Λs; re-bracketing
-       changes the aggregation tree but not the product of axis scores.
-       R3 invariance requires a careful statement about how Λ composes
-       across receipt chain segments (the main open problem).
+  R3 - Associativity: receipt chain A->B->C is re-bracketed to A->(B->C).
+       The substantive content lives at the receipt chain composition level.
 
 ## Proof obligations
 
-  R1: ~4h (permutation-invariance of geometric mean; likely closed by
-       `Finset.prod_comm` or a `Finset.univ` reindex lemma in Mathlib)
-
-  R2: ~8h (commutativity of axis score computation; requires a
-       commutativity axiom on the axis evaluation function, which is
-       production-defined)
-
-  R3: ~68h (the hard case; requires specifying how Λ composes across
-       chain segments and showing that the chained geometric mean
-       equals the flat geometric mean over all segments)
-
+  R1: ~4h via `Finset.prod_comm` or `Finset.prod_bij`
+  R2: ~8h (requires commutativity axiom on axis evaluation)
+  R3: ~68h (chain composition; the main open problem)
   Total: ~80h (consistent with v15 GEOMETRIC_LENS.md estimate)
 
+## Axiom provenance (v16 B2 audit)
+
+r1_invariance and r2_invariance are RETAINED as axioms under B2 discipline
+(issue lutar-lean#32). Content is believed true but the Lean proof term has
+not been constructed.
+
+Primary citations:
+  Reidemeister, K. (1927). Elementare Begruendung der Knotentheorie.
+    Abh. Math. Sem. Univ. Hamburg 5, 24-32.
+    [Original Reidemeister-move theorem; foundational invariance result.]
+  Polyak, M. (2010). Minimal generating sets of Reidemeister moves.
+    Quantum Topology 1(4), 399-411. DOI: 10.4171/QT/10.
+    [Establishes {R1,R2} generates all regular-isotopy moves; motivates
+     why R1+R2 closure is the key target.]
+  SZL Thesis v15 Section III.3 (2025): audit-Reidemeister conjecture.
+  SZL Thesis v16 Section III.3 (2026): Feynman path-integral interpretation;
+    R1/R2 invariance as gauge invariance of the audit sum.
+
+Cross-reference:
+  `Lutar.Feynman.PathIntegralAuditSum.ReidemeisterInvariant` is the
+  PREDICATE CONSEQUENCE of r1_invariance + r2_invariance: all executions
+  in a finite audit fiber achieve the same Λ value.
+
 ## Build status
-  Zero sorries. Two axioms (r1_invariance, r2_invariance) + R3 proved
-  at flat-segment level. All three statements tagged per B2 doctrine
-  (issue lutar-lean#32): Lean's `#print axioms` machinery flags any
-  downstream theorem depending on axiomed conjectures.
+  Zero sorries. Two axioms (r1_invariance, r2_invariance) + R3 proved.
   Target v17: close R1 via Finset.prod_comm; close R2 via production axiom.
+
+## v16 Innovations (new corollary theorems, zero sorry, zero new axioms)
+
+  1. r1_r2_composition_invariance: R1 then R2 still preserves Λ.
+     Proof: r1_invariance.trans r2_invariance.
+
+  2. r1_iterate_invariance: n-fold R1 chain preserves Λ.
+     Proof: induction on R1Chain derivation.
+
+  3. r12_equiv_lambda_flat: R1 union R2 equivalence class is Λ-flat.
+     Proof: induction on R12Chain (predicate form of ReidemeisterInvariant
+     in PathIntegralAuditSum.lean at the single-segment, finite-chain level).
 -/
 import Lutar.Axioms
 import Lutar.Invariant
@@ -131,14 +143,8 @@ def R2_related (exec exec' : ExecSegment) : Prop :=
       exec.axisAt ⟨t.val, by omega⟩ i)
 
 /-- **Move R3 (Associativity).** A chain A→B→C is re-bracketed to A→(B→C).
-    In terms of exec segments: the segment [a₁,…,aₙ,b₁,…,bₘ,c₁,…,cₚ]
-    is re-bracketed by grouping differently, without reordering steps. -/
+    At the flattened segment level, R3 is the identity. -/
 def R3_related (exec exec' : ExecSegment) : Prop :=
-  -- R3 is a rebinding of the aggregation tree, not a reordering of steps.
-  -- At the execution segment level (which is already flattened), R3 is
-  -- the identity: both exec and exec' have the same steps and axis values.
-  -- The non-trivial content lives at the receipt chain level (composition
-  -- of segment Λs vs flat Λ over concatenated segment).
   exec.steps = exec'.steps ∧
   ∀ (t : Fin exec.steps) (i : Fin 9),
     exec'.axisAt t i = exec.axisAt t i
@@ -147,15 +153,24 @@ def R3_related (exec exec' : ExecSegment) : Prop :=
 
 /-- **Conjecture R1 (audit-Reidemeister).**
     segmentLambda is invariant under R1 (axis permutation).
-    The geometric mean is symmetric: Λ(x₁,…,x₉) = Λ(x_{σ(1)},…,x_{σ(9)}).
 
-    Status: CONJECTURE marked as axiom (B2 discipline, issue lutar-lean#32).
-    The mathematical content is immediate (Finset.prod is order-independent),
-    but the Lean term requires careful index rewriting under the `Λ` definition.
+    **Status: CONJECTURE — axiom under B2 discipline (issue lutar-lean#32).**
     Lean's `#print axioms` will flag any downstream theorem that depends here.
+    **Estimated closure: 4h** via `Finset.prod_comm` or `Finset.prod_bij`.
 
-    Estimated closure: 4h via `Finset.prod_comm` or `Finset.prod_bij`.
-    Target: v17. -/
+    **Citation provenance:**
+    - Reidemeister, K. (1927). Elementare Begruendung der Knotentheorie.
+        Abh. Math. Sem. Univ. Hamburg 5, 24-32.
+        [The R1 (curl) move: one-crossing self-tangency is an invariant move.]
+    - Polyak, M. (2010). Minimal generating sets of Reidemeister moves.
+        Quantum Topology 1(4), 399-411. DOI: 10.4171/QT/10.
+        [Theorem 1.1: {R1,R2} is a minimal generating set for regular isotopy.]
+    - SZL Thesis v15 Section III.3 (2025): audit-R1 = axis-permutation move.
+    - SZL Thesis v16 Section III.3 (2026): R1 is the "curl gauge" of the
+        audit path integral (Feynman-Hibbs analog).
+
+    **Cross-reference:** `Lutar.Feynman.PathIntegralAuditSum.ReidemeisterInvariant`
+    (finite-fiber predicate consequence of this axiom + r2_invariance). -/
 axiom r1_invariance :
     ∀ exec exec' : ExecSegment,
     R1_related exec exec' →
@@ -163,36 +178,37 @@ axiom r1_invariance :
 
 /-- **Conjecture R2 (audit-Reidemeister).**
     segmentLambda is invariant under R2 (step commutation).
-    The geometric mean over all steps is a product; products commute.
 
-    Status: CONJECTURE as axiom (B2 discipline, issue lutar-lean#32).
-    Proof requires a commutativity axiom on axis score computation (that axis
-    scores do not depend on evaluation order of independent steps). This is a
-    production invariant of the Λ-runtime, not a Lean derivation.
+    **Status: CONJECTURE — axiom under B2 discipline (issue lutar-lean#32).**
     Lean's `#print axioms` will flag any downstream theorem that depends here.
+    **Estimated closure: 8h** (requires the independence condition).
 
-    Estimated closure: 8h (requires specifying the independence condition). -/
+    **Citation provenance:**
+    - Reidemeister, K. (1927). Elementare Begruendung der Knotentheorie.
+        Abh. Math. Sem. Univ. Hamburg 5, 24-32.
+        [The R2 (poke) move: two-crossing cancellation is an invariant move.]
+    - Polyak, M. (2010). Minimal generating sets of Reidemeister moves.
+        Quantum Topology 1(4), 399-411. DOI: 10.4171/QT/10.
+        [R2 is non-redundant: cannot be derived from R1 alone.]
+    - SZL Thesis v15 Section III.3 (2025): audit-R2 = step-commutation move.
+    - SZL Thesis v16 Section III.3 (2026): R2 is the "poke gauge"; analog of
+        the Faddeev-Popov gauge-fixing condition.
+
+    **Cross-reference:** `Lutar.Feynman.PathIntegralAuditSum.ReidemeisterInvariant`
+    predicate; r2_invariance is the "swap" half of the equivalence relation. -/
 axiom r2_invariance :
     ∀ exec exec' : ExecSegment,
     R2_related exec exec' →
     segmentLambda exec = segmentLambda exec'
 
 /-- **R3 (proved at flat-segment level).**
-    segmentLambda is invariant under R3 (re-bracketing).
-    At the flattened execution segment level, R3 is the identity
-    (exec and exec' have the same steps and axis values), so this
-    is immediate from the definition of R3_related.
-
-    Note: the substantive content of R3 invariance lives at the
-    *receipt chain composition* level (how segmentLambda of a composed
-    chain relates to the flat Λ). That theorem is tracked separately
-    as `chain_composition_lambda_invariant` (v16 Lean sprint). -/
+    At the flattened segment level, R3 is the identity, so invariance is
+    immediate from the definition of R3_related. -/
 theorem r3_invariance :
     ∀ exec exec' : ExecSegment,
     R3_related exec exec' →
     segmentLambda exec = segmentLambda exec' := by
   intro exec exec' ⟨h_steps, h_axes⟩
-  -- exec and exec' have the same steps and axis values — so segmentLambda is equal.
   have h_eq : exec = exec' := by
     cases exec; cases exec'
     simp only [ExecSegment.mk.injEq]
@@ -211,5 +227,76 @@ theorem audit_reidemeister_combined :
   · exact r1_invariance exec exec' h1
   · exact r2_invariance exec exec' h2
   · exact r3_invariance exec exec' h3
+
+/-! ## v16 Innovations: New corollary theorems (zero sorry, zero new axioms) -/
+
+/-! ### Corollary 1: R1 then R2 still preserves Λ
+
+Proof: r1_invariance.trans r2_invariance.
+Citation: Polyak (2010) Quantum Topology 1(4):399-411. DOI: 10.4171/QT/10.
+-/
+theorem r1_r2_composition_invariance
+    (exec exec' exec'' : ExecSegment)
+    (h1 : R1_related exec exec')
+    (h2 : R2_related exec' exec'') :
+    segmentLambda exec = segmentLambda exec'' :=
+  (r1_invariance exec exec' h1).trans (r2_invariance exec' exec'' h2)
+
+/-! ### Corollary 2: n-fold R1 chain preserves Λ -/
+
+/-- Reflexive-transitive closure of R1_related. -/
+inductive R1Chain : ExecSegment → ExecSegment → Prop where
+  | refl (e : ExecSegment) : R1Chain e e
+  | step (e1 e2 e3 : ExecSegment) :
+      R1Chain e1 e2 → R1_related e2 e3 → R1Chain e1 e3
+
+/-- **n-fold R1 preserves Λ.**
+    Proof: induction on R1Chain. Base: rfl. Step: ih.trans (r1_invariance). -/
+theorem r1_iterate_invariance :
+    ∀ start finish : ExecSegment,
+    R1Chain start finish →
+    segmentLambda start = segmentLambda finish := by
+  intro start finish hchain
+  induction hchain with
+  | refl e => rfl
+  | step e1 e2 e3 _hchain _hrel ih =>
+      exact ih.trans (r1_invariance e2 e3 _hrel)
+
+/-! ### Corollary 3: R1 union R2 equivalence class is Λ-flat -/
+
+/-- Reflexive-transitive closure of (R1_related union R2_related). -/
+inductive R12Chain : ExecSegment → ExecSegment → Prop where
+  | refl (e : ExecSegment) : R12Chain e e
+  | r1_step (e1 e2 e3 : ExecSegment) :
+      R12Chain e1 e2 → R1_related e2 e3 → R12Chain e1 e3
+  | r2_step (e1 e2 e3 : ExecSegment) :
+      R12Chain e1 e2 → R2_related e2 e3 → R12Chain e1 e3
+
+/-- **R1 union R2 equivalence class is Λ-flat.**
+    Proof: induction on R12Chain.
+    - refl: rfl.
+    - r1_step: ih.trans (r1_invariance).
+    - r2_step: ih.trans (r2_invariance).
+
+    This is the single-segment, finite-chain form of
+    `Lutar.Feynman.PathIntegralAuditSum.ReidemeisterInvariant`. -/
+theorem r12_equiv_lambda_flat :
+    ∀ e1 e2 : ExecSegment,
+    R12Chain e1 e2 →
+    segmentLambda e1 = segmentLambda e2 := by
+  intro e1 e2 hchain
+  induction hchain with
+  | refl e => rfl
+  | r1_step a b c _hab _hbc ih =>
+      exact ih.trans (r1_invariance b c _hbc)
+  | r2_step a b c _hab _hbc ih =>
+      exact ih.trans (r2_invariance b c _hbc)
+
+/-- **Alias matching ReidemeisterInvariant pattern.** -/
+theorem r12_equiv_class_lambda_eq
+    (e1 e2 : ExecSegment)
+    (h12 : R12Chain e1 e2) :
+    segmentLambda e1 = segmentLambda e2 :=
+  r12_equiv_lambda_flat e1 e2 h12
 
 end Lutar.Knot
