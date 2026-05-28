@@ -72,3 +72,9 @@ import Lutar.PRNG.K10v2_ReplayRoot
 -- v17 Wheeler delayed-choice graft
 import Lutar.Wheeler.DelayedChoiceClosure
 import Lutar.Shannon.DoctrineEntropy
+
+-- v17 Quantum-error-correction lineage grafts
+import Lutar.QEC.HammingFoundations
+import Lutar.QEC.ShorReceiptCode
+import Lutar.QEC.CSSBridge
+import Lutar.QEC.KitaevSurface
