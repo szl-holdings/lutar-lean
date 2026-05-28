@@ -3,6 +3,7 @@ import Lutar.Egyptian
 import Lutar.Invariant
 import Lutar.Bound
 import Lutar.Uniqueness
+import Lutar.TwoWitness
 import Lutar.DoctrineV3.MoralGrounding
 import Lutar.DoctrineV3.MeasurabilityHonesty
 
