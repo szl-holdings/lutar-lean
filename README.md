@@ -1,6 +1,7 @@
 # lutar-lean
 
 [![Concept DOI](https://img.shields.io/badge/concept%20DOI-10.5281%2Fzenodo.19944926-01696F?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.19944926)
+[![v17 DOI](https://img.shields.io/badge/v17%20DOI-10.5281%2Fzenodo.20431181-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20431181) [![v17 PDF](https://img.shields.io/badge/v17%20PDF-download-d62728?style=flat-square)](https://zenodo.org/records/20431181/files/ouroboros-thesis-v17.pdf)
 [![v16 DOI](https://img.shields.io/badge/v16%20DOI-10.5281%2Fzenodo.20424996-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20424996) [![v16 PDF](https://img.shields.io/badge/v16%20PDF-download-d62728?style=flat-square)](https://zenodo.org/records/20424996/files/ouroboros-thesis-v16.pdf)
 [![v15 DOI](https://img.shields.io/badge/v15%20DOI-10.5281%2Fzenodo.20424995-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20424995) [![v15 PDF](https://img.shields.io/badge/v15%20PDF-download-d62728?style=flat-square)](https://zenodo.org/records/20424995/files/ouroboros-thesis-v15.pdf)
 [![v14 DOI](https://img.shields.io/badge/v14%20DOI-10.5281%2Fzenodo.20424992-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20424992) [![v14 PDF](https://img.shields.io/badge/v14%20PDF-download-d62728?style=flat-square)](https://zenodo.org/records/20424992/files/ouroboros-thesis-v14.pdf)
@@ -127,6 +128,7 @@ synthetic-noisy mixed workload.
 
 | Version | Title | DOI | PDF |
 |---|---|---|---|
+| **v17** *(latest)* | Wheeler · Shannon · QEC-Evolved Anatomy | [`10.5281/zenodo.20431181`](https://doi.org/10.5281/zenodo.20431181) | [PDF](https://zenodo.org/records/20431181/files/ouroboros-thesis-v17.pdf) |
 | **v16** | Feynman path-integral audit closure + Gates doctrine codes + cross-component composite invariant | [`10.5281/zenodo.20424996`](https://doi.org/10.5281/zenodo.20424996) | [PDF](https://zenodo.org/records/20424996/files/ouroboros-thesis-v16.pdf) |
 | **v15** | Knot Calculus for Governed Decision Receipts — audit-Reidemeister R1/R2/R3, PAC-Bayes head, Khipu-DAG | [`10.5281/zenodo.20424995`](https://doi.org/10.5281/zenodo.20424995) | [PDF](https://zenodo.org/records/20424995/files/ouroboros-thesis-v15.pdf) |
 | **v14** | Verifiable Multi-Agent Anatomy — Lutar Calculus, formal foundations, runtime verification, honest proof record | [`10.5281/zenodo.20424992`](https://doi.org/10.5281/zenodo.20424992) | [PDF](https://zenodo.org/records/20424992/files/ouroboros-thesis-v14.pdf) |
