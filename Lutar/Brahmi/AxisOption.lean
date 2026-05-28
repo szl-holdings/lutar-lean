@@ -19,6 +19,8 @@ Runtime counterparts:
 v16 ancient-foundations graft R4-I2.
 -/
 
+import Mathlib.Logic.Function.Basic
+
 namespace Lutar.Brahmi
 
 /-- An axis value distinguishes the Brahmi place-value zero from absence.
@@ -69,9 +71,9 @@ theorem serialize_injective :
     Function.Injective serialize := by
   intro a b h
   cases a <;> cases b <;> simp [serialize] at h
-  · -- both measured: equal int values
-    rename_i va vb
-    rw [h]
+  · -- both measured: h : va = vb after simp, goal: measured va = measured vb
+    subst h
+    rfl
 
 /-- Specifically: the serialization of `measured 0` (i.e. `some 0`) is not
     equal to the serialization of `absent` (i.e. `none`). This is the

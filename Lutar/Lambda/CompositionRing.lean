@@ -28,7 +28,7 @@ Sources:
 -/
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Linarith
-import Mathlib.Algebra.Order.Ring.Lemmas
+import Mathlib.Algebra.Order.Ring.Defs
 
 namespace Lutar.Lambda
 

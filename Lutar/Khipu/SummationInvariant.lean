@@ -39,7 +39,8 @@ G7 close (feat/close-G6-G7-pinsker-khipu):
   Sorry count before: 2.  Sorry count after: 0.
 -/
 import Mathlib.Data.List.Basic
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.List.Indexes
+import Mathlib.Data.Nat.Defs
 import Mathlib.Algebra.BigOperators.Group.List
 
 namespace Lutar.Khipu
@@ -73,13 +74,13 @@ def rootValue (r : KhipuRootReceipt) : Nat :=
 
 /-- Update one decision's value by `+δ`, returning the new organ. -/
 def OrganReceipt.bumpDecisionAt (r : OrganReceipt) (j : Nat) (δ : Nat) : OrganReceipt :=
-  { r with decisions := r.decisions.mapIdx
-      (fun i d => if i = j then { d with value := d.value + δ } else d) }
+  let newDecisions := r.decisions.mapIdx (fun i d => if i = j then { d with value := d.value + δ } else d)
+  { r with decisions := newDecisions }
 
 /-- Update one organ at position `i` by bumping its `j`-th decision by `δ`. -/
 def KhipuRootReceipt.bumpAt (r : KhipuRootReceipt) (i j δ : Nat) : KhipuRootReceipt :=
-  { r with organs := r.organs.mapIdx
-      (fun k o => if k = i then o.bumpDecisionAt j δ else o) }
+  let newOrgans := r.organs.mapIdx (fun k o => if k = i then o.bumpDecisionAt j δ else o)
+  { r with organs := newOrgans }
 
 /-!
   ## Core inductive arithmetic helper
@@ -108,7 +109,7 @@ private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
     simp only [List.mapIdx_cons, List.sum_cons, List.length_cons] at *
     cases j with
     | zero =>
-      simp only [Nat.zero_eq, Nat.reduceEq, ite_true]
+      simp only [Nat.zero_eq, ite_true]
       -- The tail's mapIdx: `fun i v => if i + 1 = 0 then v + δ else v`
       -- Since i + 1 ≠ 0 for all i, this is the identity on every element.
       have htail : (tl.mapIdx (fun i v => if i + 1 = 0 then v + δ else v)).sum = tl.sum := by

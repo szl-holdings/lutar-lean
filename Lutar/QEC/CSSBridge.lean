@@ -26,7 +26,7 @@
       level.
 -/
 
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 
 namespace Lutar.QEC.CSS
 

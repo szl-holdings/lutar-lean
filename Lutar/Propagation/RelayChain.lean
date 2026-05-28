@@ -16,7 +16,8 @@ Citation:
 
 Status: complete proof, zero `sorry`.
 -/
-import Mathlib.Data.List.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Linarith
 
 namespace Lutar.Propagation.Relay
