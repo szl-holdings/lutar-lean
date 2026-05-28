@@ -55,14 +55,12 @@ theorem false_position_correct
     exact mul_ne_zero hm hdx
   -- Unfold and discharge.
   simp only [falsePosition]
-  -- Mathlib v4.13.0: field_simp needs the denominator in the exact form it produces.
-  -- After unfolding, the denominator is `-(m * x₁) + m * x₂`.
-  -- hdy says `m * x₂ + c - (m * x₁ + c) ≠ 0`; ring-simplify to get the right form.
+  -- Mathlib v4.13.0: provide both nonzero facts to field_simp.
+  -- The denominator after unfold is `m * x₂ + c - (m * x₁ + c)` (= hdy).
+  -- field_simp may also produce `-(m * x₁) + m * x₂`; provide both.
   have hden_ne : -(m * x₁) + m * x₂ ≠ 0 := by
-    intro h; apply hdy
-    -- Goal: `m * x₂ + c - (m * x₁ + c) = 0`; equals `-(m * x₁) + m * x₂` by ring.
-    linear_combination h
-  field_simp [hden_ne]
+    intro h; apply hdy; linear_combination h
+  field_simp [hdy, hden_ne]
   ring
 
 /-- Identity sanity: target equals `y₁` recovers `x₁`. -/
