@@ -1,20 +1,22 @@
 cff-version: 1.2.0
-message: "If you use this Lean 4 formalization, please cite the SZL Holdings research thesis (Ouroboros Thesis v9) which introduces the Lutar Invariant Λ, and reference this proof artifact."
-title: "lutar-lean — Lean 4 formalization of the Lutar Invariant Λ uniqueness theorem"
+message: "If you use this Lean 4 formalization, please cite the Lutar software deposit (v18.0.0) and the companion Ouroboros Thesis v18.0. The concept DOI 10.5281/zenodo.19944926 always resolves to the latest thesis version."
+title: "Lutar — Lean 4 Formal Proofs for Ouroboros Thesis Governance"
 abstract: >-
   Lean 4 + Mathlib formalization of the four-axiom characterization of the
   Lutar Invariant Λ_k as the weighted geometric mean with Egyptian unit-fraction
   weights. Provides machine-checked statements for the uniqueness theorem
-  (Theorem 1) and the min/max bound (Theorem 2), and a runtime parity check
-  between the Lean Float implementation and the production TypeScript runtime.
+  (Theorem 1) and the min/max bound (Theorem 2), Wheeler delayed-choice closure,
+  Shannon doctrine code entropy bound, full QEC stack (Hamming, Shor, CSS, Kitaev),
+  knot-theoretic audit-Reidemeister conjecture, PAC-Bayes governance head, and
+  DPO stability (TH12). Runtime parity maintained with the production TypeScript
+  runtime in szl-holdings/ouroboros and szl-holdings/platform.
 type: software
-version: "v0.1.0"
-date-released: "2026-05-18"
+version: "v18.0.0"
+date-released: "2026-05-28"
 authors:
   - family-names: Lutar
     given-names: "Stephen P."
     name-suffix: "Jr."
-
     email: stephen@szlholdings.com
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
@@ -45,34 +47,40 @@ keywords:
   - szl-holdings
   - ouroboros-thesis
 identifiers:
-  - description: "lutar-lean v0.1.0 — Zenodo software DOI (pending mint)"
+  - description: "lutar-lean v18.0.0 — Zenodo software DOI"
     type: doi
-    value: "10.5281/zenodo.PENDING"
+    value: "10.5281/zenodo.20434308"
+  - description: "Ouroboros Thesis v18.0 — Multi-track Substrate Expansion (Zenodo)"
+    type: doi
+    value: "10.5281/zenodo.20434276"
+  - description: "Ouroboros Thesis concept DOI — always-latest"
+    type: doi
+    value: "10.5281/zenodo.19944926"
+  - description: "Ouroboros Thesis v17 — Wheelerian Audit Closure (Zenodo)"
+    type: doi
+    value: "10.5281/zenodo.20431181"
   - description: "Ouroboros Thesis v9 — unified operational account of the Lutar Invariant family (Zenodo)"
     type: doi
     value: "10.5281/zenodo.20053148"
   - description: "Ouroboros Thesis v10 — Λ₁₀ paper"
     type: doi
     value: "10.5281/zenodo.20053163"
-  - description: "Ouroboros Thesis concept DOI — always-latest"
-    type: doi
-    value: "10.5281/zenodo.19944926"
   - description: "ORCID iD of the principal author"
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
 preferred-citation:
   type: software
-  title: "lutar-lean — Lean 4 formalization of the Lutar Invariant Λ uniqueness theorem"
+  title: "Lutar — Lean 4 Formal Proofs for Ouroboros Thesis Governance (v18.0.0)"
   authors:
     - family-names: Lutar
       given-names: "Stephen P."
       name-suffix: "Jr."
-
       email: stephen@szlholdings.com
       affiliation: SZL Holdings
       orcid: "https://orcid.org/0009-0001-0110-4173"
   year: 2026
   url: "https://github.com/szl-holdings/lutar-lean"
+  doi: "10.5281/zenodo.20434308"
 references:
   - type: article
     title: "Provably Safe Model Updates"
