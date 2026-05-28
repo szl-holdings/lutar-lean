@@ -174,12 +174,15 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
     -- contexts has length 9 and h forces every ctxCount = 1.
     have : (contexts.map (ctxCount f)) = List.replicate 9 1 := by
       have hlen : contexts.length = 9 := contexts_length
-      apply List.ext_getElem (by simp [hlen])
-      intro i hi _
-      have hi' : i < contexts.length := by simp_all
-      have hmem : contexts[i] ∈ contexts := List.getElem_mem _ _ _
-      have := h contexts[i] hmem
-      simp [this]
+      -- List.ext_getElem in Mathlib v4.13.0: separate length + per-element goals
+      apply List.ext_getElem
+      · simp [hlen]
+      · intro i hi hi'
+        have hi_ctx : i < contexts.length := by simpa [hlen] using hi'
+        -- List.getElem_mem in Mathlib v4.13.0: single bound-proof argument
+        have hmem : contexts[i] ∈ contexts := List.getElem_mem hi_ctx
+        have := h contexts[i] hmem
+        simp [this]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2

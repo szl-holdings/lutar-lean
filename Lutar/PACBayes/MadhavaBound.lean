@@ -27,6 +27,7 @@ Sources:
 -/
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.NormNum
@@ -53,7 +54,8 @@ theorem madhavaRemainderBound_nonneg (x : ℝ) (N : ℕ) :
     have : (0 : ℝ) < (2*N+1 : ℕ) := by
       exact_mod_cast Nat.succ_pos (2*N)
     exact this
-  exact div_nonneg hnum (le_of_lt hden)
+  -- div_nonneg in Mathlib v4.13.0: use .le on the positivity proof
+  exact div_nonneg hnum hden.le
 
 /-- The remainder bound at `x = 0` is exactly zero. -/
 theorem madhavaRemainderBound_at_zero (N : ℕ) :
@@ -87,14 +89,12 @@ theorem madhavaRemainderBound_anti
   --                                    b = 2N+1, b' = 2N+3, with a' ≤ a and b ≤ b'.
   have step1 : |x|^(2*(N+1)+1) / ((2*(N+1)+1 : ℕ) : ℝ)
              ≤ |x|^(2*N+1) / ((2*(N+1)+1 : ℕ) : ℝ) := by
-    apply div_le_div_of_nonneg_right hnum_le
-    exact hden_pos2
+    -- div_le_div_right: Mathlib v4.13.0 renamed from div_le_div_of_nonneg_right
+    exact (div_le_div_right hden_pos2).mpr hnum_le
   have step2 : |x|^(2*N+1) / ((2*(N+1)+1 : ℕ) : ℝ)
              ≤ |x|^(2*N+1) / ((2*N+1 : ℕ) : ℝ) := by
-    apply div_le_div_of_nonneg_left
-    · exact pow_nonneg habs_nn _
-    · exact hden_pos1
-    · exact hden_le
+    -- div_le_div_of_le_left: Mathlib v4.13.0 (a/larger ≤ a/smaller when a ≥ 0, denom > 0)
+    apply div_le_div_of_le_left (pow_nonneg habs_nn _) hden_pos1 hden_le
   exact le_trans step1 step2
 
 /-- The **Mādhava–Leibniz alternating-series bound** (generic).

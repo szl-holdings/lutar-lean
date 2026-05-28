@@ -52,9 +52,9 @@ open NNReal Real
 /-- Lutar.Lambda satisfies A1 (monotone).
     Proof: `Finset.prod_le_prod` + `NNReal.rpow_le_rpow`. -/
 theorem lambda_isMonotone {k : Nat} (hk : 0 < k) :
-    IsMonotone (Lambda k) := by
+    IsMonotone (Λ k) := by
   intro x y hxy
-  simp only [Lambda, hk.ne', dite_false]
+  simp only [Λ, hk.ne', dite_false]
   apply NNReal.rpow_le_rpow
   . exact Finset.prod_le_prod (fun i _ => zero_le _) (fun i _ => hxy i)
   . positivity
@@ -63,9 +63,9 @@ theorem lambda_isMonotone {k : Nat} (hk : 0 < k) :
     Proof: `Finset.prod_mul_distrib` + `Finset.prod_const` + `NNReal.mul_rpow`
     + `NNReal.rpow_natCast` + `NNReal.rpow_mul`. -/
 theorem lambda_isHomogeneous {k : Nat} (hk : 0 < k) :
-    IsHomogeneous (Lambda k) := by
+    IsHomogeneous (Λ k) := by
   intro c x
-  simp only [Lambda, hk.ne', dite_false]
+  simp only [Λ, hk.ne', dite_false]
   have : (Finset.univ : Finset (Fin k)).prod (fun i => c * x i) =
          c ^ k * (Finset.univ : Finset (Fin k)).prod x := by
     rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_fin]
@@ -77,19 +77,19 @@ theorem lambda_isHomogeneous {k : Nat} (hk : 0 < k) :
 /-- Lutar.Lambda satisfies A3 (IsEgyptianExact with A3_normalize).
     Proved in `Invariant.lean` as `a3_normalize_proof`. -/
 theorem lambda_isEgyptianExact {k : Nat} (hk : 0 < k) :
-    IsEgyptianExact k (Lambda k) :=
+    IsEgyptianExact k (Λ k) :=
   { k_pos       := hk,
     A3_normalize := a3_normalize_proof k hk }
 
 /-- Lutar.Lambda satisfies A4 (bounded by max axis).
     From `Bound.lean` axiom `Lambda_le_max`. -/
 theorem lambda_isBounded {k : Nat} (hk : 0 < k) :
-    IsBounded hk (Lambda k) :=
+    IsBounded hk (Λ k) :=
   fun x => Λ_le_max hk x
 
 /-- Lutar.Lambda satisfies all four Lutar axioms. -/
 theorem lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) :
-    LutarAxioms (Lambda k) :=
+    LutarAxioms (Λ k) :=
   { A1 := lambda_isMonotone hk,
     A2 := lambda_isHomogeneous hk,
     A3 := lambda_isEgyptianExact hk,
@@ -116,7 +116,7 @@ theorem lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) :
     + `Mathlib.MeasureTheory.Function.Symmetric` (symmetric power means). -/
 theorem lutar_is_geomean {k : Nat} (hk : 0 < k)
     (Lambda_fn : Aggregator k) (hL : LutarAxioms Lambda_fn) :
-    Lambda_fn = Lutar.Lambda k :=
+    Lambda_fn = Lutar.Λ k :=
   sorry -- CAUCHY_ND: Aczel 1966 Thm 5.1 (ISBN 0-12-043750-3) + Mathlib.Analysis.SpecificFunctions.Pow
 
 /-- **Theorem TH10 - Uniqueness of the Lutar Invariant.**

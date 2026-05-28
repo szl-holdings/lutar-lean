@@ -53,7 +53,8 @@ theorem false_position_correct
     exact mul_ne_zero hm hdx
   -- Unfold and discharge.
   simp only [falsePosition]
-  field_simp
+  -- Mathlib v4.13.0: field_simp requires explicit nonzero hint
+  field_simp [hdy]
   ring
 
 /-- Identity sanity: target equals `y₁` recovers `x₁`. -/

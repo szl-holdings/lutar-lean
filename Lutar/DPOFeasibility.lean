@@ -194,10 +194,9 @@ theorem axisScore_lipschitz
   have hS : (2 : ℝ) * ((1 / 2) * ∑ i : Fin numAxes, |theta1 i - theta2 i|) =
             ∑ i : Fin numAxes, |theta1 i - theta2 i| := by ring
   rw [hS]
-  -- Single term <= full sum (each abs_nonneg)
-  apply Finset.single_le_sum
-  · intro i _; exact abs_nonneg _
-  · exact Finset.mem_univ k
+  -- Single term ≤ full sum: Mathlib v4.13.0 needs explicit function argument
+  exact Finset.single_le_sum (f := fun i => |theta1 i - theta2 i|)
+    (fun i _ => abs_nonneg _) (Finset.mem_univ k)
 
 /-- Lipschitz constant non-negativity -- PROVED.
     0 <= gateLipschitz.
@@ -228,8 +227,11 @@ theorem tvDist_symm
 theorem tvDist_nonneg
     (pi1 pi2 : PolicyParam numAxes) :
     0 ≤ tvDist pi1 pi2 := by
-  simp only [tvDist]
-  positivity
+  simp only [tvDist, axisScore]
+  -- Mathlib v4.13.0: positivity fails to unfold tvDist; manual proof
+  apply mul_nonneg (by norm_num)
+  apply Finset.sum_nonneg
+  intro i _; exact abs_nonneg _
 
 /-- TV permutation-invariance -- PROVED.
     tvDist (pi_new ∘ sigma) (pi_ref ∘ sigma) = tvDist pi_new pi_ref.

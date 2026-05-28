@@ -120,7 +120,9 @@ private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
       rw [htail]
       omega
     | succ k =>
-      simp only [Nat.succ_ne_zero, ite_false]
+      -- head condition is 0 = k+1 which is false; use explicit proof
+      have h0 : (0 : Nat) ≠ Nat.succ k := Nat.zero_ne_succ k
+      simp only [h0, ite_false]
       have hk : k < tl.length := by omega
       -- The tail's mapIdx: `fun i v => if i + 1 = k + 1 then v + δ else v`
       -- This equals `fun i v => if i = k then v + δ else v` by Nat.succ_inj.
