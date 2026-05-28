@@ -181,15 +181,17 @@ theorem no_NCHV (f : NCHV) (h : ExactlyOnePerContext f) : False := by
       -- Goal: (fun x => some (ctxCount f x)) <$> contexts[n]?
       --       = if n < 9 then some 1 else none
       by_cases hn : n < contexts.length
-      · have : contexts[n]? = some contexts[n] := List.getElem?_eq_getElem hn
-        rw [this]
-        simp only [Option.map_some]
+      · have hget : contexts[n]? = some contexts[n] := List.getElem?_eq_getElem hn
+        have hn9 : n < 9 := hlen ▸ hn
         have hmem : contexts[n] ∈ contexts := List.getElem_mem hn
-        have h1 := h contexts[n] hmem
-        simp [h1, show n < 9 from hlen ▸ hn]
-      · have : contexts[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn)
-        rw [this]
-        simp [show ¬n < 9 from hlen ▸ hn]
+        have hcount : ctxCount f contexts[n] = 1 := h contexts[n] hmem
+        rw [hget]
+        simp only [Option.map_some, hn9, ite_true, Option.some.injEq]
+        exact hcount
+      · have hget : contexts[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn)
+        have hn9 : ¬n < 9 := hlen ▸ hn
+        rw [hget]
+        simp only [Option.map_none, hn9, ite_false]
     rw [this]; simp
   have h2 : totalCtxCount f = 2 * totalTrue f := double_count f
   have : 9 = 2 * totalTrue f := h1 ▸ h2

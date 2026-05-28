@@ -246,8 +246,7 @@ theorem khipuReceipt_checksum_invariant
             rw [hi_eq]; exact hj
           simp only [Option.map_some, ite_true]
           -- Goal: some (pendantValue (bumpDecisionAt ...)) = some (pendantValue ... + δ)
-          congr 1
-          exact pendantValue_bump r.organs[n] j δ hjlt
+          exact congrArg some (pendantValue_bump r.organs[n] j δ hjlt)
         · simp [hn]
       · -- n is out of range; both sides are none
         have ho : r.organs[n]? = none := List.getElem?_eq_none (Nat.not_lt.mp hn_range)
