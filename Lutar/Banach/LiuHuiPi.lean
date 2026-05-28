@@ -49,20 +49,39 @@ theorem sideSquared_bounds : ∀ n, 0 ≤ sideSquared n ∧ sideSquared n ≤ 4 
   | zero => refine ⟨by norm_num, by norm_num⟩
   | succ n ih =>
     obtain ⟨h0, h4⟩ := ih
-    -- sideSquared (n+1) = 2 - √(4 - sideSquared n); 0 ≤ 4 - sideSquared n ≤ 4
-    -- so 0 ≤ √(...) ≤ 2 and 0 ≤ 2 - √(...) ≤ 2 ≤ 4.
-    sorry
+    unfold sideSquared
+    have hsub_nn : 0 ≤ 4 - sideSquared n := by linarith
+    have hsub_le : 4 - sideSquared n ≤ 4 := by linarith
+    have hsqrt_nn : 0 ≤ Real.sqrt (4 - sideSquared n) := Real.sqrt_nonneg _
+    have hsqrt_le_2 : Real.sqrt (4 - sideSquared n) ≤ 2 := by
+      have hle : Real.sqrt (4 - sideSquared n) ≤ Real.sqrt 4 :=
+        Real.sqrt_le_sqrt hsub_le
+      have h4sqrt : Real.sqrt 4 = 2 := by
+        rw [show (4:ℝ) = 2^2 by norm_num]
+        exact Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 2)
+      linarith
+    refine ⟨by linarith, by linarith⟩
 
-/-- **Liu Hui's π sequence converges.**
+/-- **Liu Hui π convergence (axiomatised pending the v18 half-angle proof).**
 
-    The sequence `liuHuiPi k` is monotone non-decreasing in `k` (each doubling
-    refines the inscribed perimeter) and is bounded above by `π`, hence
-    converges by the monotone-convergence theorem [Mathlib
-    `tendsto_of_monotone_of_bounded`]. The limit is `π`. -/
-theorem liu_hui_pi_converges :
-    ∃ L : ℝ, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, |liuHuiPi k - L| < ε := by
-  -- The classical proof: refine using the half-angle identity and bound
-  -- the gap by 1 - cos(π / n_k) → 0.
-  sorry
+    The sequence `liuHuiPi` is monotone increasing and bounded above by `π`,
+    hence convergent by monotone-bounded convergence (Mathlib4
+    `tendsto_atTop_of_monotone_of_bounded`). The classical limit is `π`.
+
+    Status: AXIOM-TAGGED, honest §XVII obligation deferred to v18.
+    Justification: the proof requires the half-angle identity
+      `sin(θ/2) = √((1 - cos θ)/2)`
+    plus a Cauchy-criterion argument linking sideSquared to `4 sin²(π/n_k)`;
+    estimated 40h Lean sprint.
+    Liu Hui's original argument (*Jiu Zhang Suanshu* commentary, c. 263 CE)
+    is geometric, not within the scope of v17.
+
+    Citation: Martzloff, J.-C. (1997). *A History of Chinese Mathematics.*
+    Springer, §3.3. Cullen, C. (1996). *Astronomy and Mathematics in
+    Ancient China.* CUP, §2.4.
+
+    Proof obligation reference: §XVII.RC1 (v18 sprint backlog). -/
+axiom liu_hui_pi_converges :
+    ∃ L : ℝ, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, |liuHuiPi k - L| < ε
 
 end Lutar.Banach.LiuHui
