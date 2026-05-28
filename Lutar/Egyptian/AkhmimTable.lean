@@ -36,8 +36,6 @@ import Mathlib.Tactic.NormNum
 
 namespace Lutar.Egyptian
 
-open BigOperators
-
 /-- Unit-fraction decomposition: a list of positive denominators whose
     reciprocals are claimed to sum to a target rational. -/
 structure UFDecomp where

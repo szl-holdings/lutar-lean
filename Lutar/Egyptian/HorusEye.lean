@@ -19,6 +19,7 @@ v16 ancient-foundations graft R1-G2.
 import Mathlib.Data.Rat.Defs
 import Mathlib.Algebra.BigOperators.Group.List
 import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.FieldSimp
 
 namespace Lutar.Egyptian.HorusEye
 
