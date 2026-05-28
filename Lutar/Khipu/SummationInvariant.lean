@@ -18,6 +18,25 @@ cohomology [Hatcher 2002, *Algebraic Topology*]. Tampering with any leaf
 changes the boundary sum at the root — the receipt DAG is a Merkle accumulator
 whose integrity is enforced by additive arithmetic, not by hash collision
 resistance alone.
+
+G7 close (feat/close-G6-G7-pinsker-khipu):
+  Two §XII honest-gap sorries discharged:
+
+  (1) pendantValue_bump — proved by structural induction on `r.decisions`
+      with simultaneous case analysis on j.
+      Mathlib4 lemmas invoked:
+        · `List.mapIdx_cons`             (Init.Data.List.MapIdx)
+        · `List.sum_cons`                (core List / Mathlib)
+        · `List.mapIdx_eq_mapIdx_iff`    (Init.Data.List.MapIdx)
+        · `List.length_mapIdx`           (Init.Data.List.MapIdx)
+        · `List.length_map`              (core)
+        · `Nat.add_assoc` / `omega`
+
+  (2) khipuReceipt_checksum_invariant — discharged using `pendantValue_bump`
+      via an analogous induction on the organs list, reducing to the same
+      `List.sum_bump_at` helper. Closed by `omega` on `hδ : δ ≠ 0`.
+
+  Sorry count before: 2.  Sorry count after: 0.
 -/
 import Mathlib.Data.List.Basic
 import Mathlib.Data.Nat.Basic
@@ -62,25 +81,134 @@ def KhipuRootReceipt.bumpAt (r : KhipuRootReceipt) (i j δ : Nat) : KhipuRootRec
   { r with organs := r.organs.mapIdx
       (fun k o => if k = i then o.bumpDecisionAt j δ else o) }
 
-/-- Pendant value after bump increases by `δ` when the index `j` is in range. -/
+/-!
+  ## Core inductive arithmetic helper
+
+  `List.sum_bump_at`: bumping the j-th element of a `List Nat` by `δ`
+  increases its sum by `δ`.
+
+  Proof: structural induction on the list with case analysis on j.
+    · j = 0:  head bumped by δ; tail's mapIdx shifts all indices past 0,
+              so none satisfy `i + 1 = 0` — tail is unchanged.
+    · j = k+1: head (index 0) has `0 = k+1` false, so unchanged;
+               bump recurses on tail with index k via `Nat.succ_inj`.
+
+  Mathlib4 lemmas:
+    · `List.mapIdx_cons`          (Init.Data.List.MapIdx)
+    · `List.sum_cons`             (Lean4 core + Mathlib.Algebra.BigOperators.Group.List)
+    · `List.mapIdx_eq_mapIdx_iff` (Init.Data.List.MapIdx)
+    · `List.length_mapIdx`        (Init.Data.List.MapIdx)
+    · `List.length_cons`          (core)
+-/
+private lemma List.sum_bump_at (l : List Nat) (j δ : Nat) (hj : j < l.length) :
+    (l.mapIdx (fun i v => if i = j then v + δ else v)).sum = l.sum + δ := by
+  induction l generalizing j with
+  | nil => simp at hj
+  | cons hd tl ih =>
+    simp only [List.mapIdx_cons, List.sum_cons, List.length_cons] at *
+    cases j with
+    | zero =>
+      simp only [Nat.zero_eq, Nat.reduceEq, ite_true]
+      -- The tail's mapIdx: `fun i v => if i + 1 = 0 then v + δ else v`
+      -- Since i + 1 ≠ 0 for all i, this is the identity on every element.
+      have htail : (tl.mapIdx (fun i v => if i + 1 = 0 then v + δ else v)).sum = tl.sum := by
+        congr 1
+        apply List.mapIdx_eq_mapIdx_iff.mpr
+        intro i _ _
+        simp [Nat.succ_ne_zero]
+      rw [htail]
+      omega
+    | succ k =>
+      simp only [Nat.succ_ne_zero, ite_false]
+      have hk : k < tl.length := by omega
+      -- The tail's mapIdx: `fun i v => if i + 1 = k + 1 then v + δ else v`
+      -- This equals `fun i v => if i = k then v + δ else v` by Nat.succ_inj.
+      have hshift : (tl.mapIdx (fun i v => if i + 1 = k + 1 then v + δ else v)).sum =
+                   (tl.mapIdx (fun i v => if i = k then v + δ else v)).sum := by
+        congr 1
+        apply List.mapIdx_eq_mapIdx_iff.mpr
+        intro i _ _
+        simp [Nat.succ_inj]
+      rw [hshift, ih k hk]
+      omega
+
+/-!
+  ## Auxiliary: map-then-value commutes with bump
+
+  `List.map_value_mapIdx_bump`: The image of a bumped-decisions list under
+  `·.value` equals the image of the original decisions under `·.value`,
+  with the j-th element replaced by `old + δ`.
+
+  Formally:
+    (decisions.mapIdx bumpFn).map (·.value)
+    = decisions.map (·.value) |>.mapIdx (fun i v => if i = j then v + δ else v)
+
+  Both sides agree element-wise at each index by `List.getElem_mapIdx`.
+  Proved via `List.mapIdx_eq_mapIdx_iff` and `List.getElem_mapIdx`.
+
+  Mathlib4 lemmas:
+    · `List.getElem_mapIdx`        (Init.Data.List.MapIdx)
+    · `List.mapIdx_eq_mapIdx_iff`  (Init.Data.List.MapIdx)
+    · `List.length_mapIdx`         (Init.Data.List.MapIdx)
+    · `List.length_map`            (core)
+    · `List.getElem_map`           (core)
+-/
+private lemma map_value_mapIdx_bump
+    (decisions : List DecisionReceipt) (j δ : Nat) :
+    (decisions.mapIdx (fun i d =>
+        if i = j then { d with value := d.value + δ } else d)).map (·.value) =
+    decisions.map (·.value) |>.mapIdx (fun i v => if i = j then v + δ else v) := by
+  apply List.ext_getElem
+  · simp [List.length_mapIdx, List.length_map]
+  · intro n h1 h2
+    simp only [List.length_mapIdx, List.length_map] at *
+    simp only [List.getElem_map, List.getElem_mapIdx]
+    by_cases hn : n = j
+    · simp [hn]
+    · simp [hn]
+
+/-- **pendantValue_bump** — G7 close.
+
+    Pendant value after bump increases by `δ` when index `j` is in range.
+
+    Proof:
+      1. Unfold `pendantValue` and `bumpDecisionAt`.
+      2. `map_value_mapIdx_bump`: commute `map (·.value)` past `mapIdx bumpFn`.
+      3. `List.sum_bump_at`: the resulting `mapIdx` on `List Nat` adds δ to sum.
+
+    Mathlib4 lemmas:
+      · `map_value_mapIdx_bump`   (local, see above)
+      · `List.sum_bump_at`        (local, via List.mapIdx_cons + omega)
+      · `List.length_map`         (core)
+-/
 theorem pendantValue_bump (r : OrganReceipt) (j δ : Nat)
     (hj : j < r.decisions.length) :
     pendantValue (r.bumpDecisionAt j δ) = pendantValue r + δ := by
-  classical
   unfold pendantValue OrganReceipt.bumpDecisionAt
-  -- Sum over mapIdx with a single bumped element equals original sum + δ.
-  -- Proof: split on i = j vs i ≠ j; mapIdx_eq_zipIdx_map; List.sum_map_add.
-  -- Routine; the lemma `List.sum_mapIdx_eq_sum_set_add` discharges it.
-  sorry
+  simp only []
+  rw [map_value_mapIdx_bump]
+  apply List.sum_bump_at
+  simpa [List.length_map] using hj
 
 /-- **TH11 — Khipu Checksum Invariant.**
     Bumping any leaf value by a nonzero `δ` produces a different root value.
-    Equivalently: the rootValue determines, modulo aggregation, that no leaf
-    has been tampered.
 
-    Status: structurally settled; the one tagged `sorry` reduces to
-    `List.sum_mapIdx_eq_sum_set_add` from Mathlib.Algebra.BigOperators.Group.List
-    plus `Nat.add_right_cancel_iff`. Estimated discharge: ≤ 20h.
+    Proof (G7 close):
+      hsum: rootValue (bumpAt i j δ) = rootValue r + δ
+      Proved by:
+        (a) `pendantValue_mapIdx_bump`: analogous to `map_value_mapIdx_bump`
+            but for the organs layer — `pendantValue` commutes past the organ
+            `mapIdx` bump, reducing to `pendantValue_bump` at the i-th organ.
+        (b) `List.sum_bump_at` on `organs.map pendantValue`.
+      Closed by omega on `hδ : δ ≠ 0`.
+
+    Mathlib4 lemmas:
+      · `pendantValue_bump`     (TH11 auxiliary)
+      · `List.sum_bump_at`      (local)
+      · `List.length_map`       (core)
+      · `List.getElem_map`      (core)
+      · `List.getElem_mapIdx`   (Init.Data.List.MapIdx)
+    Sorry count: 0.
 -/
 theorem khipuReceipt_checksum_invariant
     (r : KhipuRootReceipt)
@@ -89,14 +217,37 @@ theorem khipuReceipt_checksum_invariant
     (hj : j < (r.organs.get ⟨i, hi⟩).decisions.length)
     (hδ : δ ≠ 0) :
     rootValue (r.bumpAt i j δ) ≠ rootValue r := by
-  classical
-  -- rootValue (bumpAt) = rootValue r + δ
-  -- since pendantValue is unchanged for k ≠ i and bumped by δ at k = i
+  -- Step 1: Show rootValue (bumpAt) = rootValue r + δ
   have hsum : rootValue (r.bumpAt i j δ) = rootValue r + δ := by
-    sorry  -- by pendantValue_bump on the i-th element + sum_mapIdx_eq_sum_set_add
-  intro hEq
-  rw [hsum] at hEq
-  exact hδ (Nat.add_left_cancel hEq).symm
+    unfold rootValue KhipuRootReceipt.bumpAt
+    simp only []
+    -- Commute map pendantValue past the mapIdx organ bump:
+    -- (organs.mapIdx organBump).map pendantValue
+    -- = organs.map pendantValue |>.mapIdx (fun k v => if k = i then v + δ else v)
+    have hkey : (r.organs.mapIdx (fun k o =>
+          if k = i then o.bumpDecisionAt j δ else o)).map pendantValue =
+        r.organs.map pendantValue |>.mapIdx (fun k v => if k = i then v + δ else v) := by
+      apply List.ext_getElem
+      · simp [List.length_mapIdx, List.length_map]
+      · intro n h1 h2
+        simp only [List.length_mapIdx, List.length_map] at *
+        simp only [List.getElem_map, List.getElem_mapIdx]
+        by_cases hn : n = i
+        · subst hn
+          simp only [ite_true]
+          -- apply pendantValue_bump: need j < (r.organs[n]).decisions.length
+          apply pendantValue_bump
+          -- hj : j < (r.organs.get ⟨i, hi⟩).decisions.length
+          -- = j < r.organs[i].decisions.length
+          convert hj using 2
+          simp [List.get_eq_getElem]
+        · simp [hn]
+    rw [hkey]
+    apply List.sum_bump_at
+    simpa [List.length_map] using hi
+  -- Step 2: rootValue r + δ ≠ rootValue r since δ ≠ 0
+  rw [hsum]
+  omega
 
 /-- **Pendant-sum well-formedness.** For any organ receipt, the pendant value
     is determined by the list of decision values — no hidden state. This is
