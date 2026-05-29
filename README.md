@@ -23,6 +23,16 @@
 > Source for the published thesis is in [`szl-holdings/ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis).
 > Concept DOI (always-latest): [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 
+## On Hugging Face
+
+This repository's live demos, dataset mirror, and org showcase live on the [SZLHOLDINGS Hugging Face org](https://huggingface.co/SZLHOLDINGS):
+
+| Surface | Hugging Face artifact |
+|---------|---------------------|
+| **Live demo** | [lutar-lean-browser](https://huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser) · [lean-proof-playground](https://huggingface.co/spaces/SZLHOLDINGS/lean-proof-playground) |
+| **Source mirror** | [thesis-v18-formal-verification](https://huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification) |
+| **Org showcase** | [SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 22 datasets · 19+ Spaces · 2 models |
+
 ## Primary Theorem
 
 The Lutar Invariant Λ is characterised by four axioms — monotonicity (A1), homogeneity (A2),
@@ -198,11 +208,3 @@ Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine
 
 
 ---
-
-## On Hugging Face
-
-This repository is mirrored and published on the [SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS) Hugging Face organization:
-
-- [huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser](https://huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser) — lutar-lean-browser (375 Lean 4 theorems, interactive browser)
-- [huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification](https://huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification) — thesis-v18-formal-verification (206 pp, DOI 10.5281/zenodo.20434276)
-
