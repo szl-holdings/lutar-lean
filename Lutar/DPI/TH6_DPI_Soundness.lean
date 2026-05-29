@@ -1,3 +1,9 @@
+import Mathlib.Data.Real.Basic
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Tactic
+
 /-!
 # TH6_DPI_Soundness.lean
 ## DPI Soundness — Receipt Chain Entropy Bound
@@ -19,12 +25,6 @@ any stage k satisfies H_k ≤ H₀.
 Cover, T. M., & Thomas, J. A. (2006). *Elements of Information Theory* (2nd ed.).
 Wiley-Interscience. ISBN 978-0-471-24195-9. §2.8, Data Processing Inequality.
 -/
-
-import Mathlib.Data.Real.Basic
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Algebra.BigOperators.Basic
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.Tactic
 
 namespace Lutar.DPI
 

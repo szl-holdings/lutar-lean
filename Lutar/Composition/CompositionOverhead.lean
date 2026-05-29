@@ -1,3 +1,8 @@
+import Mathlib.Data.Nat.Defs
+import Mathlib.Data.List.Basic
+import Mathlib.Algebra.Order.Ring.Defs
+import Mathlib.Tactic
+
 /-!
 # CompositionOverhead.lean
 ## Overhead Bound Theorem for Composed Doctrine-Locked Systems
@@ -14,11 +19,6 @@ computation overhead through composition pipelines.
 For a composition of N systems each with overhead ≤ C, the total overhead
 of the composed pipeline is ≤ N * C.
 -/
-
-import Mathlib.Data.Nat.Defs
-import Mathlib.Data.List.Basic
-import Mathlib.Algebra.Order.Ring.Defs
-import Mathlib.Tactic
 
 namespace Lutar.Composition.Overhead
 

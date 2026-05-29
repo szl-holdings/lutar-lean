@@ -1,3 +1,8 @@
+import Mathlib.Data.Real.Basic
+import Mathlib.Topology.MetricSpace.Basic
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Tactic
+
 /-!
 # AdversarialRobustness.lean
 ## Robustness Preservation Under Adversarial Composition
@@ -20,11 +25,6 @@ of S₁ bounds the input perturbation of S₂), then S₁ ≫ S₂ is (δ, ε₂
 - Madry et al. (2018) "Towards Deep Learning Models Resistant to Adversarial Attacks",
   ICLR 2018. arXiv:1706.06083
 -/
-
-import Mathlib.Data.Real.Basic
-import Mathlib.Topology.MetricSpace.Basic
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.Tactic
 
 namespace Lutar.Composition.Robustness
 
