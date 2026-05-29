@@ -1,12 +1,14 @@
 # lutar-lean
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=00D4FF)](https://www.apache.org/licenses/LICENSE-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
+[![Tests](https://github.com/szl-holdings/lutar-lean/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
 [![SBOM](https://github.com/szl-holdings/lutar-lean/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/sbom.yml)
 [![SLSA 3](https://github.com/szl-holdings/lutar-lean/actions/workflows/slsa.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/slsa.yml)
-[![Lean 4 + Mathlib](https://img.shields.io/badge/Lean_4_%2B_Mathlib-verified-0B1F3A.svg?style=flat-square&logoColor=00D4FF)](https://leanprover-community.github.io/mathlib4_docs/)
 [![DCO](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173)
 
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis governance framework — Λ-gate theorems, audit-fiber invariants, knot-calculus / Feynman-grafts.
