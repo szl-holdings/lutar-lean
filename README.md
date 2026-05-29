@@ -193,3 +193,14 @@ The 13 substrate repos cross-link reciprocally. This footer is maintained by GH 
 - [`vsp-otel`](https://github.com/szl-holdings/vsp-otel) — OpenTelemetry exporter for Λ-axis spans
 
 Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v6 · 11 axioms · 30 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
+
+
+---
+
+## On Hugging Face
+
+This repository is mirrored and published on the [SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS) Hugging Face organization:
+
+- [huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser](https://huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser) — lutar-lean-browser (375 Lean 4 theorems, interactive browser)
+- [huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification](https://huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification) — thesis-v18-formal-verification (206 pp, DOI 10.5281/zenodo.20434276)
+
