@@ -1,3 +1,6 @@
+import Mathlib.Tactic
+import Lutar.Composition.TH1_Composition
+
 /-!
 # R1Tests.lean
 ## Decidable Tests for R1 Composition Theorems
@@ -9,10 +12,6 @@ Five concrete tests that exercise the R1 composition framework via
 decidable evaluation. Each test is a `#check`-able proposition that
 evaluates by kernel reduction alone.
 -/
-
-import Mathlib.Tactic
-import Lutar.Composition.TH1_Composition
-
 namespace Lutar.Composition.Tests
 
 open Lutar.Composition
