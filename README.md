@@ -1,16 +1,16 @@
 # lutar-lean
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=00D4FF)](https://www.apache.org/licenses/LICENSE-2.0)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
+[![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
+[![SBOM](https://github.com/szl-holdings/lutar-lean/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/sbom.yml)
+[![SLSA 3](https://github.com/szl-holdings/lutar-lean/actions/workflows/slsa.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/slsa.yml)
+[![Lean 4 + Mathlib](https://img.shields.io/badge/Lean_4_%2B_Mathlib-verified-0B1F3A.svg?style=flat-square&logoColor=00D4FF)](https://leanprover-community.github.io/mathlib4_docs/)
+[![DCO](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173)
 
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis governance framework — Λ-gate theorems, audit-fiber invariants, knot-calculus / Feynman-grafts.
 
-[![CI (lean)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lean.yml)
-[![CodeQL](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/codeql.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://scorecard.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
-[![DOI v18.0.0](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434308-blue?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434308)
-[![Thesis DOI](https://img.shields.io/badge/thesis%20DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
-[![License](https://img.shields.io/badge/license-Apache%202.0-2DA44E?style=flat-square)](./LICENSE)
-[![Lean toolchain](https://img.shields.io/badge/lean4-v4.13.0-blue?style=flat-square)](https://github.com/leanprover/lean4/releases/tag/v4.13.0)
-[![Mathlib4](https://img.shields.io/badge/mathlib4-v4.13.0-purple?style=flat-square)](https://github.com/leanprover-community/mathlib4)
-[![Doctrine v6](https://img.shields.io/badge/doctrine-v6-01696F?style=flat-square)](https://github.com/szl-holdings/ouroboros-thesis)
 
 
 > **Frontier Capability** — first kernel-verified Λ-axis governance system.  
