@@ -1,3 +1,8 @@
+import Mathlib.Data.Nat.Log
+import Mathlib.Data.Nat.Defs
+import Mathlib.Algebra.Order.Monoid.Defs
+import Mathlib.Tactic
+
 /-!
 # MerkleDAGBuild.lean
 ## Merkle DAG Height Bound — O(N log_B N)
@@ -19,12 +24,6 @@ PhD thesis, Stanford University. (Introduced the Merkle hash tree construction.)
 Also: Merkle, R. C. (1988). "A Digital Signature Based on a Conventional
 Encryption Function". CRYPTO 1987, LNCS 293, pp. 369–378.
 -/
-
-import Mathlib.Data.Nat.Log
-import Mathlib.Data.Nat.Defs
-import Mathlib.Algebra.Order.Monoid.Defs
-import Mathlib.Tactic
-
 namespace Lutar.DPI.Merkle
 
 /-! ## 1. Merkle Node Model -/

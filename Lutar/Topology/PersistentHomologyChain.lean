@@ -1,3 +1,11 @@
+import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.List.Basic
+import Mathlib.Combinatorics.SimpleGraph.Basic
+import Mathlib.Combinatorics.SimpleGraph.Connectivity.Subgraph
+import Mathlib.Combinatorics.SimpleGraph.Walk
+import Mathlib.Tactic
+
 /-!
 # PersistentHomologyChain.lean
 ## H₀ at Λ-threshold: Persistent Homology Component Count
@@ -22,14 +30,6 @@ Edelsbrunner, H., Letscher, D., & Zomorodian, A. (2002).
 *Discrete & Computational Geometry*, 28(4), 511–533.
 DOI: 10.1007/s00454-002-2885-2
 -/
-
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.List.Basic
-import Mathlib.Combinatorics.SimpleGraph.Basic
-import Mathlib.Combinatorics.SimpleGraph.Connectivity
-import Mathlib.Tactic
-
 namespace Lutar.Topology.PH
 
 /-! ## 1. Point Cloud and Distance Model -/

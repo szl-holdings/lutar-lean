@@ -1,3 +1,11 @@
+import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Order.BoundedOrder
+import Mathlib.Logic.Relation
+import Mathlib.Data.Set.Basic
+import Mathlib.Order.Monotone.Basic
+import Mathlib.Tactic
+
 /-!
 # TH1_Composition.lean
 ## Composable Doctrine-Locked Systems — Composition Preserves Doctrine
@@ -18,16 +26,7 @@ is compatible (`S₁.output = S₂.input`), then `S₁ ≫ S₂` is doctrine-loc
 ### References
 - Doctrine v6 specification (internal Lutar canonical document, rev 2024-12)
 - Goguen–Meseguer (1982) "Security Policies and Security Models", IEEE S&P
--#/
-
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Order.BoundedOrder
-import Mathlib.Logic.Relation
-import Mathlib.Data.Set.Basic
-import Mathlib.Order.Monotone.Basic
-import Mathlib.Tactic
-
+-/
 namespace Lutar.Composition
 
 /-! ## 1. Core Type Definitions -/

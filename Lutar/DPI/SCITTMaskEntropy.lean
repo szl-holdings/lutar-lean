@@ -1,3 +1,9 @@
+import Mathlib.Data.Real.Basic
+import Mathlib.Data.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Tactic
+
 /-!
 # SCITTMaskEntropy.lean
 ## SCITT Mask Entropy Bound
@@ -20,13 +26,6 @@ IETF SCITT Working Group. "An Architecture for Trustworthy and Transparent
 Digital Supply Chains". draft-ietf-scitt-architecture (work in progress).
 https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/
 -/
-
-import Mathlib.Data.Real.Basic
-import Mathlib.Data.Finset.Basic
-import Mathlib.Algebra.BigOperators.Basic
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.Tactic
-
 namespace Lutar.DPI.SCITT
 
 /-! ## 1. SCITT Statement Model -/

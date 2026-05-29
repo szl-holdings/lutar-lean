@@ -51,6 +51,7 @@
 -/
 
 import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Fintype.Basic
 
 namespace Lutar.Shannon
 
