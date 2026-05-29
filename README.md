@@ -31,7 +31,7 @@ This repository's live demos, dataset mirror, and org showcase live on the [SZLH
 |---------|---------------------|
 | **Live demo** | [lutar-lean-browser](https://huggingface.co/spaces/SZLHOLDINGS/lutar-lean-browser) · [lean-proof-playground](https://huggingface.co/spaces/SZLHOLDINGS/lean-proof-playground) |
 | **Source mirror** | [thesis-v18-formal-verification](https://huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification) |
-| **Org showcase** | [SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 22 datasets · 19+ Spaces · 2 models |
+| **Org showcase** | [SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 24 datasets · 19+ Spaces · 2 models |
 
 ## Primary Theorem
 
@@ -195,7 +195,7 @@ The 13 substrate repos cross-link reciprocally. This footer is maintained by GH 
 - [`rosie`](https://github.com/szl-holdings/rosie) — CSS-ingress receipt orchestration
 - [`sentra`](https://github.com/szl-holdings/sentra) — Kitaev-surface drift detection on audit fibers
 - [`uds-mesh`](https://github.com/szl-holdings/uds-mesh) — UDS span schemas + governance receipts
-- [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib v4.13.0 kernel proofs (30 GREEN modules)
+- [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib v4.13.0 kernel proofs (32 GREEN modules)
 - [`ouroboros`](https://github.com/szl-holdings/ouroboros) — bounded-recursion runtime
 - [`ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) — DOI-pinned thesis substrate (v3 → v18)
 - [`platform`](https://github.com/szl-holdings/platform) — composing monorepo (76 packages, 1,220 tests)
@@ -204,7 +204,7 @@ The 13 substrate repos cross-link reciprocally. This footer is maintained by GH 
 - [`agi-forecast`](https://github.com/szl-holdings/agi-forecast) — PAC-Bayes + Bekenstein governance-trajectory forecasts
 - [`vsp-otel`](https://github.com/szl-holdings/vsp-otel) — OpenTelemetry exporter for Λ-axis spans
 
-Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v6 · 11 axioms · 30 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
+Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v6 · 11 axioms · 32 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
 
 
 ---
@@ -216,7 +216,7 @@ Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine
 
 Doctrine v6 honest scoping:
 
-- **Not a complete formal verification of the Ouroboros runtime.** The 30 GREEN modules prove specific algebraic and type-theoretic lemmas; they do not constitute an end-to-end mechanised proof of the full system.
+- **Not a complete formal verification of the Ouroboros runtime.** The 32 GREEN modules prove specific algebraic and type-theoretic lemmas; they do not constitute an end-to-end mechanised proof of the full system.
 - **Not a Mathlib contribution (yet).** Lemmas here are SZL-substrate specific; upstreaming is a future goal tracked in the roadmap.
 - **Not executable production code.** Lean 4 proofs are verification artifacts; runtime execution is handled by `ouroboros` (TypeScript/Rust).
 - **Not Sorry-free in all modules.** The GREEN designation means CI passes; `#check` and `sorry` counts are tracked per module in `docs/proof-status.md`.
