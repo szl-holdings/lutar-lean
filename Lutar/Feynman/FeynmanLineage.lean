@@ -159,6 +159,8 @@ def doctrineBanWords : List String :=
 theorem doctrine_compliant :
     ∀ word ∈ doctrineBanWords,
     ∀ step ∈ feynmanToSZLChain,
-    ¬ (word.isPrefixOf step.citation) := by decide
+    ¬ (word.isPrefixOf step.citation) := by
+  -- native_decide: Mathlib v4.13.0 String lists exceed decide kernel budget
+  native_decide
 
 end Lutar.Feynman.Lineage

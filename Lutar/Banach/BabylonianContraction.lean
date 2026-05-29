@@ -145,7 +145,7 @@ theorem T_fixedPoint_sqrt (S : ℝ) (hS : 0 < S) : T S (Real.sqrt S) = Real.sqrt
   have hsq : Real.sqrt S * Real.sqrt S = S := Real.mul_self_sqrt hS.le
   have hsqpos : 0 < Real.sqrt S := Real.sqrt_pos.mpr hS
   have hsqne : Real.sqrt S ≠ 0 := ne_of_gt hsqpos
-  field_simp
-  linarith [hsq]
+  -- In Mathlib v4.13.0 field_simp closes this goal using mul_self_sqrt directly
+  field_simp [Real.mul_self_sqrt hS.le]
 
 end Lutar.Banach.Babylonian

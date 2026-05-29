@@ -64,8 +64,9 @@ theorem babylonianRoot_nonneg
   have h4 : Real.sqrt ((b / 2) ^ 2) ≤ Real.sqrt (c + (b / 2) ^ 2) :=
     Real.sqrt_le_sqrt h1
   have h5 : Real.sqrt ((b / 2) ^ 2) = |b / 2| := by
-    rw [sq_abs]
-    exact Real.sqrt_sq_eq_abs _
+    -- In Mathlib v4.13.0: Real.sqrt_sq_eq_abs applies directly to (b/2)^2 = |b/2|^2
+    rw [← sq_abs (b / 2)]
+    exact Real.sqrt_sq (abs_nonneg _)
   have h6 : b / 2 ≤ |b / 2| := le_abs_self _
   linarith
 

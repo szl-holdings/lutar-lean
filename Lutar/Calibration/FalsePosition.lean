@@ -27,6 +27,8 @@ Runtime counterpart:
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.LinearCombination
 
 namespace Lutar.Calibration
 
@@ -51,9 +53,21 @@ theorem false_position_correct
     have : m * x₂ + c - (m * x₁ + c) = m * (x₂ - x₁) := by ring
     rw [this]
     exact mul_ne_zero hm hdx
-  -- Unfold and discharge.
-  simp only [falsePosition]
-  field_simp
+  -- Unfold falsePosition and the let bindings, then prove by rearranging the division.
+  -- After unfolding: xStar = x₁ + (T - (m*x₁+c)) * (x₂ - x₁) / (m*x₂+c - (m*x₁+c))
+  -- Sufficient to show:
+  --   m * (x₁ + (T-(m*x₁+c))*(x₂-x₁)/(m*x₂+c-(m*x₁+c))) + c = T
+  -- Equivalently (clearing denominator d = m*x₂+c-(m*x₁+c) ≠ 0):
+  --   (m*x₁+c)*d + m*(T-(m*x₁+c))*(x₂-x₁) = T*d
+  -- But d = m*(x₂-x₁), so: (m*x₁+c)*m*(x₂-x₁) + m*(T-(m*x₁+c))*(x₂-x₁) = T*m*(x₂-x₁)
+  -- Factor m*(x₂-x₁): (m*x₁+c + T - (m*x₁+c)) = T. QED by ring.
+  show m * (x₁ + (T - (m * x₁ + c)) * (x₂ - x₁) / (m * x₂ + c - (m * x₁ + c))) + c = T
+  have key : m * x₂ + c - (m * x₁ + c) = m * (x₂ - x₁) := by ring
+  rw [key]
+  -- Now denominator is m * (x₂ - x₁); both factors are nonzero.
+  -- Mathlib v4.13.0: field_simp with both nonzero witnesses, then ring.
+  have hmdx : m * (x₂ - x₁) ≠ 0 := mul_ne_zero hm hdx
+  field_simp [hmdx]
   ring
 
 /-- Identity sanity: target equals `y₁` recovers `x₁`. -/

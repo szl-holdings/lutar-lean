@@ -29,6 +29,37 @@ import Lutar.Transduction.ReceiptInvariant
 -- v16 Feynman grafts (PR #41)
 import Lutar.Feynman.FeynmanLineage
 import Lutar.Feynman.PathIntegralAuditSum
+-- integrity-remediation 2026-05-28: three publicly-claimed theorems + doctrine evolution
+import Lutar.HUKLLA.HaltEligibility
+import Lutar.OVERWATCH.ReadOnly
+import Lutar.DPI.DPIBound
+import Lutar.Doctrine.PublicClaims
+import Lutar.Doctrine.CrossComponentInvariant
+-- phd-math: R1/R2/A15/K10 (45 theorems, 0 sorry, 0 axiom)
+import Lutar.Composition.TH1_Composition
+import Lutar.Composition.CompositionOverhead
+import Lutar.Composition.AdversarialRobustness
+import Lutar.Composition.R1Tests
+import Lutar.DPI.TH6_DPI_Soundness
+import Lutar.DPI.MerkleDAGBuild
+import Lutar.DPI.SCITTMaskEntropy
+import Lutar.Topology.PersistentHomologyChain
+import Lutar.PRNG.K10v2_ReplayRoot
+-- v17 Wheeler delayed-choice graft
+import Lutar.Wheeler.DelayedChoiceClosure
+import Lutar.Shannon.DoctrineEntropy
+-- v17 Quantum-error-correction lineage grafts
+import Lutar.QEC.HammingFoundations
+import Lutar.QEC.ShorReceiptCode
+import Lutar.QEC.CSSBridge
+import Lutar.QEC.KitaevSurface
+import Lutar.Correlator.MatchedFilter
+-- v17 Gleason + Schur modules (§XVII open obligations)
+import Lutar.Lambda.SchurConcave
+import Lutar.Gates.GleasonMod8
+-- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
+import Lutar.GraphLambda
+import Lutar.PositionAware
 
 /-!
 # Lutar — root module
@@ -51,40 +82,3 @@ v16 Feynman additions (PR #41):
 - `Lutar.Feynman.PathIntegralAuditSum` — Z_Λ over audit fiber (4 SORRY_v16_OPEN)
 - `Lutar.Knot.ReidemeisterConjecture` — R1/R2 axiom; R3 proved at flat-segment level
 -/
--- integrity-remediation 2026-05-28: three publicly-claimed theorems + doctrine evolution
-import Lutar.HUKLLA.HaltEligibility
-import Lutar.OVERWATCH.ReadOnly
-import Lutar.DPI.DPIBound
-import Lutar.Doctrine.PublicClaims
-import Lutar.Doctrine.CrossComponentInvariant
--- phd-math: R1/R2/A15/K10 (45 theorems, 0 sorry, 0 axiom)
-import Lutar.Composition.TH1_Composition
-import Lutar.Composition.CompositionOverhead
-import Lutar.Composition.AdversarialRobustness
-import Lutar.Composition.R1Tests
-import Lutar.DPI.TH6_DPI_Soundness
-import Lutar.DPI.MerkleDAGBuild
-import Lutar.DPI.SCITTMaskEntropy
-import Lutar.Topology.PersistentHomologyChain
-import Lutar.PRNG.K10v2_ReplayRoot
-
-
--- v17 Wheeler delayed-choice graft
-import Lutar.Wheeler.DelayedChoiceClosure
-import Lutar.Shannon.DoctrineEntropy
-
--- v17 Quantum-error-correction lineage grafts
-import Lutar.QEC.HammingFoundations
-import Lutar.QEC.ShorReceiptCode
-import Lutar.QEC.CSSBridge
-import Lutar.QEC.KitaevSurface
-
-import Lutar.Correlator.MatchedFilter
-
--- v17 Gleason + Schur modules (§XVII open obligations)
-import Lutar.Lambda.SchurConcave
-import Lutar.Gates.GleasonMod8
-
--- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
-import Lutar.GraphLambda
-import Lutar.PositionAware

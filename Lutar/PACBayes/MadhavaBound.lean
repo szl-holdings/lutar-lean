@@ -27,6 +27,7 @@ Sources:
 -/
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.NormNum
@@ -47,13 +48,10 @@ noncomputable def madhavaRemainderBound (x : ℝ) (N : ℕ) : ℝ :=
 /-- The remainder bound is non-negative for any real `x` and any `N`. -/
 theorem madhavaRemainderBound_nonneg (x : ℝ) (N : ℕ) :
     0 ≤ madhavaRemainderBound x N := by
-  unfold madhavaRemainderBound
-  have hnum : 0 ≤ |x|^(2*N+1) := pow_nonneg (abs_nonneg x) _
-  have hden : 0 < ((2*N+1 : ℕ) : ℝ) := by
-    have : (0 : ℝ) < (2*N+1 : ℕ) := by
-      exact_mod_cast Nat.succ_pos (2*N)
-    exact this
-  exact div_nonneg hnum (le_of_lt hden)
+  simp only [madhavaRemainderBound]
+  apply div_nonneg
+  · exact pow_nonneg (abs_nonneg x) _
+  · positivity
 
 /-- The remainder bound at `x = 0` is exactly zero. -/
 theorem madhavaRemainderBound_at_zero (N : ℕ) :
@@ -69,33 +67,25 @@ theorem madhavaRemainderBound_at_zero (N : ℕ) :
 theorem madhavaRemainderBound_anti
     (x : ℝ) (hx : |x| ≤ 1) (N : ℕ) :
     madhavaRemainderBound x (N+1) ≤ madhavaRemainderBound x N := by
-  unfold madhavaRemainderBound
-  -- numerator: |x|^(2N+3) ≤ |x|^(2N+1) when |x| ≤ 1
-  -- denominator: 2(N+1)+1 = 2N+3 ≥ 2N+1
+  simp only [madhavaRemainderBound]
+  -- After simp only, Lean normalises casts: `↑(2*N+1)` becomes `2 * ↑N + 1`.
+  -- Work in the normalised form throughout.
   have habs_nn : 0 ≤ |x| := abs_nonneg x
   have hnum_le : |x|^(2*(N+1)+1) ≤ |x|^(2*N+1) := by
-    apply pow_le_pow_of_le_one habs_nn hx
-    omega
-  have hden_pos1 : (0 : ℝ) < (2*N+1 : ℕ) := by
-    exact_mod_cast Nat.succ_pos (2*N)
-  have hden_pos2 : (0 : ℝ) < (2*(N+1)+1 : ℕ) := by
-    exact_mod_cast Nat.succ_pos (2*(N+1))
-  have hden_le : ((2*N+1 : ℕ) : ℝ) ≤ ((2*(N+1)+1 : ℕ) : ℝ) := by
-    have : 2*N+1 ≤ 2*(N+1)+1 := by omega
-    exact_mod_cast this
-  -- Combine: a/b' ≤ a/b ≤ c/b   where a' = |x|^(2N+3), a = |x|^(2N+1),
-  --                                    b = 2N+1, b' = 2N+3, with a' ≤ a and b ≤ b'.
-  have step1 : |x|^(2*(N+1)+1) / ((2*(N+1)+1 : ℕ) : ℝ)
-             ≤ |x|^(2*N+1) / ((2*(N+1)+1 : ℕ) : ℝ) := by
-    apply div_le_div_of_nonneg_right hnum_le
-    exact hden_pos2
-  have step2 : |x|^(2*N+1) / ((2*(N+1)+1 : ℕ) : ℝ)
-             ≤ |x|^(2*N+1) / ((2*N+1 : ℕ) : ℝ) := by
-    apply div_le_div_of_nonneg_left
-    · exact pow_nonneg habs_nn _
-    · exact hden_pos1
-    · exact hden_le
-  exact le_trans step1 step2
+    apply pow_le_pow_of_le_one habs_nn hx; omega
+  have hden_pos1 : (0 : ℝ) < 2 * (N : ℝ) + 1 := by positivity
+  have hden_pos2 : (0 : ℝ) < 2 * ((N : ℝ) + 1) + 1 := by positivity
+  have hden_le : 2 * (N : ℝ) + 1 ≤ 2 * ((N : ℝ) + 1) + 1 := by linarith
+  -- Use norm_cast to align goal with the `↑N` form.
+  push_cast
+  -- Now goal: |x|^(2*(N+1)+1) / (2*(N : ℝ)+1+2) ≤ |x|^(2*N+1) / (2*↑N+1)
+  -- (or similar; use calc).
+  calc |x|^(2*(N+1)+1) / (2 * ((N : ℝ) + 1) + 1)
+      ≤ |x|^(2*N+1) / (2 * ((N : ℝ) + 1) + 1) := by
+          exact (div_le_div_right hden_pos2).mpr hnum_le
+    _ ≤ |x|^(2*N+1) / (2 * (N : ℝ) + 1) := by
+          -- Mathlib v4.13.0: div_le_div_of_nonneg_left replaces div_le_div_of_le_left
+          apply div_le_div_of_nonneg_left (pow_nonneg habs_nn _) hden_pos1 hden_le
 
 /-- The **Mādhava–Leibniz alternating-series bound** (generic).
 

@@ -46,7 +46,12 @@ noncomputable def liuHui96Gon : ℝ := liuHuiPi 4
 theorem sideSquared_bounds : ∀ n, 0 ≤ sideSquared n ∧ sideSquared n ≤ 4 := by
   intro n
   induction n with
-  | zero => refine ⟨by norm_num, by norm_num⟩
+  | zero =>
+    constructor
+    · -- 0 ≤ sideSquared 0 = 1
+      unfold sideSquared; norm_num
+    · -- sideSquared 0 = 1 ≤ 4
+      unfold sideSquared; norm_num
   | succ n ih =>
     obtain ⟨h0, h4⟩ := ih
     unfold sideSquared
