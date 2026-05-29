@@ -18,7 +18,7 @@ is compatible (`S₁.output = S₂.input`), then `S₁ ≫ S₂` is doctrine-loc
 ### References
 - Doctrine v6 specification (internal Lutar canonical document, rev 2024-12)
 - Goguen–Meseguer (1982) "Security Policies and Security Models", IEEE S&P
--#/
+-/
 
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
