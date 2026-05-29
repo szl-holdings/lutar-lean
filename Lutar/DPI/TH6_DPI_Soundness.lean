@@ -1,6 +1,6 @@
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Fintype.Basic
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Tactic
 

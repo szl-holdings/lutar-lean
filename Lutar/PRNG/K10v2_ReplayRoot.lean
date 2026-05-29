@@ -1,3 +1,8 @@
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Vector.Basic
+import Mathlib.Data.Bool.Basic
+import Mathlib.Tactic
+
 /-!
 # K10v2_ReplayRoot.lean
 ## Decidable Replay-Root Predicate (K10 v2 + xoshiro256**)
@@ -18,12 +23,6 @@ Blackman, D., & Vigna, S. (2018). "Scrambled Linear Pseudorandom Number Generato
 arXiv:1805.01407. https://arxiv.org/abs/1805.01407
 (Published in *ACM Transactions on Mathematical Software*, 47(4), 2021.)
 -/
-
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.Vector.Basic
-import Mathlib.Data.Bool.Basic
-import Mathlib.Tactic
-
 namespace Lutar.K10.Xoshiro
 
 /-! ## 1. xoshiro256** State Type -/
