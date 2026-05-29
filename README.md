@@ -208,3 +208,15 @@ Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine
 
 
 ---
+
+
+---
+
+## What lutar-lean Is NOT
+
+Doctrine v6 honest scoping:
+
+- **Not a complete formal verification of the Ouroboros runtime.** The 30 GREEN modules prove specific algebraic and type-theoretic lemmas; they do not constitute an end-to-end mechanised proof of the full system.
+- **Not a Mathlib contribution (yet).** Lemmas here are SZL-substrate specific; upstreaming is a future goal tracked in the roadmap.
+- **Not executable production code.** Lean 4 proofs are verification artifacts; runtime execution is handled by `ouroboros` (TypeScript/Rust).
+- **Not Sorry-free in all modules.** The GREEN designation means CI passes; `#check` and `sorry` counts are tracked per module in `docs/proof-status.md`.
