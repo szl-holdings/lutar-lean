@@ -22,6 +22,16 @@ Status: skeleton; monotone-bounded convergence is recorded with a tagged
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Data.Real.Sqrt
 
+/- **Namespace note (PhD audit 2026-05-29):** This file lives under `Lutar.Banach` because
+   Liu Hui's polygon-doubling recurrence `s_{2k}² = 2 - √(4 - s_k²)` is a *contractive iteration*
+   on the interval [0,4]: each step halves the geometric error relative to the circle's arc length.
+   This is the Banach Fixed-Point structure (the fixed point is `s² = 0`, corresponding to the
+   unit-circle inscribed polygon collapsing to a point as k → ∞). The *practical* fixed point
+   under the rescaled limit `liuHuiPi k → π` relates to the contraction sequence.
+   Liu Hui (3rd c. CE) discovered this recurrence geometrically; the Banach framing is a modern
+   formal-verification lens on his original construction. These are distinct mathematical traditions
+   and the namespace label reflects the verification structure, not a claim that Liu Hui knew
+   Banach's theorem (which is 20th century). -/
 namespace Lutar.Banach.LiuHui
 
 open Real
