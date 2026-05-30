@@ -33,7 +33,7 @@ theorem test2_l2_not_le_l1 : ¬ (DoctrineLabel.L2 ≤ DoctrineLabel.L1) := by
 /-- Test 3: DoctrinePredicate L2 L2 holds (threshold = label). -/
 theorem test3_doctrine_predicate_exact :
     DoctrinePredicate DoctrineLabel.L2 DoctrineLabel.L2 := by
-  decide
+  exact trivial
 
 /-! ## Test 4: Composition of two L2-locked systems is L2-locked -/
 
@@ -41,8 +41,8 @@ theorem test3_doctrine_predicate_exact :
 def exampleSystem : LutarSystem DoctrineLabel.L1 where
   inputLabel  := DoctrineLabel.L1
   outputLabel := DoctrineLabel.L2
-  inputOk     := by decide
-  outputOk    := by decide
+  inputOk     := by exact trivial
+  outputOk    := by exact trivial
   noDowngrade := by decide
 
 /-- Test 4: The output of compose inherits the correct labels. -/
@@ -54,8 +54,8 @@ theorem test4_compose_labels :
     let S_id : LutarSystem DoctrineLabel.L1 := {
       inputLabel  := DoctrineLabel.L1
       outputLabel := DoctrineLabel.L1
-      inputOk     := by decide
-      outputOk    := by decide
+      inputOk     := by exact trivial
+      outputOk    := by exact trivial
       noDowngrade := by decide
     }
     let h : Compatible S_id exampleSystem := by decide
@@ -74,15 +74,15 @@ theorem test5_composition_preserves_doctrine_concrete :
     let S_id : LutarSystem th := {
       inputLabel  := DoctrineLabel.L1
       outputLabel := DoctrineLabel.L1
-      inputOk     := by decide
-      outputOk    := by decide
+      inputOk     := by exact trivial
+      outputOk    := by exact trivial
       noDowngrade := by decide
     }
     let S_up : LutarSystem th := {
       inputLabel  := DoctrineLabel.L1
       outputLabel := DoctrineLabel.L2
-      inputOk     := by decide
-      outputOk    := by decide
+      inputOk     := by exact trivial
+      outputOk    := by exact trivial
       noDowngrade := by decide
     }
     let h : Compatible S_id S_up := by decide
@@ -90,8 +90,8 @@ theorem test5_composition_preserves_doctrine_concrete :
     DoctrinePredicate (compose S_id S_up h).outputLabel th ∧
     (compose S_id S_up h).inputLabel ≤ (compose S_id S_up h).outputLabel := by
   refine ⟨?_, ?_, ?_⟩
-  · decide
-  · decide
-  · decide
+  · exact trivial
+  · exact trivial
+  · exact trivial
 
 end Lutar.Composition.Tests

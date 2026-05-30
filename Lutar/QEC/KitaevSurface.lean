@@ -59,14 +59,17 @@ abbrev ErrorBit := Bool
 /-- Parity of a vertex check: XOR of the 4 incident error bits.  An odd
     parity flags a syndrome at this vertex. -/
 def vertexParity (errs : Site → ErrorBit) (v : VertexCheck) : Bool :=
-  errs v.n != errs v.s != errs v.e != errs v.w
+  Bool.xor (Bool.xor (errs v.n) (errs v.s)) (Bool.xor (errs v.e) (errs v.w))
 
 /-- A single-site error at exactly one of the 4 vertices flips parity. -/
 theorem kitaev_single_site_flips_parity_n
-    (v : VertexCheck) :
+    (v : VertexCheck)
+    (hns : v.n ≠ v.s) (hne : v.n ≠ v.e) (hnw : v.n ≠ v.w) :
     vertexParity (fun s => if s = v.n then true else false) v = true := by
-  simp [vertexParity]
-  decide
+  have hsn : v.s ≠ v.n := fun h => hns h.symm
+  have hen : v.e ≠ v.n := fun h => hne h.symm
+  have hwn : v.w ≠ v.n := fun h => hnw h.symm
+  simp [vertexParity, hsn, hen, hwn]
 
 /-- Zero errors yields zero parity (clean lattice). -/
 theorem kitaev_no_errors_zero_parity (v : VertexCheck) :
