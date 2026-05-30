@@ -31,7 +31,7 @@
 
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
-> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 217 declarations, 12 axioms, 5 residual sorries (all tagged with discharge routes).  
+> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 626 declarations, 15 axioms (14 unique), 189 sorries (138 baseline + 51 Putnam).  
 > Doctrine v6 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
@@ -40,19 +40,19 @@
 > **`lake build` is currently failing** on `main` (PRs #98–#102 open with fixes). Merge order: #98 → #99 → #100 → #101 → #102. Do not present the kernel check as passing until these are merged.
 
 > [!NOTE]
-> **5 residual `sorry` placeholders** exist in theorem bodies (not axioms). Each is tagged with a discharge route:
+> **189 `sorry` placeholders** exist (138 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
 > - `Lutar/Uniqueness.lean:120` — CAUCHY_ND (~40h sprint)
 > - `Lutar/TwoWitness.lean:163`
 > - `Lutar/HUKLLA/SBOMProvenance.lean:109`
 > - `Lutar/PACBayes/MadhavaBound.lean:126,145`
 > > >
-> The 12-axiom set is sorry-free. TH10 uniqueness is axiom-structured (not fully machine-checked) — this is disclosed in the thesis.
+> The 15-axiom set (14 unique) is structurally documented. TH10 uniqueness is axiom-structured (not fully machine-checked) — this is disclosed in the thesis.
 
 ---
 
 ## On Hugging Face
 
-[SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 27 Spaces · 31 datasets · 2 models
+[SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 26 Spaces · 29 datasets · 2 models
 
 | Surface | Artifact |
 |---------|----------|
@@ -65,12 +65,12 @@
 
 | Metric | Count | Verify |
 |--------|-------|--------|
-| Lean declarations (theorem/lemma/def) | 217 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
-| Axioms | 12 | `grep -r "^axiom " Lutar/ \| wc -l` |
-| Residual sorries | 5 (baseline) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
-| Putnam tracked sorries | 134 (2/12 Lean-discharged · 10/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
+| Lean declarations (theorem/lemma/def) | 626 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
+| Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
+| Residual sorries | 138 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
+| Putnam tracked sorries | 51 (2/12 Lean-discharged · 49/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
-| HF Spaces (org) | 24 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
+| HF Spaces (org) | 26 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
 
 ---
 
