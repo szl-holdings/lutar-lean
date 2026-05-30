@@ -59,7 +59,7 @@ abbrev ErrorBit := Bool
 /-- Parity of a vertex check: XOR of the 4 incident error bits.  An odd
     parity flags a syndrome at this vertex. -/
 def vertexParity (errs : Site → ErrorBit) (v : VertexCheck) : Bool :=
-  errs v.n != errs v.s != errs v.e != errs v.w
+  Bool.xor (Bool.xor (errs v.n) (errs v.s)) (Bool.xor (errs v.e) (errs v.w))
 
 /-- A single-site error at exactly one of the 4 vertices flips parity. -/
 theorem kitaev_single_site_flips_parity_n

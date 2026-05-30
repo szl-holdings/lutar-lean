@@ -85,7 +85,7 @@ def admissible (s : Span) (r : Receipt) : Prop :=
 /-- Decidable admission (so the runtime can decide). -/
 instance (s : Span) (r : Receipt) : Decidable (admissible s r) := by
   unfold admissible
-  exact And.decidable
+  infer_instance
 
 /-- Audit closure: given a span and a candidate receipt, the *closed label*
     is the receipt's label when admissible, and `Bot` (no doctrine

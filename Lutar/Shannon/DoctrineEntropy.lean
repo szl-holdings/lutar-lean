@@ -66,7 +66,7 @@ inductive DoctrineLabel : Type
 
 /-- The doctrine alphabet has exactly 4 elements. -/
 theorem doctrine_alphabet_size_4 :
-    Fintype.card DoctrineLabel = 4 := by
+    _root_.Fintype.card DoctrineLabel = 4 := by
   decide
 
 /-- Shannon source code: a function from each doctrine label to a 2-bit
@@ -172,7 +172,7 @@ namespace Tests
   example : shannonDecode 4 = none := by decide
   example : shannonDecode 99 = none := by decide
 
-  example : Fintype.card DoctrineLabel = 4 := by decide
+  example : _root_.Fintype.card DoctrineLabel = 4 := by decide
 
   -- Kraft sum = 1 (in the form 4 * 2^0 = 2^2 = 4)
   example : 4 * (2 ^ 0) = 2 ^ 2 := by decide
