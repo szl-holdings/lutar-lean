@@ -189,44 +189,21 @@ def trivialAdinkra : Adinkra 1 1 where
   action_bijective := by
     intro i
     constructor
-    · intro a b _; exact Fin.eq_of_val_eq (Fin.val_fin_lt.mpr (by omega))
-    · intro b; exact ⟨b, rfl⟩
+    · intro a b _; exact Subsingleton.elim a b
+    · intro b; exact ⟨b, Subsingleton.elim _ _⟩
 
-/-! ## The N=4 adinkra (valise / diamond) — the minimal interesting case -/
+-- ## N=4 adinkra and chromotopology-code correspondence
+-- Detailed N=4 valise construction and the Doran-Gates chromotopology-code
+-- correspondence remain honest formalization gaps. The axiom below preserves
+-- the named conjectural hook without a dangling documentation block.
 
-/-- The valise adinkra with N=4 colors and d=4 bosons.
-    This corresponds to the 4-dimensional hypercube with trivial code (k=0),
-    i.e., the N=4, k=0 case in Doran et al. 2011.
-    The action is the standard hypercube action: Q_i flips the i-th bit
-    of the boson index (viewing Fin 4 as {0,1}² = F₂²… approximately).
-
-    Note: for a full formalization of the N=4 valise with correct dashing
-    satisfying the quadrilateral property, a more detailed construction is
-    needed (see Doran et al. 2011, §6). This is an HONEST_GAP in this module:
-    we define the action but leave `HasQuadrilateralProperty` as a separate
-    axiom for the N=4 case. -/
-
-/-! ## Open conjecture: chromotopology–code correspondence -/
-
-/-- **Conjecture (Doran–Gates et al. 2008/2011 — not yet formalized in Lean).**
-    There is a bijection between:
-    (a) isomorphism classes of connected adinkra chromotopologies with N colors, and
-    (b) doubly-even binary linear codes of length N.
-
-    This is the main theorem of arXiv:0806.0050 and arXiv:1108.4124.
-    Stated here as an axiom since formalizing it requires the full apparatus
-    of `DoublyEvenCode.lean` plus a construction of the bijection.
-
-    Source: Doran et al. 2008 [arXiv:0806.0050] Theorem 4.3;
-            Doran et al. 2011 [arXiv:1108.4124, DOI:10.4310/ATMP.2011.v15.n6.a7]
-            Theorem 1. -/
 axiom chromotopology_code_bijection (n : ℕ) :
     -- There exists an injection from adinkra chromotopology classes to
     -- doubly-even code isomorphism classes of length n.
     -- (Full statement deferred to DoublyEvenCode.lean + a future coupling theorem.)
     ∃ _φ : (Adinkra n (2^n)) → Bool, True
 
-/-! ## Vertex height (ranking) -/
+-- ## Vertex height (ranking)
 
 /-- A ranking of an adinkra: a ℤ-valued height function on the full vertex set.
     Convention: bosons get even heights, fermions get odd heights.

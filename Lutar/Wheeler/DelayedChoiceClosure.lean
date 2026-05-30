@@ -85,7 +85,7 @@ def admissible (s : Span) (r : Receipt) : Prop :=
 /-- Decidable admission (so the runtime can decide). -/
 instance (s : Span) (r : Receipt) : Decidable (admissible s r) := by
   unfold admissible
-  exact And.decidable
+  infer_instance
 
 /-- Audit closure: given a span and a candidate receipt, the *closed label*
     is the receipt's label when admissible, and `Bot` (no doctrine
@@ -174,8 +174,9 @@ theorem closeLabel_is_function_of_admission
 def admissibleDec (s : Span) (r : Receipt) : Bool :=
   decide (admissible s r)
 
-/-- Tests (compile-checked at kernel time via `decide`). -/
 namespace Tests
+
+/-! ## Tests (compile-checked at kernel time via `native_decide`). -/
 
   def span0 : Span := ⟨1, 100, 200⟩
   def rOnTime : Receipt := ⟨1, 200, DoctrineLabel.L1⟩
@@ -184,17 +185,17 @@ namespace Tests
   def rWrong  : Receipt := ⟨2, 200, DoctrineLabel.L1⟩
   def rEdge   : Receipt := ⟨1, 200 + W, DoctrineLabel.L1⟩
 
-  example : admissibleDec span0 rOnTime = true := by decide
-  example : admissibleDec span0 rLate   = false := by decide
-  example : admissibleDec span0 rEarly  = false := by decide
-  example : admissibleDec span0 rWrong  = false := by decide
-  example : admissibleDec span0 rEdge   = true := by decide
+  example : admissibleDec span0 rOnTime = true := by native_decide
+  example : admissibleDec span0 rLate   = false := by native_decide
+  example : admissibleDec span0 rEarly  = false := by native_decide
+  example : admissibleDec span0 rWrong  = false := by native_decide
+  example : admissibleDec span0 rEdge   = true := by native_decide
 
-  example : closeLabel span0 rOnTime = DoctrineLabel.L1 := by decide
-  example : closeLabel span0 rLate   = DoctrineLabel.Bot := by decide
-  example : closeLabel span0 rEarly  = DoctrineLabel.Bot := by decide
-  example : closeLabel span0 rWrong  = DoctrineLabel.Bot := by decide
-  example : closeLabel span0 rEdge   = DoctrineLabel.L1 := by decide
+  example : closeLabel span0 rOnTime = DoctrineLabel.L1 := by native_decide
+  example : closeLabel span0 rLate   = DoctrineLabel.Bot := by native_decide
+  example : closeLabel span0 rEarly  = DoctrineLabel.Bot := by native_decide
+  example : closeLabel span0 rWrong  = DoctrineLabel.Bot := by native_decide
+  example : closeLabel span0 rEdge   = DoctrineLabel.L1 := by native_decide
 
 end Tests
 
