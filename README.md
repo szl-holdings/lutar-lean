@@ -11,7 +11,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173)
 
-> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 217 declarations, 12 axioms, 7 residual sorries (all tagged with discharge routes).  
+> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 217 declarations, 12 axioms, 5 residual sorries (all tagged with discharge routes).  
 > Doctrine v6 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
@@ -20,14 +20,12 @@
 > **`lake build` is currently failing** on `main` (PRs #98–#102 open with fixes). Merge order: #98 → #99 → #100 → #101 → #102. Do not present the kernel check as passing until these are merged.
 
 > [!NOTE]
-> **7 residual `sorry` placeholders** exist in theorem bodies (not axioms). Each is tagged with a discharge route:
+> **5 residual `sorry` placeholders** exist in theorem bodies (not axioms). Each is tagged with a discharge route:
 > - `Lutar/Uniqueness.lean:120` — CAUCHY_ND (~40h sprint)
 > - `Lutar/TwoWitness.lean:163`
 > - `Lutar/HUKLLA/SBOMProvenance.lean:109`
 > - `Lutar/PACBayes/MadhavaBound.lean:126,145`
-> - `Lutar/PACBayes.lean:265` — BoundedIntegrability
-> - `Lutar/PACBayes.lean:281` — ChernoffOptimisation
->
+> > >
 > The 12-axiom set is sorry-free. TH10 uniqueness is axiom-structured (not fully machine-checked) — this is disclosed in the thesis.
 
 ---
