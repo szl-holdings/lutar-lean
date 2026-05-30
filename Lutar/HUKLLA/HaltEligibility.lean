@@ -88,6 +88,11 @@ Corresponds to the HUKLLA T10 tripwire: halt authority belongs to HUKLLA.
 The threshold 0.90 matches `A11OY_DOCTRINE_LAMBDA_FLOOR` in
 `a11oy/deploy/manifests/a11oy-deployment.yaml` line 34–35. -/
 def isHaltEligible (t : ExecutionTrace) : Bool :=
+  -- In Lean 4.13.0, `decide (t.lambda_score ≥ LAMBDA_FLOOR)` fails because
+  -- `Real.decidableLE` was removed from Lean core. Use Classical.decRel
+  -- for explicit Decidable synthesis.
+  haveI : Decidable (t.lambda_score ≥ LAMBDA_FLOOR) :=
+    Classical.decRel (· ≥ ·) t.lambda_score LAMBDA_FLOOR
   decide (t.lambda_score ≥ LAMBDA_FLOOR) && t.receipts_closed && t.rho_closure_satisfied
 
 /-! ## Theorem 1 — Monotonicity -/

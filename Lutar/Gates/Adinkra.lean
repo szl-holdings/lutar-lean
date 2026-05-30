@@ -184,13 +184,17 @@ def Adinkra.HasQuadrilateralProperty {n d : ℕ} (A : Adinkra n d) : Prop :=
     The single edge is solid (dashing = 0).
     [Faux–Gates 2004, Fig. 1: the simplest adinkra] -/
 def trivialAdinkra : Adinkra 1 1 where
-  action  := fun _ _ => ⟨0, Nat.lt_of_sub_eq_succ rfl⟩
+  action  := fun _ _ => ⟨0, by omega⟩
   dashing := fun _ _ => 0
   action_bijective := by
     intro i
     constructor
-    · intro a b _; exact Fin.eq_of_val_eq (Fin.val_fin_lt.mpr (by omega))
-    · intro b; exact ⟨b, rfl⟩
+    · -- Injectivity: both a and b : Fin 1 must equal ⟨0, _⟩
+      intro a b _
+      exact Fin.eq_of_val_eq (by omega)
+    · -- Surjectivity: every b : Fin 1 is the image of b itself
+      intro b
+      exact ⟨b, by simp [Fin.ext_iff]⟩
 
 /-! ## The N=4 adinkra (valise / diamond) — the minimal interesting case -/
 
