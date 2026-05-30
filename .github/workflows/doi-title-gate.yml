@@ -29,8 +29,11 @@ jobs:
             echo "::group::Checking zenodo.$id"
 
             # Step 1: Check doi.org resolves (HTTP 200-range)
-            doi_status=$(curl -sS -o /dev/null -w "%{http_code}" \
-              --max-time 15 --location \
+            # -L/--location is REQUIRED: doi.org returns 302 to the Zenodo
+            # record; without following the redirect the check sees 302 and
+            # fails. (CTO C1: concept DOI zenodo.19944926 302-not-followed.)
+            doi_status=$(curl -sSL -o /dev/null -w "%{http_code}" \
+              --max-time 15 \
               "https://doi.org/10.5281/zenodo.$id" 2>&1)
             if [[ "$doi_status" != 2* ]]; then
               echo "::error::DOI-RESOLVE FAILURE: zenodo.$id — doi.org returned HTTP $doi_status (expected 2xx)"
@@ -41,7 +44,7 @@ jobs:
             echo "doi.org status: $doi_status ✓"
 
             # Step 2: Fetch Zenodo API metadata
-            meta=$(curl -sS --max-time 15 --location "https://zenodo.org/api/records/$id")
+            meta=$(curl -sSL --max-time 15 "https://zenodo.org/api/records/$id")
             http_ok=$(echo "$meta" | jq -e '.id' > /dev/null 2>&1 && echo "yes" || echo "no")
             if [ "$http_ok" != "yes" ]; then
               echo "::error::DOI-API FAILURE: zenodo.$id — Zenodo API returned no record"
@@ -74,17 +77,19 @@ jobs:
             fi
 
             # Step 4: Cross-check README version claim vs Zenodo title
-            # Look for lines that reference this DOI and extract claimed version
-            # Exclude "Doctrine v" matches (doctrine version != DOI version)
-            readme_claim=$(grep "$id" README.md \
-              | grep -ivE "doctrine v[0-9]" \
+            # Look for lines that reference this DOI and extract claimed version.
+            # We must only consider PROSE version claims, not version-like
+            # tokens embedded in URLs (e.g. slsa.dev/spec/v1.0), markdown link
+            # targets, badge image syntax, or doctrine references — all of
+            # which previously produced false-positive MISMATCH failures
+            # (Doctrine-v7 badge, SLSA v1.0 URL, "Doctrine v6" prose).
+            doi_lines=$(grep "$id" README.md \
+              | sed -E 's#https?://[^ )]*##g' \
+              | sed -E 's#\([^)]*\)##g' \
+              | sed -E 's#!\[[^]]*\]##g' \
+              | sed -E 's#[Dd]octrine[ _-]?v[0-9]+(\.[0-9]+)*##g')
+            readme_claim=$(echo "$doi_lines" \
               | grep -oE "v[0-9]+(\.[0-9]+)*" | head -1)
-            if [ -z "$readme_claim" ]; then
-              # Fallback: pattern-extract near DOI
-              readme_claim=$(grep -oE "(v[0-9]+(\.[0-9]+)*)[^|]*zenodo\.$id|zenodo\.$id[^|]*(v[0-9]+(\.[0-9]+)*)" README.md \
-                | grep -vE "[Dd]octrine" \
-                | grep -oE "v[0-9]+(\.[0-9]+)*" | head -1)
-            fi
 
             if [ -n "$readme_claim" ] && [ -n "$tver" ]; then
               if [ "$readme_claim" != "$tver" ]; then
