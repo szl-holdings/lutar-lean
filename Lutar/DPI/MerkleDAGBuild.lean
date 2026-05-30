@@ -129,6 +129,6 @@ theorem complete_tree_node_count_formula
     (B h : ℕ) (hB : 2 ≤ B) :
     -- Geometric series bound: nodeCount ≤ (B^(h+1) - 1) / (B - 1) ≤ B^(h+1)
     B ^ (h + 1) ≥ 1 := by
-  positivity
+  exact Nat.one_le_pow _ _ (by omega)
 
 end Lutar.DPI.Merkle
