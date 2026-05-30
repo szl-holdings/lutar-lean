@@ -192,7 +192,7 @@ def trivialAdinkra : Adinkra 1 1 where
     · intro a b _; exact Fin.eq_of_val_eq (Fin.val_fin_lt.mpr (by omega))
     · intro b; exact ⟨b, rfl⟩
 
-/-! ## The N=4 adinkra (valise / diamond) — the minimal interesting case -/
+-- ## The N=4 adinkra (valise / diamond) — the minimal interesting case
 
 /-- The valise adinkra with N=4 colors and d=4 bosons.
     This corresponds to the 4-dimensional hypercube with trivial code (k=0),
@@ -206,7 +206,7 @@ def trivialAdinkra : Adinkra 1 1 where
     we define the action but leave `HasQuadrilateralProperty` as a separate
     axiom for the N=4 case. -/
 
-/-! ## Open conjecture: chromotopology–code correspondence -/
+-- ## Open conjecture: chromotopology-code correspondence
 
 /-- **Conjecture (Doran–Gates et al. 2008/2011 — not yet formalized in Lean).**
     There is a bijection between:

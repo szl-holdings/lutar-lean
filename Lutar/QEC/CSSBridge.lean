@@ -57,7 +57,6 @@ theorem css_bridge_consistent
     (c : ClassicalCodeword) :
     consistent (classicalToCSS c) = true := by
   simp [consistent, classicalToCSS]
-  decide
 
 /-- The bridge is injective on classical codewords. -/
 theorem css_bridge_injective

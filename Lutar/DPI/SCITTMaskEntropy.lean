@@ -67,10 +67,10 @@ noncomputable def stmtEntropy {nF nV K : ℕ} (d : StmtDist nF nV K) : ℝ :=
 
 /-! ## 3. Masked Distribution -/
 
-/-- Push a mask through a distribution: statements with the same masked
-    representation are merged (their probabilities are summed). In our
-    model, since we map all masked outputs to a new distribution over K
-    statements, we track the *image* distribution. -/
+-- Push a mask through a distribution: statements with the same masked
+-- representation are merged (their probabilities are summed). In our
+-- model, since we map all masked outputs to a new distribution over K
+-- statements, we track the image distribution.
 
 /-- The masked distribution assigns to each index the same probability
     (masking is a deterministic function of the statement). -/
