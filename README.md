@@ -37,7 +37,7 @@
 
 ## On Hugging Face
 
-[SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 24 Spaces · 26 datasets · 2 models
+[SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 27 Spaces · 31 datasets · 2 models
 
 | Surface | Artifact |
 |---------|----------|
@@ -52,8 +52,8 @@
 |--------|-------|--------|
 | Lean declarations (theorem/lemma/def) | 217 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
 | Axioms | 12 | `grep -r "^axiom " Lutar/ \| wc -l` |
-| Residual sorries | 7 | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
-| Putnam-equivalent score (2026 season) | 8.3% (1/12) | `agi-forecast/putnam_scores/2026.json` |
+| Residual sorries | 5 (baseline) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
+| Putnam tracked sorries | 134 (2/12 Lean-discharged · 10/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
 | HF Spaces (org) | 24 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
 
