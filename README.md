@@ -11,6 +11,9 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/lutar-lean/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/lutar-lean)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173)
 
+
+> **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
+
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 217 declarations, 12 axioms, 5 residual sorries (all tagged with discharge routes).  
 > Doctrine v6 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
