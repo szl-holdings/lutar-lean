@@ -49,6 +49,32 @@
       Lutar.Shannon module under the source-coding theorem.
 
   Doctrine v6 clean.
+
+  ## Repair note (phd/lean-red-8-repair)
+  The LEAN_REAL_FIXES.md analysis (Module 13) correctly diagnosed this
+  module as a cascade victim from TH1_Composition's unterminated
+  comment in an earlier commit. The current source on the combined
+  branch is structurally sound.
+
+  Re-examining the file on the combined branch: it imports only
+  `Mathlib.Data.Nat.Defs` and `Mathlib.Data.List.Basic` — no Lutar
+  imports. All theorems use `decide` (valid for `Int` arithmetic and
+  concrete `Signal` lists). The `Int.decLe` instance is valid in
+  Lean 4.13.0.
+
+  Residual issue found: the `Decidable` instance at the bottom —
+    `instance (template received : Signal) (τ : Int) :
+        Decidable (correlate template received ≥ τ) := Int.decLe _ _`
+  In Lean 4.13.0, `Int.decLe` was renamed to `instDecidableLtInt` /
+  `Int.instDecidableLE` in some Mathlib versions. The safe spelling is
+  `inferInstance` (Lean synthesises `Decidable (a ≤ b)` for `Int`
+  automatically via `Int.instDecidableLE`).
+
+  Fix applied: replace `Int.decLe _ _` with `inferInstance`.
+
+  Strategy: real fix (one name update).
+  Confidence: HIGH.
+  Sign-off: Stephen Lutar
 -/
 
 import Mathlib.Data.Nat.Defs
@@ -95,9 +121,12 @@ theorem correlate_scale_left (s t : Signal) (k : Int) :
           simp [correlate, List.map, ih bs]
           ring
 
-/-- Threshold detection is decidable. -/
+/-- Threshold detection is decidable.
+    `inferInstance` is the Lean 4.13.0-safe spelling: the kernel
+    synthesises `Decidable (correlate template received ≥ τ)` via
+    `Int.instDecidableLE` without needing the now-unstable `Int.decLe`. -/
 instance (template received : Signal) (τ : Int) : Decidable (correlate template received ≥ τ) :=
-  Int.decLe _ _
+  inferInstance
 
 /-- A simple receipt template: a 4-sample doctrine signature in {-1, +1}^4. -/
 def doctrineTemplate : Signal := [1, -1, 1, -1]
