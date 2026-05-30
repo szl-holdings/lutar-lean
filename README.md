@@ -68,9 +68,19 @@
 | Lean declarations (theorem/lemma/def) | 626 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
 | Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
 | Residual sorries | 138 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
-| Putnam tracked sorries | 51 (4/12 Lean-discharged [A1,A5,B4,B6] · 8/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
+| Putnam tracked sorries | 51 — **0/12 fully proved** (see Putnam status below) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
 | HF Spaces (org) | 26 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
+
+### Putnam 2025 status (PhD-verified, 2026-05-30)
+
+- **0/12** problems are fully proved.
+- **2/12** files are sorry-token-free (A1, A3), but both currently state the theorem as `→ True` shells (the problem is not encoded).
+- **A5, B4, B6** carry root-level sorries on the main theorem (not just helper lemmas).
+- **2/12** previously encoded the wrong official answer (P_B6: r=1/2 vs official 1/4; P_A3: Alice vs official Bob); both corrected as of commit `163d77e`.
+- **Build status:** `lake build` currently fails on main; tracked in PRs #98–#102.
+
+Official answers verified against the [86th Putnam official solutions](https://kskedlaya.org/putnam-archive/2025s.pdf) ("B6. The largest such constant is r = 1/4"; "A3. Bob has a winning strategy for all n ≥ 1") and the [MAA Putnam archive](https://maa.org/putnam-competition/).
 
 ---
 
