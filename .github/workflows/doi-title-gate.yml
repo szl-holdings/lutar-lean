@@ -75,11 +75,15 @@ jobs:
 
             # Step 4: Cross-check README version claim vs Zenodo title
             # Look for lines that reference this DOI and extract claimed version
-            readme_claim=$(grep -oE "(v[0-9]+(\.[0-9]+)*)[^|]*zenodo\.$id|zenodo\.$id[^|]*(v[0-9]+(\.[0-9]+)*)" README.md \
+            # Exclude "Doctrine v" matches (doctrine version != DOI version)
+            readme_claim=$(grep "$id" README.md \
+              | grep -ivE "doctrine v[0-9]" \
               | grep -oE "v[0-9]+(\.[0-9]+)*" | head -1)
             if [ -z "$readme_claim" ]; then
-              # Try badge-style: DOI vNN ... zenodo.NNNN
-              readme_claim=$(grep "$id" README.md | grep -oE "v[0-9]+(\.[0-9]+)*" | head -1)
+              # Fallback: pattern-extract near DOI
+              readme_claim=$(grep -oE "(v[0-9]+(\.[0-9]+)*)[^|]*zenodo\.$id|zenodo\.$id[^|]*(v[0-9]+(\.[0-9]+)*)" README.md \
+                | grep -vE "[Dd]octrine" \
+                | grep -oE "v[0-9]+(\.[0-9]+)*" | head -1)
             fi
 
             if [ -n "$readme_claim" ] && [ -n "$tver" ]; then
