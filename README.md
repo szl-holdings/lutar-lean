@@ -68,7 +68,7 @@
 | Lean declarations (theorem/lemma/def) | 626 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
 | Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
 | Residual sorries | 138 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
-| Putnam tracked sorries | 51 (2/12 Lean-discharged · 49/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
+| Putnam tracked sorries | 51 (4/12 Lean-discharged [A1,A5,B4,B6] · 8/12 structure) | [agi-forecast](https://github.com/szl-holdings/agi-forecast) |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
 | HF Spaces (org) | 26 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
 
