@@ -84,7 +84,7 @@ def DPI_hypothesis {n m : ℕ} (op : ReceiptOp n m) : Prop :=
 /-! ## 4. DPI Receipt Chain -/
 
 /-- A *DPI receipt chain* is a sequence of receipt operations. -/
-def ReceiptChain (n : ℕ) := List (ReceiptOp n n)
+abbrev ReceiptChain (n : ℕ) := List (ReceiptOp n n)
 
 /-- Apply a chain of receipt operations sequentially. -/
 def applyChain {n : ℕ} (chain : ReceiptChain n) (d : ValidDist n) : ValidDist n :=

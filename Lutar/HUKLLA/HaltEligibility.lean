@@ -87,7 +87,7 @@ def LAMBDA_FLOOR : ℝ := 0.90
 Corresponds to the HUKLLA T10 tripwire: halt authority belongs to HUKLLA.
 The threshold 0.90 matches `A11OY_DOCTRINE_LAMBDA_FLOOR` in
 `a11oy/deploy/manifests/a11oy-deployment.yaml` line 34–35. -/
-def isHaltEligible (t : ExecutionTrace) : Bool :=
+noncomputable def isHaltEligible (t : ExecutionTrace) : Bool :=
   decide (t.lambda_score ≥ LAMBDA_FLOOR) && t.receipts_closed && t.rho_closure_satisfied
 
 /-! ## Theorem 1 — Monotonicity -/
@@ -115,7 +115,7 @@ theorem halt_eligibility_monotone
 /-- **halt_eligibility_decidable.**
 For any execution trace, whether `isHaltEligible t = true` is decidable.
 This follows from `Bool.decEq`. -/
-instance halt_eligibility_decidable (t : ExecutionTrace) :
+noncomputable instance halt_eligibility_decidable (t : ExecutionTrace) :
     Decidable (isHaltEligible t = true) :=
   inferInstance
 
@@ -127,9 +127,7 @@ theorem not_eligible_of_low_score
     (t : ExecutionTrace)
     (h : t.lambda_score < LAMBDA_FLOOR) :
     isHaltEligible t = false := by
-  simp only [isHaltEligible, Bool.and_eq_false_iff]
-  left
-  simp only [decide_eq_false_iff_not, not_le]
-  exact h
+  have hnot : ¬ t.lambda_score ≥ LAMBDA_FLOOR := not_le.mpr h
+  simp [isHaltEligible, hnot]
 
 end Lutar.HUKLLA

@@ -34,6 +34,8 @@ import Mathlib.Data.Vector.Basic
 
 namespace Lutar.QEC.Shor
 
+open Mathlib
+
 /-- A simplified physical receipt: a payload byte plus a lineage tag. -/
 structure PhysicalReceipt where
   payload : UInt8
