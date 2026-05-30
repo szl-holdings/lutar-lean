@@ -67,10 +67,10 @@ noncomputable def stmtEntropy {nF nV K : ℕ} (d : StmtDist nF nV K) : ℝ :=
 
 /-! ## 3. Masked Distribution -/
 
-/-- Push a mask through a distribution: statements with the same masked
-    representation are merged (their probabilities are summed). In our
-    model, since we map all masked outputs to a new distribution over K
-    statements, we track the *image* distribution. -/
+-- Push a mask through a distribution: statements with the same masked
+-- representation are merged (their probabilities are summed). In our
+-- model, since we map all masked outputs to a new distribution over K
+-- statements, we track the image distribution.
 
 /-- The masked distribution assigns to each index the same probability
     (masking is a deterministic function of the statement). -/
@@ -88,10 +88,9 @@ def maskedDist {nF nV K : ℕ} (hn : 0 < nV)
     representative, yielding zero entropy. -/
 theorem full_mask_zero_entropy {nF nV K : ℕ} (hn : 0 < nV) (hK : 0 < K)
     (mask : MaskSpec nF) (d : StmtDist nF nV K)
-    (hfull : ∀ i : Fin nF, mask.redacted i = true)
-    (d' := maskedDist hn mask d) :
+    (hfull : ∀ i : Fin nF, mask.redacted i = true) :
     -- All masked statements are identical, so total probability on any atom ≤ 1
-    stmtEntropy d' ≤ stmtEntropy d := by
+    stmtEntropy (maskedDist hn mask d) ≤ stmtEntropy d := by
   -- The masked distribution has the same probability vector as d
   -- (since we defined maskedDist.prob = d.prob), so entropies are equal.
   unfold stmtEntropy maskedDist
