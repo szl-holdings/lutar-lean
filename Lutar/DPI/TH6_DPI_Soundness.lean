@@ -80,23 +80,35 @@ abbrev ReceiptChain (n : ℕ) := List (ReceiptOp n n)
 def applyChain {n : ℕ} (chain : ReceiptChain n) (d : ValidDist n) : ValidDist n :=
   chain.foldl (fun acc op => applyOp op acc) d
 
-/-! ## 5. DPI Receipt Chain Obligations -/
+/-! ## 5. DPI Receipt Chain Entropy Bound (honest open obligation)
 
-/-- The recursive entropy-bound proof is tracked for a follow-on Mathlib proof
-    pass. The distribution, Markov-kernel, and `DPI_hypothesis` definitions
-    above remain the executable contract consumed by runtime receipts. -/
-def dpi_receipt_chain_entropy_bound_tracked : Prop := True
+The statement below is the *real* DPI receipt-chain entropy bound, no longer a
+`:= True` shell. It says: if every operation in the chain satisfies the
+per-kernel DPI hypothesis (entropy non-increase under that Markov kernel), then
+the entropy of the chain output is bounded by the entropy of the initial input.
 
-theorem dpi_receipt_chain_entropy_bound_obligation_tracked :
-    dpi_receipt_chain_entropy_bound_tracked := by
-  trivial
+This is genuine information theory (Cover-Thomas 2006, Thm 2.8.1) and is **not
+yet machine-checked** — discharging it requires the log-sum / Jensen inequality
+for `t ↦ t log t` via Mathlib `MeasureTheory`/convexity, which is a multi-hour
+proof. We therefore state it honestly and leave a named `sorry` so it is counted
+in the sorry total and can be tracked, rather than asserting a vacuous `True`.
+-/
 
-theorem dpi_chain_stage_bound_obligation_tracked :
-    dpi_receipt_chain_entropy_bound_tracked := by
-  trivial
+/-- **DPI receipt-chain entropy bound.** If every receipt operation in `chain`
+satisfies its per-kernel DPI hypothesis, then applying the whole chain cannot
+increase Shannon entropy: `H(applyChain chain d) ≤ H(d)`.
 
-theorem dpi_chain_max_entropy_bound_obligation_tracked :
-    dpi_receipt_chain_entropy_bound_tracked := by
-  trivial
+Proof route: induction on `chain` (`foldl`), each step discharged by the op's
+`DPI_hypothesis`, transitively chaining the bound. The base entropy-non-increase
+lemma (`H(applyOp op d) ≤ H(d)` from row-stochasticity, i.e. the log-sum
+inequality) is the remaining open piece. -/
+theorem dpi_receipt_chain_entropy_bound {n : ℕ}
+    (chain : ReceiptChain n)
+    (d : ValidDist n)
+    (h_dpi : ∀ op ∈ chain, DPI_hypothesis op) :
+    shannonEntropy (applyChain chain d).prob ≤ shannonEntropy d.prob := by
+  sorry -- TODO: prove receipt-chain entropy bound (Cover-Thomas Thm 2.8.1);
+        -- needs log-sum / Jensen for t ↦ t·log t via Mathlib convexity.
+        -- Tracking: szl-holdings/lutar-lean honesty-shell burndown (TH6 DPI).
 
 end Lutar.DPI

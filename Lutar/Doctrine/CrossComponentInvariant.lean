@@ -106,14 +106,25 @@ theorem doctrine_cross_invariant
 
 /-! ## Converse: composite false implies at least one component fails -/
 
-/-- The refusal-diagnostics converse is tracked separately because the executable
-    gate depends on classical `Real` decidability through HUKLLA. The forward
-    cross-component invariant above is the runtime admission contract. -/
-def doctrine_cross_contrapositive_tracked : Prop := True
+/-- **doctrine_cross_contrapositive.**
+The refusal-diagnostics converse, now a real theorem (no longer a `:= True`
+shell): if the composite governance decision is `false`, then at least one
+component invariant failed — either HUKLLA halt-eligibility or DPI admission.
 
-theorem doctrine_cross_contrapositive_obligation_tracked :
-    doctrine_cross_contrapositive_tracked := by
-  trivial
+This is the admission-controller "deny if any invariant fails" contract stated
+as a Lean theorem. Because `governanceAllow` is a `Bool` conjunction, the
+contrapositive is exactly `Bool.and_eq_false_iff`; no classical `Real`
+decidability is needed (the components are already `Bool`-valued at this layer). -/
+theorem doctrine_cross_contrapositive
+    (trace   : ExecutionTrace)
+    (mode    : OverwatchMode)
+    (op      : Operation)
+    (receipt : Receipt)
+    (capBits : Nat)
+    (h_false : governanceAllow trace mode op receipt capBits = false) :
+    isHaltEligible trace = false ∨ dpiAdmit receipt capBits = false := by
+  unfold governanceAllow at h_false
+  exact Bool.and_eq_false_iff.mp h_false
 
 /-! ## Decidability of composite governance -/
 
