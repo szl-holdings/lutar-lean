@@ -31,7 +31,7 @@
 
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
-> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 752 declarations, 15 axioms (14 unique), 160 sorries (109 baseline + 51 Putnam).  
+> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 749 declarations, 15 axioms (14 unique), 163 sorries (112 baseline + 51 Putnam). Drift-gated via `.github/scripts/check_numbers_drift.py` against `.github/data/lean_numbers.json`.  
 > Doctrine v7 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
@@ -40,7 +40,7 @@
 > **`lake build` builds clean on `main` @ `3de37e5`** (CI Lean-kernel-check run 26694228189, success, 2026-05-30T20:32Z). PRs #98–#102 are merged. The "build failing" caveat is retired.
 
 > [!NOTE]
-> **160 `sorry` placeholders** exist (109 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
+> **163 `sorry` placeholders** exist (112 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
 > - `Lutar/Uniqueness.lean:120` — CAUCHY_ND (~40h sprint)
 > - `Lutar/TwoWitness.lean:163`
 > - `Lutar/HUKLLA/SBOMProvenance.lean:109`
@@ -67,7 +67,7 @@
 
 | Metric | Count | Verify |
 |--------|-------|--------|
-| Lean declarations (theorem/lemma/def) | 752 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
+| Lean declarations (theorem/lemma/def/abbrev/instance/structure/inductive/class) | 749 | `python3 .github/scripts/lean_numbers.py --repo-path .` |
 | Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
 | Residual sorries | 109 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
 | Putnam tracked sorries | 51 — 0/12 fully proved, 12/12 skeletoned. Every `putnam_*_correct` is a `True`-shell (P_A1, P_A3) or carries a tracked `sorry` (A2, A4, A5, A6, B1–B6). | `for f in Lutar/Putnam/P_*.lean; do echo "$f: $(grep -c '\bsorry\b' $f)"; done` |
