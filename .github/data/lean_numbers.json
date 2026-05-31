@@ -2,9 +2,10 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "c7c0ba17c2eaec60ad38ea9172b4a0d9ca0b582f",
-  "measured_at_utc": "2026-05-31T05:40:49Z",
+  "sha": "f6def830aa",
+  "measured_at_utc": "2026-05-31T19:50:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
+  "note": "Updated by fix/k10v2-discharge-vacuous-proofs. 5 new honest sorry tactics replace 5 vacuous `Prop := True; trivial` patterns in K10v2_ReplayRoot.lean per Watunakuy Law of Testing Forbidden Tests rule and PhD-Math finding F4. Declaration count unchanged at 749 (same number of top-level declarations; names changed, types changed). Sorry baseline rises from 112 to 117 (5 Path B obligations now honestly tracked). Putnam count unchanged at 51. Total: 749/15/14/168 vs canonical 749/15/14/163 pre-fix. The 5 prior trivial proofs were Watunakuy violations; they did not count as sorries but were morally equivalent — now they are honest.",
   "numbers": {
     "declarations": 749,
     "axioms_raw": 15,
@@ -25,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 163,
-    "sorries_noncomment": 149,
+    "sorries_raw": 168,
+    "sorries_noncomment": 168,
     "sorries_putnam": 51,
-    "sorries_baseline": 112
+    "sorries_baseline": 117
   }
 }

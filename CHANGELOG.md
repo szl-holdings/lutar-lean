@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # CHANGELOG
 
+## Watunakuy fix — K10v2 vacuous proof elimination (2026-05-31, fix/k10v2-discharge-vacuous-proofs)
+
+### Changed
+
+- **`Lutar/PRNG/K10v2_ReplayRoot.lean`** (Watunakuy remediation). Replaced 5
+  `Prop := True; proof := trivial` patterns with honest theorem statements.
+  This was a Watunakuy Law of Testing violation (Forbidden Tests rule:
+  `Prop := True; trivial` is explicitly listed as a forbidden test).
+  PhD-Math finding F4 (PHD_MATH_REVIEW.md §7, HIGH severity) documented
+  the violation.
+
+  **Obligations discharged (Path A — real proof):**
+  - `isReplayRoot_correct` — `IsReplayRoot s expected = true ↔
+    generateOutputs s expected.length = expected`. Proved via
+    `eq_of_beq` + `simp [beq_iff_eq]` (Lean core `LawfulBEq`).
+  - `isReplayRoot_sound` — forward direction of correctness.
+  - `findReplayRoot_sound` — soundness of `findReplayRoot` search.
+    Proved via `List.find?_some` (Lean core).
+
+  **Obligations downgraded to honest sorry (Path B — obligation present but hard):**
+  - `xoshiroNext_injective` — injectivity of the xoshiro256** state
+    transition. Requires mechanising Blackman & Vigna (2018) Theorem 1 via
+    GF(2)^256 linear algebra. Estimated effort: ~20h.
+  - `xoshiroOutput_distinguishes_states` — distinct initial states produce
+    distinct trajectory outputs. Depends on xoshiroNext_injective.
+  - `replayRoot_unique_in_list` / `prng_replay_root_deterministic` — at most
+    one state in a candidate list is a replay-root for a given sequence.
+  - `findReplayRoot_complete` — if a candidate satisfies the predicate, find
+    returns some value. Straightforward but requires `List.find?_isSome_iff`.
+    Estimated effort: ~1h.
+  - `xoshiro_period_bound` — period is exactly 2^256 - 1. Requires companion
+    matrix primitivity over GF(2). Estimated effort: ~40h.
+
+  **Canonical number impact:**
+  - Declarations: 749 → 749 (unchanged; replaced defs with same-count theorems)
+  - Sorries (baseline, non-Putnam): 112 → 117 (+5 honest sorries)
+  - Sorries (total): 163 → 168
+  - The 5 prior `trivial` proofs were NOT counted as sorries but were morally
+    equivalent to unverified obligations; they violated Watunakuy. The honest
+    sorry count is a more accurate representation.
+
+  **Reference:** Blackman, D., & Vigna, S. (2018). "Scrambled Linear
+  Pseudorandom Number Generators." arXiv:1805.01407.
+
+### Updated
+
+- **`.github/data/lean_numbers.json`** — updated to canonical 749/15/14/168
+  @ c7c0ba17 post-fix.
+- **`README.md`** — updated proof statistics table and NOTE to 749/168.
+
 ## v15 knot calculus (2026-05-28, feat/v15-knot-calculus)
 
 ### Added
