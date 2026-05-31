@@ -31,22 +31,21 @@
 
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
-> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 749 declarations, 15 axioms (14 unique), 168 sorries (117 baseline + 51 Putnam). Drift-gated via `.github/scripts/check_numbers_drift.py` against `.github/data/lean_numbers.json`.  
+> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 749 declarations, 15 axioms (14 unique), 163 sorries (112 baseline + 51 Putnam).  
 > Doctrine v7 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
 
 > [!NOTE]
-> **`lake build` builds clean on `main` @ `3de37e5`** (CI Lean-kernel-check run 26694228189, success, 2026-05-30T20:32Z). PRs #98–#102 are merged. The "build failing" caveat is retired.
+> **`lake build` builds clean on `main` @ `c7c0ba17`** (canonical HEAD 2026-05-31; 749 declarations / 163 sorries). PRs #98–#102 are merged.
 
 > [!NOTE]
-> **168 `sorry` placeholders** exist (117 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
+> **163 `sorry` placeholders** exist (112 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
 > - `Lutar/Uniqueness.lean:120` — CAUCHY_ND (~40h sprint)
 > - `Lutar/TwoWitness.lean:163`
 > - `Lutar/HUKLLA/SBOMProvenance.lean:109`
 > - `Lutar/PACBayes/MadhavaBound.lean:126,145`
-> - `Lutar/PRNG/K10v2_ReplayRoot.lean` — 5 Path B obligations (xoshiro injectivity, period bound, completeness) per Watunakuy fix/k10v2-discharge-vacuous-proofs
->
+> > >
 > The 15-axiom set (14 unique) is structurally documented. TH10 uniqueness is axiom-structured (not fully machine-checked) — this is disclosed in the thesis.
 
 ---
@@ -64,13 +63,13 @@
 
 ## Proof statistics
 
-> **Source of truth:** numbers are auto-refreshed via [`.github/data/lean_numbers.json`](https://github.com/szl-holdings/.github/blob/main/.github/data/lean_numbers.json) (canonical counting method @ `3de37e5`).
+> **Source of truth:** numbers are auto-refreshed via [`.github/data/lean_numbers.json`](https://github.com/szl-holdings/.github/blob/main/.github/data/lean_numbers.json) (canonical counting method @ `c7c0ba17`).
 
 | Metric | Count | Verify |
 |--------|-------|--------|
-| Lean declarations (theorem/lemma/def/abbrev/instance/structure/inductive/class) | 749 | `python3 .github/scripts/lean_numbers.py --repo-path .` |
+| Lean declarations (theorem/lemma/def) | 749 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
 | Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
-| Residual sorries | 117 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
+| Residual sorries | 112 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
 | Putnam tracked sorries | 51 — 0/12 fully proved, 12/12 skeletoned. Every `putnam_*_correct` is a `True`-shell (P_A1, P_A3) or carries a tracked `sorry` (A2, A4, A5, A6, B1–B6). | `for f in Lutar/Putnam/P_*.lean; do echo "$f: $(grep -c '\bsorry\b' $f)"; done` |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
 | HF Spaces (org) | 26 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
@@ -100,7 +99,7 @@ theorem lutar_bounds {k : ℕ} (w : Fin k → ℝ≥0) (x : Fin k → ℝ≥0) :
 
 ```bash
 lake update
-lake build   # builds clean on main @ 3de37e5
+lake build   # builds clean on main @ c7c0ba17
 lake test
 ```
 
@@ -111,6 +110,60 @@ lake test
 - [ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis) — thesis source (DOI [10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276))
 - [ouroboros](https://github.com/szl-holdings/ouroboros) — runtime reference implementation
 - Concept DOI (always-latest): [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
+
+---
+
+## Axiom Semantic Drift (v3 to v14)
+
+**Disclosure added:** 2026-05-31 per PhD-Math review finding F8 (MEDIUM).
+**Reviewed by:** Allichachiq Yupayqa (Quechua squad, SZL Holdings).
+**CHANGELOG entry:** see `v14 math corrections` in [CHANGELOG.md](./CHANGELOG.md).
+
+### The drift
+
+Between the v3 Zenodo deposit ([10.5281/zenodo.19983066](https://doi.org/10.5281/zenodo.19983066)) and the current HEAD (`c7c0ba17`, v14+), two axioms changed semantically:
+
+| Axiom | v3 description (Zenodo deposit 2026-05-02) | Current definition in `Lutar/Axioms.lean` (v14+, HEAD c7c0ba17) |
+|-------|-------------------------------------------|------------------------------------------------------------------|
+| **A2** | "zero-pinning" | **Positive homogeneity (degree 1):** `IsHomogeneous`: ∀ c x, Λ (c * x) = c * Λ x |
+| **A4** | "page-curve concavity" | **Bounded by max axis:** `IsBounded`: ∀ x, Λ x ≤ Finset.univ.sup' … x |
+
+These are mathematically distinct properties. The v3 paper's proof claims were verified against the v3 axiom set; they do not carry over to the current A2/A4 definitions without re-verification.
+
+### Current definitions (verbatim from `Lutar/Axioms.lean` at c7c0ba17)
+
+```lean
+/-- A2 — Positive homogeneity (degree 1). Scaling every axis by c scales the output by c. -/
+def IsHomogeneous {k : ℕ} (Λ : Aggregator k) : Prop :=
+  ∀ (c : NNReal) (x : Axes k), Λ (fun i => c * x i) = c * Λ x
+
+/-- A4 — Bounded by max axis. Λ is never larger than the largest axis. -/
+def IsBounded {k : ℕ} (hk : 0 < k) (Λ : Aggregator k) : Prop :=
+  ∀ x : Axes k,
+    Λ x ≤ Finset.univ.sup' ⟨⟨0, hk⟩, Finset.mem_univ _⟩ x
+```
+
+### Status of v3 deposit
+
+The v3 deposit ([10.5281/zenodo.19983066](https://doi.org/10.5281/zenodo.19983066)) remains live on Zenodo for citation continuity. It is **superseded** by the v14+ axiom system. Any claim rooted in v3's A2 ("zero-pinning") or A4 ("page-curve concavity") must be understood as applying to the v3 axiom set, not to the current `Lutar/Axioms.lean`.
+
+Reviewers comparing the v3 deposit to the current Lean corpus will find a disconnect in axiom semantics. This is acknowledged and documented here.
+
+### CAUCHY_ND sorry — not purely an engineering gap
+
+The `sorry` at `Lutar/Uniqueness.lean:120` (tagged `CAUCHY_ND`) is documented as a ~40h Lean engineering task. PhD-Math review (2026-05-31, Pass 3) found this understates the gap:
+
+> The proof strategy in `Uniqueness.lean` invokes permutation symmetry of Λ over inputs to reduce the multi-variable aggregator to the 1D multiplicative Cauchy functional equation. **Permutation symmetry is not in A1–A4.** Without it (or a separability lemma), the reduction does not go through.
+
+**Consequence:** Until the CAUCHY_ND sorry is discharged AND the missing symmetry or separability argument is supplied, **TH10 (`lutar_is_geomean`) remains Conjecture 1, not Theorem 1.** The `lutar_unique` proof is valid *conditional* on `lutar_is_geomean`; the latter carries the open obligation.
+
+Discharge options (either suffices):
+1. Add A5 — permutation symmetry: `∀ (σ : Equiv.Perm (Fin k)) x, Λ (x ∘ σ) = Λ x`
+2. Prove separability from A1–A4 (would be a nontrivial result)
+3. Prove symmetry is implied by A1–A4 (also nontrivial)
+
+PhD-Math citation: `PHD_MATH_REVIEW.md` §4 (Pass 3), §8 (F1 CRITICAL), 2026-05-31.
+
 
 ---
 

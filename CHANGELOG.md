@@ -7,55 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # CHANGELOG
 
-## Watunakuy fix — K10v2 vacuous proof elimination (2026-05-31, fix/k10v2-discharge-vacuous-proofs)
 
-### Changed
+## v14+ disclosure — axiom drift and CAUCHY_ND gap (2026-05-31, docs/axiom-drift-disclosure-v3-to-v14)
 
-- **`Lutar/PRNG/K10v2_ReplayRoot.lean`** (Watunakuy remediation). Replaced 5
-  `Prop := True; proof := trivial` patterns with honest theorem statements.
-  This was a Watunakuy Law of Testing violation (Forbidden Tests rule:
-  `Prop := True; trivial` is explicitly listed as a forbidden test).
-  PhD-Math finding F4 (PHD_MATH_REVIEW.md §7, HIGH severity) documented
-  the violation.
+**PhD-Math remediation authored by Allichachiq Yupayqa (Quechua squad).**
+**Canonical Lean corpus at this disclosure: 749 declarations / 14 unique axioms / 163 sorries @ c7c0ba17.**
 
-  **Obligations discharged (Path A — real proof):**
-  - `isReplayRoot_correct` — `IsReplayRoot s expected = true ↔
-    generateOutputs s expected.length = expected`. Proved via
-    `eq_of_beq` + `simp [beq_iff_eq]` (Lean core `LawfulBEq`).
-  - `isReplayRoot_sound` — forward direction of correctness.
-  - `findReplayRoot_sound` — soundness of `findReplayRoot` search.
-    Proved via `List.find?_some` (Lean core).
+### Added
 
-  **Obligations downgraded to honest sorry (Path B — obligation present but hard):**
-  - `xoshiroNext_injective` — injectivity of the xoshiro256** state
-    transition. Requires mechanising Blackman & Vigna (2018) Theorem 1 via
-    GF(2)^256 linear algebra. Estimated effort: ~20h.
-  - `xoshiroOutput_distinguishes_states` — distinct initial states produce
-    distinct trajectory outputs. Depends on xoshiroNext_injective.
-  - `replayRoot_unique_in_list` / `prng_replay_root_deterministic` — at most
-    one state in a candidate list is a replay-root for a given sequence.
-  - `findReplayRoot_complete` — if a candidate satisfies the predicate, find
-    returns some value. Straightforward but requires `List.find?_isSome_iff`.
-    Estimated effort: ~1h.
-  - `xoshiro_period_bound` — period is exactly 2^256 - 1. Requires companion
-    matrix primitivity over GF(2). Estimated effort: ~40h.
+- **`README.md` — `## Axiom Semantic Drift (v3 to v14)` section (new).** Discloses that
+  A2 and A4 changed semantically between the v3 Zenodo deposit
+  ([10.5281/zenodo.19983066](https://doi.org/10.5281/zenodo.19983066)) and the current HEAD.
 
-  **Canonical number impact:**
-  - Declarations: 749 → 749 (unchanged; replaced defs with same-count theorems)
-  - Sorries (baseline, non-Putnam): 112 → 117 (+5 honest sorries)
-  - Sorries (total): 163 → 168
-  - The 5 prior `trivial` proofs were NOT counted as sorries but were morally
-    equivalent to unverified obligations; they violated Watunakuy. The honest
-    sorry count is a more accurate representation.
+  - **A2 in v3:** described as "zero-pinning."
+    **A2 at HEAD (c7c0ba17):** `IsHomogeneous` — positive homogeneity (degree 1):
+    `∀ (c : NNReal) (x : Axes k), Λ (fun i => c * x i) = c * Λ x`.
 
-  **Reference:** Blackman, D., & Vigna, S. (2018). "Scrambled Linear
-  Pseudorandom Number Generators." arXiv:1805.01407.
+  - **A4 in v3:** described as "page-curve concavity."
+    **A4 at HEAD (c7c0ba17):** `IsBounded` — bounded by max axis:
+    `∀ x : Axes k, Λ x ≤ Finset.univ.sup' … x`.
 
-### Updated
+  The v3 deposit remains live on Zenodo for citation continuity but is superseded by the
+  current axiom system. Any review comparing v3 claims to the current Lean corpus will
+  find a disconnect in axiom semantics; this section makes that disconnect explicit.
+  Source: PhD-Math review 2026-05-31, Pass 1/5 Finding F8 (MEDIUM).
 
-- **`.github/data/lean_numbers.json`** — updated to canonical 749/15/14/168
-  @ c7c0ba17 post-fix.
-- **`README.md`** — updated proof statistics table and NOTE to 749/168.
+- **`README.md` — CAUCHY_ND gap paragraph (in Axiom Semantic Drift section).** Discloses
+  that the `sorry` at `Lutar/Uniqueness.lean:120` conceals a missing mathematical assumption,
+  not purely a Lean engineering task:
+
+  > The proof strategy invokes permutation symmetry of Λ over inputs, but permutation
+  > symmetry is not stated in A1–A4. Without it (or a separability lemma), the reduction
+  > to the 1D multiplicative Cauchy equation does not go through.
+
+  Consequence: TH10 (`lutar_is_geomean`) is Conjecture 1, not Theorem 1, until either:
+  (a) A5 (permutation symmetry) is added and approved per Doctrine §3, or
+  (b) a separability lemma is proved from A1–A4.
+
+  Discharge options are listed verbatim in `README.md`.
+  Source: PhD-Math review 2026-05-31, Pass 3 (TH10 deep review), Finding F1 (CRITICAL).
+
+- **`README.md` — stale number correction (NEW FINDING, Allichachiq Yupayqa).** README
+  cited 752 declarations / 160 sorries @ `3de37e5`. Corrected to canonical
+  749 / 163 @ `c7c0ba17`. PR #134 (`chore/numbers-baseline-749-163`) covers the
+  `.github/data/lean_numbers.json` file; this commit corrects the README text independently.
+  Note: the README stated `3de37e5` was the canonical SHA, but the canonical HEAD is
+  `c7c0ba17`. This is the same discrepancy PhD-Math F9 flagged.
+
+### Verification
+
+- `lake build`: not run in this environment (Lean toolchain not installed). Changes are
+  documentation-only; no `.lean` files modified.
+- Strike 3 (doctrine-grep): 0 hits on changed files.
+- Strike 4 (CI grep guard): see `scripts/check_axiom_drift.sh` — a grep-based guard
+  that fails if A2/A4 inline definitions in Axioms.lean diverge from README documentation.
+
+### References
+
+- PhD-Math Review 2026-05-31, `PHD_MATH_REVIEW.md`:
+  - §2 (Pass 1), F8 — axiom semantic drift between v3 and v14 (MEDIUM)
+  - §4 (Pass 3), F1 — CAUCHY_ND sorry conceals missing symmetry axiom (CRITICAL)
+- Aczél, J. (1966). *Lectures on Functional Equations and Their Applications.* Academic Press.
+  ISBN 0-12-043750-3. Thm 5.1 — multiplicative Cauchy functional equation.
+- v3 Zenodo deposit: https://doi.org/10.5281/zenodo.19983066
+- Current canonical DOI: https://doi.org/10.5281/zenodo.20434308
+
 
 ## v15 knot calculus (2026-05-28, feat/v15-knot-calculus)
 
