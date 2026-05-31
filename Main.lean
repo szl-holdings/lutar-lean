@@ -12,5 +12,5 @@ def main : IO Unit := do
   IO.println "Lutar — kernel-verified invariant theorems"
   IO.println "Lambda_k formalised for k in {5, 7, 9}"
   IO.println "Axioms: A1 monotone, A2 homogeneous, A3 Egyptian-exact, A4 bounded"
-  IO.println "Theorem 1 (uniqueness): see Lutar/Uniqueness.lean"
+  IO.println "Conjecture 1 (uniqueness, TH10): see Lutar/Uniqueness.lean — CAUCHY_ND sorry at line 120, ~40h discharge obligation"
   IO.println "Theorem 2 (bound): see Lutar/Bound.lean"
