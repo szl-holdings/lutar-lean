@@ -31,16 +31,16 @@
 
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
-> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 626 declarations, 15 axioms (14 unique), 189 sorries (138 baseline + 51 Putnam).  
-> Doctrine v6 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
+> Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 752 declarations, 15 axioms (14 unique), 160 sorries (109 baseline + 51 Putnam).  
+> Doctrine v7 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
 
-> [!WARNING]
-> **`lake build` is currently failing** on `main` (PRs #98–#102 open with fixes). Merge order: #98 → #99 → #100 → #101 → #102. Do not present the kernel check as passing until these are merged.
+> [!NOTE]
+> **`lake build` builds clean on `main` @ `3de37e5`** (CI Lean-kernel-check run 26694228189, success, 2026-05-30T20:32Z). PRs #98–#102 are merged. The "build failing" caveat is retired.
 
 > [!NOTE]
-> **189 `sorry` placeholders** exist (138 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
+> **160 `sorry` placeholders** exist (109 non-Putnam baseline + 51 Putnam). Key baseline items are tagged with discharge routes:
 > - `Lutar/Uniqueness.lean:120` — CAUCHY_ND (~40h sprint)
 > - `Lutar/TwoWitness.lean:163`
 > - `Lutar/HUKLLA/SBOMProvenance.lean:109`
@@ -63,11 +63,13 @@
 
 ## Proof statistics
 
+> **Source of truth:** numbers are auto-refreshed via [`.github/data/lean_numbers.json`](https://github.com/szl-holdings/.github/blob/main/.github/data/lean_numbers.json) (canonical counting method @ `3de37e5`).
+
 | Metric | Count | Verify |
 |--------|-------|--------|
-| Lean declarations (theorem/lemma/def) | 626 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
+| Lean declarations (theorem/lemma/def) | 752 | `grep -r "^theorem\|^lemma\|^def " Lutar/ \| wc -l` |
 | Axioms | 15 (14 unique) | `grep -r "^axiom " Lutar/ \| wc -l` |
-| Residual sorries | 138 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
+| Residual sorries | 109 (baseline, non-Putnam) | `grep -rn "sorry" Lutar/ \| grep -v "-- .*sorry" \| wc -l` |
 | Putnam tracked sorries | 51 — 0/12 fully proved, 12/12 skeletoned. Every `putnam_*_correct` is a `True`-shell (P_A1, P_A3) or carries a tracked `sorry` (A2, A4, A5, A6, B1–B6). | `for f in Lutar/Putnam/P_*.lean; do echo "$f: $(grep -c '\bsorry\b' $f)"; done` |
 | Zenodo DOIs (org) | 7 | [Zenodo community](https://zenodo.org/communities/szl-holdings) |
 | HF Spaces (org) | 26 | [SZLHOLDINGS HF org](https://huggingface.co/SZLHOLDINGS) |
@@ -97,7 +99,7 @@ theorem lutar_bounds {k : ℕ} (w : Fin k → ℝ≥0) (x : Fin k → ℝ≥0) :
 
 ```bash
 lake update
-lake build   # currently failing — see PRs #98-#102
+lake build   # builds clean on main @ 3de37e5
 lake test
 ```
 
@@ -135,4 +137,4 @@ See [SECURITY.md](./SECURITY.md) for responsible-disclosure policy.
 
 This component is part of the SZL Holdings governance substrate. Its mathematical patterns trace to durable, scholarly-documented historical lineages (Rhind Papyrus false position, Inka khipu summation, Liu Hui polygon π, Madhava series remainder bounds, Cauchy–Banach uniqueness). See [docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md](https://github.com/szl-holdings/a11oy/blob/main/docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md) for the full source → pattern → runtime map.
 
-Doctrine v6 boundary: ancient sources inspire verifiable mathematical patterns. No secret-decoding claims. No mystical language.
+Doctrine v7 boundary: ancient sources inspire verifiable mathematical patterns. No secret-decoding claims. No mystical language.
