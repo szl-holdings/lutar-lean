@@ -18,6 +18,20 @@
 </div>
 
 ---
+
+<div align="center">
+
+<!-- genius-hero (Doctrine v11) -->
+<a href="https://szl-holdings.github.io/lutar-lean/"><img src="assets/genius/lean_arch.svg" alt="lutar-lean proof architecture — animated" width="860"></a>
+
+<sub><b><a href="https://szl-holdings.github.io/lutar-lean/">▶ Open the live 3D theorem graph</a></b> — every declaration is a node; edges are proof dependencies.</sub>
+
+<img src="assets/genius/lean_card.svg" alt="749 declarations · 14 unique axioms · 163 sorries" width="860">
+
+<img src="assets/genius/lean_cast.svg" alt="lake build — receipts.in ≡ receipts.out" width="720">
+
+</div>
+
 # lutar-lean — Lean 4 Formal Proofs for the Ouroboros Thesis
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=00D4FF)](https://www.apache.org/licenses/LICENSE-2.0)
