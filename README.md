@@ -2,9 +2,14 @@
 
 # λ lutar-lean
 
+<!-- series-a-badges (Doctrine v11) -->
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-025E8C?style=flat-square&logo=dependabot&logoColor=white)](https://github.com/szl-holdings/lutar-lean/security/dependabot)  
+[![Lake build](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml)
+
+
 **Lean 4 kernel**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276) [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-a6ce39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173) [![Doctrine](https://img.shields.io/badge/Doctrine-v7-7c5cff?style=flat-square)](https://github.com/szl-holdings/.github/blob/main/DOCTRINE_V7.md) [![SLSA](https://img.shields.io/badge/SLSA-L1_honest-22c55e?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276) [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-a6ce39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173) [![Doctrine](https://img.shields.io/badge/Doctrine-v11-3b82f6?style=flat-square)](https://github.com/szl-holdings/.github/blob/main/DOCTRINE_V11.md) [![SLSA](https://img.shields.io/badge/SLSA-L1_honest-22c55e?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
 
 [Hugging Face](https://huggingface.co/SZLHOLDINGS) · [Demo](https://szlholdings-readme.static.hf.space/) · [GitHub Org](https://github.com/szl-holdings)
 
@@ -32,7 +37,7 @@
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 749 declarations, 15 axioms (14 unique), 163 sorries (112 baseline + 51 Putnam).  
-> Doctrine v7 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
+> Doctrine v11 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
 **lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
 
@@ -191,4 +196,4 @@ See [SECURITY.md](./SECURITY.md) for responsible-disclosure policy.
 
 This component is part of the SZL Holdings governance substrate. Its mathematical patterns trace to durable, scholarly-documented historical lineages (Rhind Papyrus false position, Inka khipu summation, Liu Hui polygon π, Madhava series remainder bounds, Cauchy–Banach uniqueness). See [docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md](https://github.com/szl-holdings/a11oy/blob/main/docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md) for the full source → pattern → runtime map.
 
-Doctrine v7 boundary: ancient sources inspire verifiable mathematical patterns. No secret-decoding claims. No mystical language.
+Doctrine v11 boundary: ancient sources inspire verifiable mathematical patterns. No secret-decoding claims. No mystical language.
