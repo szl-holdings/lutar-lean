@@ -129,6 +129,7 @@ lake test
 
 ## Cross-references
 
+- **[ouroboros-thesis v21 — The PURIQ-OS Substrate](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v21)** (release tag [`paper-v21-1.0.0`](https://github.com/szl-holdings/ouroboros-thesis/releases/tag/paper-v21-1.0.0)) — documents 23 agentic formulas, **5 proved in Lean 4 with no `sorry` and no external axioms** (F1, F11, F12, F18, F19; see `PuriqFormulaLean.lean`), 18 tagged `SORRY_PURIQ_OPEN`. The Λ-aggregator is **Conjecture 1 — NOT a theorem**. Version DOI minted by Zenodo on release under Concept DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 - [ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis) — thesis source (DOI [10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276))
 - [ouroboros](https://github.com/szl-holdings/ouroboros) — runtime reference implementation
 - Concept DOI (always-latest): [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
