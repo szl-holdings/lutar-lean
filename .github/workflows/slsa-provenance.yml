@@ -1,7 +1,8 @@
-name: SLSA provenance (L3)
+name: SLSA provenance (L1 honest; L2 via Wire D in-flight; L3 roadmap post-Warhacker)
 
-# Generates SLSA L3 build provenance for release artifacts.
-# Uses slsa-framework/slsa-github-generator — a GitHub-hosted, signed build.
+# Generates SLSA L1 build provenance (honest) for release artifacts.
+# Uses slsa-framework/slsa-github-generator — a GitHub-hosted build.
+# SLSA L1 (honest): source + build provenance documented. L2 via Wire D in-flight; L3 roadmap post-Warhacker (hardened isolated CI required).
 #
 # lutar-lean: Lean 4 theorem-proving library.
 # Artifacts: Lean lake build outputs (compiled .olean files or source tarballs).
