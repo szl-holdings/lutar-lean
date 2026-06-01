@@ -211,3 +211,9 @@ See [SECURITY.md](./SECURITY.md) for responsible-disclosure policy.
 This component is part of the SZL Holdings governance substrate. Its mathematical patterns trace to durable, scholarly-documented historical lineages (Rhind Papyrus false position, Inka khipu summation, Liu Hui polygon π, Madhava series remainder bounds, Cauchy–Banach uniqueness). See [docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md](https://github.com/szl-holdings/a11oy/blob/main/docs/ANCIENT_TEXTS_FORMULA_LINEAGE.md) for the full source → pattern → runtime map.
 
 Doctrine v11 boundary: ancient sources inspire verifiable mathematical patterns. No secret-decoding claims. No mystical language.
+
+## SZL Holdings
+
+![SZL Holdings](./branding/szl-avatar-animated.gif)
+
+*Amaru — the Inca avatar of SZL Holdings. Animated mark (400×400, 16fps loop). Signed Yachay.*
