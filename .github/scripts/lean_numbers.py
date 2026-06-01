@@ -37,6 +37,42 @@ from datetime import datetime, timezone
 
 LUTAR_LEAN_URL = "https://github.com/szl-holdings/lutar-lean.git"
 
+# Experimental scopes that are NOT part of the LOCKED Doctrine v11 baseline
+# (749 declarations / 14 unique axioms / 163 sorries).
+#
+# These directories host additive, experimental work that is explicitly NOT
+# folded into the v11 numbers cited verbatim across 32+ repos, the org README,
+# every /healthz surface, and the published Ouroboros Thesis v20. The proofs in
+# them are real and valuable; they are simply staged for a future planned
+# Doctrine v12 release (see platform/docs/doctrine/v12-roadmap.md) rather than
+# counted against the locked v11 baseline.
+#
+# Path fragments are matched os.sep-bounded against each .lean file path. To
+# graduate a scope into the baseline, remove it here in the SAME PR that bumps
+# .github/data/lean_numbers.json (an explicit, reviewable Doctrine release).
+EXPERIMENTAL_SCOPES = (
+    # PURIQ-OS agentic formula pack (Ouroboros Thesis v21) — 5 PROVED + 18 open.
+    os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
+    # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
+    os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+)
+
+
+def _is_experimental(path: str) -> bool:
+    """True if `path` lives in an experimental scope excluded from the v11 baseline.
+
+    `path` is a repo-relative path (e.g. 'Lutar/Puriq/Formulas/X.lean'). A scope
+    ending in os.sep is a directory prefix; otherwise it is an exact file.
+    """
+    norm = os.path.normpath(path)
+    for scope in EXPERIMENTAL_SCOPES:
+        if scope.endswith(os.sep):
+            if (norm + os.sep).startswith(scope):
+                return True
+        elif norm == os.path.normpath(scope):
+            return True
+    return False
+
 DECL_RE = re.compile(
     r"^(?:private\s+)?(?:noncomputable\s+)?(?:private\s+)?"
     r"(theorem|lemma|def|abbrev|instance|structure|inductive|class)\b"
@@ -51,7 +87,12 @@ def iter_lean_files(root: str):
     for dirpath, _dirs, files in os.walk(base):
         for fn in files:
             if fn.endswith(".lean"):
-                yield os.path.join(dirpath, fn)
+                full = os.path.join(dirpath, fn)
+                rel = os.path.relpath(full, root)
+                # Skip experimental scopes — they do not roll into v11 numbers.
+                if _is_experimental(rel):
+                    continue
+                yield full
     main = os.path.join(root, "Main.lean")
     if os.path.exists(main):
         yield main
