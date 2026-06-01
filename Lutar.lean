@@ -48,6 +48,9 @@ import Lutar.PRNG.K10v2_ReplayRoot
 -- v17 Wheeler delayed-choice graft
 import Lutar.Wheeler.DelayedChoiceClosure
 import Lutar.Shannon.DoctrineEntropy
+-- khipu-consensus-roadmap: BFT 3-of-4 multi-organ signed agreement (additive,
+-- 2 proof-deferred conjectures, 0 new axioms; Doctrine v12 781/14/194 -> 783/14/196)
+import Lutar.KhipuConsensus
 -- v17 Quantum-error-correction lineage grafts
 import Lutar.QEC.HammingFoundations
 import Lutar.QEC.ShorReceiptCode
