@@ -3,10 +3,10 @@ Copyright © 2026 Lutar, Stephen P. (SZL Holdings).
 Released under the Apache-2.0 License.
 ORCID: 0009-0001-0110-4173
 
-# Lutar — Axioms A1..A4
+# Lutar — Axioms A1..A5
 
 The Lutar Invariant Λ_k : (Fin k → ℝ≥0) → ℝ≥0 is the unique scalar
-runtime-trust aggregator that satisfies the four axioms below.
+runtime-trust aggregator that satisfies the five axioms below.
 
 We follow the convention used in `packages/ouroboros-invariant`:
 weights are Egyptian unit fractions (1/k), values are in [0,1].
@@ -19,7 +19,7 @@ this: any aggregator satisfied A3 vacuously.
 
 The fix (V14PF-T1): replace with `A3_normalize`, the equal-weight diagonal
 commitment S1: `∀ c, Λ (fun _ => c) = c`. This constrains Λ to be exactly
-the geometric mean on the diagonal, which (together with A1, A2, A4) forces
+the geometric mean on the diagonal, which (together with A1, A2, A5) forces
 uniqueness via the Cauchy functional equation argument documented in
 `Lutar/Uniqueness.lean`.
 
@@ -31,9 +31,27 @@ import (Invariant.lean already imports Axioms.lean for the type definitions).
 Positivity of `k` is a structural precondition — it cannot be derived from
 the axiom system itself, which is parametric in `k`. It is the standard
 hypothesis required by `Finset.univ.sup'` nonemptiness in A4.
+
+## A5 addition (PhD-Math audit 2026-06-02 / fix/uniqueness-a1-a5-2026-06-02)
+
+A5 (permutation invariance) was MISSING from the original LutarAxioms structure.
+This omission made the uniqueness claim (thm:unique-aggregator / TH10) FALSE:
+the asymmetric geometric mean Φ(x₁,x₂) = x₁^(2/3)·x₂^(1/3) satisfies
+A1–A4 but is not equal to Λ₂ = (x₁·x₂)^(1/2).
+
+A5 is NECESSARY at step 7 of the Aczél 1966 Thm 5.1 proof: without it,
+each axis exponent αᵢ is unconstrained (α₁=2/3, α₂=1/3 in the counterexample).
+With A5, all αᵢ must equal α = 1/k.
+
+References:
+- THESIS_LEAN_RECONCILIATION.md (2026-06-02): full counterexample analysis
+- PHASE3_FINAL_SUMMARY.md (2026-06-02) Gate 6: conjunctiveGateCounterexample
+- Aczél, J. (1966). Lectures on Functional Equations. Academic Press. Thm 5.1.
+- Hardy, G.H., Littlewood, J.E., Pólya, G. (1934). Inequalities. §2.18.
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Data.NNReal.Basic
+import Mathlib.GroupTheory.Perm.Basic
 
 open NNReal Real
 
@@ -60,9 +78,7 @@ The *meaningful* constraint (S1 from Uniqueness.lean §S1): `Λ (fun _ => c) = c
 
 This replaces the tautological `weight_eq : (1:ℚ)/k = (1:ℚ)/k` that was
 present before the V14-C1 integrity fix. The field `A3_normalize` pins Λ
-to the diagonal of the simplex, providing the S1 condition needed to upgrade
-`lutar_unique` from Conjecture to Theorem (see Uniqueness.lean).
--/
+to the diagonal of the simplex. -/
 structure IsEgyptianExact (k : ℕ) (Λ : Aggregator k) : Prop where
   /-- k must be positive for the geometric mean to be well-defined. -/
   k_pos        : 0 < k
@@ -75,12 +91,24 @@ def IsBounded {k : ℕ} (hk : 0 < k) (Λ : Aggregator k) : Prop :=
   ∀ x : Axes k,
     Λ x ≤ Finset.univ.sup' ⟨⟨0, hk⟩, Finset.mem_univ _⟩ x
 
-/-- The four Lutar axioms collected. A3 now carries the meaningful diagonal
-normalization constraint (V14PF-T1 fix; replaces old tautological `weight_eq`). -/
+/-- **A5 — Permutation invariance (2026-06-02 addition; NECESSARY for uniqueness).**
+Reordering the input axes does not change the aggregator output.
+This axiom is required to force all axis exponents αᵢ to be equal in the
+Cauchy functional equation argument (Aczél 1966 Thm 5.1, step 7).
+Without A5, the asymmetric aggregator Φ(x₁,x₂) = x₁^(2/3)·x₂^(1/3)
+satisfies A1–A4 but ≠ Λ₂, falsifying the uniqueness claim. -/
+def IsPermutationInvariant {k : ℕ} (Λ : Aggregator k) : Prop :=
+  ∀ (x : Axes k) (σ : Fin k ≃ Fin k), Λ (x ∘ ↑σ) = Λ x
+
+/-- The five Lutar axioms collected (A1–A5).
+A5 added 2026-06-02: permutation invariance is NECESSARY for uniqueness.
+PR: fix/uniqueness-a1-a5-2026-06-02.
+Doctrine: Λ = Conjecture 1 (Lake CI must verify before theorem claim). -/
 structure LutarAxioms {k : ℕ} (Λ : Aggregator k) : Prop where
   A1 : IsMonotone Λ
   A2 : IsHomogeneous Λ
   A3 : IsEgyptianExact k Λ
   A4 : IsBounded A3.k_pos Λ
+  A5 : IsPermutationInvariant Λ
 
 end Lutar
