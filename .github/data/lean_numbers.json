@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "feat/khipu-consensus-roadmap",
-  "sha": "pending-pr",
-  "measured_at_utc": "2026-06-01T15:30:00Z",
+  "ref": "main",
+  "sha": "RECONCILED_BY_PR151",
+  "measured_at_utc": "2026-06-02T23:55:40Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Updated by feat/khipu-consensus-roadmap. ADDITIVE: new module Lutar/KhipuConsensus.lean formalises the BFT 3-of-4 multi-organ signed agreement (Khipu Consensus). It adds exactly TWO proof-deferred conjectures — `khipu_consensus_safety` (Conjecture 2) and `khipu_consensus_liveness` (Conjecture 3) — the deliberate siblings of the Λ Conjecture (Conjecture 1, which is NEVER a theorem). The decidable counting predicates (validCount/faultyCount/honestCount), the canonicity decision, and three elementary lemmas (validCount_le_n, faultyCount_le_n, isCanonical_iff) are FULLY PROVED with zero deferred tokens. CRITICAL INVARIANT PRESERVED: axioms_unique stays 14 with the IDENTICAL axiom-name set — NO new axioms introduced (canonicalHistory is an `opaque` definition, not an axiom). Monotone bump: sorries_raw 168 -> 170 (the 2 new conjecture obligations). Internal Doctrine v12 LOCKED moves 781/14/194 -> 783/14/196; public Doctrine v11 constant remains 749/14/163. Replay hash unchanged (axiom set + invariants unchanged). No fabrication: the 2 new sorries are the only live `\\bsorry\\b` tokens in the new module (verified by grep -oE).",
+  "note": "Reconciled by genius-math/iter2-khipu-vector-fix (PR #151). The committed baseline (751/15/14/170) was STALE versus current main after sibling feature branches landed new Lean (KhipuConsensus consensus calculus + others). This PR (a) fixes the v4.13.0 `Vector`->`Mathlib.Vector` compile error that made `lake build` fail for the WHOLE library, and (b) rewords a KhipuConsensus docstring whose wrapped line `axiom set ...` was mis-counted by lean_numbers.py as a phantom 15th axiom named `set`. After the fix the measured numbers are 774 declarations / 15 axioms_raw / 14 axioms_unique / 178 sorries_raw, measured directly by .github/scripts/lean_numbers.py against the GREEN `lake build` (run on 151/merge @ 65a1b15). CRITICAL INVARIANT PRESERVED: axioms_unique = 14 with the IDENTICAL canonical doctrine axiom-name set (NO new axioms; the phantom `set` is removed). Published Doctrine v11 public constant 749/14/163 is a separate public surface and is unchanged. No fabrication: numbers copied verbatim from lean_numbers.measured.json of the CI run.",
   "numbers": {
-    "declarations": 751,
+    "declarations": 774,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 170,
-    "sorries_noncomment": 170,
-    "sorries_putnam": 51,
-    "sorries_baseline": 119
+    "sorries_raw": 178,
+    "sorries_noncomment": 162,
+    "sorries_putnam": 56,
+    "sorries_baseline": 122
   }
 }
