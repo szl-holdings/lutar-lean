@@ -43,6 +43,13 @@ import Mathlib.Data.Nat.Defs
 
 namespace Lutar.KhipuConsensus
 
+-- Lean/Mathlib v4.13.0: the fixed-length vector type that used to be the bare
+-- `Vector` now lives in the `List` namespace as `List.Vector` (Lean core later
+-- reserved `Vector` for its own array-backed type). Bring it into scope under
+-- the original name so the protocol definitions below are unchanged. This is a
+-- pure compile fix — it does NOT touch Conjecture 2/3 (both remain `sorry`).
+open List (Vector)
+
 /-- A 32-byte SHA-256 action hash, as a fixed-length byte vector. -/
 abbrev ActionHash := Vector UInt8 32
 
@@ -193,3 +200,4 @@ theorem khipu_consensus_liveness {n : Nat} (c : Consensus n)
   sorry
 
 end Lutar.KhipuConsensus
+
