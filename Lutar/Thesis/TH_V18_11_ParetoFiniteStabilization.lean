@@ -104,8 +104,10 @@ theorem th_v18_11_pareto_stabilizes (seq : Nat → Nat) (N : Nat)
     (hmono : NonDecreasing seq) :
     ∃ T, ∀ t, T ≤ t → seq t = seq T := by
   -- [conjecture, deferred] — see module docstring for 3-paragraph rationale.
-  -- Admitted pending Mathlib.Data.Finset.Lattice (v18.1 discharge path).
-  -- NOT a silent sorry: see OPEN PROBLEM annotation in module header.
-  admit
+  -- OPEN_PROBLEM_TH_V18_11: pending Mathlib.Data.Finset.Lattice (v18.1 discharge path).
+  -- Honest sorry (not admit) — Thesis Researcher 2026-06-02 audit flagged that
+  -- `admit` is structurally identical to `sorry` and so should be marked as such
+  -- under Doctrine v11 honesty rules. Counted in the 163 sorries snapshot.
+  sorry -- OPEN_PROBLEM_TH_V18_11
 
 end Lutar.Thesis.Pareto
