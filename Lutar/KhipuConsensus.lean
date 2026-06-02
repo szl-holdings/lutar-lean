@@ -28,7 +28,11 @@ name set) and adds exactly TWO proof-deferred obligations (two live tracking
 tokens, one per conjecture). The Doctrine count makes a
 *monotone* bump 781/14/194 → 783/14/196 (internal v12 LOCKED); the public v11
 constant 749/14/163 is unchanged, and the replay hash is unchanged because the
-axiom set and invariants are unchanged.
+axiomatic basis and invariants are unchanged.
+
+(Note: the canonical numbers script matches `^axiom <name>` on every line, so
+docstrings must avoid starting a wrapped line with the bare word "axiom"
+followed by an identifier — otherwise it is mis-counted as a declared axiom.)
 
 The decidable counting predicates (`validCount`, `faultyCount`, `honestCount`)
 ARE fully defined and elaborate with no deferred tokens; only the two safety/liveness
