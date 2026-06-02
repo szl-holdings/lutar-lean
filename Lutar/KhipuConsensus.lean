@@ -43,6 +43,8 @@ import Mathlib.Data.Nat.Defs
 
 namespace Lutar.KhipuConsensus
 
+open Mathlib
+
 /-- A 32-byte SHA-256 action hash, as a fixed-length byte vector. -/
 abbrev ActionHash := Vector UInt8 32
 
