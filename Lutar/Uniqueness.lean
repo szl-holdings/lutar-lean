@@ -46,6 +46,8 @@ import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Topology.Order.MonotoneContinuity
 import Mathlib.Topology.Algebra.Order.Intermediate
+import Mathlib.Topology.Algebra.Order.Archimedean  -- Rat.denseRange_cast
+import Mathlib.Topology.Separation                  -- Continuous.ext_on (v4.13.0 path)
 
 namespace Lutar
 
@@ -166,22 +168,23 @@ private theorem monotone_additive_linear
     linarith [key]
   -- Step 6: g is continuous (monotone on ℝ)
   have hg_cont : Continuous g := hg_mono.continuous
-  -- Step 7: Two continuous functions equal on ℚ (dense) are equal
-  -- Both g and (fun t => g 1 * t) are continuous and agree on ℚ.
-  -- Mathlib: `DenseRange.equalizer` or `Continuous.ext_on_dense`
-  -- The dense set is the image of (ℚ : Type) in ℝ (Rat.denseRange_ratCast).
-  sorry
-  -- SORRY: density argument — closing this requires:
-  -- have : ∀ x : ℝ, g x = g 1 * x := by
-  --   apply (hg_cont.funext (continuous_const.mul continuous_id)).symm
-  --   rw [← Rat.denseRange_ratCast.closure_range]
-  --   intro x hx
-  --   obtain ⟨q, rfl⟩ := Set.mem_range.mp hx
-  --   exact hg_rat q
-  -- Mathlib lemma needed: `DenseRange.equalizer_of_continuous_of_dense`
-  -- (or direct application of `Dense.equalizer` from Mathlib.Topology.Basic)
-  -- Status: Mathlib v4.13.0 has the ingredients; the exact form of the call
-  -- needs to be verified against the actual Mathlib API.
+  -- Step 7: Two continuous functions equal on the dense range of ℚ→ℝ are equal.
+  -- g and (fun t => g 1 * t) are both continuous and agree on every rational
+  -- (Step 5, `hg_rat`); the rationals are dense in ℝ (`Rat.denseRange_cast`),
+  -- so by `Continuous.ext_on` the two functions are equal everywhere.
+  -- Mathlib v4.13.0:
+  --   Continuous.ext_on : Dense s → Continuous f → Continuous g → Set.EqOn f g s → f = g
+  --   Rat.denseRange_cast : DenseRange ((↑) : ℚ → ℝ)   [= Dense (Set.range _)]
+  have hgline : Continuous (fun t : ℝ => g 1 * t) :=
+    continuous_const.mul continuous_id
+  have hdense : Dense (Set.range ((↑) : ℚ → ℝ)) := Rat.denseRange_cast
+  have heq : Set.EqOn g (fun t : ℝ => g 1 * t) (Set.range ((↑) : ℚ → ℝ)) := by
+    rintro _ ⟨q, rfl⟩
+    simpa using hg_rat q
+  have hfun : g = (fun t : ℝ => g 1 * t) :=
+    Continuous.ext_on hdense hg_cont hgline heq
+  intro t
+  exact congrFun hfun t
 
 /-! ## Auxiliary: the single-axis slice
 
