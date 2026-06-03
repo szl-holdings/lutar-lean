@@ -1,29 +1,37 @@
-name: Scorecard
-
-# Removed `branch_protection_rule` trigger — that event runs without commit
-# context and causes startup_failure. Schedule + push on main is sufficient
-# for OSSF Scorecard to track supply-chain hygiene over time.
+name: OpenSSF Scorecard supply-chain security
 
 on:
-  schedule:
-    - cron: '17 6 * * 1'
+  branch_protection_rule:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [ main ]
+  schedule:
+    - cron: '30 1 * * 6'  # Weekly Saturday 01:30 UTC
 
-# Explicit empty workflow-level permission grant.
-#
-# Why empty (`{}`) and not omitted: OpenSSF Scorecard's `Token-Permissions`
-# check requires a top-level `permissions:` block to be present, otherwise
-# the score is reduced. The block is empty so jobs declare their own
-# minimal scopes without being clamped.
-permissions: {}
+permissions: read-all
 
 jobs:
-  scorecard:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
       security-events: write
       id-token: write
-      actions: read
-    uses: szl-holdings/.github/.github/workflows/reusable-scorecard.yml@8186471f7f83f43f3aba4015fcfb2d322dcb4c83 # .github@8186471 fix scorecard permissions
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@0864cf19026789058feabb7e87baa5f140aac736 # v2.3.1
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload Scorecard SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
