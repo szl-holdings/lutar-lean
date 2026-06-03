@@ -45,7 +45,7 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Topology.Order.MonotoneContinuity
-import Mathlib.Topology.Algebra.Order.Intermediate
+import Mathlib.Topology.Order.IntermediateValue
 
 namespace Lutar
 
