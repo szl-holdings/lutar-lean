@@ -65,6 +65,13 @@ import Lutar.Gates.GleasonMod8
 import Lutar.GraphLambda
 import Lutar.PositionAware
 import Lutar.LambdaPermInvariant
+-- Round 13 Λ-closure (Cauchy_ND): closable sub-lemmas (sorry-free) + terminal CONDITIONAL
+-- uniqueness theorem (sorry-free) + counterexample fragment. The UNCONDITIONAL uniqueness
+-- carries ONE honest, tagged open obligation (FACTORIZATION_AXIOM_GAP / needs A6 bisymmetry).
+-- Λ stays Conjecture 1; no public claim flipped; axioms_unique stays 14.
+import Lutar.Round13.CauchyND_Closure
+import Lutar.Round13.Lambda_Uniqueness
+
 
 /-!
 # Lutar — root module
@@ -87,9 +94,3 @@ v16 Feynman additions (PR #41):
 - `Lutar.Feynman.PathIntegralAuditSum` — Z_Λ over audit fiber (4 SORRY_v16_OPEN)
 - `Lutar.Knot.ReidemeisterConjecture` — R1/R2 axiom; R3 proved at flat-segment level
 -/
--- Round 13 Λ-closure (Cauchy_ND): closable sub-lemmas (sorry-free) + terminal CONDITIONAL
--- uniqueness theorem (sorry-free) + counterexample fragment. The UNCONDITIONAL uniqueness
--- carries ONE honest, tagged open obligation (FACTORIZATION_AXIOM_GAP / needs A6 bisymmetry).
--- Λ stays Conjecture 1; no public claim flipped; axioms_unique stays 14.
-import Lutar.Round13.CauchyND_Closure
-import Lutar.Round13.Lambda_Uniqueness
