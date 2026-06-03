@@ -80,9 +80,26 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .lake
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
           restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2
+
+
+      - name: Repair Mathlib package git state
+        run: |
+          set -eu
+          if [ -d .lake/packages/mathlib ]; then
+            cd .lake/packages/mathlib
+            # If git index is corrupt OR HEAD missing, blow it away
+            if ! git rev-parse HEAD >/dev/null 2>&1 || ! git status >/dev/null 2>&1; then
+              echo "::warning::Mathlib package corrupt — removing for fresh fetch"
+              cd ../..
+              rm -rf packages/mathlib
+            else
+              echo ".lake/packages/mathlib OK"
+            fi
+          fi
+        shell: bash
 
       - name: Get Mathlib binary cache
         run: lake exe cache get
@@ -94,11 +111,11 @@ jobs:
           lake build
 
       - name: Save Lake build cache
-        if: always()
+        if: success()
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .lake
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
 
       - name: Run check + reference-vectors executables
         run: |
