@@ -2,10 +2,10 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "fix/uniqueness-a1-a5-2026-06-02",
-  "sha": "7f0181203f277056ace27dcdfc666b051f049c24",
-  "measured_at_utc": "2026-06-03T18:30:00Z",
+  "sha": "9a1df32fbaa37529804cda065b391bd13c501fbf",
+  "measured_at_utc": "2026-06-03T19:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "DRIFT-GATE baseline update for PR #148 (fix/uniqueness-a1-a5-2026-06-02). A5 (permutation invariance) added to LutarAxioms as a STRUCTURE FIELD (NOT a Lean `axiom`); lambda_perm_invariant is SORRY-FREE via Equiv.prod_comp (Mathlib v4.13.0). axioms_unique = 14, IDENTICAL 14-name set \u2014 NO new/removed Lean axiom. LIVE-corpus drift vs prior baseline (a9f267f1, 787/15/14/179): declarations 787->794 (+7), sorries_raw 179->191 (+12), sorries_noncomment 163->173 (+10). HONESTY: the Lutar/Uniqueness.lean PhD-Math retry NET-ADDS live (noncomment) sorries: monotone_additive_linear (1 admitted Cauchy-linearity sorry, kept as a single tracked sorry after the inline skeleton failed to type-check on v4.13.0) + lutar_is_geomean (1 top-level assembly sorry). The sorry-FREE win is lambda_perm_invariant (\u039b satisfies A5). Build-blocking fixes in this PR: (1) import Mathlib.Topology.Order.IntermediateValue (was a nonexistent module path), (2) A5 proof via Equiv.prod_comp (was a Fintype.prod_equiv type mismatch), (3) admit monotone_additive_linear as one sorry (was 3 hard errors: linarith x2 + Monotone.continuous field). SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg): bumping that to 750/14/163 (v11 -> v11.1) requires FOUNDER AUTHORIZATION and is NOT done here. This file tracks only LIVE corpus so the drift gate stays green. Signed-off-by: Yachay <yachay@szlholdings.ai>",
+  "note": "DRIFT-GATE baseline for PR #148 after re-sync of main (merge 9a1df32, +8 main commits). A5 permutation invariance is a STRUCTURE FIELD (not a Lean axiom); Lambda_A5_perm_invariant is SORRY-FREE via Equiv.prod_comp. axioms_unique=14, identical 14-name set. Live corpus now 794 decl / 15 axioms_raw / 14 unique / 189 sorries_raw / 171 noncomment (the 8 re-synced main commits net-reduced sorries vs the intermediate 191/173). HONESTY: Uniqueness.lean still carries 2 live (noncomment) sorries (monotone_additive_linear Cauchy-linearity + lutar_is_geomean top-level assembly). SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg) whose v11->v11.1 bump to 750/14/163 requires FOUNDER AUTHORIZATION and is NOT done here. Signed-off-by: Yachay <yachay@szlholdings.ai>",
   "numbers": {
     "declarations": 794,
     "axioms_raw": 15,
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 191,
-    "sorries_noncomment": 173,
+    "sorries_raw": 189,
+    "sorries_noncomment": 171,
     "sorries_putnam": 56,
-    "sorries_baseline": 135
+    "sorries_baseline": 133
   }
 }
