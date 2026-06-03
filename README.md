@@ -41,6 +41,10 @@
 
 # lutar-lean — Lean 4 Formal Proofs for the Ouroboros Thesis
 
+### Runtime receipts
+
+Formal proofs live here. The runtime that emits DSSE-signed receipts proving the math is actually enforced lives in [`szl-lake`](https://github.com/szl-holdings/szl-lake) (GitHub front door) and [`SZLHOLDINGS/szl-lake`](https://huggingface.co/datasets/SZLHOLDINGS/szl-lake) (HF canonical dataset).
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=00D4FF)](https://www.apache.org/licenses/LICENSE-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
