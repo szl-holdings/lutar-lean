@@ -55,6 +55,12 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # Round-10 Innovations sprint — CS-frontier algorithmic substrate (PhD CS):
+    # BFT quorum intersection (n>=3f+1), FLP impossibility + partial-synchrony
+    # navigation, CAP theorem on the receipt register, 7-organ pipeline
+    # latency/throughput bounds, and the doctrine-ledger decidability class.
+    # Additive/experimental; excluded from the locked v11 baseline (749/14/163).
+    os.path.join("Lutar", "Innovations", "round10") + os.sep,
 )
 
 

@@ -51,6 +51,16 @@ import Lutar.Shannon.DoctrineEntropy
 -- khipu-consensus-roadmap: BFT 3-of-4 multi-organ signed agreement (additive,
 -- 2 proof-deferred conjectures, 0 new axioms; Doctrine v12 781/14/194 -> 783/14/196)
 import Lutar.KhipuConsensus
+-- Round-10 Innovations sprint: CS-frontier algorithmic substrate (PhD CS).
+-- Additive/experimental (Innovations/round10/); excluded from the locked v11
+-- baseline by .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES. Complexity
+-- bounds (BFT n>=3f+1, FLP, CAP), 7-organ pipeline latency/throughput, and the
+-- doctrine-ledger decidability class. Honest tagged sorrys documented per file.
+import Lutar.Innovations.round10.CSByzantineQuorum
+import Lutar.Innovations.round10.CSFLPImpossibility
+import Lutar.Innovations.round10.CSCAPTheorem
+import Lutar.Innovations.round10.CSPipelineLatency
+import Lutar.Innovations.round10.CSDoctrineDecidable
 -- v17 Quantum-error-correction lineage grafts
 import Lutar.QEC.HammingFoundations
 import Lutar.QEC.ShorReceiptCode
