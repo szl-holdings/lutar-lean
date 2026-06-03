@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "fix/uniqueness-a1-a5-2026-06-02",
-  "sha": "974e5e0c87a210427f362ed786a8fa183e244504",
-  "measured_at_utc": "2026-06-03T17:32:48Z",
+  "ref": "feat/round13-lambda-closure",
+  "sha": "abd58d159f1bdb79a017d71a6b94ab160ead8d9d",
+  "measured_at_utc": "2026-06-03T22:10:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "DRIFT-GATE baseline for PR #148, set to the EXACT values measured by the CI lean_numbers.py on the real checkout @ 974e5e0c87 (lake-build run 26901723529). A5 permutation invariance is a STRUCTURE FIELD (not a Lean axiom); Lambda_A5_perm_invariant is SORRY-FREE via Equiv.prod_comp. axioms_unique=14, identical 14-name set, no new/removed axiom. Live corpus: 794 decl / 15 axioms_raw / 14 unique / 191 sorries_raw / 173 noncomment / 135 baseline / 56 putnam. HONESTY: Uniqueness.lean carries 2 live (noncomment) sorries (monotone_additive_linear Cauchy-linearity + lutar_is_geomean top-level assembly); the A5 satisfaction lemma itself is sorry-free. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg); the v11->v11.1 bump to 750/14/163 requires FOUNDER AUTHORIZATION and is NOT done here. Signed-off-by: Yachay <yachay@szlholdings.ai>",
+  "note": "DRIFT-GATE baseline updated for PR feat/round13-lambda-closure (Round 13 Cauchy_ND closure layer). DELTA vs main abd58d15: +21 declarations (12 in Lutar/Round13/CauchyND_Closure.lean, 9 in Lutar/Round13/Lambda_Uniqueness.lean), +0 axioms (axioms_unique STAYS 14, identical name set, NO new/removed axiom), +1 sorry (exactly ONE honest tagged open obligation: FACTORIZATION_AXIOM_GAP in lambda_unique, needs A6 bisymmetry; FALSE under A1-A5 per maxAgg counterexample). Round 13 is NOT Putnam so the new sorry lands in sorries_baseline (135->136). The conditional terminal theorem lambda_unique_of_factors and the entire CauchyND_Closure layer are SORRY-FREE. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg) which is UNCHANGED; Lambda remains Conjecture 1; the internal Conjecture->Theorem flip did NOT occur (theorem is false under current axioms). No public claim flipped. Signed-off-by: Lambda-Closure Lead <lambda-closure@szlholdings.ai>",
   "numbers": {
-    "declarations": 794,
+    "declarations": 815,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 191,
-    "sorries_noncomment": 173,
+    "sorries_raw": 192,
+    "sorries_noncomment": 174,
     "sorries_putnam": 56,
-    "sorries_baseline": 135
+    "sorries_baseline": 136
   }
 }
