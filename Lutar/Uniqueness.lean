@@ -90,7 +90,7 @@ theorem lambda_isBounded {k : Nat} (hk : 0 < k) :
 
     Proof: Finset product over `Fin k` is invariant under index reordering.
     Mathlib: `Fintype.prod_equiv` in `Mathlib.Algebra.BigOperators.Group.Finset`. -/
-theorem lambda_perm_invariant {k : Nat} (hk : 0 < k)
+theorem Lambda_A5_perm_invariant {k : Nat} (hk : 0 < k)
     (x : Axes k) (σ : Fin k ≃ Fin k) :
     Λ k (x ∘ ↑σ) = Λ k x := by
   simp only [Λ_def hk]
@@ -102,7 +102,7 @@ theorem lambda_perm_invariant {k : Nat} (hk : 0 < k)
 
 theorem lambda_isPermutationInvariant {k : Nat} (hk : 0 < k) :
     IsPermutationInvariant (Λ k) :=
-  fun x σ => lambda_perm_invariant hk x σ
+  fun x σ => Lambda_A5_perm_invariant hk x σ
 
 theorem lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) :
     LutarAxioms (Λ k) :=
