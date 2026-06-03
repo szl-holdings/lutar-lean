@@ -55,6 +55,11 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # Cauchy_ND closure — round-9 Innovations sprint (Step 4: exponents = 1/k).
+    # Additive, experimental; NOT folded into the locked v11 baseline. Carries one
+    # tagged SYMMETRY_AXIOM_GAP sorry standing in for axiom A5 (permutation
+    # invariance), discharged upstream once A5 is merged into LutarAxioms.
+    os.path.join("Lutar", "Innovations", "round9") + os.sep,
 )
 
 

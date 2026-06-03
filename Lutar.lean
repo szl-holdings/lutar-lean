@@ -64,6 +64,10 @@ import Lutar.Gates.GleasonMod8
 -- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
 import Lutar.GraphLambda
 import Lutar.PositionAware
+-- round-9 Innovations sprint: Cauchy_ND Step 4 (exponents αᵢ = 1/k under A5).
+-- Additive/experimental (Innovations/round9/); excluded from the locked v11
+-- baseline by .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES.
+import Lutar.Innovations.round9.ExponentsSymmetric
 
 /-!
 # Lutar — root module
