@@ -55,13 +55,47 @@ jobs:
       - name: Generate lake-manifest.json (lake update)
         run: lake update -R
 
-      - name: Install Lean + Mathlib cache via lean-action
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.4.0
+      # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
+      # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,
+      # patterns_allowed=[]) blocks it — causing startup_failure before any runner is allocated.
+      # Inlined equivalent using only github-owned actions/cache (allowed) + shell commands.
+      - name: Restore Lake build cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          use-mathlib-cache: true
+          path: .lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2
+
+
+      - name: Repair Mathlib package git state
+        run: |
+          set -eu
+          if [ -d .lake/packages/mathlib ]; then
+            cd .lake/packages/mathlib
+            # If git index is corrupt OR HEAD missing, blow it away
+            if ! git rev-parse HEAD >/dev/null 2>&1 || ! git status >/dev/null 2>&1; then
+              echo "::warning::Mathlib package corrupt — removing for fresh fetch"
+              cd ../..
+              rm -rf packages/mathlib
+            else
+              echo ".lake/packages/mathlib OK"
+            fi
+          fi
+        shell: bash
+
+      - name: Get Mathlib binary cache
+        run: lake exe cache get
 
       - name: Build (kernel-check the whole library)
         run: lake build
+
+      - name: Save Lake build cache
+        if: success()
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
 
       - name: Count remaining sorrys
         run: |

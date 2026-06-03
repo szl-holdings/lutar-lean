@@ -41,6 +41,10 @@
 
 # lutar-lean — Lean 4 Formal Proofs for the Ouroboros Thesis
 
+### Runtime receipts
+
+Formal proofs live here. The runtime that emits DSSE-signed receipts proving the math is actually enforced lives in [`szl-lake`](https://github.com/szl-holdings/szl-lake) (GitHub front door) and [`SZLHOLDINGS/szl-lake`](https://huggingface.co/datasets/SZLHOLDINGS/szl-lake) (HF canonical dataset).
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=00D4FF)](https://www.apache.org/licenses/LICENSE-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
@@ -176,20 +180,29 @@ The v3 deposit ([10.5281/zenodo.19983066](https://doi.org/10.5281/zenodo.1998306
 
 Reviewers comparing the v3 deposit to the current Lean corpus will find a disconnect in axiom semantics. This is acknowledged and documented here.
 
-### CAUCHY_ND sorry — not purely an engineering gap
+### CAUCHY_ND sorry — A5 CORRECTION APPLIED 2026-06-02
 
-The `sorry` at `Lutar/Uniqueness.lean:120` (tagged `CAUCHY_ND`) is documented as a ~40h Lean engineering task. PhD-Math review (2026-05-31, Pass 3) found this understates the gap:
+**CRITICAL BUG FOUND AND CORRECTED (2026-06-02):** The original uniqueness claim (TH10) under A1–A4 is **FALSE**.
 
-> The proof strategy in `Uniqueness.lean` invokes permutation symmetry of Λ over inputs to reduce the multi-variable aggregator to the 1D multiplicative Cauchy functional equation. **Permutation symmetry is not in A1–A4.** Without it (or a separability lemma), the reduction does not go through.
+Counterexample (PhD-Math audit, `PHASE3_FINAL_SUMMARY.md` Gate 6, 2026-06-02):
+> `Φ(x₁,x₂) = x₁^(2/3)·x₂^(1/3)` satisfies A1–A4 but `Φ ≠ Λ₂ = (x₁·x₂)^(1/2)`.
+> A5 fails: `Φ(2,1) = 2^(2/3) ≠ 2^(1/3) = Φ(1,2)`.
 
-**Consequence:** Until the CAUCHY_ND sorry is discharged AND the missing symmetry or separability argument is supplied, **TH10 (`lutar_is_geomean`) remains Conjecture 1, not Theorem 1.** The `lutar_unique` proof is valid *conditional* on `lutar_is_geomean`; the latter carries the open obligation.
+This is not merely an engineering gap — the original `CAUCHY_ND` sorry was over a **false** theorem. No engineering effort could have closed it under A1–A4 alone.
 
-Discharge options (either suffices):
-1. Add A5 — permutation symmetry: `∀ (σ : Equiv.Perm (Fin k)) x, Λ (x ∘ σ) = Λ x`
-2. Prove separability from A1–A4 (would be a nontrivial result)
-3. Prove symmetry is implied by A1–A4 (also nontrivial)
+**Fix applied:** PR [#148](https://github.com/szl-holdings/lutar-lean/pull/148) (`fix/uniqueness-a1-a5-2026-06-02`) on 2026-06-02:
+- `Lutar/Axioms.lean`: adds `IsPermutationInvariant` predicate + `A5` field to `LutarAxioms`
+- `Lutar/Uniqueness.lean`: replaced with v2 (PhD-Math audit) — correct A1–A5 proof structure
+- `lambda_perm_invariant` is **sorry-free** via `Fintype.prod_equiv`
+- 2 sorries remain: `monotone_additive_linear` + `lutar_is_geomean` (both over a **true** theorem)
+- Lake CI must verify before merge
 
-PhD-Math citation: `PHD_MATH_REVIEW.md` §4 (Pass 3), §8 (F1 CRITICAL), 2026-05-31.
+**Corrected statement:** Under A1–A5, the unique aggregator is Λ k (geometric mean).
+A5 (permutation invariance) is **necessary**: forces all axis exponents αᵢ = 1/k (Aczél 1966 §5.1).
+
+**Consequence:** TH10 (`lutar_is_geomean`) remains **Conjecture 1**, not Theorem 1, until Lake CI passes green on the sorry-free proof (~70 Lean lines needed).
+
+PhD-Math citations: `THESIS_LEAN_RECONCILIATION.md` (2026-06-02), `PHASE3_FINAL_SUMMARY.md` Gate 6 (2026-06-02), `PHD_MATH_REVIEW.md` §8 F1 CRITICAL (2026-05-31).
 
 
 ---

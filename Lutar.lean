@@ -64,6 +64,7 @@ import Lutar.Gates.GleasonMod8
 -- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
 import Lutar.GraphLambda
 import Lutar.PositionAware
+import Lutar.LambdaPermInvariant
 
 /-!
 # Lutar — root module

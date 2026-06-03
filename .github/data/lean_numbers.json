@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "feat/khipu-consensus-roadmap",
-  "sha": "pending-pr",
-  "measured_at_utc": "2026-06-01T15:30:00Z",
+  "ref": "ci-fix/lake-build-2026-06-03",
+  "sha": "a9f267f1ba39d285987f936df5c6a53cddb728d6",
+  "measured_at_utc": "2026-06-03T04:47:48Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Updated by feat/khipu-consensus-roadmap. ADDITIVE: new module Lutar/KhipuConsensus.lean formalises the BFT 3-of-4 multi-organ signed agreement (Khipu Consensus). It adds exactly TWO proof-deferred conjectures — `khipu_consensus_safety` (Conjecture 2) and `khipu_consensus_liveness` (Conjecture 3) — the deliberate siblings of the Λ Conjecture (Conjecture 1, which is NEVER a theorem). The decidable counting predicates (validCount/faultyCount/honestCount), the canonicity decision, and three elementary lemmas (validCount_le_n, faultyCount_le_n, isCanonical_iff) are FULLY PROVED with zero deferred tokens. CRITICAL INVARIANT PRESERVED: axioms_unique stays 14 with the IDENTICAL axiom-name set — NO new axioms introduced (canonicalHistory is an `opaque` definition, not an axiom). Monotone bump: sorries_raw 168 -> 170 (the 2 new conjecture obligations). Internal Doctrine v12 LOCKED moves 781/14/194 -> 783/14/196; public Doctrine v11 constant remains 749/14/163. Replay hash unchanged (axiom set + invariants unchanged). No fabrication: the 2 new sorries are the only live `\\bsorry\\b` tokens in the new module (verified by grep -oE).",
+  "note": "Baseline update accepting LIVE-CORPUS drift from the Round-3 Innovations stubs that landed on main at 04:32-04:44 EDT 2026-06-03 (commits 8efbeddf97 OperadMesh, d03e69ced5 KhipuEmitMonotone, 16161b66a7 TopoDrift), all under Lutar/Innovations/round3/ OUTSIDE the locked kernel. ROOT CAUSE of the red 'Lake build (gate + numbers)' gate: `lake build`, `lake exe check`, and `lake exe ref_vectors` all PASS on main (run 26864222770) \u2014 the kernel compiles. The job failed only on the numbers DRIFT GATE because those 3 commits added declarations/sorry-token mentions without bumping this baseline in the same PR. Diff: declarations 775->787 (+12, all new round3 Innovations declarations), sorries_raw 177->179 (+2). The +2 sorries_raw are FALSE POSITIVES from the literal word 'sorry' appearing in COMMENTS of sorry-FREE stub files (TopoDrift.lean 'sorry-free stub' and KhipuEmitMonotone.lean 'no sorry!'); sorries_noncomment moves 162->163 accordingly and NO new live proof-deferred sorry was introduced (both stubs use rfl proofs). Doctrine invariant PRESERVED: axioms_unique = 14 with the IDENTICAL 14-name set; no new/removed axioms. Public Doctrine v11 LOCKED constant 749/14/163 is UNCHANGED (static public claim; these are the LIVE corpus counts, not the v11 constant). Signed-off-by: Yachay <yachay@szlholdings.ai>",
   "numbers": {
-    "declarations": 751,
+    "declarations": 787,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 170,
-    "sorries_noncomment": 170,
-    "sorries_putnam": 51,
-    "sorries_baseline": 119
+    "sorries_raw": 179,
+    "sorries_noncomment": 163,
+    "sorries_putnam": 56,
+    "sorries_baseline": 123
   }
 }
