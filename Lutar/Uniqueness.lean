@@ -95,8 +95,10 @@ theorem lambda_perm_invariant {k : Nat} (hk : 0 < k)
     Λ k (x ∘ ↑σ) = Λ k x := by
   simp only [Λ_def hk]
   congr 1
-  exact Fintype.prod_equiv σ x (x ∘ ↑σ) (fun i => rfl)
-  -- This is sorry-free. Fintype.prod_equiv is in Mathlib.Algebra.BigOperators.Group.Finset.
+  -- Goal: ∏ i, (x ∘ ↑σ) i = ∏ i, x i, i.e. ∏ i, x (σ i) = ∏ i, x i.
+  -- `Equiv.prod_comp (e : ι ≃ κ) (g : κ → α) : ∏ i, g (e i) = ∏ i, g i`.
+  -- This is sorry-free. Equiv.prod_comp is in Mathlib.Algebra.BigOperators.Group.Finset.
+  exact Equiv.prod_comp σ x
 
 theorem lambda_isPermutationInvariant {k : Nat} (hk : 0 < k) :
     IsPermutationInvariant (Λ k) :=
@@ -127,51 +129,18 @@ private theorem monotone_additive_linear
     (hg_add : ∀ u v : ℝ, g (u + v) = g u + g v)
     (hg_mono : Monotone g) :
     ∀ t : ℝ, g t = g 1 * t := by
-  -- Step 1: g(0) = 0
-  have hg0 : g 0 = 0 := by
-    have := hg_add 0 0; simp at this; linarith
-  -- Step 2: g(n) = n * g(1) for n : ℕ
-  have hg_nat : ∀ n : ℕ, g n = n * g 1 := by
-    intro n; induction n with
-    | zero => simp [hg0]
-    | succ n ih =>
-        rw [show (↑(n + 1) : ℝ) = ↑n + 1 by push_cast; ring,
-            hg_add, ih]; push_cast; ring
-  -- Step 3: g(n * x) = n * g(x) (scale by ℕ)
-  have hg_nat_mul : ∀ (n : ℕ) (x : ℝ), g (n * x) = n * g x := by
-    intro n x; induction n with
-    | zero => simp [hg0]
-    | succ n ih =>
-        rw [show (↑(n + 1) : ℝ) * x = ↑n * x + x by push_cast; ring,
-            hg_add, ih]; push_cast; ring
-  -- Step 4: g(n : ℤ) = n * g(1)
-  have hg_int : ∀ n : ℤ, g n = n * g 1 := by
-    intro n; rcases n with n | n
-    · push_cast; exact hg_nat n
-    · push_cast
-      have hgneg : g (-(↑(n + 1) : ℝ)) = -(g ↑(n + 1)) := by
-        have h := hg_add (↑(n + 1) : ℝ) (-(↑(n + 1) : ℝ))
-        simp at h; linarith [hg0]
-      rw [show -(↑n + 1 : ℝ) = -(↑(n + 1) : ℝ) by push_cast; ring,
-          hgneg, hg_nat (n + 1)]; push_cast; ring
-  -- Step 5: g(p/q : ℚ) = g(1) * (p/q)
-  have hg_rat : ∀ q : ℚ, g q = g 1 * q := by
-    intro q
-    have hqpos : (0 : ℝ) < q.den := by exact_mod_cast q.pos
-    have key : g 1 * q.num = (q.den : ℝ) * g ((q.num : ℝ) / q.den) := by
-      rw [← hg_nat_mul q.den ((q.num : ℝ) / q.den),
-          mul_div_cancel₀ _ hqpos.ne']
-      linarith [hg_int q.num, (hg_nat q.den).symm]
-    rw [Rat.cast_def]
-    linarith [key]
-  -- Step 6: g is continuous (monotone on ℝ)
-  have hg_cont : Continuous g := hg_mono.continuous
-  -- Step 7: Two continuous functions equal on ℚ (dense) are equal
-  -- Both g and (fun t => g 1 * t) are continuous and agree on ℚ.
-  -- Mathlib: `DenseRange.equalizer` or `Continuous.ext_on_dense`
-  -- The dense set is the image of (ℚ : Type) in ℝ (Rat.denseRange_ratCast).
+  -- HONEST OPEN LEMMA (Aczél 1966 Thm 5.1 / Cauchy 1821). This is the SOLE
+  -- blocking Cauchy step and is NOT in Mathlib v4.13.0. The earlier inline
+  -- skeleton (ℕ/ℤ/ℚ induction + monotone⇒continuous + ℚ-density equalizer)
+  -- did not type-check against the v4.13.0 API (`Monotone.continuous` is not a
+  -- field; the ℚ-density `have key`/`Rat.cast_def` rewrites left non-linear
+  -- goals `linarith` could not close). Per HONESTY-OVER-CHECKLIST it is admitted
+  -- as a single tracked `sorry` rather than shipped with hard compile errors.
+  -- Discharge route (~40 lines): g additive ⇒ ℚ-linear (induction), monotone ⇒
+  -- continuous via `Monotone.continuous_of_denseRange`/order-topology IVT, then
+  -- `DenseRange.equalizer` on `Rat.denseRange_ratCast` (Mathlib.Topology.Order.IntermediateValue).
   sorry
-  -- SORRY: density argument — closing this requires:
+  -- SORRY: full Cauchy linearity. Reference closing snippet:
   -- have : ∀ x : ℝ, g x = g 1 * x := by
   --   apply (hg_cont.funext (continuous_const.mul continuous_id)).symm
   --   rw [← Rat.denseRange_ratCast.closure_range]
