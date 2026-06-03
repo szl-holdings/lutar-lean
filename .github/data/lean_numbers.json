@@ -2,10 +2,10 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "fix/uniqueness-a1-a5-2026-06-02",
-  "sha": "9a1df32fbaa37529804cda065b391bd13c501fbf",
-  "measured_at_utc": "2026-06-03T19:00:00Z",
+  "sha": "974e5e0c87a210427f362ed786a8fa183e244504",
+  "measured_at_utc": "2026-06-03T17:32:48Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "DRIFT-GATE baseline for PR #148 after re-sync of main (merge 9a1df32, +8 main commits). A5 permutation invariance is a STRUCTURE FIELD (not a Lean axiom); Lambda_A5_perm_invariant is SORRY-FREE via Equiv.prod_comp. axioms_unique=14, identical 14-name set. Live corpus now 794 decl / 15 axioms_raw / 14 unique / 189 sorries_raw / 171 noncomment (the 8 re-synced main commits net-reduced sorries vs the intermediate 191/173). HONESTY: Uniqueness.lean still carries 2 live (noncomment) sorries (monotone_additive_linear Cauchy-linearity + lutar_is_geomean top-level assembly). SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg) whose v11->v11.1 bump to 750/14/163 requires FOUNDER AUTHORIZATION and is NOT done here. Signed-off-by: Yachay <yachay@szlholdings.ai>",
+  "note": "DRIFT-GATE baseline for PR #148, set to the EXACT values measured by the CI lean_numbers.py on the real checkout @ 974e5e0c87 (lake-build run 26901723529). A5 permutation invariance is a STRUCTURE FIELD (not a Lean axiom); Lambda_A5_perm_invariant is SORRY-FREE via Equiv.prod_comp. axioms_unique=14, identical 14-name set, no new/removed axiom. Live corpus: 794 decl / 15 axioms_raw / 14 unique / 191 sorries_raw / 173 noncomment / 135 baseline / 56 putnam. HONESTY: Uniqueness.lean carries 2 live (noncomment) sorries (monotone_additive_linear Cauchy-linearity + lutar_is_geomean top-level assembly); the A5 satisfaction lemma itself is sorry-free. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg); the v11->v11.1 bump to 750/14/163 requires FOUNDER AUTHORIZATION and is NOT done here. Signed-off-by: Yachay <yachay@szlholdings.ai>",
   "numbers": {
     "declarations": 794,
     "axioms_raw": 15,
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 189,
-    "sorries_noncomment": 171,
+    "sorries_raw": 191,
+    "sorries_noncomment": 173,
     "sorries_putnam": 56,
-    "sorries_baseline": 133
+    "sorries_baseline": 135
   }
 }
