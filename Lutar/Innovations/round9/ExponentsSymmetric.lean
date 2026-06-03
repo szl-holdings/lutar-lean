@@ -129,6 +129,26 @@ theorem prod_rpow_const_eq_rpow_sum {ι : Type*} (s : Finset ι) {c : NNReal}
   | @insert a t ha ih =>
       rw [Finset.prod_insert ha, Finset.sum_insert ha, ih, NNReal.rpow_add hc]
 
+/-- **`rpow_left_inj_one_lt`** — for a fixed NNReal base `c` with `1 < c`, the
+map `a ↦ c ^ a` (real exponent) is injective: `c ^ a = c ^ b → a = b`.
+
+Mathlib v4.13.0 has no exponent-injectivity lemma directly on `NNReal.rpow`
+(`NNReal.rpow_left_injective` is injectivity in the *base* for a fixed exponent).
+We therefore push the equality through the coercion `ℝ≥0 → ℝ` with `NNReal.coe_rpow`
+and close it with `Real.rpow_le_rpow_left_iff` (which needs `1 < c`) applied in
+both directions (antisymmetry). -/
+theorem rpow_left_inj_one_lt {c : NNReal} (hc : 1 < c) {a b : ℝ}
+    (h : c ^ a = c ^ b) : a = b := by
+  -- coerce to ℝ: (c:ℝ) ^ a = (c:ℝ) ^ b
+  have hcoe : (c : ℝ) ^ a = (c : ℝ) ^ b := by
+    have := congrArg (fun t : NNReal => (t : ℝ)) h
+    simpa only [NNReal.coe_rpow] using this
+  have hc' : (1 : ℝ) < (c : ℝ) := by exact_mod_cast hc
+  -- antisymmetry via the order iff
+  have hle : a ≤ b := (Real.rpow_le_rpow_left_iff hc').mp (le_of_eq hcoe)
+  have hge : b ≤ a := (Real.rpow_le_rpow_left_iff hc').mp (le_of_eq hcoe.symm)
+  exact le_antisymm hle hge
+
 /-! ### Step 4a — the exponents sum to one (UNCONDITIONAL) -/
 
 /-- **`sum_alphas_eq_one`.** From the diagonal commitment `A3_normalize`
@@ -164,8 +184,8 @@ theorem sum_alphas_eq_one {k : ℕ}
   -- the base is > 1, hence injective in the exponent
   have h1c : (1 : NNReal) < c := by
     rw [hc_def]; norm_num
-  -- `NNReal.rpow_left_injective` (hyp `1 < c`) applied to `c^1 = c^(∑)`
-  exact (NNReal.rpow_left_injective h1c heq).symm
+  -- exponent-injectivity for base `c > 1` applied to `c^1 = c^(∑)`
+  exact (rpow_left_inj_one_lt h1c heq).symm
 
 /-! ### Step 4b — symmetry forces the exponents equal -/
 
@@ -232,7 +252,7 @@ theorem alphas_eq_of_symmetric {k : ℕ}
     rw [← hfj, ← hfi]; exact hsym_eq
   -- injectivity of x ↦ c ^ x (real exponent), then NNReal.coe injective
   have hreal : (alphas j : ℝ) = (alphas i : ℝ) :=
-    NNReal.rpow_left_injective hc1 this
+    rpow_left_inj_one_lt hc1 this
   exact (NNReal.coe_injective hreal).symm
 
 /-! ### Step 4 (combined, with the honest symmetry hypothesis) -/
