@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "ci-fix/lake-build-2026-06-03",
-  "sha": "a9f267f1ba39d285987f936df5c6a53cddb728d6",
-  "measured_at_utc": "2026-06-03T04:47:48Z",
+  "ref": "fix/uniqueness-a1-a5-2026-06-02",
+  "sha": "159b7d51f6ef0eb4f96b775e64cc86238494b3fd",
+  "measured_at_utc": "2026-06-03T18:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Baseline update accepting LIVE-CORPUS drift from the Round-3 Innovations stubs that landed on main at 04:32-04:44 EDT 2026-06-03 (commits 8efbeddf97 OperadMesh, d03e69ced5 KhipuEmitMonotone, 16161b66a7 TopoDrift), all under Lutar/Innovations/round3/ OUTSIDE the locked kernel. ROOT CAUSE of the red 'Lake build (gate + numbers)' gate: `lake build`, `lake exe check`, and `lake exe ref_vectors` all PASS on main (run 26864222770) \u2014 the kernel compiles. The job failed only on the numbers DRIFT GATE because those 3 commits added declarations/sorry-token mentions without bumping this baseline in the same PR. Diff: declarations 775->787 (+12, all new round3 Innovations declarations), sorries_raw 177->179 (+2). The +2 sorries_raw are FALSE POSITIVES from the literal word 'sorry' appearing in COMMENTS of sorry-FREE stub files (TopoDrift.lean 'sorry-free stub' and KhipuEmitMonotone.lean 'no sorry!'); sorries_noncomment moves 162->163 accordingly and NO new live proof-deferred sorry was introduced (both stubs use rfl proofs). Doctrine invariant PRESERVED: axioms_unique = 14 with the IDENTICAL 14-name set; no new/removed axioms. Public Doctrine v11 LOCKED constant 749/14/163 is UNCHANGED (static public claim; these are the LIVE corpus counts, not the v11 constant). Signed-off-by: Yachay <yachay@szlholdings.ai>",
+  "note": "DRIFT-GATE baseline update for PR #148 (fix/uniqueness-a1-a5-2026-06-02): A5 (permutation invariance) added to LutarAxioms as a STRUCTURE FIELD (NOT a Lean `axiom`), plus the PhD-Math retry rewrite of Lutar/Uniqueness.lean. axioms_unique = 14 with the IDENTICAL 14-name set \u2014 NO new/removed Lean axiom (A5 is a Prop field, IsPermutationInvariant, satisfied sorry-free by lambda_perm_invariant via Fintype.prod_equiv). LIVE-corpus drift vs prior baseline (a9f267f1, 787/15/14/179): declarations 787->794 (+7), sorries_raw 179->190 (+11), sorries_noncomment 163->173 (+10). HONESTY: the Uniqueness.lean retry ADDS executable sorries (the explicit Cauchy/density skeleton: monotone_additive_linear + lutar_is_geomean top-level assembly + density lemma), it does NOT reduce them. The sorry-free win is lambda_perm_invariant (\u039b satisfies A5). SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg): bumping that public constant to 750/14/163 (v11 -> v11.1) requires FOUNDER AUTHORIZATION and is NOT done here. This file only tracks the LIVE corpus so the drift gate stays green. Signed-off-by: Yachay <yachay@szlholdings.ai>",
   "numbers": {
-    "declarations": 787,
+    "declarations": 794,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 179,
-    "sorries_noncomment": 163,
+    "sorries_raw": 190,
+    "sorries_noncomment": 173,
     "sorries_putnam": 56,
-    "sorries_baseline": 123
+    "sorries_baseline": 134
   }
 }
