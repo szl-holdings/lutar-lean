@@ -65,6 +65,19 @@ import Lutar.Gates.GleasonMod8
 import Lutar.GraphLambda
 import Lutar.PositionAware
 import Lutar.LambdaPermInvariant
+-- Round-10 Innovations sprint: CLASSICAL cryptographic substrate (PhD Crypto).
+-- DSSE classical signatures + post-quantum transition path, Rekor / RFC-6962
+-- Merkle inclusion proofs, cosign keyless OIDC→Fulcio trust chain, and BLS
+-- signature aggregation + threshold signing on pairing-friendly curves
+-- (BN254 / BLS12-381).  Additive/experimental (Innovations/round10/); excluded
+-- from the locked v11 baseline (749/14/163) by lean_numbers.py EXPERIMENTAL_SCOPES.
+-- Coordinated with PhD Quantum (PR #176): they own the post-quantum signer
+-- (ML-DSA/SLH-DSA, EUF-CMA vs. quantum adversary); this layer owns the classical
+-- layer + the formally-verified migration path between them.
+import Lutar.Innovations.round10.CryptoDSSEClassical
+import Lutar.Innovations.round10.CryptoRekorMerkle
+import Lutar.Innovations.round10.CryptoFulcioTrustChain
+import Lutar.Innovations.round10.CryptoBLSAggregation
 
 /-!
 # Lutar — root module

@@ -55,6 +55,12 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # Round-10 Innovations sprint — cryptographic substrate (PhD Crypto):
+    # classical DSSE signatures + PQ transition path, Rekor/RFC-6962 Merkle
+    # inclusion proofs, cosign keyless OIDC→Fulcio trust chain, BLS aggregation +
+    # threshold signatures on pairing-friendly curves (BN254/BLS12-381).
+    # Additive/experimental; excluded from the locked v11 baseline (749/14/163).
+    os.path.join("Lutar", "Innovations", "round10") + os.sep,
 )
 
 
