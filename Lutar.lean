@@ -64,6 +64,8 @@ import Lutar.Gates.GleasonMod8
 -- v17.2 GraphLambda + PositionAware (GNN substrate, feat/v17-graph-lambda-substrate)
 import Lutar.GraphLambda
 import Lutar.PositionAware
+-- phd-math-frontier: TH-V18-11 Pareto archive finite stabilization (PROVED, 0 sorry, 0 new axiom)
+import Lutar.Thesis.TH_V18_11_ParetoFiniteStabilization
 import Lutar.LambdaPermInvariant
 -- Round 13 Λ-closure (Cauchy_ND): closable sub-lemmas (sorry-free) + terminal CONDITIONAL
 -- uniqueness theorem (sorry-free) + counterexample fragment. The UNCONDITIONAL uniqueness
