@@ -67,46 +67,81 @@ structure SBOMComponent where
   dep_receipt : Hash
 deriving DecidableEq
 
+/-- Decode a `List Char` from a NUL-free byte list via `Char.ofNat`.
+    Paired with `c.toList.map Char.toNat` it is a left inverse on any
+    `String` (every code point round-trips through `Char.ofNat_toNat`). -/
+def bytesToChars (bs : List Nat) : List Char := bs.map Char.ofNat
+
+theorem bytesToChars_charsToBytes (s : String) :
+    String.ofList (bytesToChars (s.toList.map Char.toNat)) = s := by
+  unfold bytesToChars
+  rw [List.map_map]
+  have : (s.toList.map (Char.ofNat ∘ Char.toNat)) = s.toList := by
+    apply List.map_id''
+    intro c
+    show Char.ofNat c.toNat = c
+    exact Char.ofNat_toNat c
+  rw [this, String.ofList_toList]
+
 /-- **Canonical encoding** of an SBOM component as a length-prefixed
     `ReceiptBlob` (byte list).
 
     Length-prefix framing guarantees that distinct four-tuples produce
-    distinct byte sequences: any two encodings that share a prefix must
-    agree on field lengths and field contents in the same order, which
-    forces the underlying tuples to be equal. This is the structural
-    injectivity step claimed in audit §9.1. -/
+    distinct byte sequences: the leading length headers let a decoder
+    recover field boundaries unambiguously, so the encoding admits a
+    left inverse and is therefore injective (audit §9.1).
+
+    P2-IQT-CANONENC-FRAMING closure (Lean Backlog Wave-2): the previous
+    NUL-separated variant was *not* injective (`Char.toNat` and the digest
+    fields can equal the `0` separator byte). This length-prefixed encoding
+    is proved injective constructively below — **no `sorry`, no new axiom.** -/
 noncomputable def canonicalEncoding (c : SBOMComponent) : ReceiptBlob :=
-  -- Concatenation of length-prefixed UTF-8 bytes for `name`, `version`,
-  -- and the two 32-byte digests. Modelled abstractly as a List Nat;
-  -- the runtime implementation lives in `iqt_substrate.py` as
-  -- `_sha256_str(f"{name}|{version}|{content_sha256}|{dep_receipt}")`.
-  c.name.toList.map Char.toNat
-    ++ [0]  -- field separator (NUL) — non-collidable with UTF-8 codepoints
-    ++ c.version.toList.map Char.toNat
-    ++ [0]
-    ++ [c.content_sha.val]
-    ++ [0]
-    ++ [c.dep_receipt.val]
+  -- Explicit right-nested association: header :: block ++ (header :: block ++ digests).
+  -- This fixes the append tree so length-prefix peeling is deterministic.
+  c.name.length :: (c.name.toList.map Char.toNat ++
+    (c.version.length :: (c.version.toList.map Char.toNat ++
+      [c.content_sha.val, c.dep_receipt.val])))
 
-/-- Structural injectivity of `canonicalEncoding` on distinct four-tuples.
+/-- A `String` is recovered from its `Char.toNat` byte block: the map
+    `s.toList.map Char.toNat` is injective in `s`. -/
+theorem string_bytes_injective {s t : String}
+    (h : s.toList.map Char.toNat = t.toList.map Char.toNat) : s = t := by
+  have hs := bytesToChars_charsToBytes s
+  have ht := bytesToChars_charsToBytes t
+  rw [h] at hs
+  rw [hs] at ht
+  exact ht
 
-    Postulated as a **structural** lemma — the proof is a routine case
-    analysis on List.append framing with the NUL separators. We mark this
-    a `theorem` (not an axiom) with a tracked `sorry` placeholder, because
-    its content is a finite, decidable structural property and not a
-    cryptographic assumption. This is **not** a new axiom in the
-    doctrine-v6 sense — it composes only structural facts about
-    `List.append` and `String.toList`. -/
+/-- Structural injectivity of `canonicalEncoding` by **length-prefix
+    peeling**. Equal encodings force, in order: equal name-length
+    headers, equal name-byte blocks, equal version-length headers,
+    equal version-byte blocks, and equal digest pairs. Strings are
+    recovered via `string_bytes_injective` and digests via `Fin.ext`.
+    Uses only `List.append_inj`, `List.cons.injEq`, and round-trip
+    facts — **no `sorry`, no new axiom, no match reduction.** -/
 theorem canonicalEncoding_injective :
     Function.Injective canonicalEncoding := by
-  -- Structural framing proof; tracked as `sorry` only (no axiom).
-  -- The fields are length-prefixed and NUL-framed: any equality of
-  -- encodings forces field-by-field equality of (name, version,
-  -- content_sha.val, dep_receipt.val), which forces the SBOMComponent
-  -- tuples to be equal.
-  intro c₁ c₂ _h
-  -- Proof body deferred to follow-on PR (P2-IQT-CANONENC-FRAMING).
-  sorry
+  intro c₁ c₂ h
+  obtain ⟨n₁, v₁, ⟨cs₁, hcs₁⟩, ⟨dr₁, hdr₁⟩⟩ := c₁
+  obtain ⟨n₂, v₂, ⟨cs₂, hcs₂⟩, ⟨dr₂, hdr₂⟩⟩ := c₂
+  simp only [canonicalEncoding] at h
+  rw [List.cons.injEq] at h
+  obtain ⟨hnlen, htail1⟩ := h
+  have hnlen' : (n₁.toList.map Char.toNat).length = (n₂.toList.map Char.toNat).length := by
+    rw [List.length_map, List.length_map, String.length_toList, String.length_toList, hnlen]
+  obtain ⟨hname, htail2⟩ := List.append_inj htail1 hnlen'
+  rw [List.cons.injEq] at htail2
+  obtain ⟨hvlen, htail3⟩ := htail2
+  have hvlen' : (v₁.toList.map Char.toNat).length = (v₂.toList.map Char.toNat).length := by
+    rw [List.length_map, List.length_map, String.length_toList, String.length_toList, hvlen]
+  obtain ⟨hver, htail4⟩ := List.append_inj htail3 hvlen'
+  rw [List.cons.injEq, List.cons.injEq] at htail4
+  obtain ⟨hcsha, hdrcpt, _⟩ := htail4
+  have hn : n₁ = n₂ := string_bytes_injective hname
+  have hv : v₁ = v₂ := string_bytes_injective hver
+  have hcd : (⟨cs₁, hcs₁⟩ : Hash) = ⟨cs₂, hcs₂⟩ := Fin.ext hcsha
+  have hdd : (⟨dr₁, hdr₁⟩ : Hash) = ⟨dr₂, hdr₂⟩ := Fin.ext hdrcpt
+  rw [hn, hv, hcd, hdd]
 
 /-- **SHA-chain Λ-receipt** for a component, defined as a SHA-256 fold
     over the canonical encoding. This is the audit §9.1 fix:
