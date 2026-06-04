@@ -1,5 +1,5 @@
 -- Lutar/Innovations/round9/CauchyNDClosure.lean
--- CAUCHY_ND CLOSURE — integration scaffold for the Λ-uniqueness theorem.
+-- CAUCHY_ND CLOSURE — integration scaffold for the Λ-uniqueness Conjecture 1 (NOT a theorem).
 -- Doctrine v11 LOCKED 749/14/163. Λ = Conjecture 1 (NOT a theorem).
 -- Signed-off-by: Yachay <yachay@szlholdings.ai>
 -- Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
