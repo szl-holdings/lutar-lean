@@ -3,6 +3,8 @@ import Lutar.Egyptian
 import Lutar.Invariant
 import Lutar.Bound
 import Lutar.Uniqueness
+-- λ-green-strike: discoverable index of zero-sorry, Lake-verified Λ theorems
+import Lutar.GreenTheorems
 import Lutar.TwoWitness
 import Lutar.DoctrineV3.MoralGrounding
 import Lutar.DoctrineV3.MeasurabilityHonesty

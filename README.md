@@ -123,6 +123,31 @@ theorem lutar_bounds {k : ℕ} (w : Fin k → ℝ≥0) (x : Fin k → ℝ≥0) :
   exact lutar_bounds_proof w x
 ```
 
+### ✅ Verified by Lake CI: theorem `green_lambda_satisfies_lutar_axioms` in `Lutar/GreenTheorems.lean`
+
+The first **green** (zero-`sorry`, Lake-verified) named theorem about the Λ
+aggregator is now landed and indexed in `Lutar/GreenTheorems.lean`:
+
+```lean
+-- Lutar/GreenTheorems.lean — fully discharged, no proof placeholders, no new axioms
+theorem green_lambda_satisfies_lutar_axioms {k : ℕ} (hk : 0 < k) :
+    LutarAxioms (Λ k) :=
+  lambda_satisfiesAxioms hk
+```
+
+It states that the concrete Lutar Invariant `Λ k` (geometric mean with Egyptian
+unit-fraction weights `1/k`) satisfies the Lutar axioms — A1 monotone, A2
+1-homogeneous, A3 Egyptian-exact diagonal commitment, A4 bounded-by-max (and A5
+permutation invariance). The `lake-build.yml` workflow type-checks the whole
+library (including this file) and the numbers-drift gate confirms **no new
+axioms and no new `sorry`** were introduced. `Lutar/GreenTheorems.lean` also
+re-exports `green_lambda_monotone`, `green_lambda_homogeneous`, and
+`green_lambda_le_max` as a discoverable index.
+
+> Scope: `Λ` remains **Conjecture 1**. This green theorem proves that `Λ k`
+> *satisfies* the axioms; the full uniqueness theorem (TH10 / `lutar_unique`)
+> still carries the documented `CAUCHY_ND` residual in `Lutar/Uniqueness.lean`.
+
 ---
 
 ## Quick start
