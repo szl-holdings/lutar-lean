@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "round9/cauchy-mult-mono",
-  "sha": "PENDING-173",
+  "ref": "feat/innovations-round6",
+  "sha": "PENDING-166",
   "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by Lean Backlog Wave-2 for PR #173 (Cauchy_ND Step 3: multiplicative_monotone_isPow). Rebased onto current main (861 decl). Adds Lutar/Innovations/round9/CauchyMultMono.lean: +5 declarations (one_le_f_of_one_le, f_ne_zero_of_ne_zero, monotone_additive_linear, multiplicative_monotone_isPow_pos, multiplicative_monotone_isPow), +9 sorry-token occurrences of which exactly ONE is a LIVE proof-deferred sorry (the degenerate t=0 AND alpha=0 branch where the verbatim spec is genuinely FALSE); the sorry-free multiplicative_monotone_isPow_pos is the form the Cauchy_ND assembly consumes. Staged round9 innovation OUTSIDE the locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Public Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #166 (Historical Giants Round6 instillation). Rebased onto current main (866 decl). Adds 3 orphan files under Lutar/Innovations/round6/ (CauchySchwartzLambda +2 decl 0 sorry, EulerFleetTopology +4 decl 3 sorry, NoetherAudit +4 decl 1 sorry): +10 declarations, +4 sorry-token occurrences (all honest documented proof-deferrals in orphan files NOT compiled by lake build). Staged innovation OUTSIDE the locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Public Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 866,
+    "declarations": 876,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,8 +26,8 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 247,
-    "sorries_noncomment": 219,
+    "sorries_raw": 251,
+    "sorries_noncomment": 223,
     "sorries_putnam": 56,
     "sorries_baseline": 172
   }
