@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "lambda-green/green-theorems",
-  "sha": "PENDING-156b",
+  "ref": "round9/monotone-continuous",
+  "sha": "PENDING-175b",
   "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by Lean Backlog Wave-2 for PR #156 (GreenTheorems index). Rebased onto main after #142/#150/#155 (839 decl baseline). +4 declarations (green_lambda_* re-exports of already-discharged facts). 0 sorry, 0 new axiom. axioms_unique STAYS 14. Public Doctrine v11 749/14/163 UNCHANGED (README locked card untouched). Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #175. Rebased onto main after #142/#150/#155/#156 (843 decl). Adds Lutar/Innovations/round9/MonotoneContinuous.lean (+5 decl, 0 sorry, 0 new axiom; staged round9 innovation outside locked v11 kernel). axioms_unique STAYS 14. Public Doctrine v11 749/14/163 UNCHANGED; Lambda Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 843,
+    "declarations": 848,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
