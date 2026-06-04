@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "feat/innovations-round2",
-  "sha": "PENDING-161",
+  "ref": "feat/innovations-round4",
+  "sha": "PENDING-162",
   "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by Lean Backlog Wave-2 for PR #161. Rebased onto current main (911 decl). Round2 Second-Wave innovations: 10 orphan files under Lutar/Innovations/round2/. +24 declarations, +1 sorry tokens (honest documented proof-deferrals in orphan files NOT compiled by lake build). Staged innovation OUTSIDE locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #162. Rebased onto current main (935 decl). Round4 ancient-decode stubs: 10 orphan files under Lutar/Innovations/round4/. +53 declarations, +0 sorry tokens (honest documented proof-deferrals in orphan files NOT compiled by lake build). Staged innovation OUTSIDE locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 935,
+    "declarations": 988,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
