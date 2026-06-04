@@ -5,9 +5,9 @@
   "sha": "abd58d159f1bdb79a017d71a6b94ab160ead8d9d",
   "measured_at_utc": "2026-06-03T22:10:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "DRIFT-GATE baseline updated for PR feat/round13-lambda-closure (Round 13 Cauchy_ND closure layer). DELTA vs main abd58d15: +21 declarations (12 in Lutar/Round13/CauchyND_Closure.lean, 9 in Lutar/Round13/Lambda_Uniqueness.lean), +0 axioms (axioms_unique STAYS 14, identical name set, NO new/removed axiom), +1 sorry (exactly ONE honest tagged open obligation: FACTORIZATION_AXIOM_GAP in lambda_unique, needs A6 bisymmetry; FALSE under A1-A5 per maxAgg counterexample). Round 13 is NOT Putnam so the new sorry lands in sorries_baseline (135->136). The conditional terminal theorem lambda_unique_of_factors and the entire CauchyND_Closure layer are SORRY-FREE. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 (README + lean_card.svg) which is UNCHANGED; Lambda remains Conjecture 1; the internal Conjecture->Theorem flip did NOT occur (theorem is false under current axioms). No public claim flipped. Signed-off-by: Lambda-Closure Lead <lambda-closure@szlholdings.ai>",
+  "note": "DRIFT-GATE baseline CUMULATIVE for main after PR #181 (round12, +19 decl/+36 raw) AND this PR #182 (round13 Cauchy_ND closure, +21 decl/+1 raw). Base main post-#181 = 813/15/14/227/171; #182 delta = +21 declarations (12 in Lutar/Round13/CauchyND_Closure.lean, 9 in Lutar/Round13/Lambda_Uniqueness.lean), +0 axioms (axioms_unique STAYS 14, identical 14-name set, NO new/removed axiom), +1 sorry (exactly ONE honest tagged open obligation: FACTORIZATION_AXIOM_GAP in lambda_unique, needs A6 bisymmetry; FALSE under A1-A5 per maxAgg_ne_Lambda counterexample). The conditional terminal theorem lambda_unique_of_factors and the entire CauchyND_Closure layer are SORRY-FREE. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 which is UNCHANGED; Lambda remains Conjecture 1; the internal Conjecture->Theorem flip did NOT occur (theorem is false under current axioms). Recomputed by Math PR Landing Squad (Opus 4.8) to reflect the cumulative main tree so the drift gate stays truthfully green. Signed-off-by: Math PR Landing Squad <math-pr-landing@szlholdings.ai>",
   "numbers": {
-    "declarations": 815,
+    "declarations": 834,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,9 +26,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 192,
-    "sorries_noncomment": 174,
+    "sorries_raw": 228,
+    "sorries_noncomment": 208,
     "sorries_putnam": 56,
-    "sorries_baseline": 136
+    "sorries_baseline": 172
   }
 }
