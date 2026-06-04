@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "round9/monotone-continuous",
-  "sha": "PENDING-175b",
+  "ref": "round9/vcg-cauchynd",
+  "sha": "PENDING-172",
   "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by Lean Backlog Wave-2 for PR #175. Rebased onto main after #142/#150/#155/#156 (843 decl). Adds Lutar/Innovations/round9/MonotoneContinuous.lean (+5 decl, 0 sorry, 0 new axiom; staged round9 innovation outside locked v11 kernel). axioms_unique STAYS 14. Public Doctrine v11 749/14/163 UNCHANGED; Lambda Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #172 (round9: VCG truthfulness + Cauchy_ND closure scaffold). Rebased onto current main (848 decl). Adds Lutar/Innovations/round9/VCGTruthfulness.lean (+12 declarations, 0 sorry \u2014 vcgDominantStrategyTruth and vcgIndividualRationality closed with real Mathlib v4.13.0 proofs) and Lutar/Innovations/round9/CauchyNDClosure.lean (+1 declaration, +14 sorry-token occurrences of which most are in the honest documentation ledger; +3 noncomment). Staged round9 innovations OUTSIDE the locked v11 kernel. 0 new axioms; axioms_unique STAYS 14, identical 14-name set. Public Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 848,
+    "declarations": 861,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,8 +26,8 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 224,
-    "sorries_noncomment": 207,
+    "sorries_raw": 238,
+    "sorries_noncomment": 210,
     "sorries_putnam": 56,
     "sorries_baseline": 172
   }
