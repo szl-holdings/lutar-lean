@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "feat/innovations-round5",
-  "sha": "PENDING-165",
+  "ref": "feat/anatomy-round9-instill",
+  "sha": "PENDING-170",
   "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by Lean Backlog Wave-2 for PR #165. Rebased onto current main (988 decl). Round5 Emerald Codex: 10 orphan formula files under Lutar/Innovations/round5/. +22 declarations, +8 sorry tokens (honest documented proof-deferrals in orphan files NOT compiled by lake build). Staged innovation OUTSIDE locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #170. Rebased onto current main (1010 decl). Round9 anatomy killer formulas: 7 orphan organ-system files under Lutar/Innovations/round9/. +30 declarations, +10 sorry tokens (honest documented proof-deferrals in orphan files NOT compiled by lake build). Staged innovation OUTSIDE locked v11 kernel. 0 new axioms; axioms_unique STAYS 14. Doctrine v11 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 1010,
+    "declarations": 1040,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,8 +26,8 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 261,
-    "sorries_noncomment": 233,
+    "sorries_raw": 271,
+    "sorries_noncomment": 242,
     "sorries_putnam": 56,
     "sorries_baseline": 172
   }
