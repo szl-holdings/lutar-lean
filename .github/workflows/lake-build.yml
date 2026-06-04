@@ -68,8 +68,23 @@ jobs:
           esac
           lake --version
 
-      - name: Generate lake-manifest.json (lake update -R)
-        run: lake update -R
+      - name: Use committed lake-manifest.json (pinned, reproducible)
+        run: |
+          set -euo pipefail
+          # ROOT CAUSE of the prior red build (Mathlib version skew):
+          # `lake update -R` re-resolved the floating dependency branches
+          # (batteries/aesop/Qq/... tracked on main/master in the transitive
+          # graph), pulling revisions that require a newer Lean than the v4.13.0
+          # toolchain — Mathlib + deps no longer agreed and the build broke.
+          # The committed lake-manifest.json already pins the exact known-good
+          # revisions for v4.13.0 (Mathlib d7317655 @ v4.13.0). Build against
+          # the committed manifest; do NOT re-resolve it.
+          test -f lake-manifest.json || { echo "::error::lake-manifest.json missing"; exit 1; }
+          MROW=$(grep -A4 '"name": "mathlib"' lake-manifest.json | grep -o 'v4\.13\.0' | head -1 || true)
+          if [ "$MROW" != "v4.13.0" ]; then
+            echo "::error::mathlib manifest pin is not v4.13.0 (got '$MROW')"; exit 1
+          fi
+          echo "manifest pins mathlib @ v4.13.0 — OK"
 
       # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
       # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,
