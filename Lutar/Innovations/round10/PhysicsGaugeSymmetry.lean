@@ -106,7 +106,7 @@ def IsSymmetric (Λ : Lutar.Aggregator k) : Prop :=
 
 /-- **THE BRIDGE.** Gauge invariance of the receipt aggregator is definitionally
 equivalent to the proposed A5 symmetry axiom: adopting A5 is exactly demanding
-that Λ be a gauge-invariant observable. A genuine, complete theorem. -/
+that Λ be a gauge-invariant observable. This gauge-symmetry theorem is proven (Iff.rfl); note: Λ-uniqueness (Conjecture 1) remains unproven. -/
 theorem gauge_iff_symmetric (Λ : Lutar.Aggregator k) :
     GaugeInvariant Λ ↔ IsSymmetric Λ := Iff.rfl
 
