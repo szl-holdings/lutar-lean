@@ -1,5 +1,7 @@
 {
   "_about": "DSSE-shaped IQ-gate receipts for szl-holdings/lutar-lean. Envelopes reference real Lean theorems at real GitHub blob SHAs at commit 7ec70ba760f3953db34738e8805d67c6cc64bd7e. Signatures are honestly labeled placeholders until Wire-D real signing lands.",
+  "doctrine": "v11",
+  "lambda_uniqueness": "Conjecture 1 — NOT a theorem (Λ-Aggregator Uniqueness; sorry-tagged in Lutar/Uniqueness.lean)",
   "doctrine_version": "v11",
   "concept_doi": "10.5281/zenodo.19944926",
   "commit_sha": "7ec70ba760f3953db34738e8805d67c6cc64bd7e",
