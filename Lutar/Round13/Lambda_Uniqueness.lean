@@ -148,8 +148,22 @@ noncomputable def maxAgg : Aggregator 2 := fun x => x 0 ⊔ x 1
 /-- `maxAgg` is permutation-invariant (A5). CLOSED VIA `sup_comm` on the swap. -/
 theorem maxAgg_A5 : IsPermutationInvariant maxAgg := by
   intro x σ
-  -- on `Fin 2` a permutation is either id or the swap; both leave `x0 ⊔ x1` fixed
-  fin_cases σ <;> simp [maxAgg, sup_comm, Function.comp]
+  simp only [maxAgg, Function.comp]
+  -- goal: x (σ 0) ⊔ x (σ 1) = x 0 ⊔ x 1.  A permutation of `Fin 2` either fixes or swaps the
+  -- two indices; in both cases the unordered pair {σ 0, σ 1} = {0, 1}, so the sup is unchanged.
+  -- σ 0 ≠ σ 1 (injective); on Fin 2 this forces {σ 0, σ 1} = {0,1}.
+  have h01 : σ 0 ≠ σ 1 := fun h => by simpa using σ.injective h
+  have hpair : (σ 0 = 0 ∧ σ 1 = 1) ∨ (σ 0 = 1 ∧ σ 1 = 0) := by
+    -- decide over the (≤2)² possible value pairs using their `.val` in `{0,1}`.
+    have v0 := (σ 0).isLt; have v1 := (σ 1).isLt
+    have hne : (σ 0).val ≠ (σ 1).val := fun h => h01 (Fin.ext h)
+    have : (σ 0).val = 0 ∧ (σ 1).val = 1 ∨ (σ 0).val = 1 ∧ (σ 1).val = 0 := by omega
+    rcases this with ⟨a, b⟩ | ⟨a, b⟩
+    · exact Or.inl ⟨Fin.ext (by simpa using a), Fin.ext (by simpa using b)⟩
+    · exact Or.inr ⟨Fin.ext (by simpa using a), Fin.ext (by simpa using b)⟩
+  rcases hpair with ⟨a, b⟩ | ⟨a, b⟩
+  · rw [a, b]
+  · rw [a, b, sup_comm]
 
 /-- `maxAgg` satisfies the A3 diagonal commitment. CLOSED VIA `sup_idem`. -/
 theorem maxAgg_A3 : ∀ c : NNReal, maxAgg (fun _ => c) = c := by
@@ -181,12 +195,13 @@ theorem maxAgg_ne_Lambda : maxAgg ≠ Λ 2 := by
     have hprod : (∏ i, (![4, 1] : Axes 2) i) = 4 := by
       simp [Fin.prod_univ_two]
     rw [hprod]
-    -- 4 ^ (1/2) = 2  in ℝ≥0
-    have : (4 : NNReal) ^ ((1 : ℝ) / (2 : ℝ)) = 2 := by
-      rw [show (4 : NNReal) = 2 ^ (2 : ℕ) by norm_num,
-          ← NNReal.rpow_natCast (2 : NNReal) 2, ← NNReal.rpow_mul]
-      norm_num
-    rw [this]
+    -- goal: (4:ℝ≥0) ^ ((1:ℝ)/((2:ℕ):ℝ)) = 2.  Rewrite 4 = 2^2 and collapse the rpow.
+    rw [show (4 : NNReal) = (2 : NNReal) ^ (2 : ℕ) by norm_num,
+        ← NNReal.rpow_natCast (2 : NNReal) 2, ← NNReal.rpow_mul]
+    -- exponent (2:ℝ) * ((1:ℝ)/((2:ℕ):ℝ)) = 1, then 2^(1:ℝ) = 2
+    have hexp : ((2 : ℕ) : ℝ) * ((1 : ℝ) / ((2 : ℕ) : ℝ)) = 1 := by
+      push_cast; ring
+    rw [hexp, NNReal.rpow_one]
   rw [hL, hR] at hx
   -- 4 = 2 is false
   exact absurd hx (by norm_num)
