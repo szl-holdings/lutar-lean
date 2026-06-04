@@ -75,6 +75,8 @@ import Lutar.LambdaPermInvariant
 -- Λ stays Conjecture 1; no public claim flipped; axioms_unique stays 14.
 import Lutar.Round13.CauchyND_Closure
 import Lutar.Round13.Lambda_Uniqueness
+-- round14: Cauchy_ND closure Strategy B (cancellative cone; 0 new axioms, 2 named sorries)
+import Lutar.Round14.Strategy_B
 
 
 /-!
