@@ -76,6 +76,14 @@ import Lutar.LambdaPermInvariant
 import Lutar.Round13.CauchyND_Closure
 import Lutar.Round13.Lambda_Uniqueness
 
+-- Round-10 Innovations sprint: quantum-mechanical formalisms (PhD Quantum).
+-- Additive/experimental (Innovations/round10/); excluded from the locked v11 baseline.
+import Lutar.Innovations.round10.QuantumPQReceipts
+import Lutar.Innovations.round10.QuantumHolevoReceipt
+import Lutar.Innovations.round10.QuantumKitaevReceiptStream
+import Lutar.Innovations.round10.QuantumZKDoctrine
+import Lutar.Innovations.round10.QuantumNoCloningA5
+
 
 /-!
 # Lutar — root module
