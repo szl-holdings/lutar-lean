@@ -5,7 +5,7 @@
 --   Lutar/Invariant.lean. Runtime: amaru /api/amaru/v1/math/lean/theorems (live
 --   theorem/axiom/sorry counts), /v1/formulas (lambda_aggregate, proof_status
 --   "PROVEN(A1-A4); uniqueness CONJECTURE").
--- DOCTRINE INVARIANT: Λ is CONJECTURE 1 — NEVER a theorem. 749/14/163 LOCKED.
+-- DOCTRINE INVARIANT: Λ is Conjecture 1 — NOT a theorem. 749/14/163 LOCKED.
 -- ADDITIVE — not imported into Lutar.lean; does NOT touch the locked kernel.
 -- Signed-off-by: Yachay <yachay@szlholdings.ai>
 -- Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
