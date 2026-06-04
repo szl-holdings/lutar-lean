@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "feat/round13-lambda-closure",
-  "sha": "abd58d159f1bdb79a017d71a6b94ab160ead8d9d",
-  "measured_at_utc": "2026-06-03T22:10:00Z",
+  "ref": "feat/sbom-canonenc-injective",
+  "sha": "PENDING-150",
+  "measured_at_utc": "2026-06-04T00:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "DRIFT-GATE baseline CUMULATIVE for main after PR #181 (round12, +19 decl/+36 raw) AND this PR #182 (round13 Cauchy_ND closure, +21 decl/+1 raw). Base main post-#181 = 813/15/14/227/171; #182 delta = +21 declarations (12 in Lutar/Round13/CauchyND_Closure.lean, 9 in Lutar/Round13/Lambda_Uniqueness.lean), +0 axioms (axioms_unique STAYS 14, identical 14-name set, NO new/removed axiom), +1 sorry (exactly ONE honest tagged open obligation: FACTORIZATION_AXIOM_GAP in lambda_unique, needs A6 bisymmetry; FALSE under A1-A5 per maxAgg_ne_Lambda counterexample). The conditional terminal theorem lambda_unique_of_factors and the entire CauchyND_Closure layer are SORRY-FREE. SEPARATE from the LOCKED PUBLIC Doctrine v11 constant 749/14/163 which is UNCHANGED; Lambda remains Conjecture 1; the internal Conjecture->Theorem flip did NOT occur (theorem is false under current axioms). Recomputed by Math PR Landing Squad (Opus 4.8) to reflect the cumulative main tree so the drift gate stays truthfully green. Signed-off-by: Math PR Landing Squad <math-pr-landing@szlholdings.ai>",
+  "note": "Rolled forward by Lean Backlog Wave-2 for PR #150 (P2-IQT-CANONENC-FRAMING closure). Rebased onto main @ f75576fd (834 decl baseline). Delta: +3 declarations (bytesToChars, bytesToChars_charsToBytes, string_bytes_injective helpers in Lutar/SBOMProvenance.lean) and -1 sorry (canonicalEncoding_injective is now a CONSTRUCTIVE proof via length-prefix peeling + left-inverse, replacing the prior sorry; the prior NUL-separated encoding was non-injective). axioms_unique STAYS 14, IDENTICAL 14-name set, NO new/removed axiom. Public Doctrine v11 constant 749/14/163 UNCHANGED; Lambda remains Conjecture 1. Signed-off-by: Lean Backlog Wave-2 <lean-backlog-wave2@szlholdings.ai>",
   "numbers": {
-    "declarations": 834,
+    "declarations": 837,
     "axioms_raw": 15,
     "axioms_unique": 14,
     "axiom_names": [
@@ -26,7 +26,7 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 228,
+    "sorries_raw": 227,
     "sorries_noncomment": 208,
     "sorries_putnam": 56,
     "sorries_baseline": 172
