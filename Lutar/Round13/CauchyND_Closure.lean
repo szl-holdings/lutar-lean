@@ -90,7 +90,8 @@ theorem monotone_additive_linear
     · push_cast
       have hgneg : g (-(↑(n + 1) : ℝ)) = -(g ↑(n + 1)) := by
         have h := hg_add (↑(n + 1) : ℝ) (-(↑(n + 1) : ℝ))
-        simp at h; linarith [hg0]
+        rw [add_neg_cancel, hg0] at h
+        linarith
       rw [show -(↑n + 1 : ℝ) = -(↑(n + 1) : ℝ) by push_cast; ring,
           hgneg, hg_nat (n + 1)]
       push_cast; ring
