@@ -6,14 +6,14 @@
 
 A15 formalises the Lutar topology layer using persistent homology. The primary
 object is the H₀ Betti number (connected component count) as a function of the
-Rips filtration parameter Λ. All theorems target Lean 4 + Mathlib.
+Rips filtration parameter Λ (note: Λ-uniqueness is Conjecture 1 — NOT a theorem). All Lean 4 + Mathlib lemmas target:
 
 ## Per-Theorem Status Table
 
 | # | Theorem / Lemma | File | Status | Method | References |
 |---|----------------|------|--------|--------|-----------|
 | PH1 | `componentCount_antitone` | `PersistentHomologyChain.lean` | ✅ PROVED | `Fintype.card_le_of_injective` | ELZ 2002 §3 |
-| PH2 | `h0_at_lambda_threshold` | `PersistentHomologyChain.lean` | ✅ PROVED | `Fintype.card_le_of_injective` | ELZ 2002, Theorem 3 |
+| PH2 | `h0_at_lambda_threshold` | `PersistentHomologyChain.lean` | ✅ PROVED | `Fintype.card_le_of_injective` | ELZ 2002 §3 (h0-at-Λ-threshold; references an ELZ proposition, NOT the Λ-uniqueness Conjecture) |
 | PH3 | `h0_euler_bound` | `PersistentHomologyChain.lean` | ✅ PROVED | `omega` | Euler formula |
 | PH4 | `h0_zero_threshold_isolated` | `PersistentHomologyChain.lean` | ✅ PROVED | `ext` + `linarith` | isolation at Λ=0 |
 | PH5 | `persistence_nonneg` | `PersistentHomologyChain.lean` | ✅ PROVED | `linarith` | birth ≤ death |
