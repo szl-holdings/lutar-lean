@@ -233,7 +233,7 @@ The central conjecture of the Knot Calculus chapter (v15 §III.3, v16 §III.3):
 Λ is invariant under the three audit-Reidemeister moves R1, R2, R3.
 
 We model this as a predicate on a finite fiber: all executions in the fiber
-have equal Λ. This is the form needed for the fiber-collapse theorem below.
+have equal Λ. This is the form needed for the fiber-collapse lemma below.
 
 Structural analogy: gauge invariance in quantum field theory — the
 Faddeev–Popov procedure shows that gauge-equivalent paths have equal
@@ -245,7 +245,7 @@ over gauge-fixed configurations (one representative per orbit).
     all executions in the fiber achieve the same Λ value.
 
     This is the FINITE form of the conjecture (sufficient for the
-    fiber-collapse theorem). The full conjecture (that audit-Reidemeister
+    fiber-collapse lemma). The full conjecture (that audit-Reidemeister
     moves preserve Λ pointwise) implies this predicate for every receipt type. -/
 def ReidemeisterInvariant (fiber : Finset Execution) : Prop :=
   ∀ e₁ ∈ fiber, ∀ e₂ ∈ fiber, execLambda e₁ = execLambda e₂
