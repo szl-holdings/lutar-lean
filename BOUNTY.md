@@ -9,7 +9,7 @@
 > Lean 4 proof. Until that proof lands, `main` of the bounty repo *intentionally*
 > fails its proof gate — that red state is the public signal Conjecture 1 is still open.
 
-- **Doctrine:** v12 — 749 declarations · 14 unique axioms · 163 sorries · `locked_at c7c0ba17`
+- **Doctrine:** v11 — 749 declarations · 14 unique axioms · 163 sorries · `locked_at c7c0ba17`
 - **Formula:** F23 — Λ-aggregator soundness / 9-axis geometric-mean uniqueness
 - **Open obligation:** `Lutar/Uniqueness.lean:120` (`CAUCHY_ND` residual) + missing symmetry axiom
 - **Submission repo (working intake + CI arbiter):** <https://github.com/szl-holdings/lambda-bounty>
@@ -97,4 +97,4 @@ is classic aggregation theory; this conjecture is our concrete Lean formalizatio
 the mesh's apex aggregator. The bounty exists precisely so the community can turn
 Conjecture 1 into a theorem **honestly, under public axiom audit**.
 
-*Sign: Yachay <yachay@szlholdings.dev> · Doctrine v12 · Co-Authored-By: Perplexity Computer Agent*
+*Sign: Yachay <yachay@szlholdings.dev> · Doctrine v11 · Co-Authored-By: Perplexity Computer Agent*
