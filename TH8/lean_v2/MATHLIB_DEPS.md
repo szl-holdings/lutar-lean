@@ -166,7 +166,7 @@ once those hypotheses are replaced by standalone lemmas.
 
 ## 6. Internal Lemmas Needed (Not Mathlib)
 
-These are GΛR-specific lemmas that must be proved within the `Lutar.GLR` namespace before the residual sorry-bearing theorems can be fully closed without additional hypotheses.
+These are GΛR-specific lemmas that must be proved within the `Lutar.GLR` namespace before the residual sorry-bearing proofs can be fully closed without additional hypotheses.
 
 | Lemma | File | Statement Sketch | Needed By | Estimated Effort |
 |---|---|---|---|---|
