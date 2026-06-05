@@ -48,6 +48,27 @@ References:
 - PHASE3_FINAL_SUMMARY.md (2026-06-02) Gate 6: conjunctiveGateCounterexample
 - Aczél, J. (1966). Lectures on Functional Equations. Academic Press. Thm 5.1.
 - Hardy, G.H., Littlewood, J.E., Pólya, G. (1934). Inequalities. §2.18.
+
+## Axiom provenance / v3 drift disclosure (HONESTY — do not remove)
+
+The axiom *names* A1..A5 are stable, but two axioms changed MEANING between the
+v3 Zenodo deposit and current HEAD (`c7c0ba17`, v14+). A reader comparing the
+published v3 paper to this file MUST know the definitions differ:
+
+| Axiom | v3 deposit (Zenodo 10.5281/zenodo.19983066, 2026-05-02) | Current HEAD (this file) |
+|-------|----------------------------------------------------------|--------------------------|
+| A2    | "zero-pinning" (Λ(...,0,...) = 0)                          | **Positive homogeneity, deg 1** (`IsHomogeneous`) |
+| A4    | "page-curve concavity"                                    | **Bounded by max axis** (`IsBounded`) |
+
+These are mathematically DISTINCT properties. **The v3 paper's proof claims were
+verified against the v3 axiom set; they do NOT automatically carry over to the
+current A2/A4 definitions without re-verification.** This is consistent with the
+broader honesty posture: Λ-uniqueness is **Conjecture 1, never a theorem**, and
+the four non-symmetry axioms alone do not pin Λ uniquely — A2 (1-homogeneity)
+is the load-bearing axiom, and A5 (permutation invariance) is also necessary
+(see the A5 counterexample above). Lean proofs in `Lutar/Uniqueness.lean` carry
+tracked `sorry`s for the open Cauchy step; the bounty repo `szl-holdings/lambda-
+bounty` is the public intake for a complete machine-checked proof.
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Data.NNReal.Basic
