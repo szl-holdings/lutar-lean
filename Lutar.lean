@@ -75,6 +75,13 @@ import Lutar.LambdaPermInvariant
 -- Λ stays Conjecture 1; no public claim flipped; axioms_unique stays 14.
 import Lutar.Round13.CauchyND_Closure
 import Lutar.Round13.Lambda_Uniqueness
+-- PURIQ proved-formula pack (zero sorry, Mathlib-free): F1/F11/F12/F18/F19
+-- (original sprint) + F4/F7/F22 (append-only/DAG/FIFO sprint 2026-06-04). Wiring
+-- this into `lake build` makes CI kernel-check every PROVED PURIQ formula. The 15
+-- still-open PURIQ formulas remain in Lutar/Puriq/Formulas/PuriqFormulaLean.lean
+-- (NOT imported — it carries honest `sorry` placeholders). No new axiom; the
+-- locked v11 count (749/14/163) is unchanged (this scope is counter-excluded).
+import Lutar.Puriq.Formulas.ProvedFormulas
 
 
 /-!

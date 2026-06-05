@@ -13,7 +13,7 @@
 - **Formula:** F23 — Λ-aggregator soundness / 9-axis geometric-mean uniqueness
 - **Open obligation:** `Lutar/Uniqueness.lean:120` (`CAUCHY_ND` residual) + missing symmetry axiom
 - **Submission repo (working intake + CI arbiter):** <https://github.com/szl-holdings/lambda-bounty>
-- **Live submission webhook:** `POST https://szlholdings-a11oy.hf.space/api/lambda-bounty/submit` (intake receiver — see [`lambda-bounty/webhook/`](https://github.com/szl-holdings/lambda-bounty/tree/main/webhook))
+- **Live submission webhook:** `POST https://szlholdings-a11oy.hf.space/api/lambda-bounty/submit` — **live** intake receiver (also `GET …/healthz` and `GET …/receipts`); see [`lambda-bounty/webhook/`](https://github.com/szl-holdings/lambda-bounty/tree/main/webhook). A receipt acknowledges **intake only**; eligibility is decided solely by `verify-proof` CI on a PR.
 
 ---
 
@@ -88,6 +88,21 @@ Two equivalent intake paths — both produce a hash-chained **Khipu intake recei
    intake only — eligibility is still decided solely by `verify-proof` CI on a PR.**
 
 ---
+
+## Soundness caveat (honest, for judges)
+
+The four axioms **A1–A4 alone do not single out the geometric mean**: `min` satisfies
+all four (idempotent, monotone, symmetric, zero-absorbing) yet `min ≠ geometric mean`.
+This is classical (Aczél 1966; Kolmogorov–Nagumo–de Finetti 1930–31; `min` is the
+unique idempotent t-norm). So Conjecture 1 *in this literal A1–A4 form is refuted by
+the `min` counterexample*. A **provable** uniqueness theorem additionally needs
+**continuity + bisymmetry/associativity + homogeneity (or multiplicativity)**, after
+which the n-D Cauchy step (`CAUCHY_ND`) closes the argument. Whether to tighten the
+published axiom set (adding A5 bisymmetry / A6 continuity / A7 homogeneity) is a
+**founder decision**. Until then the bounty stands as an honest open problem under
+public axiom audit, and the `verify-proof` gate stays red. The live Λ endpoint reports
+the 13-axis operational aggregate; the conjecture is stated for the general n-axis
+(here 9-axis) form — the uniqueness question is independent of the axis count.
 
 ## Provenance honesty
 
