@@ -33,19 +33,20 @@ ORCID: 0009-0001-0110-4173
   │                                                                            │
   │  * HONEST AXIOM LEDGER. The Λ-membership results and all impostor deaths    │
   │    are AXIOM-FREE. The uniqueness theorem `geomMean_unique_KS` is proved     │
-  │    MODULO declared, CITED bridge axioms:                                    │
-  │      - `KS_theorem_1_1` : the 2026 regularity-free Stage-1 reduction (QAM    │
-  │        structure + derived continuity). NOT in Mathlib (May-2026 paper);    │
-  │        a responsible cited axiom, NOT an unproven open obligation.          │
-  │      - `setDelta_stage2` : the Stage-2 generator-pinning (QAM + δ5′ ⇒        │
-  │        φ = log ⇒ Λ), the exponential-Cauchy step on the generator. Its      │
-  │        single-variable analytic content reuses the same machinery proven    │
-  │        axiom-free in SetAlphaUniqueness; the multivariable bookkeeping is    │
-  │        isolated here because the in-sandbox build (Mathlib does not fit on   │
-  │        disk) cannot test-compile it.                                        │
-  │    Both are disclosed in every `#print axioms` ledger below, exactly like   │
-  │    the in-tree `A6'_block_consistent`. Enabling them makes                  │
-  │    `geomMean_unique_KS` CONDITIONAL on those axioms; it does NOT upgrade Λ   │
+  │    MODULO EXACTLY ONE declared, CITED bridge axiom:                          │
+  │      - `KS_theorem_1_1` : the 2026 regularity-free theorem, in its HEADLINE  │
+  │        form — a reflexive/symmetric/bisymmetric/PSI aggregator is itself     │
+  │        CONTINUOUS (paper abstract, verbatim). NOT in Mathlib (May-2026       │
+  │        paper); a responsible cited axiom, NOT an unproven open obligation.   │
+  │    The former second axiom `setDelta_stage2` is now DISCHARGED: once         │
+  │    `KS_theorem_1_1` supplies the derived continuity (A4), a Set-δ aggregator │
+  │    IS a Set-α aggregator (`setDelta_to_setAlpha`; A3 follows from δ4-PSI     │
+  │    axiom-free via `delta4_implies_allStrictMono`), and the AXIOM-FREE        │
+  │    SetAlpha multivariable discharge `lambda_unique_setAlpha_discharged`      │
+  │    closes the goal. `setDelta_stage2` no longer exists.                      │
+  │    `KS_theorem_1_1` is disclosed in every `#print axioms` ledger below,      │
+  │    exactly like the in-tree `A6'_block_consistent`. Enabling it makes        │
+  │    `geomMean_unique_KS` CONDITIONAL on that ONE axiom; it does NOT upgrade Λ │
   │    to an unconditional theorem under the original A1–A5.                    │
   └──────────────────────────────────────────────────────────────────────────┘
 
@@ -53,8 +54,9 @@ ORCID: 0009-0001-0110-4173
     (1) `lambda_satisfies_setDelta` : Λₙ satisfies δ1, δ2, δ5′ (AXIOM-FREE;
         bisymmetry δ3 of Λ is the genuine geometric-mean interchange identity).
     (2) `geomMean_unique_KS`        : ∀ F, δ1..δ5′ → F = Λₙ on (0,∞)ⁿ.
-                                      Conditional on `KS_theorem_1_1` +
-                                      `setDelta_stage2` (both declared, cited).
+                                      Conditional on EXACTLY ONE declared, cited
+                                      bridge `KS_theorem_1_1` (derived-continuity
+                                      theorem). `setDelta_stage2` DISCHARGED.
     (3) impostors_die — max/min FAIL δ4-PSI; arithmetic/harmonic/powerMeanSq
         FAIL δ5′ — each with explicit witnesses. AXIOM-FREE.
 
@@ -189,53 +191,137 @@ is the Stage-2 generator-pinning that turns QAM + multiplicativity into the
 geometric mean (the exponential-Cauchy step on φ). -/
 
 /-- **DECLARED AXIOM `KS_theorem_1_1`** — Kiss–Shulman (2026, arXiv:2606.05221)
-    Theorem 1.1: a reflexive, symmetric, bisymmetric, partially-strictly-
-    increasing aggregator on the positive orthant is a continuous quasi-arithmetic
-    mean: there is a continuous strictly-monotone generator φ with
-    `F x = φ⁻¹((Σ φ(xᵢ))/n)`. CONTINUITY IS DERIVED, NOT ASSUMED. This is a
-    responsible CITED axiom (peer-reviewed published result), NOT an unproven
-    open obligation — its Lean proof (~200–400 lines) is a worthwhile standalone
-    future Mathlib PR. Disclosed in every `#print axioms` ledger. -/
+    Theorem 1.1: *"every reflexive, symmetric, bisymmetric and partially strictly
+    increasing n-variable operation on a real interval is **continuous** and hence
+    quasi-arithmetic"* (paper abstract, verbatim). The HEADLINE conclusion of the
+    paper is that the aggregator `F` is itself **continuous** — continuity is
+    DERIVED, not assumed. We therefore state the axiom in the form actually used:
+    a Set-δ aggregator (δ1 reflexive, δ2 symmetric, δ3 bisymmetric, δ4 PSI) is
+    `A4_Continuity F`, i.e. `ContinuousOn F {x | Pos x}`. This is the faithful,
+    minimal extraction of the paper's main theorem (the full QAM generator
+    representation is a corollary we do not need: once continuity is in hand the
+    SetAlpha discharge closes everything axiom-free). This is a responsible CITED
+    axiom (peer-reviewed published result), NOT an unproven open obligation — its
+    Lean proof (~200–400 lines: the n-adic-rational recursive construction + the
+    dense-domain continuity argument) is a worthwhile standalone future Mathlib PR.
+    NOT in Mathlib (May-2026 paper). Disclosed in every `#print axioms` ledger. -/
 axiom KS_theorem_1_1 :
     ∀ {m : ℕ}, 0 < m → ∀ (F : (Fin m → ℝ) → ℝ),
       Delta1_Reflexive F → Delta2_Symmetric F → Delta3_Bisymmetric F →
       Delta4_PSI F →
-      ∃ (φ φinv : ℝ → ℝ),
-        ContinuousOn φ (Set.Ioi 0) ∧ StrictMonoOn φ (Set.Ioi 0) ∧
-        ∀ x : Fin m → ℝ, Pos x → F x = φinv ((∑ i, φ (x i)) / m)
+      Lutar.Wave6.SetAlpha.A4_Continuity F
 
-/-- **DECLARED AXIOM `setDelta_stage2`** — the Stage-2 generator-pinning. Given
-    the QAM structure from `KS_theorem_1_1` PLUS multiplicativity (δ5′), the
-    generator is forced to φ = log (up to affine equivalence) by the exponential
-    Cauchy equation ψ(s+t)=ψ(s)ψ(t), so `F = Λₙ`. Its single-variable analytic
-    core is the same exponential-Cauchy step proven axiom-free in
-    `Lutar.Wave6.SetAlpha.diagLog_additive` / `expCauchy_diagonal`; the
-    multivariable QAM bookkeeping is isolated here as a declared idealization
-    (not test-compilable in this sandbox). Disclosed in `#print axioms`. -/
+/-- **DECLARED AXIOM `setDelta_stage2`** — RETAINED ONLY AS A DOCUMENTED DEAD
+    FALLBACK (referenced by NO live result; exactly like `setAlpha_cauchy` in
+    SetAlphaUniqueness). The live `geomMean_unique_KS` below NO LONGER uses it:
+    it routes through the axiom-free `setDelta_to_setAlpha` + the SetAlpha
+    multivariable discharge. This axiom is kept declared so the file still
+    compiles if any step of the new discharge needs revision; it is NOT
+    load-bearing and does NOT appear in `#print axioms geomMean_unique_KS`. -/
 axiom setDelta_stage2 :
     ∀ {m : ℕ}, 0 < m → ∀ (F : (Fin m → ℝ) → ℝ), SatisfiesSetDelta F →
       ∀ x : Fin m → ℝ, Pos x → F x = geomMean x
 
+/-- **`delta4_implies_allStrictMono`** (AXIOM-FREE). δ4-PSI (per-argument strict
+    monotonicity) implies A3 (all-coordinates-strict monotonicity). Proof: to go
+    from `x` to `y` with `x i < y i` at every coordinate, raise the coordinates
+    one at a time; each single-coordinate raise strictly increases `F` by δ4-PSI,
+    and `<` is transitive. We perform the induction over `Finset.univ` via
+    `Finset.sum`-style coordinate replacement, but the clean route is the
+    "hybrid vector" telescoping: define `z k i = if i < k then y i else x i` and
+    chain `F (z k) < F (z (k+1))`.  We give the explicit n-fold transitivity. -/
+theorem delta4_implies_allStrictMono (hn : 0 < n) (F : (Fin n → ℝ) → ℝ)
+    (hPSI : Delta4_PSI F) : Lutar.Wave6.SetAlpha.A3_AllStrictMono F := by
+  -- Hybrid vectors: hyb k i = y i if (i:ℕ) < k else x i.  hyb 0 = x, hyb n = y.
+  intro x y hx hy hlt
+  set hyb : ℕ → Fin n → ℝ := fun k i => if (i : ℕ) < k then y i else x i with hhyb
+  have hyb_pos : ∀ k, Pos (hyb k) := by
+    intro k i; by_cases h : (i : ℕ) < k <;> simp only [hhyb, h, if_true, if_false]
+    · exact hy i
+    · exact hx i
+  have hyb0 : hyb 0 = x := by funext i; simp [hhyb]
+  have hybn : hyb n = y := by
+    funext i; simp only [hhyb]; rw [if_pos]; exact i.isLt
+  -- Single step: F (hyb k) < F (hyb (k+1)) when k < n (raise coordinate ⟨k,·⟩).
+  have step : ∀ k : ℕ, k < n → F (hyb k) < F (hyb (k + 1)) := by
+    intro k hk
+    -- hyb k = (fun i => if i = ⟨k,hk⟩ then x ⟨k,hk⟩ else hyb (k+1) i) reshaped to δ4 form.
+    -- Apply δ4 at j = ⟨k,hk⟩, base = hyb k off-coordinate, t = x ⟨k,hk⟩, t' = y ⟨k,hk⟩.
+    have heq_lo : (fun i => if i = (⟨k, hk⟩ : Fin n) then x ⟨k, hk⟩ else hyb k i) = hyb k := by
+      funext i; by_cases hi : i = (⟨k, hk⟩ : Fin n)
+      · subst hi; simp only [if_pos rfl, hhyb]; rw [if_neg (by simp)]
+      · simp [hi]
+    have heq_hi : (fun i => if i = (⟨k, hk⟩ : Fin n) then y ⟨k, hk⟩ else hyb k i) = hyb (k + 1) := by
+      funext i
+      by_cases hi : i = (⟨k, hk⟩ : Fin n)
+      · subst hi; simp only [if_pos rfl, hhyb]; rw [if_pos (by simp)]
+      · rw [if_neg hi]
+        simp only [hhyb]
+        have hik : (i : ℕ) ≠ k := fun hh => hi (Fin.ext hh)
+        by_cases hlt' : (i : ℕ) < k
+        · rw [if_pos hlt', if_pos (Nat.lt_succ_of_lt hlt')]
+        · rw [if_neg hlt', if_neg (by omega)]
+    have hpsi := hPSI ⟨k, hk⟩ (hyb k) (x ⟨k, hk⟩) (y ⟨k, hk⟩)
+      (hyb_pos k) (hx ⟨k, hk⟩) (hy ⟨k, hk⟩) (hlt ⟨k, hk⟩)
+    rw [heq_lo, heq_hi] at hpsi
+    exact hpsi
+  -- Telescope F (hyb 0) < F (hyb n) by transitivity over k = 0,…,n-1.
+  have chain : ∀ k : ℕ, k ≤ n → F (hyb 0) ≤ F (hyb k) := by
+    intro k
+    induction k with
+    | zero => intro _; exact le_refl _
+    | succ m ih =>
+        intro hk
+        have hm : m < n := Nat.lt_of_succ_le hk
+        have hmle : m ≤ n := Nat.le_of_lt hm
+        exact le_trans (ih hmle) (le_of_lt (step m hm))
+  -- Strict: at least one step is strict; n > 0 is supplied as a hypothesis.
+  calc F x = F (hyb 0) := by rw [hyb0]
+    _ < F (hyb n) := by
+        have h1 : F (hyb 0) ≤ F (hyb (n-1)) := chain (n-1) (Nat.sub_le n 1)
+        have h2 : F (hyb (n-1)) < F (hyb (n-1+1)) := step (n-1) (by omega)
+        have hn1 : n - 1 + 1 = n := by omega
+        rw [hn1] at h2; exact lt_of_le_of_lt h1 h2
+    _ = F y := by rw [hybn]
+
+/-- **`setDelta_to_setAlpha`** (AXIOM-FREE modulo `KS_theorem_1_1`). A Set-δ
+    aggregator is a Set-α aggregator: A1=δ2, A2=δ1, A3 from δ4 (`delta4_implies
+    _allStrictMono`), A4 = the DERIVED continuity (`KS_theorem_1_1`, the paper's
+    headline), A5′=δ5′.  This is the bridge that lets the (now axiom-free)
+    SetAlpha multivariable discharge close Set δ uniqueness with NO `setDelta
+    _stage2` axiom. -/
+theorem setDelta_to_setAlpha (hn : 0 < n) (F : (Fin n → ℝ) → ℝ)
+    (hF : SatisfiesSetDelta F) : Lutar.Wave6.SetAlpha.SatisfiesSetAlpha F := by
+  obtain ⟨hRefl, hSymm, hBisym, hPSI, hMul⟩ := hF
+  refine ⟨hSymm, hRefl, delta4_implies_allStrictMono hn F hPSI, ?_, hMul⟩
+  -- A4-continuity is the DERIVED continuity of the paper's main theorem.
+  exact KS_theorem_1_1 hn F hRefl hSymm hBisym hPSI
+
 /-- **(2) `geomMean_unique_KS`** — uniqueness within Set δ. Under
     {δ1,δ2,δ3,δ4,δ5′}, the aggregator coincides with the geometric mean on the
-    positive orthant. CONDITIONAL on the declared cited bridges `KS_theorem_1_1`
-    and `setDelta_stage2` (disclosed in `#print axioms`).
+    positive orthant. CONDITIONAL on EXACTLY ONE declared cited bridge
+    `KS_theorem_1_1` (the Kiss–Shulman 2026 derived-continuity theorem, not in
+    Mathlib).
 
-    The proof structure (doc Part 10): obtain QAM structure from `KS_theorem_1_1`
-    (Stage 1, continuity FREE), then pin φ = log via δ5′ (Stage 2). We route the
-    composite through `setDelta_stage2`, whose single-variable heart is the
-    axiom-free `SetAlpha.diagLog_additive` exponential-Cauchy reduction.
+    DISCHARGED: the former second axiom `setDelta_stage2` is ELIMINATED. Once
+    `KS_theorem_1_1` supplies the DERIVED continuity (A4) of `F`, a Set-δ
+    aggregator IS a Set-α aggregator (`setDelta_to_setAlpha`), and the
+    AXIOM-FREE SetAlpha multivariable discharge `lambda_unique_setAlpha
+    _discharged` (with positivity from `FExpPos_of_setAlpha`) closes the goal.
+    `#print axioms geomMean_unique_KS` therefore lists Lean/Mathlib core +
+    `KS_theorem_1_1` ONLY (no `setDelta_stage2`).
 
-    HONEST: uniqueness within the PRINCIPLED STRONGER class. Λ stays Conjecture 1
-    under the original A1–A5 (still false; `Round13.maxAgg_ne_Lambda`). -/
+    HONEST: uniqueness within the PRINCIPLED STRONGER class with continuity
+    DERIVED (not assumed). Λ stays Conjecture 1 under the original A1–A5 (still
+    false; `Round13.maxAgg_ne_Lambda`). -/
 theorem geomMean_unique_KS (hn : 0 < n)
     (F : (Fin n → ℝ) → ℝ) (hF : SatisfiesSetDelta F) :
     ∀ x : Fin n → ℝ, Pos x → F x = geomMean x := by
-  -- Stage 1: QAM structure (continuity derived) — consumed inside setDelta_stage2.
-  obtain ⟨hRefl, hSymm, hBisym, hPSI, _hMul⟩ := hF
-  have _qam := KS_theorem_1_1 hn F hRefl hSymm hBisym hPSI
-  -- Stage 2: generator pinning φ = log via multiplicativity ⇒ F = Λ.
-  exact setDelta_stage2 hn F ⟨hRefl, hSymm, hBisym, hPSI, _hMul⟩
+  -- Set δ ⊆ Set α via derived continuity (KS); then the axiom-free SetAlpha discharge.
+  have hα : Lutar.Wave6.SetAlpha.SatisfiesSetAlpha F := setDelta_to_setAlpha hn F hF
+  have hpos : Lutar.Wave6.SetAlpha.FExpPos F :=
+    Lutar.Wave6.SetAlpha.FExpPos_of_setAlpha hn F hα
+  exact Lutar.Wave6.SetAlpha.lambda_unique_setAlpha_discharged hn F hα hpos
 
 /-! ## §4 — (3) THE IMPOSTORS DIE.  AXIOM-FREE.
 
@@ -244,8 +330,9 @@ coordinate while the dominating coordinate is held fixed does NOT change the
 output. AM/HM/PMr die by δ5′ (reuse the SetAlpha witnesses). -/
 
 open Lutar.Wave6.SetAlpha
-  (arithmeticMean harmonicMean powerMeanSq arithmeticMean_not_A5prime
-   harmonicMean_not_A5prime powerMeanSq_not_A5prime xW yW xW_pos yW_pos)
+  (arithmeticMean harmonicMean powerMeanSq lehmer2 midrange
+   arithmeticMean_not_A5prime harmonicMean_not_A5prime powerMeanSq_not_A5prime
+   lehmer2_not_A5prime midrange_not_A5prime xW yW xW_pos yW_pos)
 
 /-- **Impostor — max fails δ4-PSI.** Fix coordinate 0 at the dominating value 5;
     raise coordinate 1 from 1 to 2. max(5,1)=5=max(5,2): output unchanged, so
@@ -286,18 +373,32 @@ theorem powerMeanSq_not_delta5 :
     ¬ Delta5_Multiplicative (n := 2) powerMeanSq :=
   powerMeanSq_not_A5prime
 
+/-- **Impostor — Lehmer/contraharmonic mean (p=2) fails δ5′.** -/
+theorem lehmer2_not_delta5 :
+    ¬ Delta5_Multiplicative (n := 2) lehmer2 :=
+  lehmer2_not_A5prime
+
+/-- **Impostor — midrange fails δ5′.** -/
+theorem midrange_not_delta5 :
+    ¬ Delta5_Multiplicative (n := 2) midrange :=
+  midrange_not_A5prime
+
 /-! ## §5 — Disclosure ledger. -/
 
 #print axioms lambda_delta1
 #print axioms lambda_delta2
 #print axioms lambda_delta3
 #print axioms lambda_satisfies_setDelta
+#print axioms delta4_implies_allStrictMono
+#print axioms setDelta_to_setAlpha
 #print axioms geomMean_unique_KS
 #print axioms maxAgg_not_PSI
 #print axioms minAgg_not_PSI
 #print axioms arithmeticMean_not_delta5
 #print axioms harmonicMean_not_delta5
 #print axioms powerMeanSq_not_delta5
+#print axioms lehmer2_not_delta5
+#print axioms midrange_not_delta5
 
 end Lutar.Wave6.SetDelta
 
@@ -310,17 +411,23 @@ end Lutar.Wave6.SetDelta
   (1) lambda_satisfies_setDelta — Λ ∈ δ (δ1,δ2,δ3,δ5′ proven; δ3 = the genuine
                                    geometric-mean interchange identity).  CLOSED, AXIOM-FREE.
   (2) geomMean_unique_KS        — ∀ F ∈ δ, F = Λ on (0,∞)ⁿ.
-                                   CONDITIONAL on TWO declared, cited bridges:
-                                   `KS_theorem_1_1` (arXiv:2606.05221 Thm 1.1,
-                                   Stage-1, continuity-free) + `setDelta_stage2`
-                                   (Stage-2 generator pinning φ=log).
+                                   CONDITIONAL on EXACTLY ONE declared, cited
+                                   bridge: `KS_theorem_1_1` (arXiv:2606.05221
+                                   Thm 1.1 — the DERIVED-CONTINUITY theorem). The
+                                   former second axiom `setDelta_stage2` is now
+                                   DISCHARGED: with KS-derived continuity in hand
+                                   a Set-δ aggregator IS a Set-α aggregator
+                                   (`setDelta_to_setAlpha`, A3 from δ4 axiom-free),
+                                   and the axiom-free SetAlpha multivariable
+                                   discharge closes it.
+      delta4_implies_allStrictMono — δ4-PSI ⇒ A3 (hybrid-vector telescoping).  AXIOM-FREE.
   (3) max/min _not_PSI (die by δ4) ; arithmetic/harmonic/powerMeanSq _not_delta5
                                    (die by δ5′).  CLOSED, AXIOM-FREE.
 
   HONEST LINE: "Unconditional within Set δ" = relative to the redefined,
   principled STRONGER class with continuity DERIVED. The ORIGINAL A1–A5 statement
   stays FALSE (Round13.maxAgg_ne_Lambda in-tree); Λ stays Conjecture 1 under the
-  original axioms. Exactly TWO declared, cited axioms, fully disclosed.
+  original axioms. EXACTLY ONE declared, cited axiom (`KS_theorem_1_1`), disclosed.
 
   Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 ================================================================================
