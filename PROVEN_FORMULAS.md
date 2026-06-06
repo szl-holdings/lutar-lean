@@ -7,10 +7,11 @@
 
 # Proven Formulas — the honest showcase
 
-> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly five formulas**. Everything newer is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
+> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly five formulas** — a fact itself machine-enforced by `Lutar.Wave8.AxiomDisclosure.locked_count_five` (depends on **no** axioms). On top of that locked floor, **~36 experimental theorems** are kernel-verified and **CI-green on `main` @ `7885fd9`** (waves 5/6/7/8 + agentic P1–P6 + airtight Λ + coder). Everything newer than the locked 5 is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
 
-**Toolchain:** Lean `v4.13.0` · Mathlib pinned `d7317655` (`v4.13.0`)
+**Locked-kernel toolchain:** Lean `v4.13.0` · Mathlib pinned `d7317655` (`v4.13.0`)
 **Locked kernel:** `c7c0ba17` · **749** declarations / **14** unique axioms / **163** tracked sorries · `lake build` clean
+**Experimental scope (current `main`):** `7885fd9` · Lean `v4.18.0` · **1304** declarations / **22** unique axioms · CI-green, kernel-verified (NOT in the locked count)
 **Maturity legend:** **PROVEN** = sorry-free, Lean-core axioms only `[propext, Classical.choice, Quot.sound]` · **AXIOM-GATED** = sorry-free given a declared, cited idealization · **CI-GREEN(MD)** = Mathlib-dependent, kernel-checked by CI · **COND.** = conditional on a declared axiom · **CONJECTURE** = not a theorem
 
 ---
@@ -43,7 +44,8 @@ Every campaign below is kernel-checked by lutar-lean CI but lives in the **exper
 | **Wave-7** — conformal rank-count/p-value, Doob two-sided audit envelope, PAC-Bayes routing envelope, degree-sum iso-invariance | [#190](https://github.com/szl-holdings/lutar-lean/pull/190) | `d6a232ba` | 10 | 0 new axioms |
 | **Mathlib-bump C3/C4/C5** — concentration / KL re-exports | [#187](https://github.com/szl-holdings/lutar-lean/pull/187) | — | 3 | re-exports, CI-green |
 | **Coder formulas** — code-substrate formula ports | [#193](https://github.com/szl-holdings/lutar-lean/pull/193) | — | — | CI-green |
-| **Λ-uniqueness (Set α + Set δ)** — conditional uniqueness within **strengthened** axiom classes | [#192](https://github.com/szl-holdings/lutar-lean/pull/192) | `5f0bb5ee` | 22 results | 3 declared, cited bridge axioms; 10 impostor-deaths axiom-free |
+| **Λ-uniqueness (Set α + Set δ) — airtight Λ** — conditional uniqueness within **strengthened** axiom classes | [#192](https://github.com/szl-holdings/lutar-lean/pull/192) | `5f0bb5ee` | 22 results | `lambda_unique_setAlpha` uses Lean-core axioms only; 10 impostor-deaths axiom-free |
+| **Wave-8** — disclosure-soundness, hash-chain tamper-evidence, split-conformal coverage, CPA minimality, Simplex switching safety, Byzantine `n=3f+1`, min-gate uniqueness, density-matrix PSD, governance spectral, Λ strict monotonicity | [lutar-lean@main](https://github.com/szl-holdings/lutar-lean) | `7885fd9` | 10 theorems | core axioms `[propext, Classical.choice, Quot.sound]` (M2 just `[propext]`); `0 sorryAx` |
 
 ### 2.1 Agentic-loop P1–P6 (PR #188 @ `2ede47a2`) — the system-level proof
 
@@ -55,6 +57,25 @@ Every campaign below is kernel-checked by lutar-lean CI but lives in the **exper
 | **P4** replay-determinism | re-running a recorded run reproduces a byte-identical receipt chain | PROVEN (axiom-free) |
 | **P5** tamper-evidence | any single-receipt mutation makes re-verify reject | AXIOM-GATED (`hashFn_collision_resistant`, disclosed) |
 | **P6** monotone auditability | an accepted prefix never has to be retracted as the log grows | PROVEN |
+
+### 2.2 Wave-8 (10 theorems, `main` @ `7885fd9`) — with benefit + `#print axioms`
+
+All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimental** and do **not** move the locked count of 5. Core axioms are `[propext, Classical.choice, Quot.sound]` unless noted; `0 sorryAx` across the set.
+
+| ID | Theorem | Benefit | `#print axioms` |
+|---|---|---|---|
+| **Ph1** | `disclosure_sound` | Axiom-honesty gate — the disclosure of a declaration's axioms is sound (you cannot under-report what a theorem depends on). | `[propext, Classical.choice, Quot.sound]` |
+| **M2** | `hashchain_tamper_evident` | Cannonico tamper-evidence — any mutation of a hash-chained receipt is detectable. | **`[propext]` only** |
+| **CP1** | split-conformal **marginal** coverage | Trust intervals with a distribution-free marginal-coverage guarantee — *split-conformal, **NOT** Hoeffding*. | `[propext, Classical.choice, Quot.sound]` |
+| **G1** | CPA minimality (collision) | Minimal collision/abuse surface for the canonical-receipt scheme. | `[propext, Classical.choice, Quot.sound]` |
+| **S2** | Simplex switching safety | Safe fallback switching between a complex and a verified-baseline controller. | `[propext, Classical.choice, Quot.sound]` |
+| **B1** | Byzantine `n = 3f+1` | Quorum safety bound underpinning the 3-of-4 witness consensus. | `[propext, Classical.choice, Quot.sound]` |
+| **L2** | min-gate deny-by-default uniqueness | The deny-by-default min-gate is the **unique** aggregator with that safety property. | `[propext, Classical.choice, Quot.sound]` |
+| **Q1** | density-matrix PSD | Governance state stays a valid (positive-semidefinite) density matrix. | `[propext, Classical.choice, Quot.sound]` |
+| **Q2** | governance spectral (real) | Governance operator has real spectrum — well-posed scoring. | `[propext, Classical.choice, Quot.sound]` |
+| **L3** | Λ strict monotonicity | Λ is strictly monotone per axis — more evidence never lowers the score spuriously. | `[propext, Classical.choice, Quot.sound]` |
+
+> Wave-8 is **experimental**. It does not change the locked count of 5 and does not change Λ's Conjecture-1 status. The locked-count-five fact itself is a Wave-8 theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_five`) that **depends on no axioms** — the locked set cannot silently grow.
 
 ---
 
@@ -93,9 +114,10 @@ Every campaign below is kernel-checked by lutar-lean CI but lives in the **exper
 
 | Metric | Value |
 |---|---|
-| **Locked proven formulas** | **5** — `{F1, F11, F12, F18, F19}` @ `c7c0ba17` |
-| Locked kernel | `749` declarations / `14` unique axioms / `163` tracked sorries · `lake build` clean |
-| Experimental kernel-verified (CI-green) | wave-5 (11), wave-6 (11), wave-7 (10), agentic-loop (28), Λ-uniqueness Set α+δ (22 results) — **never in the locked count** |
+| **Locked proven formulas** | **5** — `{F1, F11, F12, F18, F19}` @ `c7c0ba17`; the count is itself a no-axiom Lean theorem (`locked_count_five`) |
+| Locked kernel | `749` declarations / `14` unique axioms / `163` tracked sorries · Lean `v4.13.0` · `lake build` clean |
+| Experimental scope (current `main`) | `7885fd9` · Lean `v4.18.0` · `1304` declarations / `22` unique axioms · CI-green |
+| Experimental kernel-verified (CI-green) — **~36 theorems** | wave-5 (11), wave-6 (11), wave-7 (10), wave-8 (10), agentic-loop (28), airtight Λ Set α+δ (22 results) — **never in the locked count** |
 | Λ-uniqueness | **Conjecture 1** — conditional within strengthened classes (CI-green); unconditional uniqueness machine-checked **false** |
 | Supply chain | SLSA L1 honest today (cosign signing + `slsa.dev/provenance/v0.2` wired). SLSA L2 is roadmap — build-provenance attestation not yet earned on deployed images. L3 is out of scope. FedRAMP, Iron Bank, and CMMC are not pursued and not claimed. |
 
