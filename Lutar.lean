@@ -112,6 +112,16 @@ import Lutar.Wave5.MathlibCore
 -- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
 -- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
 import Lutar.Wave5.DiscreteSubstrate
+-- prove-wave-7: Mathlib-FREE discrete substrate (bare `lean` 4.13.0 verified, sorry-free;
+-- #print axioms = Lean-core only). W7-4 conformal rank-count calibration/antitone backbone
+-- (Vovk-Gammerman-Shafer 2005); W7-6 Doob two-sided audit envelope (Doob 1953). Disjoint
+-- from wave-5/wave-6 (which closed coverage-conservation + bounded-frontier termination).
+import Lutar.Wave7.DiscreteSubstrate
+-- prove-wave-7: Mathlib-DEP kernel-checked. W7-1 vertex-summed graph functional iso-
+-- invariance / F-G6 additive companion (Equiv.sum_comp; graph2nn You et al. ICML 2020);
+-- W7-5 PAC-Bayes min<=avg<=max routing envelope (Finset.sum_le_card_nsmul /
+-- card_nsmul_le_sum; McAllester COLT 1999). Signatures verified vs pinned Mathlib d7317655.
+import Lutar.Wave7.MathlibCore
 
 
 /-!
