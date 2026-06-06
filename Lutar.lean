@@ -112,6 +112,15 @@ import Lutar.Wave5.MathlibCore
 -- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
 -- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
 import Lutar.Wave5.DiscreteSubstrate
+-- lambda-uniqueness/unconditional-strengthened (Team A, PhD): route (c) Cauchy
+-- closure + strengthened-class Λ-uniqueness. MonotoneAdditiveLinear closes the
+-- classical monotone-additive⇒linear lemma (no open obligation, no declared axiom).
+-- StrengthenedUniqueness proves Λ unique WITHIN the principled stronger A5′ class
+-- (axiom-free) and within the regularity-free A6″ class (Kiss–Shulman 2026,
+-- CONDITIONAL on the disclosed `kiss_shulman_qam` bridge axiom). The ORIGINAL
+-- A1–A5 statement stays FALSE (maxAgg_ne_Lambda in-tree); Λ stays Conjecture 1.
+import Lutar.Wave6.MonotoneAdditiveLinear
+import Lutar.Wave6.StrengthenedUniqueness
 
 
 /-!
