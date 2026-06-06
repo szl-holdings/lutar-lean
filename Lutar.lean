@@ -92,7 +92,13 @@ import Lutar.Puriq.Formulas.ProvedFormulas
 import Lutar.Wave3.Consensus
 import Lutar.Wave3.MerkleKraft
 import Lutar.Wave3.InfoEstim
-import Lutar.Wave3.Tier1Mathlib
+-- NOTE: Lutar.Wave3.Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen re-exports)
+-- is committed to the repo but intentionally NOT imported here: it is
+-- Mathlib-dependent and could not be bare-`lean` verified in the build sandbox
+-- (Mathlib does not fit disk). Per the honesty doctrine we do not wire an
+-- unverified Mathlib file into the strict `lake build` gate; it is reported as
+-- CI-PENDING and can be promoted into this root once a green `lake build`
+-- confirms it compiles. The three modules above are bare-`lean` verified sorry-free.
 
 
 /-!
