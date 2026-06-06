@@ -138,7 +138,8 @@ theorem has content — its hypothesis is satisfiable. -/
 /-- **`lambda_factors`** — `Λ k` itself factors with the equal exponents `1/k`.
     (`Λ k x = (∏ xᵢ)^(1/k) = ∏ xᵢ^(1/k)` by `NNReal.rpow` distributing over the
     finite product.) This witnesses that the block-consistent class is NON-EMPTY
-    and contains Λ, so the conditional theorem is non-vacuous.
+    and contains the geometric mean as a member, so the conditional uniqueness
+    result (Conjecture 1 under A6') is non-vacuous — its hypothesis is satisfiable.
 
     The product-distributes-over-rpow step uses the SAME in-tree idiom that is
     already CI-green in `Lutar.Round13.lambda_unique_of_factors`
