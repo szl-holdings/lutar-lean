@@ -55,6 +55,10 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # prove-coder INNOVATE pack (a11oy Code governed coder) — Mathlib-FREE bare-lean
+    # verified: 26 theorems Lean-core-only + 1 collision-resistance-axiom-gated tamper
+    # theorem. Additive, EXPERIMENTAL, NOT folded into the locked v11 baseline.
+    os.path.join("Lutar", "Coder") + os.sep,
 )
 
 
