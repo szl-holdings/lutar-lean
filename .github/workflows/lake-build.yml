@@ -4,7 +4,7 @@ name: Lake build (gate + numbers)
 #
 # Why this exists (audit 2026-05-31): multiple crews gave conflicting signals on
 # whether `lake build` was green. This workflow makes the answer click-and-run:
-#   1. Pin the exact toolchain from ./lean-toolchain (v4.13.0).
+#   1. Pin the exact toolchain from ./lean-toolchain (v4.18.0 as of the wave-6 bump).
 #   2. Restore the Mathlib build cache, then `lake build` the whole library.
 #   3. Recompute the canonical declaration/axiom/sorry numbers and upload them as
 #      a build artifact.
@@ -58,13 +58,13 @@ jobs:
           sh /tmp/elan-init.sh -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Resolve toolchain from lean-toolchain (must be v4.13.0)
+      - name: Resolve toolchain from lean-toolchain (must be v4.18.0)
         run: |
           PIN=$(cat lean-toolchain)
           echo "lean-toolchain pin: $PIN"
           case "$PIN" in
-            *v4.13.0) echo "toolchain pin OK" ;;
-            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.13.0"; exit 1 ;;
+            *v4.18.0) echo "toolchain pin OK" ;;
+            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.18.0"; exit 1 ;;
           esac
           lake --version
 
@@ -74,17 +74,17 @@ jobs:
           # ROOT CAUSE of the prior red build (Mathlib version skew):
           # `lake update -R` re-resolved the floating dependency branches
           # (batteries/aesop/Qq/... tracked on main/master in the transitive
-          # graph), pulling revisions that require a newer Lean than the v4.13.0
+          # graph), pulling revisions that require a newer Lean than the pinned
           # toolchain — Mathlib + deps no longer agreed and the build broke.
           # The committed lake-manifest.json already pins the exact known-good
-          # revisions for v4.13.0 (Mathlib d7317655 @ v4.13.0). Build against
+          # revisions for v4.18.0 (Mathlib aa936c36 @ v4.18.0). Build against
           # the committed manifest; do NOT re-resolve it.
           test -f lake-manifest.json || { echo "::error::lake-manifest.json missing"; exit 1; }
-          MROW=$(grep -A4 '"name": "mathlib"' lake-manifest.json | grep -o 'v4\.13\.0' | head -1 || true)
-          if [ "$MROW" != "v4.13.0" ]; then
-            echo "::error::mathlib manifest pin is not v4.13.0 (got '$MROW')"; exit 1
+          MROW=$(grep -A4 '"name": "mathlib"' lake-manifest.json | grep -o 'v4\.18\.0' | head -1 || true)
+          if [ "$MROW" != "v4.18.0" ]; then
+            echo "::error::mathlib manifest pin is not v4.18.0 (got '$MROW')"; exit 1
           fi
-          echo "manifest pins mathlib @ v4.13.0 — OK"
+          echo "manifest pins mathlib @ v4.18.0 — OK"
 
       # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
       # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,

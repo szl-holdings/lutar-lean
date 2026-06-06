@@ -39,7 +39,8 @@ Byzantine adversary is an open obligation.
 -/
 import Mathlib.Data.Vector.Basic
 import Mathlib.Data.List.Basic
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 
 namespace Lutar.KhipuConsensus
 

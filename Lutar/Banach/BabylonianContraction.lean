@@ -120,7 +120,7 @@ theorem babylonian_lipschitz_le_half
     · linarith
   have h_xy_nn : 0 ≤ |x - y| := abs_nonneg _
   -- |x - y| * |1 - S/(x*y)| / 2 ≤ 1/2 * |x - y|
-  rw [div_le_iff h2pos]
+  rw [div_le_iff₀ h2pos]
   rw [show (1/2 : ℝ) * |x - y| * 2 = |x - y| by ring]
   calc |x - y| * |1 - S / (x * y)|
       ≤ |x - y| * 1 := mul_le_mul_of_nonneg_left h_abs_le_1 h_xy_nn

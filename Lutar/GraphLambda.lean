@@ -129,13 +129,105 @@ noncomputable def LambdaAutomorphism.toEquiv {e : GraphExecution}
     (φ : LambdaAutomorphism e) : e.V ≃ e.V :=
   Equiv.ofBijective φ.toFun φ.bij
 
-/-- Graph automorphism invariance is tracked for a follow-on product-reindexing
-    proof pass. The graph execution, vertex scoring, and automorphism structures
-    above remain the runtime contract. -/
-def graph_automorphism_invariance_tracked : Prop := True
+/-- **F-G4 core lemma — vertex-Λ is preserved by a Λ-automorphism.**
+    Because a `LambdaAutomorphism` preserves the per-vertex axis scores
+    (`score_pres`), the per-vertex Λ value is invariant under the relabeling. -/
+theorem vertexLambda_automorphism_invariant {e : GraphExecution}
+    (φ : LambdaAutomorphism e) (v : e.V) :
+    vertexLambda e (φ.toFun v) = vertexLambda e v := by
+  unfold vertexLambda
+  rw [← φ.score_pres v]
 
-theorem Λ_graph_automorphism_invariant_obligation_tracked :
-    graph_automorphism_invariance_tracked := by
-  trivial
+/-- **F-G4 (V17.2-T2) — Λ_graph is invariant under a Λ-automorphism.**
+    The graph-level aggregate `Λ_graph e` is unchanged when the vertices are
+    relabeled by a score- and edge-preserving automorphism `φ`.  The proof
+    reindexes the defining `Finset.univ` product by the bijection `φ.toEquiv`
+    (`Equiv.prod_comp`) and uses that each vertex-Λ is preserved
+    (`vertexLambda_automorphism_invariant`).
+
+    Formally: the product of `vertexLambda e` over all vertices equals the
+    product of `vertexLambda e ∘ φ` (since `φ` permutes the vertices), and the
+    latter is the product of `vertexLambda e` again (since `φ` preserves scores),
+    so `Λ_graph` — a function of that product and `|V|` — is unchanged. -/
+theorem Λ_graph_automorphism_invariant {e : GraphExecution}
+    (φ : LambdaAutomorphism e) :
+    (Finset.univ : Finset e.V).prod (fun v => vertexLambda e (φ.toFun v))
+      = (Finset.univ : Finset e.V).prod (vertexLambda e) := by
+  -- step 1: each factor is preserved (score_pres ⇒ vertexLambda preserved)
+  have hstep : (Finset.univ : Finset e.V).prod (fun v => vertexLambda e (φ.toFun v))
+      = (Finset.univ : Finset e.V).prod (fun v => vertexLambda e v) := by
+    apply Finset.prod_congr rfl
+    intro v _
+    exact vertexLambda_automorphism_invariant φ v
+  simpa using hstep
+
+/-- **F-G4 — Λ_graph itself is invariant under a Λ-automorphism.**
+    Since `Λ_graph` depends on the vertex set only through `Fintype.card e.V`
+    (unchanged) and the univ-product of `vertexLambda e` (invariant by the
+    previous theorem), `Λ_graph e = Λ_graph e` with the relabeled scores. This
+    is stated as the equality of the defining expression evaluated on the
+    automorphism-reindexed product. -/
+theorem Λ_graph_invariant_under_automorphism {e : GraphExecution}
+    (φ : LambdaAutomorphism e) (h : 0 < Fintype.card e.V) :
+    (((Finset.univ : Finset e.V).prod (fun v => vertexLambda e (φ.toFun v)))
+        ^ ((1 : ℝ) / (Fintype.card e.V : ℝ)))
+      = Λ_graph e := by
+  rw [Λ_graph_def h, Λ_graph_automorphism_invariant φ]
+
+/-! ## §3. Cross-graph isomorphism invariance (V17.2-T3) -/
+
+/-- A Λ-isomorphism between two graph executions: a vertex bijection that
+    preserves adjacency AND carries the scores of `e₁` onto those of `e₂`. -/
+structure LambdaIso (e₁ e₂ : GraphExecution) where
+  toEquiv    : e₁.V ≃ e₂.V
+  edge_pres  : ∀ v w, e₁.graph.Adj v w ↔ e₂.graph.Adj (toEquiv v) (toEquiv w)
+  score_pres : ∀ v, e₁.scores v = e₂.scores (toEquiv v)
+
+/-- **F-G4 (V17.2-T3) — vertex-Λ transports across a Λ-isomorphism.** -/
+theorem vertexLambda_iso_transport {e₁ e₂ : GraphExecution}
+    (ψ : LambdaIso e₁ e₂) (v : e₁.V) :
+    vertexLambda e₁ v = vertexLambda e₂ (ψ.toEquiv v) := by
+  unfold vertexLambda
+  rw [ψ.score_pres v]
+
+/-- **F-G4 (V17.2-T3) — the univ-product of vertex-Λ is a Λ-isomorphism
+    invariant.** Reindexes the `e₂` product by `ψ.toEquiv` (`Fintype.prod_equiv`)
+    and rewrites each factor by `vertexLambda_iso_transport`. This is the genuine
+    cross-graph statement: two score-graphs related by a Λ-isomorphism have the
+    same vertex-Λ product, hence (when they have equal cardinality) the same
+    `Λ_graph`. -/
+theorem prod_vertexLambda_iso_invariant {e₁ e₂ : GraphExecution}
+    (ψ : LambdaIso e₁ e₂) :
+    (Finset.univ : Finset e₁.V).prod (vertexLambda e₁)
+      = (Finset.univ : Finset e₂.V).prod (vertexLambda e₂) := by
+  -- reindex the e₂ product by the bijection ψ.toEquiv (Fintype.prod_equiv)
+  exact Fintype.prod_equiv ψ.toEquiv (vertexLambda e₁) (vertexLambda e₂)
+    (fun v => vertexLambda_iso_transport ψ v)
+
+/-- **F-G4 (V17.2-T3) — Λ_graph is a Λ-isomorphism invariant.**
+    If `e₁` and `e₂` are related by a Λ-isomorphism `ψ`, then `Λ_graph e₁ =
+    Λ_graph e₂`.  The vertex sets have equal cardinality (a bijection exists),
+    and the vertex-Λ products agree, so the n-th roots agree. -/
+theorem Λ_graph_iso_invariant {e₁ e₂ : GraphExecution}
+    (ψ : LambdaIso e₁ e₂) :
+    Λ_graph e₁ = Λ_graph e₂ := by
+  have hcard : Fintype.card e₁.V = Fintype.card e₂.V :=
+    Fintype.card_congr ψ.toEquiv
+  by_cases h0 : Fintype.card e₁.V = 0
+  · have h0' : Fintype.card e₂.V = 0 := by rw [← hcard]; exact h0
+    simp [Λ_graph, h0, h0']
+  · have hpos₁ : 0 < Fintype.card e₁.V := Nat.pos_of_ne_zero h0
+    have hpos₂ : 0 < Fintype.card e₂.V := by rw [← hcard]; exact hpos₁
+    rw [Λ_graph_def hpos₁, Λ_graph_def hpos₂,
+        prod_vertexLambda_iso_invariant ψ, hcard]
 
 end Lutar.GraphLambda
+
+-- ## F-G4 axiom disclosure (CI prints these in the build log).
+-- All are pure structural reindexings; expected dependencies are the standard
+-- Mathlib trio [propext, Classical.choice, Quot.sound] (NO sorryAx, NO declared
+-- Lutar axioms).
+#print axioms Lutar.GraphLambda.Λ_graph_automorphism_invariant
+#print axioms Lutar.GraphLambda.Λ_graph_invariant_under_automorphism
+#print axioms Lutar.GraphLambda.prod_vertexLambda_iso_invariant
+#print axioms Lutar.GraphLambda.Λ_graph_iso_invariant
