@@ -82,6 +82,17 @@ import Lutar.Round13.Lambda_Uniqueness
 -- (NOT imported — it carries honest `sorry` placeholders). No new axiom; the
 -- locked v11 count (749/14/163) is unchanged (this scope is counter-excluded).
 import Lutar.Puriq.Formulas.ProvedFormulas
+-- prove-wave-3 campaign: C1-C20 research candidates (sorry-free; wiring into
+-- `lake build` makes CI kernel-check every Wave3 theorem). Mathlib-free modules
+-- (Consensus C10-C12, MerkleKraft C8/C13/C14, InfoEstim C9/C17/C20) were ALSO
+-- bare-`lean` verified locally; Tier1Mathlib (C1 Tsirelson, C2 CHSH, C6 Jensen)
+-- is CI-only (Mathlib does not fit sandbox disk). Lambda (F23) stays Conjecture 1
+-- (C7 conditional only, in F23_Uniqueness.lean, NOT imported). Experimental/wave3
+-- scope is counter-excluded from the locked v11 count (749/14/163 @ c7c0ba17).
+import Lutar.Wave3.Consensus
+import Lutar.Wave3.MerkleKraft
+import Lutar.Wave3.InfoEstim
+import Lutar.Wave3.Tier1Mathlib
 
 
 /-!
@@ -105,3 +116,4 @@ v16 Feynman additions (PR #41):
 - `Lutar.Feynman.PathIntegralAuditSum` — Z_Λ over audit fiber (4 SORRY_v16_OPEN)
 - `Lutar.Knot.ReidemeisterConjecture` — R1/R2 axiom; R3 proved at flat-segment level
 -/
+
