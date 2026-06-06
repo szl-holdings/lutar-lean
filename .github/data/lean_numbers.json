@@ -2,12 +2,12 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "PENDING-WAVE7",
-  "measured_at_utc": "2026-06-06T06:43:36Z",
+  "sha": "PENDING-WAVE7-ON-V4.18-WAVE6",
+  "measured_at_utc": "2026-06-06T16:30:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by PROVE-WAVE-7 (based on wave-5 verified main b71114cf, PR #186). Adds two NEW additive Lean modules wired into the Lutar.lean kernel-check root, DISJOINT from concurrent prove-wave-6. Mathlib-FREE bare-`lean` 4.13.0 verified (exit 0, #print axioms disclosed verbatim): Lutar/Wave7/DiscreteSubstrate.lean [W7-4a/b/c conformal RANK-COUNT calibration/antitone backbone + p-value floor (Vovk-Gammerman-Shafer 2005, Lei et al. 2018 JASA 113:1094); W7-6a/W7-6 Doob TWO-SIDED optional-stopping audit envelope (Doob 1953) \u2014 distinct from wave-5 anti-deflation and wave-6 coverage-conservation]. Mathlib-DEP (CI kernel-checked, expected deps propext/Classical.choice/Quot.sound only, NO sorryAx): Lutar/Wave7/MathlibCore.lean [W7-1a/W7-1 vertex-summed graph functional isomorphism-invariance / F-G6 additive companion of in-tree GraphLambda F-G4 (Equiv.sum_comp; graph2nn You-Leskovec-He-Xie ICML 2020 arXiv:2007.06559); W7-5a/b/W7-5 PAC-Bayes min<=avg<=max routing envelope (Finset.sum_le_card_nsmul / Finset.card_nsmul_le_sum; McAllester COLT 1999 doi:10.1145/307400.307435; GraphRouter arXiv:2410.03834)]. Net declarations 1189 -> 1203 (+14 across the two new Lean files). No new axioms (axiom_names set UNCHANGED). No new sorries (sorries_raw UNCHANGED). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally; locked_proven STAYS 5 {F1,F11,F12,F18,F19}. C3 Hoeffding/C4 Azuma/C5 KL>=0 remain DEFERRED (Mathlib modules 404 at pin d7317655). Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
+  "note": "PROVE-WAVE-7 conformal rank-count + Doob envelope + graph-sum + PAC-Bayes brought onto the v4.18.0 main (which already carries the #187 SubGaussianKL bump and the #189 wave-6 graph+info substrate, baseline 1220). Mathlib-FREE bare-lean-verified (sorry-free; #print axioms = Lean-core only): Lutar/Wave7/DiscreteSubstrate.lean [W7-4 conformal rank-count calibration/antitone backbone (Vovk-Gammerman-Shafer 2005); W7-6 Doob two-sided audit envelope (Doob 1953)]. Mathlib-DEP (CI kernel-checked): Lutar/Wave7/MathlibCore.lean [W7-1 vertex-summed graph functional iso-invariance / F-G6 additive companion via Equiv.sum_comp (graph2nn You et al. ICML 2020); W7-5 PAC-Bayes min<=avg<=max routing envelope via Finset.sum_le_card_nsmul / card_nsmul_le_sum (McAllester COLT 1999); signatures verified vs Mathlib v4.18.0]. Net declarations 1220 -> 1234 (+14 from Wave7 DiscreteSubstrate + MathlibCore). sorries_raw unchanged at 308 (every new theorem is sorry-free). axioms_raw 20 / axioms_unique 19 unchanged; no new axioms (expected deps propext/Classical.choice/Quot.sound only, NO sorryAx in the new theorems). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
   "numbers": {
-    "declarations": 1203,
+    "declarations": 1234,
     "axioms_raw": 20,
     "axioms_unique": 19,
     "axiom_names": [

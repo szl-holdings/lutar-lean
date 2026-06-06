@@ -1,5 +1,5 @@
 import Mathlib.Tactic
-import Mathlib.Geometry.VectorBundle.Basic
+import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Topology.FiberBundle.Basic
 
 namespace Lutar.Innovations.Round2

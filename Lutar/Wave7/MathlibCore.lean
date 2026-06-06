@@ -24,7 +24,10 @@ lemmas grounded in published results, NOT analytic limit theorems.
   `Finset.card_nsmul_le_sum`. Powers cost-aware model routing (a11oy Model Router;
   GraphRouter, arXiv:2410.03834).
 -/
-import Mathlib.Algebra.BigOperators.Group.Finset
+-- Mathlib v4.18.0: `Mathlib/Algebra/BigOperators/Group/Finset.lean` was split into a
+-- `Finset/` directory; the `Finset.sum`/`Finset.prod` API (incl. `Equiv.sum_comp`,
+-- `Finset.sum_le_card_nsmul`, `Finset.card_nsmul_le_sum`) now lives under `.Finset.Basic`.
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Logic.Equiv.Basic

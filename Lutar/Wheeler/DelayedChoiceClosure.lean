@@ -39,7 +39,8 @@
   art and explicitly named innovations beyond it.
 -/
 
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Order.Basic
 
 namespace Lutar.Wheeler

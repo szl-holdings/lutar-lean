@@ -107,7 +107,7 @@ theorem posterior_strict_decrease {P R : ℝ} (hP : 0 < P) (hR : 0 < R) :
     unfold posterior gain
     field_simp
     ring
-  rw [hk, div_lt_iff hpr]
+  rw [hk, div_lt_iff₀ hpr]
   nlinarith [hP, hR]
 
 /-! ### Correspondence summary
