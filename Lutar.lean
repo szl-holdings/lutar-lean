@@ -123,6 +123,14 @@ import Lutar.Wave6.MetricSpectral
 -- post-processing, Fano collision-forces-error, conformal-coverage conservation). The
 -- analytic KL/sub-Gaussian Mathlib modules are 404 at pin d7317655 (C3/C4/C5 deferred).
 import Lutar.Wave6.InfoSubstrate
+-- prove-wave-6 (Mathlib bump v4.13.0 -> v4.18.0): C3 Hoeffding / C4 Azuma-Hoeffding /
+-- C5 Gibbs (KL >= 0). These were honestly BLOCKED at d7317655 because
+-- Mathlib.Probability.Moments.SubGaussian and Mathlib.InformationTheory.KullbackLeibler.Basic
+-- were HTTP 404 there. The bump to Mathlib v4.18.0 (aa936c36, Lean v4.18.0) makes both
+-- present (earliest tagged release with BOTH files). Pure term-mode re-exports; signatures
+-- verified verbatim vs v4.18.0. Experimental/wave6 scope; locked v11 kernel 749/14/163 @
+-- c7c0ba17 UNCHANGED; Lambda stays Conjecture 1.
+import Lutar.Wave6.SubGaussianKL
 
 
 /-!
