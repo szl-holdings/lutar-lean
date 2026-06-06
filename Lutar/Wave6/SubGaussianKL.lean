@@ -92,7 +92,11 @@ theorem c4_azuma_hoeffding_sum_ge_le
     {ε : ℝ} (hε : 0 ≤ ε) :
     (μ {ω | ε ≤ ∑ i ∈ Finset.range n, Y i ω}).toReal
       ≤ Real.exp (- ε ^ 2 / (2 * ∑ i ∈ Finset.range n, cY i)) :=
-  HasSubgaussianMGF.measure_sum_ge_le_of_HasCondSubgaussianMGF h_adapted h0 n h_subG hε
+  -- NOTE: this lemma lives directly in `ProbabilityTheory` (in `section Martingale`,
+  -- AFTER `end HasSubgaussianMGF`), NOT under the `HasSubgaussianMGF` namespace —
+  -- unlike the C3 Hoeffding lemma. So it is referenced WITHOUT the `HasSubgaussianMGF.`
+  -- prefix (we `open ProbabilityTheory`).
+  measure_sum_ge_le_of_HasCondSubgaussianMGF h_adapted h0 n h_subG hε
 
 /-! ## C5 — Gibbs' inequality: the Kullback–Leibler divergence is nonnegative. -/
 

@@ -191,7 +191,7 @@ theorem szl_bound_lt_one : szl_concrete_bound < 1 := by
     · apply add_nonneg
       · exact le_of_lt (Real.log_pos (by norm_num : (1:ℝ) < 3))
       · apply Real.log_nonneg
-        apply le_div_iff (by norm_num : (0:ℝ) < 0.05) |>.mpr
+        apply le_div_iff₀ (by norm_num : (0:ℝ) < 0.05) |>.mpr
         norm_num [Real.sqrt_le_sqrt]
         norm_num
     · norm_num
@@ -224,7 +224,7 @@ theorem szl_bound_positive : 0 < szl_concrete_bound := by
   · apply add_pos_of_pos_of_nonneg
     · exact Real.log_pos (by norm_num : (1:ℝ) < 3)
     · apply Real.log_nonneg
-      rw [le_div_iff (by norm_num : (0:ℝ) < 0.05)]
+      rw [le_div_iff₀ (by norm_num : (0:ℝ) < 0.05)]
       apply mul_le_mul_of_nonneg_right _ (by norm_num)
       apply mul_le_mul_of_nonneg_left _ (by norm_num)
       exact Real.one_le_sqrt.mpr (by norm_num)
@@ -351,7 +351,7 @@ theorem full_putnam_improvement_falsified :
     · apply add_nonneg
       · exact le_of_lt (Real.log_pos (by norm_num : (1:ℝ) < 3))
       · apply Real.log_nonneg
-        apply le_div_iff (by norm_num : (0:ℝ) < 0.05) |>.mpr
+        apply le_div_iff₀ (by norm_num : (0:ℝ) < 0.05) |>.mpr
         norm_num [Real.sqrt_le_sqrt]
         norm_num
     · norm_num
