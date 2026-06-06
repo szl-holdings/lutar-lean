@@ -245,28 +245,35 @@ theorem delta4_implies_allStrictMono (hn : 0 < n) (F : (Fin n → ℝ) → ℝ)
   -- Single step: F (hyb k) < F (hyb (k+1)) when k < n (raise coordinate ⟨k,·⟩).
   have step : ∀ k : ℕ, k < n → F (hyb k) < F (hyb (k + 1)) := by
     intro k hk
-    -- hyb k = (fun i => if i = ⟨k,hk⟩ then x ⟨k,hk⟩ else hyb (k+1) i) reshaped to δ4 form.
-    -- Apply δ4 at j = ⟨k,hk⟩, base = hyb k off-coordinate, t = x ⟨k,hk⟩, t' = y ⟨k,hk⟩.
-    have heq_lo : (fun i => if i = (⟨k, hk⟩ : Fin n) then x ⟨k, hk⟩ else hyb k i) = hyb k := by
-      funext i; by_cases hi : i = (⟨k, hk⟩ : Fin n)
-      · subst hi
-        simp only [if_pos rfl, hhyb]
-        rw [if_neg (by simp only [Fin.val_mk]; exact lt_irrefl k)]
-      · simp [hi]
-    have heq_hi : (fun i => if i = (⟨k, hk⟩ : Fin n) then y ⟨k, hk⟩ else hyb k i) = hyb (k + 1) := by
-      funext i
-      by_cases hi : i = (⟨k, hk⟩ : Fin n)
-      · subst hi
-        simp only [if_pos rfl, hhyb]
-        rw [if_pos (by simp only [Fin.val_mk]; exact Nat.lt_succ_self k)]
+    -- Coordinate `j = ⟨k,hk⟩`.  Off `j`, `hyb k` and `hyb (k+1)` agree; at `j`,
+    -- `hyb k j = x j` and `hyb (k+1) j = y j`.  So δ4-PSI at `j` gives the step.
+    set j : Fin n := ⟨k, hk⟩ with hj
+    have hjval : (j : ℕ) = k := rfl
+    -- value of `hyb k` at `j`: `↑j = k`, so `¬(k < k)` ⇒ branch `x j`.
+    have hk_at_j : hyb k j = x j := by
+      simp only [hhyb, hjval]; rw [if_neg (lt_irrefl k)]
+    -- value of `hyb (k+1)` at `j`: `k < k+1` ⇒ branch `y j`.
+    have hk1_at_j : hyb (k + 1) j = y j := by
+      simp only [hhyb, hjval]; rw [if_pos (Nat.lt_succ_self k)]
+    -- off `j`, the two hybrids agree.
+    have hoff : ∀ i, i ≠ j → hyb k i = hyb (k + 1) i := by
+      intro i hi
+      have hik : (i : ℕ) ≠ k := fun hh => hi (Fin.ext (by simpa [hjval] using hh))
+      simp only [hhyb]
+      by_cases hlt' : (i : ℕ) < k
+      · rw [if_pos hlt', if_pos (Nat.lt_succ_of_lt hlt')]
+      · rw [if_neg hlt', if_neg (by omega)]
+    -- Rebuild `hyb (k+1)` from `hyb k` by replacing coordinate `j` with `y j`.
+    have heq_lo : (fun i => if i = j then x j else hyb k i) = hyb k := by
+      funext i; by_cases hi : i = j
+      · rw [if_pos hi, hi, hk_at_j]
       · rw [if_neg hi]
-        simp only [hhyb]
-        have hik : (i : ℕ) ≠ k := fun hh => hi (Fin.ext hh)
-        by_cases hlt' : (i : ℕ) < k
-        · rw [if_pos hlt', if_pos (Nat.lt_succ_of_lt hlt')]
-        · rw [if_neg hlt', if_neg (by omega)]
-    have hpsi := hPSI ⟨k, hk⟩ (hyb k) (x ⟨k, hk⟩) (y ⟨k, hk⟩)
-      (hyb_pos k) (hx ⟨k, hk⟩) (hy ⟨k, hk⟩) (hlt ⟨k, hk⟩)
+    have heq_hi : (fun i => if i = j then y j else hyb k i) = hyb (k + 1) := by
+      funext i; by_cases hi : i = j
+      · rw [if_pos hi, hi, hk1_at_j]
+      · rw [if_neg hi, hoff i hi]
+    have hpsi := hPSI j (hyb k) (x j) (y j)
+      (hyb_pos k) (hx j) (hy j) (hlt j)
     rw [heq_lo, heq_hi] at hpsi
     exact hpsi
   -- Telescope F (hyb 0) < F (hyb n) by transitivity over k = 0,…,n-1.
