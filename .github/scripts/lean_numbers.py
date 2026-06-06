@@ -60,6 +60,13 @@ EXPERIMENTAL_SCOPES = (
     # pipeline theorems (Mathlib-free, sorry-free) + one declared crypto axiom
     # (hashFn_collision_resistant, disclosed like F13′). Staged for Doctrine v12.
     os.path.join("Lutar", "Agentic") + os.sep,
+    # Unify layer (unify/governance-substrate-meta-theorem) — additive, NOT wired
+    # into Lutar.lean; new namespace Lutar.Unify. Bundles the proven agentic-loop
+    # P1-P6 guarantees into ONE governance-substrate soundness meta-theorem via a
+    # monoid-action spine (Mathlib-free, no open obligations). Headline
+    # governed_run_sound is fully Lean-core; P5 tamper-evidence is exposed
+    # separately and reuses Agentic's single declared crypto axiom.
+    os.path.join("Lutar", "Unify") + os.sep,
 )
 
 
