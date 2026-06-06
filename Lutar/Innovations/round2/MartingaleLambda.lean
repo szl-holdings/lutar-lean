@@ -1,5 +1,5 @@
 import Mathlib.Tactic
-import Mathlib.Probability.Martingale.Stopping
+import Mathlib.Probability.Process.Stopping
 import Mathlib.Probability.Martingale.Basic
 
 namespace Lutar.Innovations.Round2

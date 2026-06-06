@@ -19,7 +19,9 @@ the Λ-gate is independent of which physical axis holds which score.
   - Lutar.Knot.ReidemeisterConjecture (v16) — R1/R2 axioms
 -/
 import Mathlib.Tactic.Ring
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 
 namespace Lutar.Thesis.Permutation
 

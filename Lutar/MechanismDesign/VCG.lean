@@ -32,8 +32,14 @@
 -- for the non-tie case (strict argmax). Only the tie-breaking clause needs sorry₁.
 
 import Mathlib.Data.Finset.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
-import Mathlib.Order.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
+import Mathlib.Order.Defs.Unbundled
+import Mathlib.Order.Defs.LinearOrder
 import Mathlib.Data.Real.Basic
 
 namespace SZL.MechanismDesign.VCG

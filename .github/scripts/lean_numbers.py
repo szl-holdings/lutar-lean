@@ -60,6 +60,10 @@ EXPERIMENTAL_SCOPES = (
     # pipeline theorems (Mathlib-free, sorry-free) + one declared crypto axiom
     # (hashFn_collision_resistant, disclosed like F13′). Staged for Doctrine v12.
     os.path.join("Lutar", "Agentic") + os.sep,
+    # prove-coder INNOVATE pack (a11oy Code governed coder) — Mathlib-FREE bare-lean
+    # verified: 26 theorems Lean-core-only + 1 collision-resistance-axiom-gated tamper
+    # theorem. Additive, EXPERIMENTAL, NOT folded into the locked v11 baseline.
+    os.path.join("Lutar", "Coder") + os.sep,
     # Unify layer (unify/governance-substrate-meta-theorem) — additive, NOT wired
     # into Lutar.lean; new namespace Lutar.Unify. Bundles the proven agentic-loop
     # P1-P6 guarantees into ONE governance-substrate soundness meta-theorem via a
