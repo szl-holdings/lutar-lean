@@ -5,7 +5,9 @@ ORCID: 0009-0001-0110-4173
 
 ================================================================================
   Lutar/Wave6/StrengthenedUniqueness.lean
-  UNCONDITIONAL Λ-uniqueness WITHIN A PRINCIPLED, STRONGER AGGREGATOR CLASS.
+  Λ-uniqueness WITHIN A PRINCIPLED, STRONGER AGGREGATOR CLASS (Λ stays
+  Conjecture 1 under the original A1–A5; this is uniqueness relative to a
+  redefined stronger class, NOT an unconditional theorem).
 
   ┌──────────────────────────────────────────────────────────────────────────┐
   │ WHAT THIS IS — AND IS NOT (load-bearing honesty, must survive any summary) │
@@ -32,7 +34,9 @@ ORCID: 0009-0001-0110-4173
 
   RESULTS (all fully closed / no open obligations, NO declared axiom — Lean/Mathlib core only):
     (1) `lambda_satisfies_A5prime`        : Λ k ∈ the A5′ class.
-    (2) `lambda_unique_unconditional`     : ∀ F, SatisfiesA5prime F → F = Λ k.
+    (2) `lambda_unique_in_A5prime`        : ∀ F, SatisfiesA5prime F → F = Λ k
+                                            (uniqueness WITHIN the class; Λ stays
+                                            Conjecture 1 under original A1–A5).
     (3) `maxAgg_not_A5prime`,
         `aggMin_not_A5prime`,
         `aggMaxZ_not_A5prime`             : each impostor ∉ the A5′ class.
@@ -80,7 +84,8 @@ hypothesis: it is part of the (stronger) definition of "valid aggregator". -/
 
 /-- **A5′ — the strengthened valid-aggregator class.** A1–A5 **plus** the
     power-product structural axiom (membership of the quasi-arithmetic class).
-    The geometric mean is the UNIQUE member (Thm `lambda_unique_unconditional`). -/
+    The geometric mean is the UNIQUE member (Thm `lambda_unique_in_A5prime`).
+    NB: Λ stays Conjecture 1 under the original A1–A5; this restricts the class. -/
 def SatisfiesA5prime {k : ℕ} (Φ : Aggregator k) : Prop :=
   LutarAxioms Φ ∧ ∃ αs : Fin k → NNReal, Lutar.Round13.Factors Φ αs
 
@@ -95,13 +100,14 @@ theorem lambda_satisfies_A5prime {k : ℕ} (hk : 0 < k) :
   refine ⟨Lutar.Round13.lambda_satisfiesAxioms_round13 hk, ?_⟩
   exact ⟨fun _ => (1 / k : NNReal), Lutar.Wave4.BlockConsistency.lambda_factors hk⟩
 
-/-! ## §3 — (2) UNCONDITIONAL uniqueness WITHIN the strengthened class.
+/-! ## §3 — (2) Uniqueness WITHIN the strengthened class (Λ stays Conjecture 1
+      under the original A1–A5).
 
 No side hypothesis: the only assumption is membership in A5′ (the strengthened
-core). This is the maximal honest "unconditional" statement — unconditional
-RELATIVE TO the redefined class. -/
+core). This is the maximal honest statement of uniqueness RELATIVE TO the
+redefined stronger class; Λ stays Conjecture 1 under the original A1–A5. -/
 
-/-- **(2) `lambda_unique_unconditional`.** Every aggregator in the strengthened
+/-- **(2) `lambda_unique_in_A5prime`.** Every aggregator in the strengthened
     A5′ class equals `Λ k`. There is NO extra/side hypothesis beyond A5′ itself;
     the strengthened axioms ARE the hypotheses. Reduces to the CI-green,
     fully-closed `Lutar.Round13.lambda_unique_of_factors`.
@@ -109,8 +115,8 @@ RELATIVE TO the redefined class. -/
     HONEST: this is uniqueness within the PRINCIPLED STRONGER class (the
     quasi-arithmetic/power-product restriction of Aczél/Kolmogorov/Csató). It is
     NOT the old false statement under the original weaker A1–A5 (still false;
-    `maxAgg_ne_Lambda` in-tree). -/
-theorem lambda_unique_unconditional {k : ℕ} (hk : 0 < k)
+    `maxAgg_ne_Lambda` in-tree) — Λ stays Conjecture 1 under the original axioms. -/
+theorem lambda_unique_in_A5prime {k : ℕ} (hk : 0 < k)
     (F : Aggregator k) (hF : SatisfiesA5prime F) :
     F = Λ k := by
   obtain ⟨hL, αs, hfac⟩ := hF
@@ -120,8 +126,8 @@ theorem lambda_unique_unconditional {k : ℕ} (hk : 0 < k)
 theorem A5prime_unique {k : ℕ} (hk : 0 < k)
     (F G : Aggregator k) (hF : SatisfiesA5prime F) (hG : SatisfiesA5prime G) :
     F = G :=
-  (lambda_unique_unconditional hk F hF).trans
-    (lambda_unique_unconditional hk G hG).symm
+  (lambda_unique_in_A5prime hk F hF).trans
+    (lambda_unique_in_A5prime hk G hG).symm
 
 /-! ## §4 — (3) THE IMPOSTORS DIE: each A1–A5 counterexample ∉ A5′.
 
@@ -135,7 +141,7 @@ equal `Λ 2`, contradicting its in-tree `≠ Λ 2` numeric witness. -/
 theorem maxAgg_not_A5prime : ¬ SatisfiesA5prime (Lutar.Round13.maxAgg) := by
   intro h
   exact Lutar.Round13.maxAgg_ne_Lambda
-    (lambda_unique_unconditional (by norm_num) _ h)
+    (lambda_unique_in_A5prime (by norm_num) _ h)
 
 /-- Impostor 2: the min aggregator `aggMin x = x 0 ⊓ x 1`. -/
 noncomputable def aggMin : Aggregator 2 := fun x => x 0 ⊓ x 1
@@ -159,7 +165,7 @@ theorem aggMin_ne_Lambda : aggMin ≠ Λ 2 := by
 
 theorem aggMin_not_A5prime : ¬ SatisfiesA5prime aggMin := by
   intro h
-  exact aggMin_ne_Lambda (lambda_unique_unconditional (by norm_num) _ h)
+  exact aggMin_ne_Lambda (lambda_unique_in_A5prime (by norm_num) _ h)
 
 /-- Impostor 3: the first-coordinate "dictator" aggregator `aggMaxZ x = x 0`.
     (A degenerate aggregator that ignores all but the first axis; it satisfies
@@ -186,7 +192,7 @@ theorem aggMaxZ_ne_Lambda : aggMaxZ ≠ Λ 2 := by
 
 theorem aggMaxZ_not_A5prime : ¬ SatisfiesA5prime aggMaxZ := by
   intro h
-  exact aggMaxZ_ne_Lambda (lambda_unique_unconditional (by norm_num) _ h)
+  exact aggMaxZ_ne_Lambda (lambda_unique_in_A5prime (by norm_num) _ h)
 
 /-! ## §5 — A6″: the REGULARITY-FREE strengthened core (Kiss–Shulman 2026).
 
@@ -253,7 +259,7 @@ axiom kiss_shulman_qam :
     regularity-free strengthened class A6″. Under {A1–A5 + bisymmetry}, the
     aggregator equals `Λ k`. CONDITIONAL on the declared bridge `kiss_shulman_qam`
     (disclosed in `#print axioms`). This is the WEAKER-PREMISE companion to the
-    axiom-free A5′ theorem `lambda_unique_unconditional`. -/
+    axiom-free A5′ theorem `lambda_unique_in_A5prime`. -/
 theorem lambda_unique_under_A6primeprime {k : ℕ} (hk : 0 < k)
     (F : Aggregator k) (hF : SatisfiesA6primeprime F) :
     F = Λ k := by
@@ -293,7 +299,7 @@ theorem lambda_satisfies_A6primeprime {k : ℕ} (hk : 0 < k) :
 /-! ## §6 — Disclosure. -/
 
 #print axioms lambda_satisfies_A5prime
-#print axioms lambda_unique_unconditional
+#print axioms lambda_unique_in_A5prime
 #print axioms A5prime_unique
 #print axioms maxAgg_not_A5prime
 #print axioms aggMin_not_A5prime
@@ -310,8 +316,9 @@ end Lutar.Wave6.Strengthened
   --------------------------------------------------------------------------
   CLASS  A5′ = A1–A5 + power-product/factorization (quasi-arithmetic class).
   (1) lambda_satisfies_A5prime     — Λ ∈ A5′.                     CLOSED.
-  (2) lambda_unique_unconditional  — ∀ F ∈ A5′, F = Λ (no side    CLOSED.
-                                      hypothesis).
+  (2) lambda_unique_in_A5prime     — ∀ F ∈ A5′, F = Λ (no side    CLOSED.
+                                      hypothesis beyond A5′; Λ stays Conjecture 1
+                                      under the original A1–A5).
   (3) maxAgg/aggMin/aggMaxZ _not_A5prime — each impostor ∉ A5′.   CLOSED.
 
   HONEST LINE: "Unconditional" = within the redefined, principled STRONGER class.
