@@ -36,6 +36,8 @@ the math is machine-checked in standard Mathlib; we only instantiate.
 import Mathlib.Algebra.Star.CHSH
 import Mathlib.Analysis.Convex.Jensen
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 namespace Wave3.Tier1
 
