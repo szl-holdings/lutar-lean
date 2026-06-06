@@ -6,7 +6,7 @@ ORCID: 0009-0001-0110-4173
 # Lutar/Wave8/Gershgorin.lean — Q2: Gershgorin Governance Non-Degeneracy
 
 A direct application of Mathlib's Gershgorin-derived diagonal-dominance theorem
-(`Matrix.det_ne_zero_of_sum_row_lt_diag`) to the a11oy governance weight matrix.
+(`det_ne_zero_of_sum_row_lt_diag`) to the a11oy governance weight matrix.
 If every diagonal entry strictly dominates the sum of the norms of the
 off-diagonal entries in its row, then the governance matrix is NON-SINGULAR
 (`det ≠ 0`), hence invertible: the weighted-aggregation operator has a unique
@@ -33,7 +33,8 @@ row-dominance ⇒ `det ≠ 0` corollary that Mathlib derives FROM `eigenvalue_me
 - NO open obligation, no new declared axiom; Mathlib-backed (Gershgorin).
 
 ## Citations
-- Mathlib Gershgorin (`det_ne_zero_of_sum_row_lt_diag`, `eigenvalue_mem_ball`):
+- Mathlib Gershgorin (`det_ne_zero_of_sum_row_lt_diag`, `eigenvalue_mem_ball`,
+  top-level decls in `Mathlib.LinearAlgebra.Matrix.Gershgorin`):
   https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Gershgorin.html
 - Wikipedia, Gershgorin circle theorem:
   https://en.wikipedia.org/wiki/Gershgorin_circle_theorem
@@ -55,14 +56,14 @@ eigenvalue (Gershgorin disc) can reach `0`. -/
 theorem governance_nonsingular (W : Matrix n n ℂ)
     (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
     W.det ≠ 0 :=
-  Matrix.det_ne_zero_of_sum_row_lt_diag hdom
+  det_ne_zero_of_sum_row_lt_diag hdom
 
 /-- **Q2 — Gershgorin governance non-degeneracy (ℝ).** The honest real-governance
 model: a strictly diagonally-dominant real governance matrix is non-singular. -/
 theorem governance_nonsingular_real (W : Matrix n n ℝ)
     (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
     W.det ≠ 0 :=
-  Matrix.det_ne_zero_of_sum_row_lt_diag hdom
+  det_ne_zero_of_sum_row_lt_diag hdom
 
 /-- **Q2 corollary — governance solvability.** A strictly diagonally-dominant
 real governance matrix has a unit determinant (`IsUnit W.det`), hence is
