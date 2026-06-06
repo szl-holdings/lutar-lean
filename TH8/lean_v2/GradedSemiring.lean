@@ -30,9 +30,10 @@ ORCID  : 0009-0001-0110-4173
 Org    : SZL Holdings
 Date   : 2026-05-15
 -/
-import Mathlib.Algebra.Order.Ring.Lemmas
+import Mathlib.Algebra.Order.Ring.Defs
+import Mathlib.Algebra.Order.Ring.Basic
 import Mathlib.Data.NNReal.Basic
-import Mathlib.Order.Pi
+import Mathlib.Algebra.Order.Pi
 import Mathlib.Tactic
 import Lutar.Axioms
 import Lutar.Invariant

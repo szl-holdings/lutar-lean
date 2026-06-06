@@ -22,7 +22,8 @@
       Lutar.QEC.CSS, Lutar.QEC.Shor, and Lutar.QEC.Kitaev.
 -/
 
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 
 namespace Lutar.QEC.Hamming
 

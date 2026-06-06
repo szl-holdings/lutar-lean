@@ -31,7 +31,9 @@ Sources:
 -/
 import Mathlib.Data.Rat.Defs
 import Mathlib.Algebra.Order.Field.Rat
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 import Mathlib.Tactic.NormNum
 
 namespace Lutar.Egyptian
