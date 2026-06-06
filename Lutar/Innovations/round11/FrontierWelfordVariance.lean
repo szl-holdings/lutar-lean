@@ -43,7 +43,7 @@ directly (the "weighted mean" invariant), which is the cleanest exact statement 
 
 NEW file under `Lutar/Innovations/round11/`; locked kernel untouched.
 -/
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Data.Int.Basic
 import Mathlib.Tactic
 

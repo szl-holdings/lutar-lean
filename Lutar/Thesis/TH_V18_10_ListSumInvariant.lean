@@ -13,7 +13,9 @@ This is the abstract form of the receipt tamper-evidence property.
   - Merkle (1987) Crypto'87 — hash tree tamper-evidence
   - Lutar.Khipu.SummationInvariant (v15) — receipt DAG integrity
 -/
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 import Mathlib.Tactic.Ring
 
 namespace Lutar.Thesis.ListSum

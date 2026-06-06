@@ -16,7 +16,9 @@ Citation:
 
 Status: complete proof, zero `sorry`.
 -/
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Linarith
 

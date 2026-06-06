@@ -28,9 +28,15 @@
 --   Signed-off-by: Yachay <yachay@szlholdings.ai>
 --   Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 
-import Mathlib.Data.Finset.Lattice
+import Mathlib.Data.Finset.Lattice.Basic
+import Mathlib.Data.Finset.Lattice.Fold
 import Mathlib.Data.Finset.Max
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Order.Basic
 import Mathlib.Algebra.Order.Sub.Defs

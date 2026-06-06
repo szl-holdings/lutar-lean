@@ -5,7 +5,7 @@
 -- Signed-off-by: Yachay <yachay@szlholdings.ai>
 -- Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 
-import Mathlib.Order.Fixedpoint
+import Mathlib.Order.FixedPoints
 
 namespace Lutar.Innovations.Round5
 

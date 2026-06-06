@@ -86,7 +86,7 @@ Every RAE-1 receipt includes:
 
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.Probability.ProbabilityMeasure
+import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Mathlib.MeasureTheory.Measure.MeasureSpace
 
 namespace SZL.AGI.PACBayes

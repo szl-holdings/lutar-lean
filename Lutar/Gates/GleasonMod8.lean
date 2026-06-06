@@ -39,7 +39,12 @@ hence the minimum possible non-trivial degree forces n ≡ 0 (mod 8).
     Cambridge UP, §7.6.
 -/
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Data.Finset.Card
 
 namespace Lutar.Gates

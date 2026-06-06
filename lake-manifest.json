@@ -20,7 +20,7 @@
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",
    "inherited": true,
-   "configFile": "lakefile.lean"},
+   "configFile": "lakefile.toml"},
   {"url": "https://github.com/leanprover-community/aesop",
    "type": "git",
    "subDir": null,
