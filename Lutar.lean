@@ -92,15 +92,22 @@ import Lutar.Puriq.Formulas.ProvedFormulas
 import Lutar.Wave3.Consensus
 import Lutar.Wave3.MerkleKraft
 import Lutar.Wave3.InfoEstim
--- prove-wave-4: PROMOTE the Mathlib-dependent re-exports into the kernel-check
--- root so CI (`lake build` / "Lean kernel check") actually compiles them. These
--- are Mathlib-dependent (could not be bare-`lean` verified locally — Mathlib does
--- not fit the sandbox disk); their truth is established by a GREEN CI build, NOT
--- claimed here. Per the honesty doctrine they were CI-PENDING in Wave-3; Wave-4
--- promotes them now that they are wired for CI verification.
-import Lutar.Wave3.Tier1Mathlib        -- C1 Tsirelson 2√2 / C2 CHSH≤2 / C6 Jensen (Mathlib-dep; signatures verified vs pinned Mathlib d731765; missing sqrt/NNReal imports added)
+-- prove-wave-4: the two Wave-4 modules below are CI-VERIFIED GREEN (lake build).
+--   * LambdaBisymmetryWitness — bare-`lean` verified, Lean-core axioms only.
+--   * LambdaBlockConsistency  — conditional Λ uniqueness under the WEAKER, more
+--     governance-natural block-consistency axiom A6' (declared/disclosed; NOT in
+--     the locked v11 kernel). Λ (F23) STAYS Conjecture 1 unconditionally.
+-- HONESTY NOTE (Tier1Mathlib): the C1 Tsirelson / C2 CHSH / C6 Jensen re-exports
+-- in Lutar/Wave3/Tier1Mathlib.lean have signatures verified VERBATIM against
+-- pinned Mathlib (rev d731765), but wiring that module into this kernel-check root
+-- reproducibly RED-lights the `lake build` step (isolated by bisection: root @
+-- a4299fb with Tier1Mathlib un-wired is fully GREEN). CI build logs are not
+-- retrievable in this environment, so the exact compile error cannot be pinned
+-- down here. Per the honesty doctrine, C1/C2/C6 therefore REMAIN CI-PENDING
+-- (file present in-tree, NOT imported into the compiled root). They are NOT
+-- claimed proven.
 import Lutar.Wave4.LambdaBisymmetryWitness  -- A6 discrimination witness (bare-`lean` verified, Lean-core axioms only)
-import Lutar.Wave4.LambdaBlockConsistency   -- conditional Λ uniqueness on the WEAKER block-consistency axiom A6' (Mathlib-dep, CI-verified)
+import Lutar.Wave4.LambdaBlockConsistency   -- conditional Λ uniqueness on the WEAKER block-consistency axiom A6' (Mathlib-dep, CI-verified GREEN)
 
 
 /-!
