@@ -158,6 +158,15 @@ import Lutar.Wave7.MathlibCore
 import Lutar.Wave6.MonotoneAdditiveLinear
 import Lutar.Wave6.SetAlphaUniqueness
 import Lutar.Wave6.SetDeltaUniqueness
+-- prove-coder: EXPERIMENTAL coder-specific INNOVATE pack (Mathlib-FREE; bare `lean`
+-- verified sorry-free; #print axioms shows Lean-core deps only + 1 declared
+-- collision-resistance axiom on the tamper theorem). Sandbox containment (CS1),
+-- bounded repair termination (CS2), router envelope+argmin stability (CR3), Byzantine
+-- majority intersection (CV4), conformal never-100% confidence (CC5), receipt-log
+-- Kraft compression (CK6), code-context non-interference / poisoned-dependency defense
+-- (NI7). EXPERIMENTAL scope: excluded from the LOCKED v11 baseline numbers via
+-- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Coder/).
+import Lutar.Coder.CoderProofs
 
 
 /-!
