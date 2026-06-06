@@ -55,6 +55,11 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # Agentic-loop end-to-end system proofs (prove-agentic) — additive, NOT wired
+    # into Lutar.lean; new namespace Lutar.Agentic.Pipeline. P1–P6 RAG→MCP→kernel
+    # pipeline theorems (Mathlib-free, sorry-free) + one declared crypto axiom
+    # (hashFn_collision_resistant, disclosed like F13′). Staged for Doctrine v12.
+    os.path.join("Lutar", "Agentic") + os.sep,
 )
 
 
