@@ -5,7 +5,7 @@ package «lutar» where
   -- Lean 4 + Mathlib package for the Lutar Invariant uniqueness theorem.
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "v4.13.0"
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.18.0"
 
 @[default_target]
 lean_lib «Lutar» where
