@@ -108,6 +108,10 @@ import Lutar.Wave3.Tier1Mathlib             -- C1/C2/C6 (Mathlib-dep) — wave-5
 -- prove-wave-5: substrate-relevant Mathlib instantiations (AM-GM dominates Λ; Cauchy–Schwarz
 -- trust-vector bound). Signatures verified verbatim vs pinned Mathlib d7317655.
 import Lutar.Wave5.MathlibCore
+-- prove-wave-5: Mathlib-FREE discrete substrate guarantees (bare `lean` 4.13.0 verified
+-- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
+-- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
+import Lutar.Wave5.DiscreteSubstrate
 
 
 /-!

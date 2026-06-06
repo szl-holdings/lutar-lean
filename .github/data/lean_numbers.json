@@ -5,9 +5,9 @@
   "sha": "PENDING-WAVE5",
   "measured_at_utc": "2026-06-06T05:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by PROVE-WAVE-5. Re-wires the MINIMAL Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen) after dropping the non-load-bearing c1a_tsirelson_constant numeric remark (-1 decl) and its two extra SpecialFunctions imports (wave-4 isolated Tier1Mathlib as the lake-build culprit). Adds Wave5/MathlibCore (+3 decls): W5-1 weighted AM-GM (Real.geom_mean_le_arith_mean_weighted -> Lambda <= arithmetic mean), W5-1b two-point AM-GM, W5-2 Cauchy-Schwarz real_inner_le_norm (trust-vector similarity bound). Net declarations 1182 -> 1184 (-1 c1a, +3 wave5). No new axioms (all pure Mathlib instantiations; expected deps propext/Classical.choice/Quot.sound, NO sorryAx). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
+  "note": "Rolled forward by PROVE-WAVE-5. Re-wires the MINIMAL Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen) after dropping the non-load-bearing c1a_tsirelson_constant numeric remark (-1 decl) and its two extra SpecialFunctions imports (wave-4 isolated Tier1Mathlib as the lake-build culprit). Adds Wave5/MathlibCore (+3 decls): W5-1 weighted AM-GM (Real.geom_mean_le_arith_mean_weighted -> Lambda <= arithmetic mean), W5-1b two-point AM-GM, W5-2 Cauchy-Schwarz real_inner_le_norm (trust-vector similarity bound). Net declarations 1182 -> 1189 (-1 c1a, +3 Wave5/MathlibCore, +5 Wave5/DiscreteSubstrate Mathlib-free bare-lean-verified). No new axioms (all pure Mathlib instantiations; expected deps propext/Classical.choice/Quot.sound, NO sorryAx). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
   "numbers": {
-    "declarations": 1184,
+    "declarations": 1189,
     "axioms_raw": 20,
     "axioms_unique": 19,
     "axiom_names": [
