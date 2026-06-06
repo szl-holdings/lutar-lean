@@ -112,6 +112,17 @@ import Lutar.Wave5.MathlibCore
 -- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
 -- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
 import Lutar.Wave5.DiscreteSubstrate
+-- prove-wave-6: graph-substrate guarantees from the founder's favorited graph-ML repos.
+-- Mathlib-FREE bare-lean cores (F-G2 GNN≤1-WL upper bound, F-G5 bounded-frontier DAG
+-- termination, F-G6 relabeling-invariant graph functionals) + Mathlib-dep (F-G1 Fréchet/
+-- Bourgain finite distortion, F-G3 geometric-contraction mixing promoting SpectralAdmit).
+-- F-G4 Λ-graph isomorphism invariance is closed inside Lutar.GraphLambda (above).
+import Lutar.Wave6.GraphSubstrate
+import Lutar.Wave6.MetricSpectral
+-- prove-wave-6: Mathlib-FREE info/concentration discrete cores (DPI deterministic
+-- post-processing, Fano collision-forces-error, conformal-coverage conservation). The
+-- analytic KL/sub-Gaussian Mathlib modules are 404 at pin d7317655 (C3/C4/C5 deferred).
+import Lutar.Wave6.InfoSubstrate
 
 
 /-!

@@ -2,12 +2,12 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "PENDING-WAVE5",
-  "measured_at_utc": "2026-06-06T05:00:00Z",
+  "sha": "PENDING-WAVE6",
+  "measured_at_utc": "2026-06-06T06:37:02Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by PROVE-WAVE-5. Re-wires the MINIMAL Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen) after dropping the non-load-bearing c1a_tsirelson_constant numeric remark (-1 decl) and its two extra SpecialFunctions imports (wave-4 isolated Tier1Mathlib as the lake-build culprit). Adds Wave5/MathlibCore (+3 decls): W5-1 weighted AM-GM (Real.geom_mean_le_arith_mean_weighted -> Lambda <= arithmetic mean), W5-1b two-point AM-GM, W5-2 Cauchy-Schwarz real_inner_le_norm (trust-vector similarity bound). Net declarations 1182 -> 1189 (-1 c1a, +3 Wave5/MathlibCore, +5 Wave5/DiscreteSubstrate Mathlib-free bare-lean-verified). No new axioms (all pure Mathlib instantiations; expected deps propext/Classical.choice/Quot.sound, NO sorryAx). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
+  "note": "Rolled forward by PROVE-WAVE-6 (based on wave5 verified commit 0a552a90). Adds the GRAPH + INFO substrate proof families. Mathlib-FREE bare-lean-verified (exit 0, #print axioms disclosed): Lutar/Wave6/GraphSubstrate.lean [F-G2 gnn_le_wl GNN<=1-WL upper bound (no axioms); F-G5 iterStep_drains/iterStep_empties bounded-frontier receipt-DAG termination (no axioms); F-G6 adj_pred_relabel_invariant/countAdj_relabel_invariant relabeling-invariant graph functionals], Lutar/Wave6/InfoSubstrate.lean [Wave-4 DPI dpi_postprocess_collapse/dpi_count_pullback; Fano fano_collision_forces_error; conformal coverage_conservation/miscoverage_le_total]. Mathlib-DEP (CI kernel-checked): Lutar/GraphLambda.lean [F-G4 vertexLambda_automorphism_invariant + cross-graph LambdaIso transport via Fintype.prod_equiv -> Lambda_graph_iso_invariant]; Lutar/Wave6/MetricSpectral.lean [F-G1 frechet_coord_lipschitz/frechet_isometric_embedding via abs_dist_sub_le + kuratowskiEmbedding.isometry (Bourgain 1985 doi:10.1007/BF02776078; Linial-London-Rabinovich 1995 doi:10.1007/BF01200757); F-G3 geometric_contraction promotes SpectralAdmit toy to a real finite contraction bound]. Net declarations 1189 -> 1217 (+23 from the three new Wave6 files: GraphSubstrate 12, InfoSubstrate 5, MetricSpectral 6; +5 from GraphLambda F-G4 real proofs replacing the placeholder). sorries_raw unchanged at 308 (every new theorem is sorry-free). axioms_raw 20 / axioms_unique 19 unchanged. No new axioms (expected deps propext/Classical.choice/Quot.sound only, NO sorryAx in the new theorems). C3 Hoeffding/C4 Azuma/C5 KL>=0 remain DEFERRED: Mathlib at pin v4.13.0 has no InformationTheory/KullbackLeibler or Probability/Moments/SubGaussian (confirmed 404 at pin) and no safe lakefile bump that preserves the locked kernel. Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
   "numbers": {
-    "declarations": 1189,
+    "declarations": 1217,
     "axioms_raw": 20,
     "axioms_unique": 19,
     "axiom_names": [
