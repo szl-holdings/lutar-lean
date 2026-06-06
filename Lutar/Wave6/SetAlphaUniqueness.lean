@@ -459,17 +459,18 @@ theorem mvLog_coeff_eq (F : (Fin n → ℝ) → ℝ) (hSym : A1_Symmetry F) :
     -- `i = swap i j k ↔ j = k`: applying the involution `swap i j` to both sides,
     -- `swap i j i = j` and `swap i j (swap i j k) = k`.
     by_cases hik : i = (Equiv.swap i j) k
-    · -- then k = swap i j i = j, so j = k holds
+    · -- then k = swap i j i = j, so j = k holds; both indicators are 1.
       have hk : k = (Equiv.swap i j) i := by
         have := congrArg (Equiv.swap i j) hik
         simpa [Equiv.swap_apply_self] using this.symm
       rw [Equiv.swap_apply_left] at hk
-      simp [hik, hk.symm]
-    · -- then ¬ (j = k): if j = k then i = swap i j k = swap i j j = i, contradiction
+      rw [if_pos hik, if_pos hk.symm]
+    · -- then ¬ (j = k): if j = k then i = swap i j k = swap i j j = i, contradiction.
+      -- both indicators are 0.
       have hjk : j ≠ k := by
         intro hjk; apply hik
         rw [← hjk, Equiv.swap_apply_right]
-      simp [hik, hjk]
+      rw [if_neg hik, if_neg hjk]
   -- hswap : F ((exp∘stdBasis i)∘swap) = F (exp∘stdBasis i); rewrite the LHS.
   rw [hreindex] at hswap
   -- hswap : F (exp∘stdBasis j) = F (exp∘stdBasis i); take logs.
@@ -547,9 +548,10 @@ theorem lambda_unique_setAlpha_discharged (hn : 0 < n)
   -- log (geomMean x) = (1/n) * log (∏ x i) = (1/n) * ∑ log x i = c * ∑ log x i.
   have hprodpos : 0 < ∏ i, x i := Finset.prod_pos (fun i _ => hx i)
   have hloggm : Real.log (geomMean x) = c * ∑ i, Real.log (x i) := by
-    unfold geomMean
-    rw [Real.log_rpow hprodpos, Real.log_prod _ _ (fun i _ => (hx i).ne'), hc_val]
-    ring
+    have hlg : Real.log (geomMean x) = (1 / (n : ℝ)) * ∑ i, Real.log (x i) := by
+      unfold geomMean
+      rw [Real.log_rpow hprodpos, Real.log_prod _ _ (fun i _ => (hx i).ne')]
+    rw [hlg, hc_val]
   -- Both F x and geomMean x are positive with equal logs ⇒ equal.
   have hgmpos : 0 < geomMean x := geomMean_pos hx
   have hlogeq : Real.log (F x) = Real.log (geomMean x) := by rw [hlogFx, hloggm]
