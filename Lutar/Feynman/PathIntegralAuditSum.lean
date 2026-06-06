@@ -53,7 +53,12 @@ Planck's constant, renormalisation, or any quantum physics whatsoever.
   SORRY_v16_OPEN[4] — exec_lambda_bounded: prod of NNReal ≤ 1 rpow ≤ 1 (3h)
 -/
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.NNReal.Basic
 import Lutar.Axioms

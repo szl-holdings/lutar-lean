@@ -75,7 +75,12 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Data.Real.Sqrt
 import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Mathlib.MeasureTheory.Constructions.Pi
-import Mathlib.Probability.Moments
+import Mathlib.Probability.Moments.Basic
+import Mathlib.Probability.Moments.ComplexMGF
+import Mathlib.Probability.Moments.IntegrableExpMul
+import Mathlib.Probability.Moments.MGFAnalytic
+import Mathlib.Probability.Moments.SubGaussian
+import Mathlib.Probability.Moments.Tilted
 import Mathlib.Probability.Independence.Basic
 
 namespace Lutar.PACBayes

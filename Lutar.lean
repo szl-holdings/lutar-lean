@@ -112,8 +112,54 @@ import Lutar.Wave5.MathlibCore
 -- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
 -- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
 import Lutar.Wave5.DiscreteSubstrate
+-- prove-wave-6: graph-substrate guarantees from the founder's favorited graph-ML repos.
+-- Mathlib-FREE bare-lean cores (F-G2 GNN≤1-WL upper bound, F-G5 bounded-frontier DAG
+-- termination, F-G6 relabeling-invariant graph functionals) + Mathlib-dep (F-G1 Fréchet/
+-- Bourgain finite distortion, F-G3 geometric-contraction mixing promoting SpectralAdmit).
+-- F-G4 Λ-graph isomorphism invariance is closed inside Lutar.GraphLambda (above).
+import Lutar.Wave6.GraphSubstrate
+import Lutar.Wave6.MetricSpectral
+-- prove-wave-6: Mathlib-FREE info/concentration discrete cores (DPI deterministic
+-- post-processing, Fano collision-forces-error, conformal-coverage conservation). The
+-- analytic KL/sub-Gaussian Mathlib modules are 404 at pin d7317655 (C3/C4/C5 deferred).
+import Lutar.Wave6.InfoSubstrate
+-- prove-wave-6 (Mathlib bump v4.13.0 -> v4.18.0): C3 Hoeffding / C4 Azuma-Hoeffding /
+-- C5 Gibbs (KL >= 0). These were honestly BLOCKED at d7317655 because
+-- Mathlib.Probability.Moments.SubGaussian and Mathlib.InformationTheory.KullbackLeibler.Basic
+-- were HTTP 404 there. The bump to Mathlib v4.18.0 (aa936c36, Lean v4.18.0) makes both
+-- present (earliest tagged release with BOTH files). Pure term-mode re-exports; signatures
+-- verified verbatim vs v4.18.0. Experimental/wave6 scope; locked v11 kernel 749/14/163 @
+-- c7c0ba17 UNCHANGED; Lambda stays Conjecture 1.
+import Lutar.Wave6.SubGaussianKL
+-- prove-wave-7: Mathlib-FREE discrete substrate (bare `lean` verified, sorry-free;
+-- #print axioms = Lean-core only). W7-4 conformal rank-count calibration/antitone backbone
+-- (Vovk-Gammerman-Shafer 2005); W7-6 Doob two-sided audit envelope (Doob 1953). Disjoint
+-- from wave-5/wave-6 (which closed coverage-conservation + bounded-frontier termination).
+import Lutar.Wave7.DiscreteSubstrate
+-- prove-wave-7: Mathlib-DEP kernel-checked. W7-1 vertex-summed graph functional iso-
+-- invariance / F-G6 additive companion (Equiv.sum_comp; graph2nn You et al. ICML 2020);
+-- W7-5 PAC-Bayes min<=avg<=max routing envelope (Finset.sum_le_card_nsmul /
+-- card_nsmul_le_sum; McAllester COLT 1999). Signatures verified vs Mathlib v4.18.0.
+import Lutar.Wave7.MathlibCore
+-- lambda-uniqueness/unconditional-setalpha (Team A, PhD): Lambda-uniqueness WITHIN
+-- principled STRONGER axiom classes. These modules do NOT flip any public claim:
+-- the ORIGINAL A1-A5 unconditional statement stays FALSE (Round13.maxAgg_ne_Lambda
+-- in-tree) and Lambda (F23) STAYS Conjecture 1 unconditionally. Wiring them into
+-- `lake build` makes CI kernel-check every theorem and every #print axioms ledger.
+--   * MonotoneAdditiveLinear -- the classical Cauchy monotone-additive=>linear lemma,
+--     closed with NO open obligation and NO declared axiom (pure rational squeeze).
+--   * SetAlphaUniqueness -- Set alpha = {A1,A2,A3,A4,A5' MULTIPLICATIVITY}. Lambda
+--     membership + all five impostor deaths are AXIOM-FREE; lambda_unique_setAlpha is
+--     CONDITIONAL on ONE disclosed cited axiom setAlpha_cauchy (multivariable Cauchy core).
+--   * SetDeltaUniqueness -- Set delta = {d1,d2,d3 Bisymmetry,d4 PSI,d5' MULT}; continuity
+--     DERIVED (Kiss-Shulman 2026 arXiv:2606.05221 Thm 1.1). Lambda membership + impostor
+--     deaths AXIOM-FREE; geomMean_unique_KS CONDITIONAL on disclosed cited axioms
+--     KS_theorem_1_1 + setDelta_stage2. Drift baseline rolled forward in the same PR.
+import Lutar.Wave6.MonotoneAdditiveLinear
+import Lutar.Wave6.SetAlphaUniqueness
+import Lutar.Wave6.SetDeltaUniqueness
 -- prove-coder: EXPERIMENTAL coder-specific INNOVATE pack (Mathlib-FREE; bare `lean`
--- 4.13.0 verified sorry-free; #print axioms shows Lean-core deps only + 1 declared
+-- verified sorry-free; #print axioms shows Lean-core deps only + 1 declared
 -- collision-resistance axiom on the tamper theorem). Sandbox containment (CS1),
 -- bounded repair termination (CS2), router envelope+argmin stability (CR3), Byzantine
 -- majority intersection (CV4), conformal never-100% confidence (CC5), receipt-log

@@ -28,7 +28,8 @@
       receipt corruption, not quantum operator products.
 -/
 
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 
 namespace Lutar.QEC.Kitaev
 

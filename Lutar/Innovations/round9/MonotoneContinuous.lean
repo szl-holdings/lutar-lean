@@ -79,7 +79,7 @@ Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 -/
 import Mathlib.Topology.Order.LeftRightLim
 import Mathlib.Topology.Algebra.GroupWithZero
-import Mathlib.Topology.Instances.NNReal
+import Mathlib.Topology.Instances.NNReal.Lemmas
 import Mathlib.Data.Real.Cardinality
 
 namespace Lutar.Innovations.Round9.MonotoneContinuous

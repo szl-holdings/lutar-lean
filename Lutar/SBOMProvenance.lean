@@ -47,7 +47,8 @@ map to distinct byte sequences (structural injectivity).
 import Lutar.Axioms
 import Lutar.Thesis.TH_V18_14_SHA256CollisionHonest
 import Mathlib.Data.Finset.Basic
-import Mathlib.Order.Defs
+import Mathlib.Order.Defs.Unbundled
+import Mathlib.Order.Defs.LinearOrder
 
 namespace Lutar.SBOMProvenance
 
