@@ -59,6 +59,9 @@ import Mathlib.Algebra.Order.Field.Basic
 namespace Wave6.MetricSpectral
 
 open scoped NNReal
+-- `SeparableSpace` lives in the `TopologicalSpace` namespace (Mathlib.Topology.Bases);
+-- open it so the Kuratowski embedding signature resolves (matches Kuratowski.lean).
+open TopologicalSpace
 
 /-! ## F-G1 — Fréchet anchor coordinate is 1-Lipschitz (the Bourgain expansion side). -/
 
