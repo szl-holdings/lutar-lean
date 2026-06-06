@@ -249,12 +249,16 @@ theorem delta4_implies_allStrictMono (hn : 0 < n) (F : (Fin n → ℝ) → ℝ)
     -- Apply δ4 at j = ⟨k,hk⟩, base = hyb k off-coordinate, t = x ⟨k,hk⟩, t' = y ⟨k,hk⟩.
     have heq_lo : (fun i => if i = (⟨k, hk⟩ : Fin n) then x ⟨k, hk⟩ else hyb k i) = hyb k := by
       funext i; by_cases hi : i = (⟨k, hk⟩ : Fin n)
-      · subst hi; simp only [if_pos rfl, hhyb]; rw [if_neg (by simp)]
+      · subst hi
+        simp only [if_pos rfl, hhyb]
+        rw [if_neg (by simp only [Fin.val_mk]; exact lt_irrefl k)]
       · simp [hi]
     have heq_hi : (fun i => if i = (⟨k, hk⟩ : Fin n) then y ⟨k, hk⟩ else hyb k i) = hyb (k + 1) := by
       funext i
       by_cases hi : i = (⟨k, hk⟩ : Fin n)
-      · subst hi; simp only [if_pos rfl, hhyb]; rw [if_pos (by simp)]
+      · subst hi
+        simp only [if_pos rfl, hhyb]
+        rw [if_pos (by simp only [Fin.val_mk]; exact Nat.lt_succ_self k)]
       · rw [if_neg hi]
         simp only [hhyb]
         have hik : (i : ℕ) ≠ k := fun hh => hi (Fin.ext hh)

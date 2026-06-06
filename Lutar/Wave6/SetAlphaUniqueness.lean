@@ -422,7 +422,7 @@ theorem mvLog_linear_combo (F : (Fin n → ℝ) → ℝ)
   have hGcont : Continuous (fun x => G x) := by simpa [hG] using hcont
   -- Canonical-basis decomposition of `t`.
   have hdecomp : t = ∑ i, t i • stdBasis i := by
-    have := Pi.pi_eq_sum_univ t
+    have := pi_eq_sum_univ t
     simpa [stdBasis] using this
   -- Apply G, push through the sum and the scalars.
   calc mvLog F t
@@ -453,21 +453,23 @@ theorem mvLog_coeff_eq (F : (Fin n → ℝ) → ℝ) (hSym : A1_Symmetry F) :
                 = (fun k : Fin n => Real.exp (stdBasis j k)) := by
     funext k
     simp only [Function.comp_apply, stdBasis]
-    by_cases hki : k = i
-    · subst hki; rw [Equiv.swap_apply_left]
-      by_cases hij : i = j
-      · subst hij; simp
-      · simp [hij, (Ne.symm hij)]
-    · by_cases hkj : k = j
-      · subst hkj; rw [Equiv.swap_apply_right]
-        by_cases hij : i = j
-        · subst hij; simp
-        · simp [hij, (Ne.symm hij)]
-      · rw [Equiv.swap_apply_of_ne_of_ne hki hkj]
-        -- k ≠ i and k ≠ j: both branches give exp 0.
-        have h1 : (if i = k then (1:ℝ) else 0) = 0 := by simp [Ne.symm hki]
-        have h2 : (if j = k then (1:ℝ) else 0) = 0 := by simp [Ne.symm hkj]
-        rw [h1, h2]
+    -- It suffices to show the indicator coefficients agree:
+    --   (if i = swap i j k then 1 else 0) = (if j = k then 1 else 0).
+    congr 1
+    -- `i = swap i j k ↔ j = k`: applying the involution `swap i j` to both sides,
+    -- `swap i j i = j` and `swap i j (swap i j k) = k`.
+    by_cases hik : i = (Equiv.swap i j) k
+    · -- then k = swap i j i = j, so j = k holds
+      have hk : k = (Equiv.swap i j) i := by
+        have := congrArg (Equiv.swap i j) hik
+        simpa [Equiv.swap_apply_self] using this.symm
+      rw [Equiv.swap_apply_left] at hk
+      simp [hik, hk.symm]
+    · -- then ¬ (j = k): if j = k then i = swap i j k = swap i j j = i, contradiction
+      have hjk : j ≠ k := by
+        intro hjk; apply hik
+        rw [← hjk, Equiv.swap_apply_right]
+      simp [hik, hjk]
   -- hswap : F ((exp∘stdBasis i)∘swap) = F (exp∘stdBasis i); rewrite the LHS.
   rw [hreindex] at hswap
   -- hswap : F (exp∘stdBasis j) = F (exp∘stdBasis i); take logs.
@@ -546,9 +548,8 @@ theorem lambda_unique_setAlpha_discharged (hn : 0 < n)
   have hprodpos : 0 < ∏ i, x i := Finset.prod_pos (fun i _ => hx i)
   have hloggm : Real.log (geomMean x) = c * ∑ i, Real.log (x i) := by
     unfold geomMean
-    rw [Real.log_rpow hprodpos]
-    rw [Real.log_prod _ _ (fun i _ => (hx i).ne')]
-    rw [hc_val]; ring
+    rw [Real.log_rpow hprodpos, Real.log_prod _ _ (fun i _ => (hx i).ne'), hc_val]
+    ring
   -- Both F x and geomMean x are positive with equal logs ⇒ equal.
   have hgmpos : 0 < geomMean x := geomMean_pos hx
   have hlogeq : Real.log (F x) = Real.log (geomMean x) := by rw [hlogFx, hloggm]
