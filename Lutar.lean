@@ -98,7 +98,9 @@ import Lutar.Wave3.InfoEstim
 -- not fit the sandbox disk); their truth is established by a GREEN CI build, NOT
 -- claimed here. Per the honesty doctrine they were CI-PENDING in Wave-3; Wave-4
 -- promotes them now that they are wired for CI verification.
-import Lutar.Wave3.Tier1Mathlib        -- C1 Tsirelson 2√2 / C2 CHSH≤2 / C6 Jensen (Mathlib-dep, CI-verified)
+-- BISECTION (wave4): Tier1Mathlib temporarily un-wired to isolate the failing
+-- module; its C1/C2/C6 signatures were authored in Wave-3 but never CI-compiled.
+-- import Lutar.Wave3.Tier1Mathlib
 import Lutar.Wave4.LambdaBisymmetryWitness  -- A6 discrimination witness (bare-`lean` verified, Lean-core axioms only)
 import Lutar.Wave4.LambdaBlockConsistency   -- conditional Λ uniqueness on the WEAKER block-consistency axiom A6' (Mathlib-dep, CI-verified)
 
