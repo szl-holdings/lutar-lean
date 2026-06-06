@@ -2,12 +2,12 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "PENDING-WAVE5",
-  "measured_at_utc": "2026-06-06T05:00:00Z",
+  "sha": "PENDING-WAVE6-MATHLIB-BUMP",
+  "measured_at_utc": "2026-06-06T07:00:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Rolled forward by PROVE-WAVE-5. Re-wires the MINIMAL Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen) after dropping the non-load-bearing c1a_tsirelson_constant numeric remark (-1 decl) and its two extra SpecialFunctions imports (wave-4 isolated Tier1Mathlib as the lake-build culprit). Adds Wave5/MathlibCore (+3 decls): W5-1 weighted AM-GM (Real.geom_mean_le_arith_mean_weighted -> Lambda <= arithmetic mean), W5-1b two-point AM-GM, W5-2 Cauchy-Schwarz real_inner_le_norm (trust-vector similarity bound). Net declarations 1182 -> 1189 (-1 c1a, +3 Wave5/MathlibCore, +5 Wave5/DiscreteSubstrate Mathlib-free bare-lean-verified). No new axioms (all pure Mathlib instantiations; expected deps propext/Classical.choice/Quot.sound, NO sorryAx). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
+  "note": "Rolled forward by PROVE-WAVE-6 (Mathlib toolchain bump v4.13.0 -> v4.18.0). Bumps lean-toolchain to leanprover/lean4:v4.18.0 and the mathlib require/manifest pin to v4.18.0 (rev aa936c36e8484abd300577139faf8e945850831a) -- the EARLIEST tagged release containing BOTH Mathlib/Probability/Moments/SubGaussian.lean (first present v4.18.0) AND Mathlib/InformationTheory/KullbackLeibler/Basic.lean (first present v4.17.0), both HTTP-404 at the prior d7317655 pin. Adds Lutar/Wave6/SubGaussianKL.lean (+3 decls): C3 Hoeffding (ProbabilityTheory.HasSubgaussianMGF.measure_sum_ge_le_of_iIndepFun), C4 Azuma-Hoeffding (measure_sum_ge_le_of_HasCondSubgaussianMGF), C5 Gibbs KL>=0 (InformationTheory.integral_llr_add_sub_measure_univ_nonneg). All pure term-mode Mathlib instantiations; expected deps propext/Classical.choice/Quot.sound, NO sorryAx, NO new axiom. Net declarations 1189 -> 1192 (+3 Wave6/SubGaussianKL). axioms_unique stays 19, sorries unchanged. Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; Lambda remains Conjecture 1 unconditionally. Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>",
   "numbers": {
-    "declarations": 1189,
+    "declarations": 1192,
     "axioms_raw": 20,
     "axioms_unique": 19,
     "axiom_names": [

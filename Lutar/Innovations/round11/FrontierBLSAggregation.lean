@@ -53,7 +53,7 @@ used (`(a+b)·h = a·h + b·h`).  The pairing `e` is abstracted as injectivity o
 
 NEW file under `Lutar/Innovations/round11/`; locked kernel untouched.
 -/
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Tactic
 

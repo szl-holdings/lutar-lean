@@ -15,7 +15,12 @@ The kernel-postulation note is removed; this is the substrate guarantee
 for v14+ Λ-gate interpretability, fully discharged.
 -/
 import Mathlib.Analysis.MeanInequalities
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Lutar.Axioms
 import Lutar.Invariant

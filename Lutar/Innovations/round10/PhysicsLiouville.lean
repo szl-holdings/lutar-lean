@@ -57,7 +57,12 @@ import Mathlib.Data.Fintype.Card
 import Mathlib.Data.Finset.Card
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.Logic.Equiv.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 
 open BigOperators
 

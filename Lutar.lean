@@ -112,6 +112,14 @@ import Lutar.Wave5.MathlibCore
 -- sorry-free; #print axioms shows Lean-core deps only). Conformal-coverage count law,
 -- UDS collision pigeonhole, monotone optional-stopping (anti-deflation), threshold mono.
 import Lutar.Wave5.DiscreteSubstrate
+-- prove-wave-6 (Mathlib bump v4.13.0 -> v4.18.0): C3 Hoeffding / C4 Azuma-Hoeffding /
+-- C5 Gibbs (KL >= 0). These were honestly BLOCKED at d7317655 because
+-- Mathlib.Probability.Moments.SubGaussian and Mathlib.InformationTheory.KullbackLeibler.Basic
+-- were HTTP 404 there. The bump to Mathlib v4.18.0 (aa936c36, Lean v4.18.0) makes both
+-- present (earliest tagged release with BOTH files). Pure term-mode re-exports; signatures
+-- verified verbatim vs v4.18.0. Experimental/wave6 scope; locked v11 kernel 749/14/163 @
+-- c7c0ba17 UNCHANGED; Lambda stays Conjecture 1.
+import Lutar.Wave6.SubGaussianKL
 
 
 /-!

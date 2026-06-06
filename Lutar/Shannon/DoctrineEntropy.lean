@@ -50,7 +50,8 @@
   DOIs; innovations beyond the prior art explicitly enumerated.
 -/
 
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Card
 

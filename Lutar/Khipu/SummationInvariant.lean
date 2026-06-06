@@ -40,8 +40,11 @@ G7 close (feat/close-G6-G7-pinsker-khipu):
 -/
 import Mathlib.Data.List.Basic
 import Mathlib.Data.List.Indexes
-import Mathlib.Data.Nat.Defs
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 
 namespace Lutar.Khipu
 

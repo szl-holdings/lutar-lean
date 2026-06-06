@@ -17,7 +17,9 @@ Runtime counterpart: `rosie/src/horus-eye-weights.ts`.
 v16 ancient-foundations graft R1-G2.
 -/
 import Mathlib.Data.Rat.Defs
-import Mathlib.Algebra.BigOperators.Group.List
+import Mathlib.Algebra.BigOperators.Group.List.Basic
+import Mathlib.Algebra.BigOperators.Group.List.Defs
+import Mathlib.Algebra.BigOperators.Group.List.Lemmas
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.FieldSimp
 

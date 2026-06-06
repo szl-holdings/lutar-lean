@@ -40,7 +40,12 @@
 -- statement (pure integer arithmetic) are proven here without sorry.
 
 import Mathlib.Algebra.Polynomial.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Data.Nat.Basic

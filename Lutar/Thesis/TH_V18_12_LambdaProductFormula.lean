@@ -1,5 +1,6 @@
 import Mathlib.Tactic.Linarith
-import Mathlib.Data.Int.Defs
+import Mathlib.Data.Int.Init
+import Mathlib.Data.Int.Basic
 /-
 # TH-V18-12 — Lambda-like Product Multiplicativity
 
