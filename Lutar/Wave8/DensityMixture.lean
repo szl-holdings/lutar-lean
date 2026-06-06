@@ -66,7 +66,7 @@ theorem posSemidef_sum {ι : Type*} (s : Finset ι) (M : ι → Matrix n n ℝ)
   classical
   induction s using Finset.induction with
   | empty => simpa using (Matrix.PosSemidef.zero : (0 : Matrix n n ℝ).PosSemidef)
-  | insert a s ha ih =>
+  | @insert a s ha ih =>
       rw [Finset.sum_insert ha]
       exact (h a (Finset.mem_insert_self a s)).add
         (ih (fun i hi => h i (Finset.mem_insert_of_mem hi)))

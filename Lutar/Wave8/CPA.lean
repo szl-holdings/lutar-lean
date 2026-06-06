@@ -45,8 +45,7 @@ noncomputable def cpaTime (Δp Δv : E) : ℝ := - ⟪Δp, Δv⟫ / ‖Δv‖ ^ 
 theorem sep2_expand (Δp Δv : E) (t : ℝ) :
     sep2 Δp Δv t = ‖Δp‖ ^ 2 + 2 * t * ⟪Δp, Δv⟫ + t ^ 2 * ‖Δv‖ ^ 2 := by
   unfold sep2
-  rw [norm_add_sq_real, real_inner_smul_right, real_inner_self_eq_norm_sq,
-      norm_smul]
+  rw [norm_add_sq_real, real_inner_smul_right, norm_smul]
   have hv : (‖(t : ℝ)‖ * ‖Δv‖) ^ 2 = t ^ 2 * ‖Δv‖ ^ 2 := by
     rw [mul_pow, Real.norm_eq_abs, sq_abs]
   rw [hv]; ring
