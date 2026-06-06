@@ -71,6 +71,15 @@ EXPERIMENTAL_SCOPES = (
     # governed_run_sound is fully Lean-core; P5 tamper-evidence is exposed
     # separately and reuses Agentic's single declared crypto axiom.
     os.path.join("Lutar", "Unify") + os.sep,
+    # Wave8 PROVE-NOW experimental pack (prove-next10) — 10 additive theorems
+    # across two PR groups: kernel-only Lean-core proofs (Ph1 axiom-disclosure,
+    # M2 hash-chain, L2 min-gate deny-by-default, B1 Byzantine n=3/f=1, S2
+    # Simplex/RTA safety invariant, CP1 split-conformal coverage) and Mathlib
+    # proofs (Q1 density-matrix mixture PSD, Q2 Gershgorin governance bound,
+    # G1 CPA minimality, L3 geometric-mean trust strict monotonicity). EXPERIMENTAL,
+    # CI-green only, NOT folded into the locked v11 baseline (stays 5). Λ remains
+    # Conjecture 1 (L3 asserts no uniqueness). No sorry / no open obligation.
+    os.path.join("Lutar", "Wave8") + os.sep,
 )
 
 
