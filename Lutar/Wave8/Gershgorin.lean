@@ -41,6 +41,11 @@ import Mathlib.Data.Complex.Norm
 
 open Matrix Complex
 
+-- Gershgorin's `eigenvalue_mem_ball` instantiates `Matrix.toLin'` over a generic
+-- `Fintype`/`DecidableEq` index, whose `whnf` reduction is costly; give the
+-- elaborator extra budget. (Honest: a pure resource bump, no proof shortcut.)
+set_option maxHeartbeats 1000000
+
 namespace Lutar.Wave8.Gershgorin
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
