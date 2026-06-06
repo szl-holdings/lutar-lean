@@ -168,6 +168,18 @@ import Lutar.Wave6.SetDeltaUniqueness
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Coder/).
 import Lutar.Coder.CoderProofs
 
+-- Wave8 PROVE-NOW experimental pack (prove-next10), Mathlib group.
+-- Q1 density-matrix mixture PSD, Q2 Gershgorin governance spectral bound,
+-- G1 closest-point-approach minimality, L3 geometric-mean trust strict
+-- monotonicity (asserts NO Λ uniqueness — Conjecture 1 untouched). EXPERIMENTAL
+-- scope: excluded from the LOCKED v11 baseline numbers via
+-- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave8/).
+-- locked-proven stays EXACTLY 5.
+import Lutar.Wave8.DensityMixture
+import Lutar.Wave8.Gershgorin
+import Lutar.Wave8.CPA
+import Lutar.Wave8.LambdaMono
+
 
 /-!
 # Lutar — root module
