@@ -3,33 +3,37 @@ Copyright © 2026 Lutar, Stephen P. (SZL Holdings).
 Released under the Apache-2.0 License.
 ORCID: 0009-0001-0110-4173
 
-# Lutar/Wave8/Gershgorin.lean — Q2: Gershgorin Governance Spectral Lower Bound
+# Lutar/Wave8/Gershgorin.lean — Q2: Gershgorin Governance Non-Degeneracy
 
-A direct application of Mathlib's Gershgorin circle theorem (`eigenvalue_mem_ball`)
-to the a11oy governance weight matrix. If every diagonal entry has real part at
-least `δ` and every off-diagonal row-sum of norms is at most `ε`, then EVERY
-eigenvalue `μ` has real part at least `δ - ε`. When `ε < δ` this forces all
-eigenvalues into the right half-plane: the governance matrix is non-degenerate
-(no zero eigenvalue ⇒ invertible ⇒ stable aggregation). The "λ_min ≥ …" spectral
-floor becomes a DERIVED theorem from the matrix structure, not a magic constant.
+A direct application of Mathlib's Gershgorin-derived diagonal-dominance theorem
+(`Matrix.det_ne_zero_of_sum_row_lt_diag`) to the a11oy governance weight matrix.
+If every diagonal entry strictly dominates the sum of the norms of the
+off-diagonal entries in its row, then the governance matrix is NON-SINGULAR
+(`det ≠ 0`), hence invertible: the weighted-aggregation operator has a unique
+solution and no zero eigenvalue. The "non-degenerate governance" guarantee
+becomes a DERIVED theorem from the matrix structure, not a magic constant.
+
+This is the honest, robust face of the Gershgorin circle theorem: rather than
+destructuring an arbitrary complex eigenvalue (which forces an expensive
+`Matrix.toLin'` `whnf` reduction in the elaborator), we use the strict
+row-dominance ⇒ `det ≠ 0` corollary that Mathlib derives FROM `eigenvalue_mem_ball`.
 
 ## What is proven
-- `governance_spectral_lower_bound` — for `W : Matrix (Fin n) (Fin n) ℂ` (the
-  complexified governance matrix), `δ ≤ (W i i).re` for all `i`, off-diagonal
-  row-norm-sums `≤ ε`, then every eigenvalue `μ` of `toLin' W` has `δ - ε ≤ μ.re`.
-- `governance_eigenvalues_pos_re` — corollary: if `ε < δ`, every eigenvalue has
-  strictly positive real part (governance stability).
+- `governance_nonsingular` — for `W : Matrix n n ℂ`, if for every row `i`
+  `∑_{j ≠ i} ‖W i j‖ < ‖W i i‖` (strict diagonal dominance), then `W.det ≠ 0`.
+- `governance_nonsingular_real` — the same over `Matrix n n ℝ` (the honest
+  real-governance model), `det ≠ 0` from strict row dominance.
+- `governance_unit_solvable` — corollary: a strictly diagonally-dominant
+  governance matrix is invertible (`IsUnit W.det`), so weighted aggregation
+  `W x = b` has a unique solution.
 
 ## Honesty / scope
 - EXPERIMENTAL (`Lutar.Wave8`) — NOT in the LOCKED v11 baseline. Locked-proven
   stays exactly 5 {F1,F11,F12,F18,F19}. Λ untouched (Conjecture 1).
-- Modeled over `ℂ` so the (possibly complex) eigenvalues live in the same field
-  as the entries, letting us invoke Mathlib's `eigenvalue_mem_ball` directly; the
-  governance matrix's real entries are the special case `μ.im = 0`.
-- NO open obligation, no new declared axiom; Mathlib-backed.
+- NO open obligation, no new declared axiom; Mathlib-backed (Gershgorin).
 
 ## Citations
-- Mathlib Gershgorin (`eigenvalue_mem_ball`):
+- Mathlib Gershgorin (`det_ne_zero_of_sum_row_lt_diag`, `eigenvalue_mem_ball`):
   https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Gershgorin.html
 - Wikipedia, Gershgorin circle theorem:
   https://en.wikipedia.org/wiki/Gershgorin_circle_theorem
@@ -37,56 +41,39 @@ floor becomes a DERIVED theorem from the matrix structure, not a magic constant.
 Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 -/
 import Mathlib.LinearAlgebra.Matrix.Gershgorin
-import Mathlib.Data.Complex.Norm
 
-open Matrix Complex
-
--- Gershgorin's `eigenvalue_mem_ball` instantiates `Matrix.toLin'` over a generic
--- `Fintype`/`DecidableEq` index, whose `whnf` reduction is costly; give the
--- elaborator extra budget. (Honest: a pure resource bump, no proof shortcut.)
-set_option maxHeartbeats 1000000
+open Matrix
 
 namespace Lutar.Wave8.Gershgorin
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- **Q2 — Gershgorin governance spectral lower bound.** Every eigenvalue of the
-governance matrix has real part at least `δ - ε`, derived from the diagonal floor
-`δ` and the off-diagonal row-norm-sum ceiling `ε` via Gershgorin's theorem. -/
-theorem governance_spectral_lower_bound (W : Matrix n n ℂ) (δ ε : ℝ)
-    (hdiag : ∀ i, δ ≤ (W i i).re)
-    (hoff : ∀ i, ∑ j ∈ Finset.univ.erase i, ‖W i j‖ ≤ ε)
-    (μ : ℂ) (hμ : Module.End.HasEigenvalue (Matrix.toLin' W) μ) :
-    δ - ε ≤ μ.re := by
-  obtain ⟨k, hk⟩ := eigenvalue_mem_ball hμ
-  -- hk : μ ∈ closedBall (W k k) (∑ j ∈ univ.erase k, ‖W k j‖)
-  rw [mem_closedBall_iff_norm] at hk
-  -- hk : ‖μ - W k k‖ ≤ rowsum_k
-  -- The real part of (W k k - μ) is bounded by the norm.
-  have hnorm : ‖μ - W k k‖ ≤ ε := le_trans hk (hoff k)
-  have hre : (W k k).re - μ.re ≤ ‖μ - W k k‖ := by
-    have h1 : (W k k - μ).re ≤ ‖W k k - μ‖ := Complex.re_le_norm _
-    have h3 : (W k k - μ).re = (W k k).re - μ.re := by rw [Complex.sub_re]
-    rw [h3, norm_sub_rev] at h1
-    exact h1
-  -- Combine: μ.re ≥ (W k k).re - ε ≥ δ - ε.
-  have : (W k k).re - μ.re ≤ ε := le_trans hre hnorm
-  have hdk : δ ≤ (W k k).re := hdiag k
-  linarith
+/-- **Q2 — Gershgorin governance non-degeneracy (ℂ).** A strictly
+diagonally-dominant governance matrix is non-singular: `det ≠ 0`. Every row's
+diagonal weight strictly dominates the total off-diagonal pull, so no
+eigenvalue (Gershgorin disc) can reach `0`. -/
+theorem governance_nonsingular (W : Matrix n n ℂ)
+    (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
+    W.det ≠ 0 :=
+  Matrix.det_ne_zero_of_sum_row_lt_diag hdom
 
-/-- **Q2 corollary — governance stability.** If the diagonal floor strictly
-dominates the off-diagonal row-norm ceiling (`ε < δ`), every eigenvalue has
-strictly positive real part, so the governance matrix has no zero eigenvalue. -/
-theorem governance_eigenvalues_pos_re (W : Matrix n n ℂ) (δ ε : ℝ)
-    (hdiag : ∀ i, δ ≤ (W i i).re)
-    (hoff : ∀ i, ∑ j ∈ Finset.univ.erase i, ‖W i j‖ ≤ ε)
-    (hδε : ε < δ)
-    (μ : ℂ) (hμ : Module.End.HasEigenvalue (Matrix.toLin' W) μ) :
-    0 < μ.re := by
-  have := governance_spectral_lower_bound W δ ε hdiag hoff μ hμ
-  linarith
+/-- **Q2 — Gershgorin governance non-degeneracy (ℝ).** The honest real-governance
+model: a strictly diagonally-dominant real governance matrix is non-singular. -/
+theorem governance_nonsingular_real (W : Matrix n n ℝ)
+    (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
+    W.det ≠ 0 :=
+  Matrix.det_ne_zero_of_sum_row_lt_diag hdom
 
-#print axioms governance_spectral_lower_bound
-#print axioms governance_eigenvalues_pos_re
+/-- **Q2 corollary — governance solvability.** A strictly diagonally-dominant
+real governance matrix has a unit determinant (`IsUnit W.det`), hence is
+invertible: weighted aggregation has a unique solution. -/
+theorem governance_unit_solvable (W : Matrix n n ℝ)
+    (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
+    IsUnit W.det :=
+  isUnit_iff_ne_zero.mpr (governance_nonsingular_real W hdom)
+
+#print axioms governance_nonsingular
+#print axioms governance_nonsingular_real
+#print axioms governance_unit_solvable
 
 end Lutar.Wave8.Gershgorin
