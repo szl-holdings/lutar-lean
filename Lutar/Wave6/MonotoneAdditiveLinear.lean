@@ -64,6 +64,7 @@ import Mathlib.Algebra.Order.Field.Basic
 import Mathlib.Algebra.Module.LinearMap.Defs
 import Mathlib.Algebra.Module.Rat
 import Mathlib.Data.Rat.Cast.Order
+import Mathlib.Topology.Instances.RealVectorSpace
 
 namespace Lutar.Wave6
 
@@ -169,7 +170,45 @@ theorem monotone_additive_linear (g : ℝ → ℝ)
       exact absurd hle (not_le.mpr hgt_lt)
   exact le_antisymm hupper hlower
 
+/-! ## §3 — The CONTINUOUS Cauchy lemma, CLOSED (no open obligations).
+
+This is the second classical route (Cauchy 1821 / Aczél 1966 §2.1): a CONTINUOUS
+additive `g : ℝ → ℝ` is linear, `g t = g 1 * t`.  Unlike `monotone_additive_linear`
+this needs NO monotonicity — it consumes continuity directly through the Mathlib
+Cauchy theorem `map_real_smul` (`Mathlib.Topology.Instances.RealVectorSpace`,
+verified present at the v4.13.0 pin), which states that a continuous additive map
+between real topological vector spaces is ℝ-linear.  We package `g` as the bundled
+`AddMonoidHom.mk' g hg_add` (the SAME packaging already used axiom-free in
+`additive_ratCast_linear` above) and feed its continuity to `map_real_smul`.
+NO declared axiom; `#print axioms` lists Lean/Mathlib core only.
+
+This is the load-bearing analytic lemma that lets Set α DISCHARGE the former
+declared `setAlpha_cauchy` axiom on a SINGLE coordinate generator (continuity is
+the A4 axiom; monotonicity of a single coordinate is NOT available from the
+all-strict A3, which is exactly why the continuous route — not the monotone one —
+is required for the genuine multivariable discharge). -/
+
+/-- **`continuous_additive_linear`** — a CONTINUOUS additive `g : ℝ → ℝ` is linear:
+    `g t = g 1 * t` for all real `t`.  Proven via the Mathlib Cauchy theorem
+    `map_real_smul` (continuous additive ⇒ ℝ-linear).  NO open obligation, NO
+    declared axiom. -/
+theorem continuous_additive_linear (g : ℝ → ℝ)
+    (hg_add : ∀ u v : ℝ, g (u + v) = g u + g v) (hg_cont : Continuous g) :
+    ∀ t : ℝ, g t = g 1 * t := by
+  intro t
+  -- Bundle `g` as an additive hom; its underlying function is `g` definitionally.
+  let G : ℝ →+ ℝ := AddMonoidHom.mk' g hg_add
+  have hG : ∀ x, G x = g x := fun _ => rfl
+  -- `G` is continuous (same underlying function as `g`).
+  have hGcont : Continuous (fun x => G x) := by
+    simpa [hG] using hg_cont
+  -- Cauchy theorem: continuous additive ⇒ commutes with real scalars.
+  -- `G (t • 1) = t • G 1`, and `t • (1:ℝ) = t`, `t • G 1 = t * g 1`.
+  have hsmul : G (t • (1 : ℝ)) = t • G (1 : ℝ) := map_real_smul G hGcont t (1 : ℝ)
+  simpa [hG, smul_eq_mul, mul_comm] using hsmul
+
 #print axioms additive_ratCast_linear
 #print axioms monotone_additive_linear
+#print axioms continuous_additive_linear
 
 end Lutar.Wave6

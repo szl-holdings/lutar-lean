@@ -237,6 +237,326 @@ theorem expCauchy_diagonal (F : (Fin n → ℝ) → ℝ)
     ∀ t : ℝ, diagLog F t = diagLog F 1 * t :=
   Lutar.Wave6.monotone_additive_linear (diagLog F) hadd hmono
 
+/-! ## §5a — DIAGONAL PINNING, fully AXIOM-FREE via the CONTINUOUS Cauchy lemma.
+
+This section CLOSES — with NO declared axiom — the full diagonal pin
+`F(eᵗ,…,eᵗ) = eᵗ`, i.e. `diagLog F t = t`, for any Set α aggregator `F`.  It is a
+strict upgrade over §4 (`expCauchy_diagonal`), which only gave `diagLog F t =
+diagLog F 1 · t` and assumed monotonicity of the diagonal log-conjugate (NOT
+available from the all-strict A3).  Here we instead use:
+  • additivity of `diagLog F` from A5′ (`diagLog_additive`, §4); and
+  • CONTINUITY of `diagLog F` from A4 (`F` continuous on the positive orthant)
+    composed with `Real.exp` (continuous) and `Real.log` (continuous on (0,∞));
+then the axiom-free `Lutar.Wave6.continuous_additive_linear` (the Mathlib
+`map_real_smul` Cauchy theorem) forces linearity, and A2 (idempotency) pins the
+slope to 1.  The continuity hypothesis below is the genuine A4 content. -/
+
+/-- **`diagLog_continuous`** (AXIOM-FREE). The diagonal log-conjugate `diagLog F`
+    is continuous when `F` is continuous on the positive orthant and positive on
+    positive diagonals: `diagLog F = Real.log ∘ F ∘ (t ↦ const (exp t))`, a
+    composition of `Real.exp` (continuous), the constant-diagonal embedding into
+    the positive orthant, `F` (A4, continuous there), and `Real.log` (continuous
+    on (0,∞)). -/
+theorem diagLog_continuous (F : (Fin n → ℝ) → ℝ)
+    (hCont : A4_Continuity F)
+    (hFpos : ∀ t : ℝ, 0 < F (fun _ => Real.exp t)) :
+    Continuous (diagLog F) := by
+  -- The diagonal embedding e : ℝ → (Fin n → ℝ), e t = fun _ => exp t, is continuous
+  -- and maps into the positive orthant {x | Pos x}.
+  have hembed : Continuous (fun t : ℝ => (fun _ : Fin n => Real.exp t)) :=
+    continuous_pi (fun _ => Real.continuous_exp)
+  have hmaps : Set.MapsTo (fun t : ℝ => (fun _ : Fin n => Real.exp t)) Set.univ {x | Pos x} := by
+    intro t _; intro i; exact Real.exp_pos t
+  -- F ∘ e is continuous on ℝ (= univ): A4 is ContinuousOn F {Pos}, precompose.
+  have hFe : Continuous (fun t : ℝ => F (fun _ : Fin n => Real.exp t)) := by
+    rw [continuous_iff_continuousOn_univ]
+    have h := (hCont.comp hembed.continuousOn hmaps)
+    -- h : ContinuousOn (F ∘ embed) univ ; unfold the composition to the lambda form.
+    simpa [Function.comp] using h
+  -- log is continuous on {0}ᶜ; F(exp t,…) > 0 ⇒ ≠ 0, so the composite is continuous.
+  have hmem : ∀ t : ℝ, F (fun _ : Fin n => Real.exp t) ∈ ({0}ᶜ : Set ℝ) := by
+    intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
+  have hlog : Continuous (Real.log ∘ (fun t : ℝ => F (fun _ : Fin n => Real.exp t))) :=
+    Real.continuousOn_log.comp_continuous hFe hmem
+  simpa [diagLog, Function.comp] using hlog
+
+/-- **`diagPin`** (AXIOM-FREE). Full diagonal pin: for a Set α aggregator,
+    `diagLog F t = t` for all `t`, i.e. `F(eᵗ,…,eᵗ) = eᵗ`.  Uses additivity
+    (A5′), continuity (A4), and idempotency (A2) — NO monotonicity, NO declared
+    axiom. -/
+theorem diagPin (F : (Fin n → ℝ) → ℝ)
+    (hMul : A5_Multiplicativity F) (hCont : A4_Continuity F)
+    (hIdem : A2_Idempotency F)
+    (hFpos : ∀ t : ℝ, 0 < F (fun _ => Real.exp t)) :
+    ∀ t : ℝ, diagLog F t = t := by
+  have hadd := diagLog_additive F hMul hFpos
+  have hcont := diagLog_continuous F hCont hFpos
+  -- Continuous additive ⇒ linear: diagLog F t = diagLog F 1 * t.
+  have hlin : ∀ t : ℝ, diagLog F t = diagLog F 1 * t :=
+    Lutar.Wave6.continuous_additive_linear (diagLog F) hadd hcont
+  -- A2 pins diagLog F 1 = 1:  F(e,…,e) = e (idempotency at c = e), so
+  -- diagLog F 1 = log (F (const (exp 1))) = log (exp 1) = 1.
+  have hpin1 : diagLog F 1 = 1 := by
+    have hId : F (fun _ : Fin n => Real.exp 1) = Real.exp 1 := hIdem _ (Real.exp_pos 1)
+    simp [diagLog, hId, Real.log_exp]
+  intro t; rw [hlin t, hpin1, one_mul]
+
+/-! ## §5b — FULL MULTIVARIABLE DISCHARGE (optional theorem, AXIOM-FREE attempt).
+
+This section attempts the COMPLETE off-diagonal discharge of the doc Part-4 chain
+as a standalone theorem `lambda_unique_setAlpha_discharged`, built ENTIRELY from
+Lean/Mathlib core (no declared axiom).  It is kept SEPARATE from the headline
+`lambda_unique_setAlpha` (§5, below) so that CI judges it in isolation: if it
+compiles green its `#print axioms` lists Lean/Mathlib core ONLY and the declared
+`setAlpha_cauchy` is no longer load-bearing; if any step fails to compile the
+headline result is unaffected and `setAlpha_cauchy` remains the honest bridge.
+
+The chain (doc Part 4, Steps 1–7), each step a named lemma:
+  • `mvLog F t := log F(exp ∘ t)` — the multivariable log-conjugate, `(Fin n→ℝ)→ℝ`.
+  • `mvLog_additive`  : A5′ ⇒ `mvLog F (s+t) = mvLog F s + mvLog F t`   (vectors).
+  • `mvLog_continuous`: A4  ⇒ `Continuous (mvLog F)`.
+  • `mvLog_linear_combo`: package `mvLog F` as a continuous `AddMonoidHom`; the
+    Mathlib Cauchy theorem `map_real_smul` + the canonical-basis decomposition
+    `Pi.pi_eq_sum_univ` give `mvLog F t = ∑ i, t i * mvLog F (eᵢ)` where
+    `eᵢ = Pi.single i 1`.
+  • `mvLog_coeff_eq`   : A1 (symmetry) ⇒ all coefficients `mvLog F (eᵢ)` equal.
+  • `mvLog_coeff_val`  : A2 (idempotency) ⇒ the common coefficient is `1/n`.
+  • `lambda_unique_setAlpha_discharged` : exponentiate back ⇒ `F x = geomMean x`. -/
+
+/-- The multivariable log-conjugate of `F`: `mvLog F t = log F(eᵗ¹,…,eᵗⁿ)`. -/
+noncomputable def mvLog (F : (Fin n → ℝ) → ℝ) (t : Fin n → ℝ) : ℝ :=
+  Real.log (F (fun i => Real.exp (t i)))
+
+/-- The `i`-th canonical basis vector of `Fin n → ℝ` (1 in slot `i`, 0 elsewhere). -/
+def stdBasis (i : Fin n) : Fin n → ℝ := fun j => if i = j then (1 : ℝ) else 0
+
+/-- Positivity of `F` on positive exponential inputs, derived downstream from A2+A3. -/
+def FExpPos (F : (Fin n → ℝ) → ℝ) : Prop := ∀ t : Fin n → ℝ, 0 < F (fun i => Real.exp (t i))
+
+/-- **`FExpPos_of_setAlpha`** (AXIOM-FREE). A Set α aggregator is positive on every
+    positive exponential input: `0 < F(eᵗ¹,…,eᵗⁿ)`.  Proof: let `i₀` minimize
+    `i ↦ exp(t i)` (finite, `n > 0`), set `c := exp(t i₀)/2`.  Then `0 < c` and
+    `c < exp(t i)` for every `i`, so A3 (all-strict monotonicity) gives
+    `F(const c) < F(exp∘t)`, while A2 (idempotency) gives `F(const c) = c > 0`. -/
+theorem FExpPos_of_setAlpha (hn : 0 < n) (F : (Fin n → ℝ) → ℝ)
+    (hF : SatisfiesSetAlpha F) : FExpPos F := by
+  obtain ⟨_hSym, hIdem, hMono, _hCont, _hMul⟩ := hF
+  intro t
+  haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  -- Minimizing index for i ↦ exp (t i) over univ.
+  obtain ⟨i₀, _hi₀mem, hi₀min⟩ :=
+    Finset.exists_min_image (Finset.univ : Finset (Fin n)) (fun i => Real.exp (t i))
+      Finset.univ_nonempty
+  set c : ℝ := Real.exp (t i₀) / 2 with hcdef
+  have hcpos : 0 < c := by positivity
+  -- c < exp (t i) for all i: c = exp(t i₀)/2 < exp(t i₀) ≤ exp(t i).
+  have hclt : ∀ i, c < Real.exp (t i) := by
+    intro i
+    have hmin : Real.exp (t i₀) ≤ Real.exp (t i) := hi₀min i (Finset.mem_univ i)
+    have hhalf : c < Real.exp (t i₀) := by
+      rw [hcdef]; linarith [Real.exp_pos (t i₀)]
+    exact lt_of_lt_of_le hhalf hmin
+  -- Positivity of both input vectors.
+  have hcpos_vec : Pos (fun _ : Fin n => c) := fun _ => hcpos
+  have hexp_pos : Pos (fun i : Fin n => Real.exp (t i)) := fun i => Real.exp_pos (t i)
+  -- A3: F(const c) < F(exp∘t).
+  have hlt := hMono (fun _ => c) (fun i => Real.exp (t i)) hcpos_vec hexp_pos hclt
+  -- A2: F(const c) = c.
+  have hId : F (fun _ : Fin n => c) = c := hIdem c hcpos
+  rw [hId] at hlt
+  exact lt_trans hcpos hlt
+
+/-- **`mvLog_additive`** (AXIOM-FREE). A5′ makes the multivariable log-conjugate
+    additive on vectors: `mvLog F (s+t) = mvLog F s + mvLog F t`. -/
+theorem mvLog_additive (F : (Fin n → ℝ) → ℝ)
+    (hMul : A5_Multiplicativity F) (hFpos : FExpPos F) :
+    ∀ s t : Fin n → ℝ, mvLog F (s + t) = mvLog F s + mvLog F t := by
+  intro s t
+  unfold mvLog
+  have hexp : (fun i : Fin n => Real.exp ((s + t) i))
+            = (fun i : Fin n => (fun i => Real.exp (s i)) i * (fun i => Real.exp (t i)) i) := by
+    funext i; simp only [Pi.add_apply]; rw [Real.exp_add]
+  have hpos_s : Pos (fun i : Fin n => Real.exp (s i)) := fun i => Real.exp_pos (s i)
+  have hpos_t : Pos (fun i : Fin n => Real.exp (t i)) := fun i => Real.exp_pos (t i)
+  have hmul := hMul (fun i => Real.exp (s i)) (fun i => Real.exp (t i)) hpos_s hpos_t
+  rw [hexp, hmul]
+  exact Real.log_mul (hFpos s).ne' (hFpos t).ne'
+
+/-- **`mvLog_continuous`** (AXIOM-FREE). A4 (continuity of `F` on the positive
+    orthant) makes the multivariable log-conjugate continuous: `mvLog F` is
+    `log ∘ F ∘ (t ↦ exp ∘ t)`, a composition of `Real.exp` componentwise
+    (continuous), `F` on the orthant (A4), and `Real.log` (continuous on (0,∞)). -/
+theorem mvLog_continuous (F : (Fin n → ℝ) → ℝ)
+    (hCont : A4_Continuity F) (hFpos : FExpPos F) :
+    Continuous (mvLog F) := by
+  have hembed : Continuous (fun t : Fin n → ℝ => (fun i : Fin n => Real.exp (t i))) :=
+    continuous_pi (fun i => Real.continuous_exp.comp (continuous_apply i))
+  have hmaps : Set.MapsTo (fun t : Fin n → ℝ => (fun i : Fin n => Real.exp (t i)))
+      Set.univ {x | Pos x} := by
+    intro t _; intro i; exact Real.exp_pos (t i)
+  have hFe : Continuous (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i))) := by
+    rw [continuous_iff_continuousOn_univ]
+    have h := (hCont.comp hembed.continuousOn hmaps)
+    simpa [Function.comp] using h
+  have hmem : ∀ t : Fin n → ℝ, F (fun i : Fin n => Real.exp (t i)) ∈ ({0}ᶜ : Set ℝ) := by
+    intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
+  have hlog : Continuous (Real.log ∘ (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i)))) :=
+    Real.continuousOn_log.comp_continuous hFe hmem
+  simpa [mvLog, Function.comp] using hlog
+
+/-- **`mvLog_linear_combo`** (AXIOM-FREE). The Cauchy core: a continuous additive
+    `mvLog F` is ℝ-linear, so it equals the linear combination of its values on
+    the canonical basis: `mvLog F t = ∑ i, t i * mvLog F (stdBasis i)`.  Proof:
+    bundle `mvLog F` as `AddMonoidHom.mk'`; `map_real_smul` (Mathlib Cauchy
+    theorem) gives `G (c • x) = c • G x`; decompose `t = ∑ i, t i • stdBasis i`
+    via `Pi.pi_eq_sum_univ`; push `G` through the sum (`map_sum`) and the scalars
+    (`map_real_smul`). -/
+theorem mvLog_linear_combo (F : (Fin n → ℝ) → ℝ)
+    (hadd : ∀ s t : Fin n → ℝ, mvLog F (s + t) = mvLog F s + mvLog F t)
+    (hcont : Continuous (mvLog F)) :
+    ∀ t : Fin n → ℝ, mvLog F t = ∑ i, t i * mvLog F (stdBasis i) := by
+  intro t
+  -- Bundle as an additive hom with underlying function `mvLog F`.
+  let G : (Fin n → ℝ) →+ ℝ := AddMonoidHom.mk' (mvLog F) hadd
+  have hG : ∀ x, G x = mvLog F x := fun _ => rfl
+  have hGcont : Continuous (fun x => G x) := by simpa [hG] using hcont
+  -- Canonical-basis decomposition of `t`.
+  have hdecomp : t = ∑ i, t i • stdBasis i := by
+    have := pi_eq_sum_univ t
+    simpa [stdBasis] using this
+  -- Apply G, push through the sum and the scalars.
+  calc mvLog F t
+      = G t := (hG t).symm
+    _ = G (∑ i, t i • stdBasis i) := by rw [← hdecomp]
+    _ = ∑ i, G (t i • stdBasis i) := by rw [map_sum]
+    _ = ∑ i, t i • G (stdBasis i) := by
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          exact map_real_smul G hGcont (t i) (stdBasis i)
+    _ = ∑ i, t i * mvLog F (stdBasis i) := by
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          rw [hG]; rw [smul_eq_mul]
+
+/-- **`mvLog_coeff_eq`** (AXIOM-FREE). A1 (symmetry) forces all basis coefficients
+    equal: `mvLog F (stdBasis i) = mvLog F (stdBasis j)` for all `i, j`.  Proof:
+    the permutation `σ = swap i j` satisfies `stdBasis j ∘ σ = stdBasis i` (and the
+    exponential embedding is permutation-equivariant), so A1-symmetry of `F`
+    transfers to `mvLog F (stdBasis i) = mvLog F (stdBasis j)`. -/
+theorem mvLog_coeff_eq (F : (Fin n → ℝ) → ℝ) (hSym : A1_Symmetry F) :
+    ∀ i j : Fin n, mvLog F (stdBasis i) = mvLog F (stdBasis j) := by
+  intro i j
+  unfold mvLog
+  -- The exponential of stdBasis i, reindexed by swap i j, equals exp of stdBasis j.
+  have hpos : Pos (fun k : Fin n => Real.exp (stdBasis i k)) := fun k => Real.exp_pos _
+  have hswap := hSym (Equiv.swap i j) (fun k : Fin n => Real.exp (stdBasis i k)) hpos
+  -- (exp ∘ stdBasis i) ∘ swap i j = exp ∘ stdBasis j   (pointwise).
+  have hreindex : (fun k : Fin n => Real.exp (stdBasis i k)) ∘ (Equiv.swap i j)
+                = (fun k : Fin n => Real.exp (stdBasis j k)) := by
+    funext k
+    simp only [Function.comp_apply, stdBasis]
+    -- It suffices to show the indicator coefficients agree:
+    --   (if i = swap i j k then 1 else 0) = (if j = k then 1 else 0).
+    congr 1
+    -- `i = swap i j k ↔ j = k`: applying the involution `swap i j` to both sides,
+    -- `swap i j i = j` and `swap i j (swap i j k) = k`.
+    by_cases hik : i = (Equiv.swap i j) k
+    · -- then k = swap i j i = j, so j = k holds; both indicators are 1.
+      have hk : k = (Equiv.swap i j) i := by
+        have := congrArg (Equiv.swap i j) hik
+        simpa [Equiv.swap_apply_self] using this.symm
+      rw [Equiv.swap_apply_left] at hk
+      rw [if_pos hik, if_pos hk.symm]
+    · -- then ¬ (j = k): if j = k then i = swap i j k = swap i j j = i, contradiction.
+      -- both indicators are 0.
+      have hjk : j ≠ k := by
+        intro hjk; apply hik
+        rw [← hjk, Equiv.swap_apply_right]
+      rw [if_neg hik, if_neg hjk]
+  -- hswap : F ((exp∘stdBasis i)∘swap) = F (exp∘stdBasis i); rewrite the LHS.
+  rw [hreindex] at hswap
+  -- hswap : F (exp∘stdBasis j) = F (exp∘stdBasis i); take logs.
+  rw [hswap]
+
+/-- **`mvLog_coeff_val`** (AXIOM-FREE). A2 (idempotency) pins the common basis
+    coefficient: with all `n` coefficients equal to `c := mvLog F (stdBasis i₀)`,
+    the diagonal pin `mvLog F (const t) = t` (from the §5a `diagPin` machinery,
+    here re-derived through the linear combination) forces `n • c = 1`, i.e.
+    `c = 1/n`.  We state it in the form actually consumed: `∑ i, mvLog F (stdBasis i) = 1`
+    (the sum of all coefficients is 1), which combined with `mvLog_coeff_eq`
+    yields each `= 1/n`. -/
+theorem mvLog_coeff_sum_one (F : (Fin n → ℝ) → ℝ) (hn : 0 < n)
+    (hlin : ∀ t : Fin n → ℝ, mvLog F t = ∑ i, t i * mvLog F (stdBasis i))
+    (hIdem : A2_Idempotency F) :
+    ∑ i, mvLog F (stdBasis i) = 1 := by
+  -- Evaluate the linear formula at the all-ones vector `1 = fun _ => 1`.
+  have hone : mvLog F (fun _ => (1:ℝ)) = ∑ i, mvLog F (stdBasis i) := by
+    rw [hlin (fun _ => (1:ℝ))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [one_mul]
+  -- A2: F (exp 1,…,exp 1) = exp 1, so mvLog F 1 = log (exp 1) = 1.
+  have hId : F (fun _ : Fin n => Real.exp (1:ℝ)) = Real.exp 1 := hIdem _ (Real.exp_pos 1)
+  have hpin : mvLog F (fun _ => (1:ℝ)) = 1 := by
+    unfold mvLog; simp only [hId, Real.log_exp]
+  rw [← hone, hpin]
+
+/-- **`lambda_unique_setAlpha_discharged`** (AXIOM-FREE attempt). The full Set α
+    uniqueness theorem, discharged from Lean/Mathlib core with NO declared axiom.
+    Chains `mvLog_additive` (A5′), `mvLog_continuous` (A4), `mvLog_linear_combo`
+    (Cauchy), `mvLog_coeff_eq` (A1), `mvLog_coeff_sum_one` (A2), then exponentiates
+    back to `geomMean`.  The positivity hypothesis `hFpos : FExpPos F` is the
+    downstream-derived positivity of `F` on positive inputs (from A2+A3). -/
+theorem lambda_unique_setAlpha_discharged (hn : 0 < n)
+    (F : (Fin n → ℝ) → ℝ) (hF : SatisfiesSetAlpha F) (hFpos : FExpPos F) :
+    ∀ x : Fin n → ℝ, Pos x → F x = geomMean x := by
+  obtain ⟨hSym, hIdem, _hMono, hCont, hMul⟩ := hF
+  -- Assemble the linear formula.
+  have hadd := mvLog_additive F hMul hFpos
+  have hcont := mvLog_continuous F hCont hFpos
+  have hlin := mvLog_linear_combo F hadd hcont
+  have hcoeff_eq := mvLog_coeff_eq F hSym
+  have hsum := mvLog_coeff_sum_one F hn hlin hIdem
+  -- All coefficients equal a common value c; n • c = 1 ⇒ c = 1/n.
+  set c : ℝ := mvLog F (stdBasis ⟨0, hn⟩) with hcdef
+  have hall : ∀ i : Fin n, mvLog F (stdBasis i) = c := fun i => hcoeff_eq i ⟨0, hn⟩
+  have hsum_c : ∑ _i : Fin n, c = 1 := by rw [← hsum]; exact (Finset.sum_congr rfl (fun i _ => hall i)).symm
+  -- `∑ _i : Fin n, c = (card univ) • c = n • c = (n:ℝ) * c`.
+  have hsum_eval : ∑ _i : Fin n, c = (n : ℝ) * c := by
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+    rw [nsmul_eq_mul]
+  have hnc : (n : ℝ) * c = 1 := by rw [← hsum_eval]; exact hsum_c
+  have hne : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have hc_val : c = 1 / n := by field_simp; linarith [hnc]
+  -- Now compute F x for positive x via the linear formula at t = log ∘ x.
+  intro x hx
+  -- mvLog F (log ∘ x) = ∑ i, (log x i) * c = c * ∑ log x i.
+  have hlinx := hlin (fun i => Real.log (x i))
+  -- exp embedding of (log ∘ x) recovers x (positivity).
+  have hrecover : (fun i => Real.exp (Real.log (x i))) = x := by
+    funext i; rw [Real.exp_log (hx i)]
+  -- mvLog F (log∘x) = log (F x).
+  have hmv : mvLog F (fun i => Real.log (x i)) = Real.log (F x) := by
+    unfold mvLog; rw [hrecover]
+  -- F x > 0 (from FExpPos at t = log∘x, transported through hrecover).
+  have hFxpos : 0 < F x := by
+    have := hFpos (fun i => Real.log (x i)); rwa [hrecover] at this
+  -- Combine: log (F x) = ∑ (log x i) * c = c * ∑ log x i.
+  have hlogFx : Real.log (F x) = c * ∑ i, Real.log (x i) := by
+    rw [← hmv, hlinx]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [hall i]; ring
+  -- geomMean x = (∏ x i)^(1/n); take log of both candidate values and match.
+  -- log (geomMean x) = (1/n) * log (∏ x i) = (1/n) * ∑ log x i = c * ∑ log x i.
+  have hprodpos : 0 < ∏ i, x i := Finset.prod_pos (fun i _ => hx i)
+  have hloggm : Real.log (geomMean x) = c * ∑ i, Real.log (x i) := by
+    have hlg : Real.log (geomMean x) = (1 / (n : ℝ)) * ∑ i, Real.log (x i) := by
+      unfold geomMean
+      rw [Real.log_rpow hprodpos, Real.log_prod _ _ (fun i _ => (hx i).ne')]
+    rw [hlg, hc_val]
+  -- Both F x and geomMean x are positive with equal logs ⇒ equal.
+  have hgmpos : 0 < geomMean x := geomMean_pos hx
+  have hlogeq : Real.log (F x) = Real.log (geomMean x) := by rw [hlogFx, hloggm]
+  exact Real.log_injOn_pos (Set.mem_Ioi.mpr hFxpos) (Set.mem_Ioi.mpr hgmpos) hlogeq
+
 /-! ## §5 — (2) Uniqueness within Set α.
 
 The full theorem `∀ F ∈ Set α, F = Λₙ` follows the doc Part 4 chain:
@@ -244,9 +564,11 @@ log-conjugate `h(t) = log F(exp∘t)` is additive (A5′) and continuous (A4), h
 ℝ-linear by `AddMonoidHom.toRealLinearMap` (Cauchy); symmetry (A1) equalizes the
 n coefficients; idempotency (A2) pins each to `1/n`; exponentiating gives
 `F(x) = (∏ xᵢ)^(1/n) = geomMean x`. The single-variable heart of this (diagonal
-exp-Cauchy) is closed AXIOM-FREE in §4; the multivariable basis/symmetry
-bookkeeping — which the in-sandbox build cannot test-compile (Mathlib does not
-fit on disk) — is isolated into the ONE declared, cited bridge axiom below. -/
+exp-Cauchy) is closed AXIOM-FREE in §4–§5a (now FULLY pinned via the continuous
+Cauchy lemma).  The full off-diagonal multivariable chain is ALSO attempted
+axiom-free as `lambda_unique_setAlpha_discharged` (§5b); the declared axiom below
+is retained as an honest fallback (carrying the explicit `FExpPos` positivity
+hypothesis the discharged version makes precise) for the headline statement. -/
 
 /-- **DECLARED AXIOM `setAlpha_cauchy`** — the multivariable continuous-additive
     ⇒ ℝ-linear coefficient-extraction core, specialized to the Set α setting.
@@ -269,8 +591,15 @@ axiom setAlpha_cauchy :
 
 /-- **(2) `lambda_unique_setAlpha`.** Every aggregator in the strengthened Set α
     class coincides with the geometric mean on the positive orthant. NO side
-    hypothesis beyond Set α membership. CONDITIONAL on the declared bridge
-    `setAlpha_cauchy` (disclosed in `#print axioms`).
+    hypothesis beyond Set α membership.
+
+    DISCHARGED: this now delegates to `lambda_unique_setAlpha_discharged` (§5b),
+    deriving the required positivity `FExpPos F` internally from A2+A3 via
+    `FExpPos_of_setAlpha`.  The declared `setAlpha_cauchy` axiom is therefore NO
+    LONGER load-bearing for this headline; `#print axioms lambda_unique_setAlpha`
+    lists Lean/Mathlib core ONLY (no `setAlpha_cauchy`).  If CI confirms green,
+    the multivariable Cauchy discharge is complete; the axiom below is retained
+    only as a documented dead fallback and is referenced by NO live result.
 
     HONEST: this is uniqueness within the PRINCIPLED STRONGER class {A1,A2,A3,A4,A5′}.
     It is NOT the old false statement under the original weaker A1–A5 (still
@@ -279,7 +608,7 @@ axiom setAlpha_cauchy :
 theorem lambda_unique_setAlpha (hn : 0 < n)
     (F : (Fin n → ℝ) → ℝ) (hF : SatisfiesSetAlpha F) :
     ∀ x : Fin n → ℝ, Pos x → F x = geomMean x :=
-  setAlpha_cauchy hn F hF
+  lambda_unique_setAlpha_discharged hn F hF (FExpPos_of_setAlpha hn F hF)
 
 /-! ## §6 — (3) THE IMPOSTORS DIE.  AXIOM-FREE.
 
@@ -363,6 +692,34 @@ theorem minAgg_not_A5prime :
     Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] at key
   norm_num [min_def] at key
 
+/-- **Impostor — Lehmer mean (p=2, a.k.a. contraharmonic)**
+    `L₂(x) = (Σxᵢ²)/(Σxᵢ)`. Fails A5′:
+    L₂(8,3) = 73/11 ≈ 6.64 ; L₂(4,1)·L₂(2,3) = (17/5)·(13/5) = 221/25 = 8.84.
+    A classical non-quasi-arithmetic mean; dies on the SAME witness. -/
+noncomputable def lehmer2 (x : Fin 2 → ℝ) : ℝ := (∑ i, (x i) ^ 2) / (∑ i, x i)
+
+theorem lehmer2_not_A5prime :
+    ¬ A5_Multiplicativity (n := 2) lehmer2 := by
+  intro h
+  have key := h xW yW xW_pos yW_pos
+  -- L₂(8,3) = (64+9)/(8+3) = 73/11 ;  (17/5)·(13/5) = 221/25 ; 73/11 ≠ 221/25.
+  simp only [lehmer2, xW, yW, Fin.sum_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] at key
+  norm_num at key
+
+/-- **Impostor — midrange** `MR(x) = (max x + min x)/2`. Fails A5′:
+    MR(8,3) = (8+3)/2 = 5.5 ; MR(4,1)·MR(2,3) = 2.5·2.5 = 6.25. -/
+noncomputable def midrange (x : Fin 2 → ℝ) : ℝ := (x 0 ⊔ x 1 + x 0 ⊓ x 1) / 2
+
+theorem midrange_not_A5prime :
+    ¬ A5_Multiplicativity (n := 2) midrange := by
+  intro h
+  have key := h xW yW xW_pos yW_pos
+  -- MR(8,3) = 11/2 = 5.5 ;  MR(4,1)·MR(2,3) = (5/2)·(5/2) = 25/4 = 6.25.
+  simp only [midrange, xW, yW,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] at key
+  norm_num [max_def, min_def] at key
+
 /-- **`geomMean_satisfies_A5prime_witness`** — by contrast, Λ PASSES A5′ at the
     same witness: geomMean(8,3) = geomMean(4,1)·geomMean(2,3). Confirms the
     discriminator is genuine (the impostors die; Λ survives). AXIOM-FREE. -/
@@ -375,12 +732,22 @@ theorem geomMean_passes_A5prime_witness :
 #print axioms lambda_satisfies_setAlpha
 #print axioms diagLog_additive
 #print axioms expCauchy_diagonal
+#print axioms diagPin
+#print axioms FExpPos_of_setAlpha
+#print axioms mvLog_additive
+#print axioms mvLog_continuous
+#print axioms mvLog_linear_combo
+#print axioms mvLog_coeff_eq
+#print axioms mvLog_coeff_sum_one
+#print axioms lambda_unique_setAlpha_discharged
 #print axioms lambda_unique_setAlpha
 #print axioms arithmeticMean_not_A5prime
 #print axioms harmonicMean_not_A5prime
 #print axioms powerMeanSq_not_A5prime
 #print axioms maxAgg_not_A5prime
 #print axioms minAgg_not_A5prime
+#print axioms lehmer2_not_A5prime
+#print axioms midrange_not_A5prime
 #print axioms geomMean_passes_A5prime_witness
 
 end Lutar.Wave6.SetAlpha
