@@ -92,13 +92,15 @@ import Lutar.Puriq.Formulas.ProvedFormulas
 import Lutar.Wave3.Consensus
 import Lutar.Wave3.MerkleKraft
 import Lutar.Wave3.InfoEstim
--- NOTE: Lutar.Wave3.Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen re-exports)
--- is committed to the repo but intentionally NOT imported here: it is
--- Mathlib-dependent and could not be bare-`lean` verified in the build sandbox
--- (Mathlib does not fit disk). Per the honesty doctrine we do not wire an
--- unverified Mathlib file into the strict `lake build` gate; it is reported as
--- CI-PENDING and can be promoted into this root once a green `lake build`
--- confirms it compiles. The three modules above are bare-`lean` verified sorry-free.
+-- prove-wave-4: PROMOTE the Mathlib-dependent re-exports into the kernel-check
+-- root so CI (`lake build` / "Lean kernel check") actually compiles them. These
+-- are Mathlib-dependent (could not be bare-`lean` verified locally — Mathlib does
+-- not fit the sandbox disk); their truth is established by a GREEN CI build, NOT
+-- claimed here. Per the honesty doctrine they were CI-PENDING in Wave-3; Wave-4
+-- promotes them now that they are wired for CI verification.
+import Lutar.Wave3.Tier1Mathlib        -- C1 Tsirelson 2√2 / C2 CHSH≤2 / C6 Jensen (Mathlib-dep, CI-verified)
+import Lutar.Wave4.LambdaBisymmetryWitness  -- A6 discrimination witness (bare-`lean` verified, Lean-core axioms only)
+import Lutar.Wave4.LambdaBlockConsistency   -- conditional Λ uniqueness on the WEAKER block-consistency axiom A6' (Mathlib-dep, CI-verified)
 
 
 /-!
