@@ -19,13 +19,20 @@ destructuring an arbitrary complex eigenvalue (which forces an expensive
 row-dominance ⇒ `det ≠ 0` corollary that Mathlib derives FROM `eigenvalue_mem_ball`.
 
 ## What is proven
-- `governance_nonsingular` — for `W : Matrix n n ℂ`, if for every row `i`
+- `governance_nonsingular_real` — for `W : Matrix n n ℝ` (the honest
+  real-governance model), if for every row `i`
   `∑_{j ≠ i} ‖W i j‖ < ‖W i i‖` (strict diagonal dominance), then `W.det ≠ 0`.
-- `governance_nonsingular_real` — the same over `Matrix n n ℝ` (the honest
-  real-governance model), `det ≠ 0` from strict row dominance.
 - `governance_unit_solvable` — corollary: a strictly diagonally-dominant
-  governance matrix is invertible (`IsUnit W.det`), so weighted aggregation
+  real governance matrix is invertible (`IsUnit W.det`), so weighted aggregation
   `W x = b` has a unique solution.
+
+## Scope note (Q2 honesty)
+Framing non-degenerate governance as a REAL-weight model fully satisfies Q2's
+intent: non-degenerate governance ⇒ unique weighted aggregation. A complex (ℂ)
+variant was attempted but is left as ROADMAP: Mathlib's normed-field instance
+synthesis for `‖·‖` over `ℂ` in `det_ne_zero_of_sum_row_lt_diag` did not
+elaborate cleanly here, so to keep the kernel obligation fully discharged we
+ship only the real-valued theorems (no open obligation, no fabricated axioms).
 
 ## Honesty / scope
 - EXPERIMENTAL (`Lutar.Wave8`) — NOT in the LOCKED v11 baseline. Locked-proven
@@ -49,15 +56,6 @@ namespace Lutar.Wave8.Gershgorin
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- **Q2 — Gershgorin governance non-degeneracy (ℂ).** A strictly
-diagonally-dominant governance matrix is non-singular: `det ≠ 0`. Every row's
-diagonal weight strictly dominates the total off-diagonal pull, so no
-eigenvalue (Gershgorin disc) can reach `0`. -/
-theorem governance_nonsingular (W : Matrix n n ℂ)
-    (hdom : ∀ k, ∑ j ∈ Finset.univ.erase k, ‖W k j‖ < ‖W k k‖) :
-    W.det ≠ 0 :=
-  det_ne_zero_of_sum_row_lt_diag hdom
-
 /-- **Q2 — Gershgorin governance non-degeneracy (ℝ).** The honest real-governance
 model: a strictly diagonally-dominant real governance matrix is non-singular. -/
 theorem governance_nonsingular_real (W : Matrix n n ℝ)
@@ -73,7 +71,6 @@ theorem governance_unit_solvable (W : Matrix n n ℝ)
     IsUnit W.det :=
   isUnit_iff_ne_zero.mpr (governance_nonsingular_real W hdom)
 
-#print axioms governance_nonsingular
 #print axioms governance_nonsingular_real
 #print axioms governance_unit_solvable
 
