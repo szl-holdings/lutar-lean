@@ -1,6 +1,8 @@
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
-import Mathlib.Order.BoundedOrder
+import Mathlib.Order.BoundedOrder.Basic
+import Mathlib.Order.BoundedOrder.Lattice
+import Mathlib.Order.BoundedOrder.Monotone
 import Mathlib.Logic.Relation
 import Mathlib.Data.Set.Basic
 import Mathlib.Order.Monotone.Basic

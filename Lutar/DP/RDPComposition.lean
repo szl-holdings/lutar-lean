@@ -131,7 +131,7 @@ theorem rdpToDPEpsilon_nonneg (p : RDPParams) (δ : ℝ) (hδ : 0 < δ) (hδ1 : 
   apply add_nonneg p.hε
   apply div_nonneg
   · apply Real.log_nonneg
-    rw [div_le_iff hδ, one_mul]
+    rw [div_le_iff₀ hδ, one_mul]
     linarith [hδ1]
   · linarith [p.hα]
 

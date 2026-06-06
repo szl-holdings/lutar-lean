@@ -50,7 +50,12 @@
 -- Lean 4 + Mathlib v4.13.0.
 
 import Mathlib.Data.Real.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Algebra.BigOperators.Group.Finset.Pi
+import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
+import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Tactic.Linarith
 
 open BigOperators

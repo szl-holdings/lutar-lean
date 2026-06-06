@@ -8,7 +8,7 @@
 -- Signed-off-by: Yachay <yachay@szlholdings.ai>
 -- Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 namespace Lutar.Innovations.Round6

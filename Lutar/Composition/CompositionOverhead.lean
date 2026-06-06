@@ -1,4 +1,5 @@
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Data.List.Basic
 import Mathlib.Tactic
 

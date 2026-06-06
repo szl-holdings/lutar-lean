@@ -29,7 +29,8 @@
     • A single-fault detection theorem is proved on the receipt bundle.
 -/
 
-import Mathlib.Data.Nat.Defs
+import Mathlib.Data.Nat.Basic
+import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Data.Vector.Basic
 
 namespace Lutar.QEC.Shor
@@ -44,14 +45,14 @@ structure PhysicalReceipt where
 
 /-- The Shor [[9,1,3]] bundle: 9 physical receipts encoding one logical
     receipt.  We use a dependent vector of length 9. -/
-abbrev ShorBundle := Vector PhysicalReceipt 9
+abbrev ShorBundle := List.Vector PhysicalReceipt 9
 
 /-- Encode a logical receipt as a Shor bundle by replicating it 9 times.
     (Simplified: a real implementation would use 3 blocks of 3 with
     phase entanglement; the multi-agent receipt analogue only needs the
     9-fold replication for correction by majority vote.) -/
 def encode (logical : PhysicalReceipt) : ShorBundle :=
-  Vector.replicate 9 logical
+  List.Vector.replicate 9 logical
 
 /-- Hamming distance over `UInt8` (byte-level). -/
 def byteDist (a b : UInt8) : Nat :=
@@ -86,7 +87,7 @@ theorem shor_single_fault_corrects
 theorem shor_encode_first
     (logical : PhysicalReceipt) :
     (encode logical).get 0 = logical := by
-  simp [encode, Vector.get, Vector.replicate]
+  simp [encode, List.Vector.get, List.Vector.replicate]
 
 /-- All-slot equality for Shor encoding is tracked as a Vector API proof obligation.
     Concrete first-slot and round-trip facts below are kernel-checked. -/
@@ -100,7 +101,7 @@ theorem shor_encode_all_equal_obligation_tracked : shor_encode_all_equal_tracked
 theorem shor_clean_roundtrip
     (logical : PhysicalReceipt) :
     majorityPayload (encode logical) = logical.payload := by
-  simp [majorityPayload, encode, Vector.get, Vector.replicate]
+  simp [majorityPayload, encode, List.Vector.get, List.Vector.replicate]
 
 namespace Tests
 

@@ -64,7 +64,7 @@ Formal proofs live here. The runtime that emits DSSE-signed receipts proving the
 > Lean 4 + Mathlib v4.13.0 formal proofs underpinning the Ouroboros Thesis — 749 declarations, 15 axioms (14 unique), 163 sorries (112 baseline + 51 Putnam).  
 > Doctrine v11 · DOI [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)
 
-**lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the [Ouroboros Thesis](https://github.com/szl-holdings/ouroboros-thesis). It provides the formal verification substrate for all SZL runtime governance claims.
+**lutar-lean** contains the machine-checked Lean 4 proofs for the Λ-gate theorems, audit-fiber invariants, and knot-calculus / Feynman-grafts of the SZL thesis corpus (see [`szl-papers`](https://github.com/szl-holdings/szl-papers/tree/main/thesis)). It provides the formal verification substrate for all SZL runtime governance claims.
 
 > [!NOTE]
 > **`lake build` builds clean on `main` @ `c7c0ba17`** (canonical HEAD 2026-05-31; 749 declarations / 163 sorries). PRs #98–#102 are merged.
@@ -150,6 +150,27 @@ re-exports `green_lambda_monotone`, `green_lambda_homogeneous`, and
 
 ---
 
+## What is locked vs. what is experimental
+
+**Locked (proven, in the canonical count @ `c7c0ba17`):** exactly **5** zero-`sorry`, no-external-axiom
+PURIQ formula theorems — **F1, F11, F12, F18, F19** (`PuriqFormulaLean.lean`) — plus the green
+axiom-satisfaction theorem `green_lambda_satisfies_lutar_axioms`. These are the only claims stated as
+proven fact.
+
+**Experimental (open PRs — NOT in the locked count, NOT claimed as theorems yet):**
+
+| PR | Wave | Content |
+|----|------|---------|
+| [#188](https://github.com/szl-holdings/lutar-lean/pull/188) | agentic-loop | end-to-end agentic-loop system proofs (P1–P6, Mathlib-free) |
+| [#189](https://github.com/szl-holdings/lutar-lean/pull/189) | wave 6 | graph + information substrate proof families (F-G1..F-G6) |
+| [#190](https://github.com/szl-holdings/lutar-lean/pull/190) | wave 7 | conformal rank-count + Doob envelope + graph-sum + PAC-Bayes |
+| [#191](https://github.com/szl-holdings/lutar-lean/pull/191), [#192](https://github.com/szl-holdings/lutar-lean/pull/192) | Λ-uniqueness | strengthened-class uniqueness route — **still Conjecture 1** |
+
+Nothing in the experimental waves changes the locked count or the Conjecture-1 status of Λ until it
+lands on `main` and survives `lake build` clean.
+
+---
+
 ## Quick start
 
 ```bash
@@ -162,8 +183,8 @@ lake test
 
 ## Cross-references
 
-- **[ouroboros-thesis v21 — The PURIQ-OS Substrate](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v21)** (release tag [`paper-v21-1.0.0`](https://github.com/szl-holdings/ouroboros-thesis/releases/tag/paper-v21-1.0.0)) — documents 23 agentic formulas, **5 proved in Lean 4 with no `sorry` and no external axioms** (F1, F11, F12, F18, F19; see `PuriqFormulaLean.lean`), 18 tagged `SORRY_PURIQ_OPEN`. The Λ-aggregator is **Conjecture 1 — NOT a theorem**. Version DOI minted by Zenodo on release under Concept DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
-- [ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis) — thesis source (DOI [10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276))
+- **[SZL thesis corpus — The PURIQ-OS Substrate](https://github.com/szl-holdings/szl-papers/tree/main/thesis)** — documents 23 agentic formulas, **5 proved in Lean 4 with no `sorry` and no external axioms** (F1, F11, F12, F18, F19; see `PuriqFormulaLean.lean`), 18 tagged `SORRY_PURIQ_OPEN`. The Λ-aggregator is **Conjecture 1 — NOT a theorem**. Version DOI minted by Zenodo under Concept DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
+- [`szl-papers`](https://github.com/szl-holdings/szl-papers) — thesis source + preprints (DOI [10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276))
 - [ouroboros](https://github.com/szl-holdings/ouroboros) — runtime reference implementation
 - Concept DOI (always-latest): [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 
@@ -262,4 +283,4 @@ Doctrine v11 boundary: ancient sources inspire verifiable mathematical patterns.
 
 ![SZL Holdings](./branding/szl-avatar-animated.gif)
 
-*Amaru — the Inca avatar of SZL Holdings. Animated mark (400×400, 16fps loop). Signed Yachay.*
+*SZL Holdings animated mark (400×400, 16fps loop).*
