@@ -168,13 +168,21 @@ import Lutar.Wave6.SetDeltaUniqueness
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Coder/).
 import Lutar.Coder.CoderProofs
 
--- Wave8 PROVE-NOW experimental pack (prove-next10), Mathlib group.
--- Q1 density-matrix mixture PSD, Q2 Gershgorin governance spectral bound,
--- G1 closest-point-approach minimality, L3 geometric-mean trust strict
--- monotonicity (asserts NO Λ uniqueness — Conjecture 1 untouched). EXPERIMENTAL
--- scope: excluded from the LOCKED v11 baseline numbers via
+-- Wave8 PROVE-NOW experimental pack (prove-next10). EXPERIMENTAL scope:
+-- excluded from the LOCKED v11 baseline numbers via
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave8/).
--- locked-proven stays EXACTLY 5.
+-- locked-proven stays EXACTLY 5; Λ remains Conjecture 1.
+-- Kernel-only Lean-core group (Ph1 axiom-disclosure, M2 hash-chain, L2 min-gate
+-- deny-by-default, B1 Byzantine n=3/f=1, S2 Simplex/RTA safety, CP1 split-conformal):
+import Lutar.Wave8.AxiomDisclosure
+import Lutar.Wave8.HashChain
+import Lutar.Wave8.MinGate
+import Lutar.Wave8.Byzantine
+import Lutar.Wave8.Simplex
+import Lutar.Wave8.Conformal
+-- Mathlib group (Q1 density-matrix mixture PSD, Q2 Gershgorin governance bound,
+-- G1 closest-point-approach minimality, L3 geometric-mean trust strict
+-- monotonicity — L3 asserts NO Λ uniqueness, Conjecture 1 untouched):
 import Lutar.Wave8.DensityMixture
 import Lutar.Wave8.Gershgorin
 import Lutar.Wave8.CPA
