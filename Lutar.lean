@@ -97,17 +97,17 @@ import Lutar.Wave3.InfoEstim
 --   * LambdaBlockConsistency  — conditional Λ uniqueness under the WEAKER, more
 --     governance-natural block-consistency axiom A6' (declared/disclosed; NOT in
 --     the locked v11 kernel). Λ (F23) STAYS Conjecture 1 unconditionally.
--- HONESTY NOTE (Tier1Mathlib): the C1 Tsirelson / C2 CHSH / C6 Jensen re-exports
--- in Lutar/Wave3/Tier1Mathlib.lean have signatures verified VERBATIM against
--- pinned Mathlib (rev d731765), but wiring that module into this kernel-check root
--- reproducibly RED-lights the `lake build` step (isolated by bisection: root @
--- a4299fb with Tier1Mathlib un-wired is fully GREEN). CI build logs are not
--- retrievable in this environment, so the exact compile error cannot be pinned
--- down here. Per the honesty doctrine, C1/C2/C6 therefore REMAIN CI-PENDING
--- (file present in-tree, NOT imported into the compiled root). They are NOT
--- claimed proven.
 import Lutar.Wave4.LambdaBisymmetryWitness  -- A6 discrimination witness (bare-`lean` verified, Lean-core axioms only)
 import Lutar.Wave4.LambdaBlockConsistency   -- conditional Λ uniqueness on the WEAKER block-consistency axiom A6' (Mathlib-dep, CI-verified GREEN)
+-- prove-wave-5: re-wire the MINIMAL Tier1Mathlib (C1 Tsirelson / C2 CHSH / C6 Jensen)
+-- after dropping the non-load-bearing `c1a_tsirelson_constant` numeric remark and its
+-- two extra SpecialFunctions imports (wave-4 isolated this module as the lake-build
+-- culprit; wave-5 minimizes its build closure to exactly the two modules that DEFINE the
+-- instantiated theorems). Signatures verified verbatim vs pinned Mathlib d7317655.
+import Lutar.Wave3.Tier1Mathlib             -- C1/C2/C6 (Mathlib-dep) — wave-5 re-wire, CI-gated
+-- prove-wave-5: substrate-relevant Mathlib instantiations (AM-GM dominates Λ; Cauchy–Schwarz
+-- trust-vector bound). Signatures verified verbatim vs pinned Mathlib d7317655.
+import Lutar.Wave5.MathlibCore
 
 
 /-!
