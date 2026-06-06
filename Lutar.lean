@@ -141,6 +141,23 @@ import Lutar.Wave7.DiscreteSubstrate
 -- W7-5 PAC-Bayes min<=avg<=max routing envelope (Finset.sum_le_card_nsmul /
 -- card_nsmul_le_sum; McAllester COLT 1999). Signatures verified vs Mathlib v4.18.0.
 import Lutar.Wave7.MathlibCore
+-- lambda-uniqueness/unconditional-setalpha (Team A, PhD): Lambda-uniqueness WITHIN
+-- principled STRONGER axiom classes. These modules do NOT flip any public claim:
+-- the ORIGINAL A1-A5 unconditional statement stays FALSE (Round13.maxAgg_ne_Lambda
+-- in-tree) and Lambda (F23) STAYS Conjecture 1 unconditionally. Wiring them into
+-- `lake build` makes CI kernel-check every theorem and every #print axioms ledger.
+--   * MonotoneAdditiveLinear -- the classical Cauchy monotone-additive=>linear lemma,
+--     closed with NO open obligation and NO declared axiom (pure rational squeeze).
+--   * SetAlphaUniqueness -- Set alpha = {A1,A2,A3,A4,A5' MULTIPLICATIVITY}. Lambda
+--     membership + all five impostor deaths are AXIOM-FREE; lambda_unique_setAlpha is
+--     CONDITIONAL on ONE disclosed cited axiom setAlpha_cauchy (multivariable Cauchy core).
+--   * SetDeltaUniqueness -- Set delta = {d1,d2,d3 Bisymmetry,d4 PSI,d5' MULT}; continuity
+--     DERIVED (Kiss-Shulman 2026 arXiv:2606.05221 Thm 1.1). Lambda membership + impostor
+--     deaths AXIOM-FREE; geomMean_unique_KS CONDITIONAL on disclosed cited axioms
+--     KS_theorem_1_1 + setDelta_stage2. Drift baseline rolled forward in the same PR.
+import Lutar.Wave6.MonotoneAdditiveLinear
+import Lutar.Wave6.SetAlphaUniqueness
+import Lutar.Wave6.SetDeltaUniqueness
 
 
 /-!
