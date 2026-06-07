@@ -1,13 +1,13 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "main",
-  "sha": "PENDING-LAMBDA-AIRTIGHT-ON-V4.18",
-  "measured_at_utc": "2026-06-06T16:39:31Z",
+  "ref": "wave12-frontier",
+  "sha": "PENDING-WAVE12-FRONTIER-CUT2-CF13-CF17",
+  "measured_at_utc": "2026-06-07T23:30:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "PR#195 lambda-airtight/discharge-cauchy-setdelta merged onto v4.18.0 main (which after #189/#190/#188/#192/#193/#194 measured 1283/23/22/308). MEASURED on the resolved merge working tree (lean_numbers.py @ db992ec7 base): declarations 1283 -> 1304 (+21: +1 MonotoneAdditiveLinear continuous_additive_linear; +16 SetAlpha off-diagonal AXIOM-FREE chain FExpPos_of_setAlpha, mvLog/stdBasis/FExpPos defs, mvLog_additive, mvLog_continuous, mvLog_linear_combo via Mathlib map_real_smul + Pi.pi_eq_sum_univ, mvLog_coeff_eq, mvLog_coeff_sum_one, lambda_unique_setAlpha_discharged, diagLog_continuous, diagPin, lehmer2/midrange A5' deaths; +4 SetDelta delta4_implies_allStrictMono, setDelta_to_setAlpha, lehmer2/midrange delta5' deaths). DISCHARGE: lambda_unique_setAlpha re-routed through lambda_unique_setAlpha_discharged so #print axioms lambda_unique_setAlpha lists Lean/Mathlib core ONLY (no setAlpha_cauchy); geomMean_unique_KS re-routed through setDelta_to_setAlpha + SetAlpha discharge so #print axioms geomMean_unique_KS lists Lean/Mathlib core + KS_theorem_1_1 ONLY (no setDelta_stage2). DECLARED AXIOMS UNCHANGED at axioms_raw 23 / axioms_unique 22: setAlpha_cauchy and setDelta_stage2 RETAINED as DOCUMENTED DEAD FALLBACKS (referenced by NO live result; like A6'_block_consistent's role) so the files compile regardless; KS_theorem_1_1 retained (cited 2026 derived-continuity theorem, NOT in Mathlib). The discharge shows up in per-result #print axioms (CI build log), NOT in the axiom-name set. v4.18.0 import fix applied (Mathlib.Algebra.BigOperators.Group.Finset -> .Finset.Basic) in SetAlphaUniqueness.lean and SetDeltaUniqueness.lean. NO new sorries (sorries_raw/noncomment UNCHANGED 308/256; NO sorryAx in proven theorems). HONEST: the ORIGINAL A1-A5 unconditional statement stays machine-checked FALSE (Round13.maxAgg_ne_Lambda in-tree); Lambda (F23) STAYS Conjecture 1 unconditionally; uniqueness is WITHIN principled stronger axiom classes only. Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; locked_proven stays 5 {F1,F11,F12,F18,F19}. Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>",
+  "note": "Wave12 frontier: CUT-2/CF-11 lambda_unique_of_separable (Round13/LambdaSeparable.lean, 4 decls, axiom-free, no sorry), CF-13 OuroLoopInputLipschitz (Innovations/round5, 7 decls), CF-17 NumericStability (Khipu, 8 decls). +19 declarations (1304 -> 1323). Uniqueness.lean: redirected the legacy monotone_additive_linear sorry to the sorry-free Round13.monotone_additive_linear (net -1 live/noncomment sorry; sorries_noncomment 256 -> 255). lutar_is_geomean (UNCONDITIONAL, machine-checked FALSE via Round13.maxAgg_ne_Lambda) RETAINS its tracked sorry per HONESTY-OVER-CHECKLIST. sorries_raw UNCHANGED at 308 (comment-text mentions of the word offset the one removed live token; sorries_noncomment drops to 255). axioms_raw/unique and axiom_names UNCHANGED (23/22; NO new axiom token in any added file). Locked v11 kernel 749/14/163 @ c7c0ba17 UNCHANGED; locked_proven stays 5 {F1,F11,F12,F18,F19}. Lambda (F23) STAYS Conjecture 1 unconditionally; CUT-2 is a CONDITIONAL theorem under {A1,A2,A3,A5,slice-multiplicativity}. Signed-off-by: SZL CTO <cto@szl-holdings.com>",
   "numbers": {
-    "declarations": 1304,
+    "declarations": 1323,
     "axioms_raw": 23,
     "axioms_unique": 22,
     "axiom_names": [
@@ -35,7 +35,7 @@
       "sha256_collision_resistant"
     ],
     "sorries_raw": 308,
-    "sorries_noncomment": 256,
+    "sorries_noncomment": 255,
     "sorries_putnam": 56,
     "sorries_baseline": 252
   }
