@@ -91,6 +91,22 @@ EXPERIMENTAL_SCOPES = (
     # declared axiom. EXPERIMENTAL, NOT folded into the locked v11 baseline
     # (stays 5 {F1,F11,F12,F18,F19}). Λ remains Conjecture 1.
     os.path.join("Lutar", "Wave9") + os.sep,
+    # Wave10 candidate-theorem pack (wave10-experimental) — 6 additive known-theorem
+    # formalizations, all Mathlib-FREE / Lean-core-only (build & kernel-verify on a
+    # disk-constrained host without the Mathlib cache): RA-1 Signal-Temporal-Logic
+    # robustness soundness (Donzé-Maler 2010 two-sided bounds), CN-1 quorum-
+    # intersection consensus safety/agreement (Lamport Paxos; Howard Flexible
+    # Paxos OPODIS 2016), TE-3 DSSE search-token injectivity (Kamara-Papamanthou
+    # CCS 2012, PRF injectivity as explicit HYPOTHESIS not axiom), IF-3 non-
+    # interference compositionality (Goguen-Meseguer 1982; Mantel MAKS), AU-1
+    # audit-replay determinism + tamper localization (Schneider 1990; Lamport
+    # 1978), MR-1 mesh reachability / route monotonicity (CLRS; cf Mathlib
+    # Relation.ReflTransGen). Plus a Wave10 AxiomDisclosure ledger re-asserting
+    # locked_count_five = 5. All CI-green, kernel-only axioms (propext/Quot.sound
+    # or none), NO sorry / NO open obligation / NO new declared axiom. EXPERIMENTAL,
+    # NOT folded into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}).
+    # Λ remains Conjecture 1.
+    os.path.join("Lutar", "Wave10") + os.sep,
 )
 
 
