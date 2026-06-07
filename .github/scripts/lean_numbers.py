@@ -107,6 +107,29 @@ EXPERIMENTAL_SCOPES = (
     # NOT folded into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}).
     # Λ remains Conjecture 1.
     os.path.join("Lutar", "Wave10") + os.sep,
+    # Wave11 FRONTIER proven pack (wave11-frontier) — 24 additive theorems across
+    # four candidate-frontier formalizations, all locally lake-built kernel-clean
+    # (Lean 4.18.0 / Mathlib v4.18.0; every #print axioms is a subset of
+    # {propext, Classical.choice, Quot.sound}): CF-1 GraphAutoDistInvariant
+    # (Λ-graph automorphism / isomorphism SimpleGraph.dist invariance + P-GNN
+    # position-encoding equivariance, You et al. 2019 arXiv:1906.04817; also
+    # closes the two formerly `:= True` PositionAware obligations), CF-2
+    # OuroKVCacheSlots (looped-LM KV-cache slot-index bijection Fin T × Fin L ≃
+    # Fin (T·L) via finProdFinEquiv, decode-equivalence, required size T·L, and
+    # the undersized-cache collision; Antizana/ouro-cache-fix, Ouro
+    # arXiv:2510.25741), CF-3 OuroLoopEarlyExit (loop fixed-point uniqueness +
+    # quantitative kᵗ/(1−k) early-exit error envelope + convergence via Mathlib
+    # ContractingWith; Banach 1922, DEQ arXiv:1909.01377), CF-5
+    # ImmuneNeymanPearsonOpt (DISCRETE/finite Neyman-Pearson most-powerful LRT
+    # optimality via the pointwise sign lemma; Neyman-Pearson 1933,
+    # Cohen-Rosenfeld-Kolter arXiv:1902.02918 — the measure-theoretic
+    # Gaussian-shift sorry₁ in Robustness/CertifiedRadius.lean stays OPEN). Plus a
+    # Wave11 AxiomDisclosure ledger re-asserting locked_count_five = 5 and
+    # wave11_theorem_count = 24. All CI-green, kernel-only axioms, NO sorry /
+    # NO open obligation / NO new declared axiom. EXPERIMENTAL, NOT folded into
+    # the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Λ remains
+    # Conjecture 1.
+    os.path.join("Lutar", "Wave11") + os.sep,
 )
 
 

@@ -23,6 +23,7 @@ sharper per-region governance bounds than the global DPI bound.
 import Mathlib.Combinatorics.SimpleGraph.Basic
 import Mathlib.Combinatorics.SimpleGraph.Metric
 import Lutar.GraphLambda
+import Lutar.Wave11.GraphAutoDistInvariant
 
 namespace Lutar.PositionAware
 
@@ -40,23 +41,46 @@ noncomputable def positionEncoding {V : Type} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) (A : AnchorSet V) (v : V) : A → ℕ :=
   fun a => G.dist v a.val
 
-/-! ## §2. Graph-isomorphism distance invariance (auxiliary lemma) -/
+/-! ## §2. Graph-isomorphism distance invariance (CLOSED — Wave11/CF-1)
 
-/-- Distance invariance under graph automorphism is tracked for a follow-on
-    SimpleGraph metric proof pass. -/
-def dist_iso_inv_tracked : Prop := True
+Formerly `:= True` (tracked). Now a genuine theorem: `SimpleGraph.dist` is
+preserved by any graph isomorphism / automorphism, proven kernel-clean in
+`Lutar.Wave11.GraphAutoDistInvariant.dist_iso_eq`. -/
 
-theorem dist_iso_inv_obligation_tracked : dist_iso_inv_tracked := by
-  trivial
+/-- **CLOSED (CF-1).** Distance invariance under a graph isomorphism: for any
+    `f : G ≃g G'`, `G'.dist (f u) (f v) = G.dist u v`. This is the real metric
+    obligation that the v17.2 placeholder `:= True` stood in for. -/
+def dist_iso_inv_tracked : Prop :=
+  ∀ {V W : Type} (G : SimpleGraph V) (G' : SimpleGraph W) (f : G ≃g G') (u v : V),
+    G'.dist (f u) (f v) = G.dist u v
 
-/-! ## §3. Position encoding equivariance (V17.2-T3) -/
+theorem dist_iso_inv_obligation_tracked : dist_iso_inv_tracked :=
+  fun G G' f u v =>
+    Lutar.Wave11.GraphAutoDistInvariant.dist_iso_eq f u v
 
-/-- Position-encoding equivariance is tracked for a follow-on proof pass over
-    `SimpleGraph.dist` and anchor-set image coercions. -/
-def positionEncoding_equivariant_tracked : Prop := True
+/-! ## §3. Position encoding equivariance (CLOSED — Wave11/CF-1)
+
+Formerly `:= True` (tracked). Now a genuine theorem: the per-vertex P-GNN
+position encoding (distance to each anchor) is automorphism-equivariant.
+Under an automorphism `f : G ≃g G`, the encoding of `f v` against the
+relabelled anchor `f a` equals the encoding of `v` against `a`. -/
+
+/-- **CLOSED (CF-1).** Position-encoding equivariance: relabelling a vertex and
+    its anchor by an automorphism leaves the distance-to-anchor code unchanged.
+    Discharged by `dist_auto_eq` (the metric core, kernel-clean). -/
+def positionEncoding_equivariant_tracked : Prop :=
+  ∀ {V : Type} (G : SimpleGraph V) (f : G ≃g G) (v a : V),
+    G.dist (f v) (f a) = G.dist v a
 
 theorem positionEncoding_equivariant_obligation_tracked :
-    positionEncoding_equivariant_tracked := by
-  trivial
+    positionEncoding_equivariant_tracked :=
+  fun G f v a =>
+    Lutar.Wave11.GraphAutoDistInvariant.dist_auto_eq f v a
 
 end Lutar.PositionAware
+
+-- ## CF-1 axiom disclosure for the now-CLOSED PositionAware obligations
+-- (formerly `:= True`).  Expected kernel-only [propext, Classical.choice,
+-- Quot.sound].  NO sorryAx, NO declared Lutar axioms.
+#print axioms Lutar.PositionAware.dist_iso_inv_obligation_tracked
+#print axioms Lutar.PositionAware.positionEncoding_equivariant_obligation_tracked
