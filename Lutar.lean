@@ -188,6 +188,30 @@ import Lutar.Wave8.Gershgorin
 import Lutar.Wave8.CPA
 import Lutar.Wave8.LambdaMono
 
+-- Wave9 candidate-theorem pack (wave9-experimental). EXPERIMENTAL scope:
+-- excluded from the LOCKED v11 baseline numbers via
+-- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave9/).
+-- locked-proven stays EXACTLY 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1.
+-- 8 additive known-theorem formalizations (NO sorry / NO open obligation / NO
+-- new declared axiom; #print axioms = Lean/Mathlib core only, per file):
+--   MA1 Gershgorin zero-eigenvalue exclusion (spectral form, ℂ-general);
+--   CP-1 Merkle / transparency-log inclusion soundness + append-only binding;
+--   MC-4 Ville fixed-time anytime-valid supermartingale (Markov) bound;
+--   GT-1 Menger cut/path duality (cut⇒disconnect + disjoint-routes⇒cut bound);
+--   OE-2 covariance-intersection information-form PSD convex closure;
+--   C1 Basilic BDB quorum-intersection threshold n > 3t+d+2q (sharp);
+--   PB1 time-uniform PAC-Bayes Ville-assembly core (DV / sup-time = ROADMAP);
+--   IF2 robust-declassification non-interference soundness.
+import Lutar.Wave9.Gershgorin
+import Lutar.Wave9.Merkle
+import Lutar.Wave9.Ville
+import Lutar.Wave9.Menger
+import Lutar.Wave9.CovarianceIntersection
+import Lutar.Wave9.BasilicBDB
+import Lutar.Wave9.TimeUniformPACBayes
+import Lutar.Wave9.RobustDeclass
+import Lutar.Wave9.AxiomDisclosure
+
 
 /-!
 # Lutar — root module

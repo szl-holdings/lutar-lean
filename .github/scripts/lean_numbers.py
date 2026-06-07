@@ -80,6 +80,17 @@ EXPERIMENTAL_SCOPES = (
     # CI-green only, NOT folded into the locked v11 baseline (stays 5). Λ remains
     # Conjecture 1 (L3 asserts no uniqueness). No sorry / no open obligation.
     os.path.join("Lutar", "Wave8") + os.sep,
+    # Wave9 candidate-theorem pack (wave9-experimental) — 8 additive known-theorem
+    # formalizations: MA1 Gershgorin zero-eigenvalue exclusion (spectral form),
+    # CP-1 Merkle/transparency-log soundness (abstract collision-resistance),
+    # MC-4 Ville fixed-time anytime-valid supermartingale bound, GT-1 Menger
+    # cut/path duality (cut side), OE-2 covariance-intersection PSD closure,
+    # C1 Basilic BDB quorum-intersection threshold, PB1 time-uniform PAC-Bayes
+    # (Ville-assembly core), IF2 robust-declassification non-interference. All
+    # CI-green, Mathlib- or kernel-backed, NO sorry / NO open obligation / NO new
+    # declared axiom. EXPERIMENTAL, NOT folded into the locked v11 baseline
+    # (stays 5 {F1,F11,F12,F18,F19}). Λ remains Conjecture 1.
+    os.path.join("Lutar", "Wave9") + os.sep,
 )
 
 
