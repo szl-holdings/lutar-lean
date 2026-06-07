@@ -75,6 +75,17 @@ import Lutar.LambdaPermInvariant
 -- Λ stays Conjecture 1; no public claim flipped; axioms_unique stays 14.
 import Lutar.Round13.CauchyND_Closure
 import Lutar.Round13.Lambda_Uniqueness
+-- Wave12 CUT-2 / CF-11: axiom-free CONDITIONAL Λ-uniqueness under slice-multiplicativity
+-- (`lambda_unique_of_separable`, no sorry, NO new axiom). Strictly weaker hypothesis than
+-- the `Factors` premise; derived from the already-proved `multiplicative_monotone_isPow_pos`.
+-- Λ (F23) STAYS Conjecture 1 unconditionally (the unconditional claim is FALSE — maxAgg/min).
+import Lutar.Round13.LambdaSeparable
+-- Wave12 CF-13: DEQ/Ouro equilibrium input-Lipschitz well-posedness margin (Mathlib
+-- ContractingWith; kernel-clean, no sorry, no new axiom). Companion to Wave11 CF-3.
+import Lutar.Innovations.round5.OuroLoopInputLipschitz
+-- Wave12 CF-17: floating-point summation forward-error bound (γ_{n-1}·Σ|xᵢ|; Higham 2002,
+-- rounding model as explicit HYPOTHESIS not axiom; kernel-clean, no sorry, no new axiom).
+import Lutar.Khipu.NumericStability
 -- PURIQ proved-formula pack (zero sorry, Mathlib-free): F1/F11/F12/F18/F19
 -- (original sprint) + F4/F7/F22 (append-only/DAG/FIFO sprint 2026-06-04). Wiring
 -- this into `lake build` makes CI kernel-check every PROVED PURIQ formula. The 15
