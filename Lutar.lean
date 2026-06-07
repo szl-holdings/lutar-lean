@@ -212,6 +212,33 @@ import Lutar.Wave9.TimeUniformPACBayes
 import Lutar.Wave9.RobustDeclass
 import Lutar.Wave9.AxiomDisclosure
 
+-- Wave10 candidate-theorem pack (wave10-experimental). EXPERIMENTAL scope:
+-- excluded from the LOCKED v11 baseline numbers via
+-- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave10/).
+-- locked-proven stays EXACTLY 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1.
+-- 6 additive known-theorem formalizations, all Mathlib-FREE / Lean-core-only
+-- (NO sorry / NO open obligation / NO new declared axiom; #print axioms =
+-- kernel-only [propext, Quot.sound] or none, per file):
+--   RA-1 Signal-Temporal-Logic robustness soundness (Donzé–Maler 2010,
+--        two-sided bounds: Sat⇒0≤ρ and 0<ρ⇒Sat; not naive iff at boundary);
+--   CN-1 quorum-intersection consensus safety / agreement (Lamport Paxos;
+--        Howard Flexible Paxos, OPODIS 2016);
+--   TE-3 DSSE search-token injectivity (Kamara–Papamanthou, CCS 2012;
+--        PRF injectivity as explicit HYPOTHESIS, not a declared axiom);
+--   IF-3 non-interference compositionality (Goguen–Meseguer 1982; Mantel MAKS);
+--   AU-1 audit-replay determinism + tamper localization (Schneider 1990;
+--        Lamport 1978);
+--   MR-1 mesh reachability / route monotonicity (CLRS; cf Mathlib
+--        Relation.ReflTransGen).
+-- Plus a Wave10 AxiomDisclosure ledger re-asserting locked_count_five = 5.
+import Lutar.Wave10.STLRobustness
+import Lutar.Wave10.QuorumIntersection
+import Lutar.Wave10.DSSEToken
+import Lutar.Wave10.NonInterferenceComposition
+import Lutar.Wave10.ReplayDeterminism
+import Lutar.Wave10.ReachabilityRedundancy
+import Lutar.Wave10.AxiomDisclosure
+
 
 /-!
 # Lutar — root module
