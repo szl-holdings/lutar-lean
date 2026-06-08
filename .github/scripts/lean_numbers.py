@@ -258,6 +258,19 @@ EXPERIMENTAL_SCOPES = (
     # gap-to-disjoint-intervals BKS map, and the dyadic_image_dense assembly. NO sorry, NO new
     # axiom token. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave19") + os.sep,
+    # Wave20 density PRIMITIVES pack (wave20-density-primitives) — additive, EXPERIMENTAL, NOT
+    # folded into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Two files under
+    # Lutar/Wave20/, the standalone reusable engines behind BKS arXiv:2208.07083 Lemma 6 Step 2.
+    # DisjointOpens.lean = PRIMITIVE A: pairwise-disjoint nonempty open sets are countable
+    # (self-contained rational-injection proof over ℝ + general separable-space packaging +
+    # uncountable/False corollaries + the Set.Ioo interval form). Accumulation.lean = PRIMITIVE B:
+    # the perfect-nonempty ⇒ uncountable engine (Cantor injection), the
+    # closed+no-isolated-points ⇒ perfect ⇒ uncountable bridge, the two-sided-accumulation
+    # predicate + its bridge to Mathlib AccPt, reducing BKS bullet 2 to ONE named residual
+    # (B-residual: closure of dyadic image contains a nonempty perfect set of two-sided
+    # accumulation points). NO sorry, NO new axiom token; all #print axioms ⊆ {propext,
+    # Classical.choice, Quot.sound}. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1.
+    os.path.join("Lutar", "Wave20") + os.sep,
 )
 
 

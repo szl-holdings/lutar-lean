@@ -357,6 +357,24 @@ import Lutar.Wave19.Density
 import Lutar.Wave19.AccumulationUncountable
 import Lutar.Wave19.Cut1Density
 import Lutar.Wave19.DyadicImageDense
+-- Wave20 density PRIMITIVES (EXPERIMENTAL · CI-green · kernel-clean): the two STANDALONE reusable
+-- engines behind the Burai–Kiss–Szokol (arXiv:2208.07083) Lemma 6 Step-2 density argument, proved
+-- as construction-agnostic Mathlib-style lemmas (NO Wave18/Wave19 dependency). DisjointOpens.lean
+-- = PRIMITIVE A: a pairwise-disjoint family of nonempty open sets is countable — given BOTH as a
+-- self-contained rational-injection proof over ℝ (each nonempty open meets ℚ; disjointness ⇒ the
+-- choice i ↦ qᵢ injective; ℚ countable) AND as the general SeparableSpace packaging, with the
+-- uncountable/False contradiction corollaries and the concrete Set.Ioo interval form the BKS map
+-- produces. Accumulation.lean = PRIMITIVE B: the quantitative engine "a nonempty perfect set of
+-- reals is uncountable" (Cantor injection Perfect.exists_nat_bool_injection; ℕ→Bool has card 𝔠),
+-- the requested bridge "closed + no isolated points ⇒ perfect ⇒ uncountable", the two-sided
+-- accumulation predicate IsTwoSidedAccPt + its bridge to Mathlib AccPt, reducing BKS bullet 2 to a
+-- SINGLE honestly-stated residual (B-residual: the dyadic image's closure contains a nonempty
+-- perfect set of two-sided accumulation points; the Aczél–Dhombres self-similar structure, NOT
+-- faked, NOT axiomatised). All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new
+-- axiom; no proof placeholders. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven set
+-- STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave20/) in lean_numbers.py.
+import Lutar.Wave20.DisjointOpens
+import Lutar.Wave20.Accumulation
 
 
 /-!
