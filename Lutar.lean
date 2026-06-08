@@ -395,6 +395,26 @@ import Lutar.Wave21.Uncountable
 import Lutar.Wave21.DyadicImageDense
 import Lutar.Wave21.Cut1Final
 
+-- Wave22 frontier (EXPERIMENTAL · kernel-clean): CUT-1 FINAL (C-order) — closes the ONE honest
+-- residual carried by Wave21's dyadic_image_dense_complete, the BKS Fourth-step gap-shift ordering
+-- R s ≤ L t (arXiv:2107.07391 Thm 8 eqs (8)-(9)). GapShiftOrdering.lean derives the discrete
+-- midpoint chain F (f a) (f c) ≤ F (f b) (f d) (from the generator recursion + monotone f) and the
+-- monotone-limit passage; CorderClosure.lean builds the (C-order) endpoint data L α = F X α,
+-- R α = F Y α (nonemptiness from φ,ψ strict mono; gap-shift DERIVED via corder_gapshift, not
+-- assumed); Cut1Corder.lean discharges Wave21's hC into full CUT-1 density and continuity, with the
+-- gap-shift FULLY derived (continuous_of_corder_fully_derived). LambdaConditional.lean STRENGTHENS
+-- the CONDITIONAL Λ result: the sharpest conditional uniqueness cut1_sharp_conditional_lambda drops
+-- both the bisymmetry hypothesis (proved redundant, bisymmetry_is_redundant) and the unit-norm
+-- fᵢ 1 = 1 (derived from A3 + separability, slice_one_eq_one_of_sep), leaving the WEAKEST checkable
+-- set {A1-A5}+separability+slice-multiplicativity+slice-monotonicity. All #print axioms ⊆ {propext,
+-- Classical.choice, Quot.sound}; NO new axiom; no proof placeholders. CUT-1 is now FULLY closed on
+-- its stated CHECKABLE hypotheses; Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked
+-- FALSE). Locked-proven set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave22/).
+import Lutar.Wave22.GapShiftOrdering
+import Lutar.Wave22.CorderClosure
+import Lutar.Wave22.Cut1Corder
+import Lutar.Wave22.LambdaConditional
+
 
 /-!
 # Lutar — root module

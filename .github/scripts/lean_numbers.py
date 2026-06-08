@@ -288,6 +288,27 @@ EXPERIMENTAL_SCOPES = (
     # (machine-checked FALSE) — closing CUT-1 makes the CONDITIONAL Λ chain axiom-clean end to end,
     # NOT unconditional. Locked-proven set STAYS EXACTLY 5.
     os.path.join("Lutar", "Wave21") + os.sep,
+    # Wave22 frontier pack (wave22-cut1-corder) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave22/. CLOSES the ONE
+    # honest residual of CUT-1 carried by Wave21's dyadic_image_dense_complete: the BKS Fourth-step
+    # (C-order) gap-shift ordering R s <= L t (arXiv:2107.07391 Theorem 8, eqs (8)-(9)).
+    # GapShiftOrdering.lean derives the discrete midpoint chain F (f a)(f c) <= F (f b)(f d) from
+    # the generator recursion F (f a)(f b) = f((a+b)/2) + monotone f, and the monotone-limit
+    # passage le_of_tendsto_of_tendsto. CorderClosure.lean constructs the (C-order) endpoint data
+    # L a = F X a, R a = F Y a (nonemptiness from phi,psi strict mono; the gap-shift is DERIVED via
+    # corder_gapshift from convergent gap sequences + continuity of psi, NOT re-assumed) and packs
+    # it into the exact existential hC shape Wave21 requires. Cut1Corder.lean discharges that hC,
+    # yielding dyadic_image_dense_corder_closed (full density), continuous_of_corder_closed and
+    # continuous_of_corder_fully_derived (continuous BKS generator with the gap-shift fully derived).
+    # LambdaConditional.lean STRENGTHENS the CONDITIONAL Lambda result: cut1_sharp_conditional_lambda
+    # drops the bisymmetry hypothesis (proved redundant by bisymmetry_is_redundant) and the
+    # unit-normalization f_i 1 = 1 (derived from A3 + separability + multiplicativity via
+    # slice_one_eq_one_of_sep), leaving the WEAKEST checkable hypothesis set
+    # {A1-A5}+separability+slice-multiplicativity+slice-monotonicity. No proof placeholders, NO new
+    # axiom token; all #print axioms subset {propext, Classical.choice, Quot.sound}. CUT-1 is now
+    # FULLY closed on its stated CHECKABLE hypotheses; Lambda UNCONDITIONAL uniqueness STAYS
+    # Conjecture 1 (machine-checked FALSE). Locked-proven set STAYS EXACTLY 5.
+    os.path.join("Lutar", "Wave22") + os.sep,
 )
 
 
