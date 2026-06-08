@@ -208,6 +208,25 @@ EXPERIMENTAL_SCOPES = (
     #     in-tree lemma precedent; honestly documented, NOT faked).
     # locked-proven stays 5; nothing folded in.
     os.path.join("Lutar", "Wave16") + os.sep,
+    # Wave17 frontier pack (wave17-frontier) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline. Three files under Lutar/Wave17/, all kernel-clean (#print axioms ⊆
+    # {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry):
+    #   • Wave17.BinaryPinsker  (CF-23) — the FULL binary (two-bin) Pinsker inequality
+    #     2(p-q)² ≤ KL_bin(p,q), assembling Wave16's g''(p)=1/p+1/(1-p)-4≥0 convexity crux into the
+    #     complete mean-value/monotone-derivative chain (deriv, second deriv, MonotoneOn /
+    #     AntitoneOn around the minimiser p=q). This is the CONDITIONAL two-bin case; the
+    #     UNCONDITIONAL simplex DPO axiom `pinsker` stays FALSE-as-stated, token UNTOUCHED. The
+    #     remaining gap to full simplex Pinsker is the data-processing reduction (CF-23-FULL).
+    #   • Wave17.MonDEQWellPosed (CF-27) — monotone-operator equilibrium net well-posedness
+    #     (uniqueness): a strongly-monotone operator (m>0) on (Fin n → ℝ) is injective, so the
+    #     equilibrium z=G(z) has at most one solution (Winston-Kolter arXiv:2006.08591;
+    #     pattern-only, NO code copied). Existence half = CF-27-FULL roadmap.
+    #   • Wave17.RecurrentDepth (CF-28) — recurrent-depth contraction amplification: a K-Lipschitz
+    #     recurrent block iterated r times is Kʳ-Lipschitz, with antitone depth constant for a
+    #     contraction (mcleish7/retrofitting-recurrence Apache-2.0, arXiv:2511.07384;
+    #     concept-only). Distinct from CF-13 input-Lipschitz equilibrium.
+    # locked-proven stays 5; Λ stays Conjecture 1; nothing folded in.
+    os.path.join("Lutar", "Wave17") + os.sep,
 )
 
 
