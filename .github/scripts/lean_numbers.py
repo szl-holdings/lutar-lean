@@ -187,6 +187,27 @@ EXPERIMENTAL_SCOPES = (
     # Λ remains Conjecture 1 (unconditional uniqueness FALSE); Byzantine BFT safety remains
     # Khipu Conjecture 2. locked-proven stays 5; nothing folded in.
     os.path.join("Lutar", "Wave15") + os.sep,
+    # Wave16 frontier pack (wave16-frontier) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline. Four files under Lutar/Wave16/, all kernel-clean (#print axioms ⊆
+    # {propext, Classical.choice, Quot.sound}), NO sorry, NO new declared axiom token:
+    #   • PinskerConvexity.lean  (CF-23 advance): binary_inv_sum_ge_four — the binary-entropy
+    #     convexity crux g''(p)=1/p+1/(1-p)-4 ≥ 0 that Wave15 flagged as the missing piece of
+    #     the binary Pinsker derivative argument; + tightness at p=1/2. Full Pinsker still NOT
+    #     proven (MVT chain deferred); DPOFeasibility.pinsker stays FALSE-as-stated, UNTOUCHED.
+    #   • Cut1MeanAxioms.lean     (CF-24 advance): geoBin_idem/comm/homog/mono_left — the
+    #     geometric-mean generator satisfies the full Aczél quasi-arithmetic mean axioms
+    #     (idempotency, symmetry, homogeneity, monotonicity), complementing Wave15's bisymmetry
+    #     witness. Full bisymmetry⇒generator representation still DEFERRED roadmap; Λ STAYS
+    #     Conjecture 1 (unconditional uniqueness FALSE).
+    #   • LambdaScaleInvariance.lean (CF-25, MPP arXiv:2310.02994 / Abacus-adjacent): Λ
+    #     product-multiplicativity Λ(c⊙x)=Λ(c)·Λ(x) ⇒ MPP normalization-invariance / scale
+    #     robustness. Genuine new theorems about Λ (not the A2 uniform-scale axiom).
+    #   • AbacusPlaceValue.lean   (CF-26, mcleish7/arithmetic arXiv:2405.17399, MIT):
+    #     Abacus positional-encoding well-posedness — place-value recurrence (Horner) +
+    #     zero-string anchor. The non-overflow bound abacusVal<bⁿ is DEFERRED roadmap (no
+    #     in-tree lemma precedent; honestly documented, NOT faked).
+    # locked-proven stays 5; nothing folded in.
+    os.path.join("Lutar", "Wave16") + os.sep,
 )
 
 
