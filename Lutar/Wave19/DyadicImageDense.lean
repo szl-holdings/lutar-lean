@@ -21,7 +21,7 @@ Given these, density holds — fully kernel-clean — via:
 many disjoint intervals on a separable line is impossible" engine and the "perfect ⇒ uncountable"
 engine are BOTH proven in Wave19; only the two literature facts above are taken as inputs.
 
-NO `sorry`, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
 
 ## Sources
 * Burai, Kiss, Szokol (2022), arXiv:2208.07083 — Lemma 6, bullets 2–3.
