@@ -20,7 +20,7 @@ Mathlib v4.18.0 *does* package the separable-space half
 keyed-to-this-construction wrapper turning it into the "uncountable index ⇒ `False`" engine that
 the gap-to-disjoint-intervals map of BKS Step 2 consumes.
 
-NO `sorry`, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
 
 ## Sources
 * Burai, Kiss, Szokol (2022), *A dichotomy result for strictly increasing bisymmetric maps*,
