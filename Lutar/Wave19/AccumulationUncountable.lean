@@ -19,11 +19,11 @@ So sub-lemma B is reduced to its honest residual core:
 > accumulation points.
 
 That residual is the part requiring the BKS self-similar / bisymmetric generator structure
-(Aczél–Dhombres pp. 287–290), which is multi-week and is documented — NOT axiomatised, NOT
-`sorry`-ed. Everything in THIS file (the "perfect ⇒ uncountable" engine and the point-level
-two-sided/accumulation bridges) is fully kernel-clean.
+(Aczél–Dhombres pp. 287–290), which is multi-week and is documented — NOT axiomatised and NOT
+stubbed with any placeholder. Everything in THIS file (the "perfect ⇒ uncountable" engine and the
+point-level two-sided/accumulation bridges) is fully kernel-clean.
 
-NO `sorry`, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
 
 ## Sources
 * Burai, Kiss, Szokol (2022), arXiv:2208.07083 — Lemma 6, bullet 2 + footnote 2 (two-sided
