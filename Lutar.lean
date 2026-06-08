@@ -316,6 +316,23 @@ import Lutar.Wave16.AbacusPlaceValue
 import Lutar.Wave17.BinaryPinsker
 import Lutar.Wave17.MonDEQWellPosed
 import Lutar.Wave17.RecurrentDepth
+-- Wave18 frontier (EXPERIMENTAL · CI-green · kernel-clean): CF-29 the Aczél quasi-arithmetic
+-- REPRESENTATION theorem — honest forward construction toward CUT-1. AczelRepresentation.lean
+-- supplies the representation predicate `IsQuasiArithmetic2`, the BKS dyadic-midpoint recursion
+-- `IsDyadicMidpointGen`, the COMPLETE soundness/only-if direction (a quasi-arithmetic mean is
+-- reflexive/symmetric/BISYMMETRIC/strict-mono + satisfies the dyadic recursion), the analytic
+-- heart `generator_collapse_affine`/`generator_unique_up_to_affine` (generator-uniqueness via the
+-- Round13 `monotone_additive_linear` rational squeeze, NO continuity), and the Mathlib-backed
+-- continuous-extension bridge `gen_continuous_of_denseRange`. Cut1Chain.lean pins φ=log via A2
+-- 1-homogeneity (`expMidpoint_homogeneous`), shows the log generator IS the geometric mean
+-- (`expMidpoint_eq_geom` = √(xy) = Λ binary slice), and re-exports the axiom-free conditional
+-- CUT-1 conclusion `cut1_conditional_lambda` through the Wave15 bisymmetry bridge. All #print
+-- axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry. The ONLY
+-- remaining gap to full CUT-1 = the topological `dyadic_image_dense` lemma (BKS arXiv:2208.07083
+-- Step 2, NOT in Mathlib v4.18.0). Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven
+-- set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave18/) in lean_numbers.py.
+import Lutar.Wave18.AczelRepresentation
+import Lutar.Wave18.Cut1Chain
 
 
 /-!
