@@ -130,6 +130,18 @@ EXPERIMENTAL_SCOPES = (
     # the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Λ remains
     # Conjecture 1.
     os.path.join("Lutar", "Wave11") + os.sep,
+    # Wave13 full proof-sweep pack (wave13-sweep) — additive, EXPERIMENTAL, NOT folded
+    # into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three kernel-clean
+    # theorems (every #print axioms is a subset of {propext, Classical.choice,
+    # Quot.sound}): quorum_agreement_single_valued_vote (the SIMPLIFIED non-Byzantine
+    # single-valued-vote shadow of quorum agreement — explicitly NOT Khipu Conjecture 2,
+    # which stays open in Innovations/round12/Identity_Ayni_Quorum.lean), and
+    # hm_bottleneck_clean (clean x_i^{-1} statement of the Tetractys harmonic-mean
+    # bottleneck; Hardy-Littlewood-Polya 1934 sec 2.5). The in-tree close of
+    # findReplayRoot_complete (Lutar/PRNG/K10v2_ReplayRoot.lean, via List.find?_isSome)
+    # is a BASELINE edit (-1 live sorry), recorded by bumping lean_numbers.json in this
+    # same PR. Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
+    os.path.join("Lutar", "Wave13") + os.sep,
 )
 
 
