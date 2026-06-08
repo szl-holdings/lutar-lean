@@ -40,6 +40,7 @@ import Lutar.Axioms
 import Lutar.Egyptian
 import Lutar.Invariant
 import Lutar.Bound
+import Lutar.Round13.CauchyND_Closure
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.SpecialFunctions.Exp
@@ -133,29 +134,12 @@ private theorem monotone_additive_linear
     (g : ℝ → ℝ)
     (hg_add : ∀ u v : ℝ, g (u + v) = g u + g v)
     (hg_mono : Monotone g) :
-    ∀ t : ℝ, g t = g 1 * t := by
-  -- HONEST OPEN LEMMA (Aczél 1966 Thm 5.1 / Cauchy 1821). This is the SOLE
-  -- blocking Cauchy step and is NOT in Mathlib v4.13.0. The earlier inline
-  -- skeleton (ℕ/ℤ/ℚ induction + monotone⇒continuous + ℚ-density equalizer)
-  -- did not type-check against the v4.13.0 API (`Monotone.continuous` is not a
-  -- field; the ℚ-density `have key`/`Rat.cast_def` rewrites left non-linear
-  -- goals `linarith` could not close). Per HONESTY-OVER-CHECKLIST it is admitted
-  -- as a single tracked `sorry` rather than shipped with hard compile errors.
-  -- Discharge route (~40 lines): g additive ⇒ ℚ-linear (induction), monotone ⇒
-  -- continuous via `Monotone.continuous_of_denseRange`/order-topology IVT, then
-  -- `DenseRange.equalizer` on `Rat.denseRange_ratCast` (Mathlib.Topology.Order.IntermediateValue).
-  sorry
-  -- SORRY: full Cauchy linearity. Reference closing snippet:
-  -- have : ∀ x : ℝ, g x = g 1 * x := by
-  --   apply (hg_cont.funext (continuous_const.mul continuous_id)).symm
-  --   rw [← Rat.denseRange_ratCast.closure_range]
-  --   intro x hx
-  --   obtain ⟨q, rfl⟩ := Set.mem_range.mp hx
-  --   exact hg_rat q
-  -- Mathlib lemma needed: `DenseRange.equalizer_of_continuous_of_dense`
-  -- (or direct application of `Dense.equalizer` from Mathlib.Topology.Basic)
-  -- Status: Mathlib v4.13.0 has the ingredients; the exact form of the call
-  -- needs to be verified against the actual Mathlib API.
+    ∀ t : ℝ, g t = g 1 * t :=
+  -- CLOSED (Wave12 CUT-2 cleanup): re-export the sorry-free Round 13 proof
+  -- `Lutar.Round13.monotone_additive_linear` (Aczél 1966 Thm 5.1 / Cauchy 1821,
+  -- via the rational squeeze; no continuity assumed). This retires the legacy
+  -- S-MAIN-1 open obligation in this file with ZERO new axioms.
+  Lutar.Round13.monotone_additive_linear g hg_add hg_mono
 
 /-! ## Auxiliary: the single-axis slice
 
@@ -218,10 +202,17 @@ theorem lutar_is_geomean {k : Nat} (hk : 0 < k)
   -- Hence all αᵢ = α.
   -- By A3 (hA3): Phi(c,...,c) = c ⟹ c^(k*α) = c ⟹ k*α = 1 ⟹ α = 1/k.
   -- Reconstruction: Phi(x) = (∏ xᵢ)^(1/k) = Λ k x.
+  -- ⚠️ HONEST OPEN OBLIGATION (UNAVOIDABLE — statement is FALSE under A1–A5).
+  -- `lutar_is_geomean` is the UNCONDITIONAL claim `LutarAxioms Phi → Phi = Λ k`.
+  -- This is machine-checked FALSE: `Lutar.Round13.maxAgg` and `min` satisfy A1–A5
+  -- but are not Λ k (see `Round13.maxAgg_ne_Lambda`). There is therefore NO
+  -- sorry-free proof to re-export — `Round13.lambda_unique` carries the same
+  -- tagged `FACTORIZATION_AXIOM_GAP` obligation. Per HONESTY-OVER-CHECKLIST we do
+  -- NOT fabricate a closed proof of a false statement; Λ stays Conjecture 1.
+  -- The honestly-true conditional core now lives in
+  -- `Lutar.Round13.lambda_unique_of_separable` (CUT-2, axiom-free) and
+  -- `Lutar.Round13.lambda_unique_of_factors`.
   sorry
-  -- SORRY: top-level assembly of the above argument.
-  -- When monotone_additive_linear is closed, this becomes ~50 lines.
-  -- See LAMBDA_UNIQUENESS_RETRY.md §4 for the full tactic sketch.
 
 /-- **Theorem TH10 (Uniqueness of the Lutar Invariant).** -/
 theorem lutar_unique {k : Nat} (hk : 0 < k)
