@@ -38,10 +38,11 @@ jobs:
       # before lean-action's configure step (which requires it).
       - name: Install elan
         run: |
-          # Pinned to leanprover/elan commit SHA 3d5138e1526a569a23901b8ee559032793cf445e (v4.2.1)
-          # SHA-256 of elan-init.sh at this commit: 4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
-          ELAN_SHA=3d5138e1526a569a23901b8ee559032793cf445e
-          EXPECTED=4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
+          # Pinned to leanprover/elan commit SHA 35628cce104e81a25514c4dcd224491351145818 (v4.2.2)
+          # Bumped from v4.2.1 (failed CI: 'error: failed to parse latest release tag').
+          # SHA-256 of elan-init.sh at this commit: a620ff1641616222c8d37c54845492004bb84d6877cdbc944dd65c1aa685bf53
+          ELAN_SHA=35628cce104e81a25514c4dcd224491351145818
+          EXPECTED=a620ff1641616222c8d37c54845492004bb84d6877cdbc944dd65c1aa685bf53
           curl -sSfL "https://raw.githubusercontent.com/leanprover/elan/$ELAN_SHA/elan-init.sh" -o /tmp/elan-init.sh
           echo "$EXPECTED  /tmp/elan-init.sh" | sha256sum -c
           sh /tmp/elan-init.sh -y --default-toolchain none

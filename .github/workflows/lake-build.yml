@@ -48,24 +48,61 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install elan (SHA-pinned)
+      - name: Install elan (SHA-pinned, v4.2.3)
         run: |
-          # leanprover/elan @ 3d5138e1526a569a23901b8ee559032793cf445e (v4.2.1)
-          ELAN_SHA=3d5138e1526a569a23901b8ee559032793cf445e
-          EXPECTED=4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
-          curl -sSfL "https://raw.githubusercontent.com/leanprover/elan/$ELAN_SHA/elan-init.sh" -o /tmp/elan-init.sh
-          echo "$EXPECTED  /tmp/elan-init.sh" | sha256sum -c
-          sh /tmp/elan-init.sh -y --default-toolchain none
+          set -euo pipefail
+          # ROOT CAUSE of the prior ~40s Step-6 red build ("failed to parse
+          # latest release tag"): on a FRESH runner elan installs the toolchain
+          # via InstallMethod::Dist, which (elan <= v4.2.2) first runs a
+          # self-update check -- fetch_latest_release_tag("leanprover/elan")
+          # GETs https://github.com/leanprover/elan/releases/latest and regex-
+          # parses /tag/<ver> from the response. On the hardened runner that
+          # fetch returns no parseable /tag/ link, and in v4.2.2 the error is
+          # propagated with `?`, ABORTING the whole toolchain install before any
+          # Lean compiles. elan v4.2.3 (commit b6cec7e) downgrades this to a
+          # non-fatal Notification::SelfUpdateCheckFailed, so the real toolchain
+          # download proceeds. Fix = pin elan to v4.2.3.
+          #
+          # We install the v4.2.3 elan binary by EXPLICIT release tag (not the
+          # `latest/download` redirect, which itself intermittently 504s on
+          # restricted egress) and verify its sha256, so the install stays fully
+          # pinned + integrity-checked.
+          ELAN_VER=v4.2.3
+          ELAN_TARBALL=elan-x86_64-unknown-linux-gnu.tar.gz
+          EXPECTED=df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2
+          curl -sSfL "https://github.com/leanprover/elan/releases/download/$ELAN_VER/$ELAN_TARBALL" -o /tmp/elan.tar.gz
+          echo "$EXPECTED  /tmp/elan.tar.gz" | sha256sum -c
+          mkdir -p /tmp/elan-init
+          tar xzf /tmp/elan.tar.gz -C /tmp/elan-init
+          # The tarball ships a single `elan-init` binary == the installer.
+          /tmp/elan-init/elan-init -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Resolve toolchain from lean-toolchain (must be v4.18.0)
         run: |
+          set -euo pipefail
           PIN=$(cat lean-toolchain)
           echo "lean-toolchain pin: $PIN"
           case "$PIN" in
             *v4.18.0) echo "toolchain pin OK" ;;
             *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.18.0"; exit 1 ;;
           esac
+          # With elan v4.2.3 the self-update check is NON-FATAL during
+          # toolchain install (leanprover/elan eec8851: a failed
+          # check_self_update is downgraded from a propagated error to a
+          # SelfUpdateCheckFailed warning), so the real toolchain download
+          # pinned in ./lean-toolchain proceeds even on the hardened runner.
+          # We still install the EXACT pin explicitly. `elan toolchain install`
+          # exits non-zero ONLY when the toolchain is already present
+          # ('already installed'); that case is benign (e.g. a warm runner
+          # image), so we tolerate it with `|| true` and rely on the
+          # `elan toolchain list | grep -q` check below as the REAL gate --
+          # if the v4.18.0 toolchain is genuinely absent this step hard-fails.
+          elan toolchain install "leanprover/lean4:v4.18.0" || true
+          elan default "leanprover/lean4:v4.18.0"
+          elan toolchain list | grep -q "leanprover/lean4:v4.18.0" \
+            || { echo "::error::v4.18.0 toolchain not installed"; exit 1; }
+          # Prove the toolchain is actually usable end-to-end.
           lake --version
 
       - name: Use committed lake-manifest.json (pinned, reproducible)

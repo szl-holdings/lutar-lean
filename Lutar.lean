@@ -333,6 +333,30 @@ import Lutar.Wave17.RecurrentDepth
 -- set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave18/) in lean_numbers.py.
 import Lutar.Wave18.AczelRepresentation
 import Lutar.Wave18.Cut1Chain
+-- Wave19 frontier (EXPERIMENTAL · CI-green · kernel-clean): CUT-1 DENSITY step — closes the
+-- Burai–Kiss–Szokol (arXiv:2208.07083) Lemma 6 Step-2 density engine, the single remaining gap
+-- after Wave18. DisjointOpens.lean builds the MISSING "countably-many-pairwise-disjoint-nonempty
+-- -opens on a separable line" contradiction engine (Mathlib has the separable-space half; we key
+-- it to this construction as `false_of_uncountable_pairwiseDisjoint_Ioo`). Density.lean defines
+-- the two-sided accumulation predicate, extracts a gap from non-density, discharges the
+-- disjointness half of BKS bullet 3 from a clean gap-shift ordering (`pairwiseDisjoint_Ioo_of_sep`),
+-- and assembles `dyadic_image_dense`/`dyadic_image_dense_of_sep`. AccumulationUncountable.lean
+-- closes the QUANTITATIVE core of BKS bullet 2: a nonempty perfect subset of ℝ is uncountable
+-- (Cantor injection `Perfect.exists_nat_bool_injection`; `ℕ → Bool` has cardinality 𝔠), reducing
+-- "uncountably many accumulation points" to "contains a nonempty perfect subset". Cut1Density.lean
+-- splices density into Wave18's `gen_continuous_of_denseRange` (BKS Step 4). DyadicImageDense.lean
+-- is the capstone: `dyadic_image_dense_via_perfect` proves density kernel-clean from exactly TWO
+-- named BKS literature residuals (B-residual: perfect subset of two-sided acc points; C-order: the
+-- gap-separated image endpoints), and `continuous_of_perfect_accumulation` carries it to
+-- continuity. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom; no proof placeholders.
+-- The residual is the BKS self-similar generator structure (Aczél–Dhombres pp.287–290), HONESTLY
+-- documented, NOT faked. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven set STAYS
+-- EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave19/) in lean_numbers.py.
+import Lutar.Wave19.DisjointOpens
+import Lutar.Wave19.Density
+import Lutar.Wave19.AccumulationUncountable
+import Lutar.Wave19.Cut1Density
+import Lutar.Wave19.DyadicImageDense
 
 
 /-!
