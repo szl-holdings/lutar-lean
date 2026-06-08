@@ -276,6 +276,27 @@ import Lutar.Wave14.LeibnizRemainder
 import Lutar.Wave14.ReedSolomonDistance
 import Lutar.Wave14.VCGEfficiency
 import Lutar.Wave14.LogSumInequality
+-- Wave15 frontier pack (wave15-frontier) — additive, EXPERIMENTAL, NOT folded into the
+-- locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three files, kernel-clean theorems
+-- (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry / NO new axiom):
+--   • Wave15.KLDivergenceSimplex (CF-22) — KL(p‖q) ≥ 0 ON THE SIMPLEX, the CONDITIONAL repair
+--                              of the FALSE-as-stated DPO klDivergence_nonneg axiom; direct
+--                              corollary of Wave14 CF-21 gibbs_inequality. The baseline axiom
+--                              token is UNTOUCHED; this is a NEW conditional theorem.
+--   • Wave15.PinskerRoadmap     (CF-23) — Pinsker building blocks (per-term Gibbs bound + summed
+--                              mass-gap lower bound) + HONEST roadmap. Full conditional Pinsker
+--                              (squared-L1 ≤ 2·KL) is NOT proven (binary-bin calculus + DPI
+--                              reduction not in Mathlib v4.18.0); DPOFeasibility.pinsker stays
+--                              FALSE-as-stated, untouched.
+--   • Wave15.BisymmetryCut1     (CF-24) — CUT-1 partial: bisymmetry as a CHECKABLE PREDICATE
+--                              (NOT the declared A6 axiom token); geometric-mean bisymmetry
+--                              witness + axiom-free CUT-1→CUT-2 bridge. Full bisymmetry⇒quasi-
+--                              arithmetic representation is the deferred roadmap item.
+-- Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
+-- Counted under EXPERIMENTAL_SCOPES (Lutar/Wave15/) in .github/scripts/lean_numbers.py.
+import Lutar.Wave15.KLDivergenceSimplex
+import Lutar.Wave15.PinskerRoadmap
+import Lutar.Wave15.BisymmetryCut1
 
 
 /-!

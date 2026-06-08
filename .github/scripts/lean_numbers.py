@@ -160,6 +160,33 @@ EXPERIMENTAL_SCOPES = (
     #                             statements remain FALSE-as-stated for lack of a simplex hyp).
     # Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
     os.path.join("Lutar", "Wave14") + os.sep,
+    # Wave15 frontier pack (wave15-frontier) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three files, kernel-clean theorems
+    # (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry / NO new
+    # declared axiom). Each is a clean COMPANION upgrading an existing tab without editing the
+    # baseline file (whose tracked sorrys/axioms stay honest):
+    #   • KLDivergenceSimplex (CF-22) — KL(p‖q) ≥ 0 ON THE SIMPLEX (∑p=∑q=1, p,q>0): the
+    #                       CONDITIONAL repair of the FALSE-as-stated DPO klDivergence_nonneg
+    #                       axiom, a direct corollary of Wave14 CF-21 gibbs_inequality. The
+    #                       baseline axiom token DPOFeasibility.klDivergence_nonneg is UNTOUCHED;
+    #                       dpo_klDivergence_nonneg_on_simplex restates the repair in the DPO
+    #                       file's own klDivergence symbol. This is a NEW conditional theorem,
+    #                       NOT a closure of the unconditional (still-false) axiom.
+    #   • PinskerRoadmap     (CF-23) — Pinsker building blocks (gibbs_term_lower per-term bound +
+    #                       klSum_lower_by_mass_gap summed bound) + HONEST roadmap. Full
+    #                       conditional Pinsker (½‖p−q‖₁² ≤ KL) is NOT proven — the binary-bin
+    #                       calculus + DPI reduction are not in Mathlib v4.18.0; nlinarith with
+    #                       log≤x−1 provably fails. DPOFeasibility.pinsker stays FALSE-as-stated,
+    #                       axiom token UNTOUCHED.
+    #   • BisymmetryCut1     (CF-24) — CUT-1 partial: IsBisymmetric2 as a CHECKABLE PREDICATE
+    #                       (NOT the declared Puriq.F23.A6_bisymmetric axiom token),
+    #                       geoBin_isBisymmetric (geometric-mean witness, NNReal rpow upgrade of
+    #                       the Wave4 decide-on-ℕ witness), and lambda_unique_of_bisymmetric_
+    #                       separable (axiom-free CUT-1→CUT-2 bridge via lambda_unique_of_separable).
+    #                       The full bisymmetry⇒quasi-arithmetic representation is deferred roadmap.
+    # Λ remains Conjecture 1 (unconditional uniqueness FALSE); Byzantine BFT safety remains
+    # Khipu Conjecture 2. locked-proven stays 5; nothing folded in.
+    os.path.join("Lutar", "Wave15") + os.sep,
 )
 
 
