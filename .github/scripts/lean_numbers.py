@@ -250,6 +250,14 @@ EXPERIMENTAL_SCOPES = (
     # arXiv:2208.07083 Step 2; NOT in Mathlib v4.18.0; honestly documented, NOT faked, NO axiom).
     # Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave18") + os.sep,
+    # Wave19 frontier pack (wave19-cut1-density) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave19/. Builds the
+    # MISSING density engine of BKS arXiv:2208.07083 Lemma 6 Step 2: the
+    # "countably-many-pairwise-disjoint-nonempty-opens on a separable line" contradiction engine
+    # (countable_of_pairwiseDisjoint_open / false_of_uncountable_pairwiseDisjoint_Ioo), the
+    # gap-to-disjoint-intervals BKS map, and the dyadic_image_dense assembly. NO sorry, NO new
+    # axiom token. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
+    os.path.join("Lutar", "Wave19") + os.sep,
 )
 
 
