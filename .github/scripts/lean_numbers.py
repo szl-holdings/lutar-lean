@@ -271,6 +271,23 @@ EXPERIMENTAL_SCOPES = (
     # accumulation points). NO sorry, NO new axiom token; all #print axioms ⊆ {propext,
     # Classical.choice, Quot.sound}. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1.
     os.path.join("Lutar", "Wave20") + os.sep,
+    # Wave21 frontier pack (wave21-cut1-final) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave21/. CLOSES the
+    # FINAL residual of BKS arXiv:2208.07083 Lemma 6 Step-2 (dyadic_image_dense): the (B) residual
+    # "uncountably many two-sided accumulation points" is discharged kernel-clean via the LIGHT
+    # monotone-extension route of the parent paper arXiv:2107.07391 Theorem 8 — NO perfect-set /
+    # Cantor machinery. Uncountable.lean proves: left/right one-sided-gap points of any H ⊆ ℝ are
+    # countable (rational-injection); a non-two-sided point is a one-sided-gap point; hence an
+    # uncountable H has uncountably many two-sided accumulation points; and a STRICTLY monotone
+    # g : ℝ → ℝ has uncountable range (injects the continuum Ioo 0 1, Cardinal.mk_Ioo_real).
+    # DyadicImageDense.lean assembles dyadic_image_dense_complete (B internal; only the (C-order)
+    # gap-shift ordering remains a stated structural hypothesis). Cut1Final.lean splices into
+    # Wave18 gen_continuous_of_denseRange (continuous BKS generator) and re-exports the CONDITIONAL
+    # cut1_conditional_lambda_closed. No proof placeholders, NO new axiom token; all #print axioms
+    # ⊆ {propext, Classical.choice, Quot.sound}. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1
+    # (machine-checked FALSE) — closing CUT-1 makes the CONDITIONAL Λ chain axiom-clean end to end,
+    # NOT unconditional. Locked-proven set STAYS EXACTLY 5.
+    os.path.join("Lutar", "Wave21") + os.sep,
 )
 
 

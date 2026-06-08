@@ -376,6 +376,25 @@ import Lutar.Wave19.DyadicImageDense
 import Lutar.Wave20.DisjointOpens
 import Lutar.Wave20.Accumulation
 
+-- Wave21 frontier (EXPERIMENTAL · kernel-clean): CUT-1 FINAL — closes the FINAL residual of the
+-- Burai–Kiss–Szokol (arXiv:2208.07083) Lemma 6 Step-2 density lemma and assembles the COMPLETE
+-- dyadic_image_dense. Uncountable.lean discharges the (B) residual ("uncountably many two-sided
+-- accumulation points") kernel-clean via the LIGHT monotone-extension route of the parent paper
+-- arXiv:2107.07391 Theorem 8 — NO perfect-set / Cantor machinery: one-sided-gap points of any
+-- H ⊆ ℝ inject into ℚ (countable), a non-two-sided point is a one-sided-gap point, so an
+-- uncountable H has uncountably many two-sided accumulation points; and a STRICTLY monotone
+-- g : ℝ → ℝ has uncountable range (injects the continuum Ioo 0 1). DyadicImageDense.lean assembles
+-- dyadic_image_dense_complete with (B) internal (only the (C-order) gap-shift ordering remains a
+-- stated structural hypothesis, the genuine BKS Fourth-step analytic fact). Cut1Final.lean splices
+-- into Wave18 gen_continuous_of_denseRange (continuous BKS generator) and re-exports the CONDITIONAL
+-- cut1_conditional_lambda_closed. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO
+-- new axiom; no proof placeholders. Closing CUT-1 makes the CONDITIONAL Λ chain axiom-clean end to
+-- end on its stated hypotheses; Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked
+-- FALSE). Locked-proven set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave21/).
+import Lutar.Wave21.Uncountable
+import Lutar.Wave21.DyadicImageDense
+import Lutar.Wave21.Cut1Final
+
 
 /-!
 # Lutar — root module
