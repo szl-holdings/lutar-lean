@@ -144,10 +144,15 @@ theorem lambda_unique_of_separable {k : ℕ} (hk : 0 < k)
       intro l
       simp only [Function.comp, hσ, hx]
       rcases eq_or_ne l i with hli | hli
-      · subst hli; rw [Equiv.swap_apply_left]; simp [hij.symm]
+      · subst hli
+        rw [Equiv.swap_apply_left]
+        simp [hij, hij.symm]
       · rcases eq_or_ne l j with hlj | hlj
-        · subst hlj; rw [Equiv.swap_apply_right]; simp [hij]
-        · rw [Equiv.swap_apply_of_ne_of_ne hli hlj]; simp [hli, hlj]
+        · subst hlj
+          rw [Equiv.swap_apply_right]
+          simp [hij, hij.symm]
+        · rw [Equiv.swap_apply_of_ne_of_ne hli hlj]
+          simp [hli, hlj]
     have hxself : ∀ l, x l
         = (fun l => if l = i then (4 : NNReal) else if l = j then 2 else 1) l := by
       intro l; simp [hx]
