@@ -309,6 +309,28 @@ EXPERIMENTAL_SCOPES = (
     # FULLY closed on its stated CHECKABLE hypotheses; Lambda UNCONDITIONAL uniqueness STAYS
     # Conjecture 1 (machine-checked FALSE). Locked-proven set STAYS EXACTLY 5.
     os.path.join("Lutar", "Wave22") + os.sep,
+    # Wave23 frontier pack (wave23-bft-safety) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave23/. Attacks the
+    # GENUINE open conjecture (Khipu Conjecture 2, ubuntu_quorum_safety / khipu_consensus_safety):
+    # Byzantine quorum SAFETY. UNCONDITIONAL safety stays Conjecture 2 (a faulty organ can
+    # equivocate; n <= 3f is impossible per Lamport-Shostak-Pease, formalized in Lutar/Wave8). We do
+    # NOT attempt the false unconditional statement. QuorumSafety.lean identifies the WEAKEST
+    # CHECKABLE hypothesis that turns quorum safety into a THEOREM: honest non-equivocation under
+    # signed votes (HonestNonEquivocation) — the BFT analog of slice-multiplicativity for Lambda.
+    # Votes are a RELATION (faulty organs MAY equivocate, unlike the Wave13 total-function shadow);
+    # only honest organs are single-valued. exists_honest_of_card_gt / exists_honest_in_inter
+    # DISCHARGE the non-faulty-witness residual that Round12 AyniQuorum.ubuntu_quorum_safety and the
+    # kernel KhipuConsensus.khipu_consensus_safety left as proof-deferred (Finset.not_subset +
+    # card_le_card). Reusing the in-tree placeholder-free quorum_intersection_honest
+    # (Round12, n >= 3f+1 ==> |Q1 cap Q2| > f), khipu_quorum_safety_conditional proves AGREEMENT
+    # (no split-brain): two quorums of size >= n-f certifying v1,v2 ==> v1 = v2.
+    # subsumes_single_valued_shadow re-derives the Wave13 single-valued shadow from the
+    # Byzantine-aware theorem (strict generality). All #print axioms subset {propext,
+    # Classical.choice, Quot.sound}; NO new axiom token; no proof placeholders. The result is
+    # CONDITIONAL on {n >= 3f+1, |faulty| <= f, |Qi| >= n-f, honest non-equivocation}; UNCONDITIONAL
+    # Byzantine BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 5; Lambda STAYS
+    # Conjecture 1 (machine-checked FALSE).
+    os.path.join("Lutar", "Wave23") + os.sep,
 )
 
 
