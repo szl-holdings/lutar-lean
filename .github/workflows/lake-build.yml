@@ -68,6 +68,11 @@ jobs:
             *v4.18.0) echo "toolchain pin OK" ;;
             *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.18.0"; exit 1 ;;
           esac
+          # Install the EXACT pinned toolchain explicitly. This avoids elan's
+          # implicit 'resolve latest release' path (which fails with
+          # 'failed to parse latest release tag' on some runner states).
+          elan toolchain install "leanprover/lean4:v4.18.0"
+          elan default "leanprover/lean4:v4.18.0"
           lake --version
 
       - name: Use committed lake-manifest.json (pinned, reproducible)
