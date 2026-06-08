@@ -1,9 +1,9 @@
 {
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
-  "ref": "wave13-sweep",
-  "sha": "PENDING-WAVE13-SWEEP-CLOSE-FINDREPLAYROOT-COMPLETE",
-  "measured_at_utc": "2026-06-08T00:30:00Z",
+  "ref": "wave14-frontier",
+  "sha": "PENDING-WAVE14-FRONTIER-EXPERIMENTAL-COMPANION-PACK",
+  "measured_at_utc": "2026-06-08T01:20:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
   "note": "Wave13 full proof-sweep (branch wave13-sweep, off main @ 2ae6fa7 = wave12 merged). BASELINE edit: closed findReplayRoot_complete in Lutar/PRNG/K10v2_ReplayRoot.lean via Lean-core List.find?_isSome ((xs.find? p).isSome <-> exists x in xs, p x); proof is axiom-clean (#print axioms = {propext, Quot.sound}). This removes exactly ONE live sorry token from a baseline (non-Putnam) file: sorries_raw 308->307, sorries_noncomment 255->254, sorries_baseline 252->251. NO declaration added in baseline (the proof fills an existing theorem body). The file's other 4 obligations (xoshiroNext_injective et al., replay-root uniqueness, xoshiro_period_bound) STAY honest sorries. EXPERIMENTAL (NOT counted): new file Lutar/Wave13/Sweep.lean (3 kernel-clean theorems: quorum_agreement_single_valued_vote = the SIMPLIFIED non-Byzantine single-valued-vote shadow, NOT Khipu Conjecture 2 which stays open; hm_bottleneck_clean = clean x_i^{-1} Tetractys HM bottleneck) added under EXPERIMENTAL_SCOPES (Lutar/Wave13/) in lean_numbers.py, so declarations/axioms UNCHANGED at 1323/23/22. NO new declared axiom token in any file (axiom_names UNCHANGED). Locked v11 kernel 749/14/163 UNCHANGED; locked_proven stays 5 {F1,F11,F12,F18,F19}. Lambda (F23) STAYS Conjecture 1 unconditionally; Byzantine BFT safety STAYS Khipu Conjecture 2. Signed-off-by: SZL CTO <cto@szl-holdings.com>",
   "numbers": {

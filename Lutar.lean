@@ -257,6 +257,25 @@ import Lutar.Wave10.AxiomDisclosure
 -- Classical.choice, Quot.sound}); NO sorry / NO new declared axiom. Counted under
 -- EXPERIMENTAL_SCOPES (Lutar/Wave13/) in .github/scripts/lean_numbers.py.
 import Lutar.Wave13.Sweep
+-- Wave14 frontier pack (wave14-frontier) — additive, EXPERIMENTAL, NOT folded into the
+-- locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1; Byzantine BFT
+-- safety remains Khipu Conjecture 2; DPO klDivergence/pinsker remain FALSE-as-stated).
+-- New axiom-free theorems (all axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry /
+-- NO new declared axiom), each upgrading an existing tab via a clean companion that does NOT
+-- edit the baseline (its tracked sorrys stay honest):
+--   • Wave14.LeibnizRemainder  — CF-18  alternating-series / Mādhava remainder bound
+--                                 (upgrades PACBayes/MadhavaBound).
+--   • Wave14.ReedSolomonDistance — CF-19 Reed–Solomon MDS distance lower bound
+--                                 (upgrades CodingTheory/ReedSolomonSingleton).
+--   • Wave14.VCGEfficiency      — CF-20  VCG efficient-outcome maximality + truthfulness core
+--                                 (clean replacement for the broken argmax-based VCG file).
+--   • Wave14.LogSumInequality   — CF-21  Cover–Thomas log-sum inequality + Gibbs' inequality
+--                                 (the correctly-stated DPI core the DPO tab needs).
+-- Counted under EXPERIMENTAL_SCOPES (Lutar/Wave14/) in .github/scripts/lean_numbers.py.
+import Lutar.Wave14.LeibnizRemainder
+import Lutar.Wave14.ReedSolomonDistance
+import Lutar.Wave14.VCGEfficiency
+import Lutar.Wave14.LogSumInequality
 
 
 /-!

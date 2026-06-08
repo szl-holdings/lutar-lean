@@ -142,6 +142,24 @@ EXPERIMENTAL_SCOPES = (
     # is a BASELINE edit (-1 live sorry), recorded by bumping lean_numbers.json in this
     # same PR. Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
     os.path.join("Lutar", "Wave13") + os.sep,
+    # Wave14 frontier pack (wave14-frontier) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Four files, nine kernel-clean
+    # theorems (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry /
+    # NO new declared axiom). Each is a clean COMPANION upgrading an existing tab without
+    # editing the baseline file (whose tracked sorrys stay honest):
+    #   • LeibnizRemainder      (CF-18) — alternating-series / Mādhava remainder bound
+    #                             (PACBayes/MadhavaBound; Mathlib Antitone.alternating_series).
+    #   • ReedSolomonDistance   (CF-19) — RS MDS distance LOWER bound (achievability half of
+    #                             Singleton; CodingTheory/ReedSolomonSingleton). The Singleton
+    #                             UPPER bound / full MDS equality (Vandermonde rank) stays sorry.
+    #   • VCGEfficiency         (CF-20) — VCG efficient-outcome maximality + truthfulness core
+    #                             (clean Finset.exists_max_image route; the in-tree VCG.lean uses
+    #                             a non-existent Finset.argmax and does not compile / is unwired).
+    #   • LogSumInequality      (CF-21) — Cover–Thomas log-sum inequality + Gibbs' inequality
+    #                             (the correctly-stated DPI core; the DPO klDivergence/pinsker
+    #                             statements remain FALSE-as-stated for lack of a simplex hyp).
+    # Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
+    os.path.join("Lutar", "Wave14") + os.sep,
 )
 
 
