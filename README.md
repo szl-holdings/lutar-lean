@@ -45,7 +45,21 @@ They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Qu
 
 > The experimental library on `main` type-checks at **1323 declarations / 23 axioms (22 unique), CI-green** on Lean `v4.18.0` (`lake build + numbers` ✅, DCO ✅).
 
-These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the [Wave-13 sweep](https://github.com/szl-holdings/lutar-lean) — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-5.
+These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-5.
+
+**Frontier families (Waves 11–17, all `#print axioms` ⊆ `[propext, Classical.choice, Quot.sound]`, no new axiom, no `sorry`):**
+
+| Wave | Headline results |
+|------|------------------|
+| **11** | CF-1 graph-automorphism distance invariance · CF-2 Ouro KV-cache slots · CF-3 Ouro early-exit soundness · CF-5 immune Neyman–Pearson optimality |
+| **12** | **CUT-2 `lambda_unique_of_separable`** (axiom-free conditional Λ uniqueness — Λ *off bare conjecture*) · CF-13 DEQ input-Lipschitz well-posedness · CF-17 floating-point summation error bound |
+| **13** | replay-root completeness · non-Byzantine quorum shadow · Hardy–Littlewood–Pólya HM-bottleneck |
+| **14** | CF-18 Leibniz/Mādhava alternating-series remainder · CF-19 Reed–Solomon MDS distance · CF-20 VCG efficiency + truthfulness core · CF-21 Cover–Thomas log-sum + Gibbs |
+| **15** | **CF-22 `dpo_klDivergence_nonneg_on_simplex`** (KL ≥ 0 on the simplex — conditionally repairs the false-as-stated DPO axiom) · CF-24 axiom-free bisymmetry→CUT-2 bridge |
+| **16** | CF-23 binary-KL convexity crux · CF-24 `geoBin` satisfies the **full Aczél quasi-arithmetic axioms** (idempotent/symmetric/homogeneous/monotone — the last analytic step before CUT-1) · CF-25 Λ scale-invariance · CF-26 abacus place-value |
+| **17** | **CF-23 `binary_pinsker`** (full binary Pinsker `2(p−q)² ≤ KL`) · CF-27 monotone-DEQ unique equilibrium · CF-28 recurrent-depth `Kʳ`-Lipschitz |
+
+~100 kernel-clean theorems across these waves; every one is drift-gate-checked and CI-green on `main`. None changes the locked count of 5; Λ stays **Conjecture 1**.
 
 ### The Λ line — Conjecture 1 (do not misquote this)
 
