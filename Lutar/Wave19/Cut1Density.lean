@@ -25,7 +25,7 @@ extends continuously — with NO extra hypotheses beyond monotonicity. This file
 single kernel-clean theorem, exhibiting that Wave19's `dyadic_image_dense` plugs *exactly* into the
 Wave18 bridge that "begins where the density lemma ends".
 
-NO `sorry`, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
 
 ## Sources
 * Burai, Kiss, Szokol (2022), arXiv:2208.07083 — Lemma 6, Steps 2 (density) and 4 (continuity).
