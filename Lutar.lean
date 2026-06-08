@@ -249,6 +249,14 @@ import Lutar.Wave10.NonInterferenceComposition
 import Lutar.Wave10.ReplayDeterminism
 import Lutar.Wave10.ReachabilityRedundancy
 import Lutar.Wave10.AxiomDisclosure
+-- Wave13 full proof-sweep pack (wave13-sweep) — additive, EXPERIMENTAL, NOT folded
+-- into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1;
+-- Byzantine BFT safety remains Khipu Conjecture 2). Closes findReplayRoot_complete
+-- in-tree (List.find?_isSome) and adds quorum single-valued-vote shadow +
+-- clean-statement HM bottleneck. All kernel-clean (axioms ⊆ {propext,
+-- Classical.choice, Quot.sound}); NO sorry / NO new declared axiom. Counted under
+-- EXPERIMENTAL_SCOPES (Lutar/Wave13/) in .github/scripts/lean_numbers.py.
+import Lutar.Wave13.Sweep
 
 
 /-!

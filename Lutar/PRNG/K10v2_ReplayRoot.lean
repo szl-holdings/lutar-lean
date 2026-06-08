@@ -258,7 +258,9 @@ theorem findReplayRoot_complete (candidates : List Xoshiro256State)
     (hmem : s ∈ candidates)
     (hroot : IsReplayRoot s expected = true) :
     (findReplayRoot candidates expected).isSome = true := by
-  sorry
+  unfold findReplayRoot
+  rw [List.find?_isSome]
+  exact ⟨s, hmem, hroot⟩
 
 /-! ## 8. xoshiro256** Period Bound (Path B — obligation-tracked)
 
