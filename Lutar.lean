@@ -297,6 +297,14 @@ import Lutar.Wave14.LogSumInequality
 import Lutar.Wave15.KLDivergenceSimplex
 import Lutar.Wave15.PinskerRoadmap
 import Lutar.Wave15.BisymmetryCut1
+-- Wave16 frontier (EXPERIMENTAL · CI-green · kernel-clean): CF-23 binary-KL convexity crux,
+-- CF-24 geometric-mean quasi-arithmetic mean axioms, CF-25 Λ product-multiplicativity (MPP
+-- normalization-invariance), CF-26 Abacus positional-encoding well-posedness. All #print axioms
+-- ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry. Λ STAYS Conjecture 1.
+import Lutar.Wave16.PinskerConvexity
+import Lutar.Wave16.Cut1MeanAxioms
+import Lutar.Wave16.LambdaScaleInvariance
+import Lutar.Wave16.AbacusPlaceValue
 
 
 /-!
