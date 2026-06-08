@@ -212,9 +212,8 @@ theorem recSum_error_le (u : ℝ) (hu : 0 ≤ u) :
       -- Let P := (1+u)^(t.length-1).  Note (1+u)^(t.length) = (1+u)·P.
       set P : ℝ := (1 + u) ^ (t.length - 1) with hP
       have hPexp : (1 + u) ^ t.length = (1 + u) * P := by
-        rw [hP, ← pow_succ']
-        congr 1
-        omega
+        have hlen1 : t.length - 1 + 1 = t.length := Nat.sub_add_cancel hmpos
+        rw [hP, ← pow_succ', hlen1]
       -- RHS target = ((1+u)·P - 1)·(|a| + absSum t)
       rw [hgoal_len]
       have hAt : absSum (a :: t) = |a| + absSum t := by simp [absSum_cons]
