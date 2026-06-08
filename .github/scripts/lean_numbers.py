@@ -227,6 +227,29 @@ EXPERIMENTAL_SCOPES = (
     #     concept-only). Distinct from CF-13 input-Lipschitz equilibrium.
     # locked-proven stays 5; Λ stays Conjecture 1; nothing folded in.
     os.path.join("Lutar", "Wave17") + os.sep,
+    # Wave18 frontier pack (wave18-cut1) — additive, EXPERIMENTAL, NOT folded into the
+    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Two files under Lutar/Wave18/, all
+    # kernel-clean (#print axioms in every theorem ⊆ {propext, Classical.choice, Quot.sound}),
+    # NO sorry, NO new declared axiom token, each compiled locally to ZERO errors against the
+    # cached Mathlib v4.18.0 oleans. CF-29 = the Aczél quasi-arithmetic REPRESENTATION theorem,
+    # honest forward construction toward CUT-1:
+    #   • AczelRepresentation.lean — `IsQuasiArithmetic2` representation predicate; the BKS
+    #     dyadic-midpoint recursion `IsDyadicMidpointGen`; the COMPLETE soundness/only-if
+    #     direction (quasiArith_reflexive/symmetric/bisymmetric/dyadic_recursion/strictMono_left:
+    #     a φ-quasi-arithmetic mean satisfies all four Aczél axioms + the recursion); the analytic
+    #     heart generator_collapse_affine / generator_unique_up_to_affine (generator-uniqueness
+    #     up to affine via Round13 monotone_additive_linear rational squeeze, NO continuity); the
+    #     Mathlib-backed continuous-extension bridge gen_continuous_of_denseRange; and the log
+    #     generator endpoint expMidpoint_eq_geom (= √(xy)).
+    #   • Cut1Chain.lean — the A2 1-homogeneity pin expMidpoint_homogeneous + expMidpoint_idem +
+    #     log_generator_pins_geometric (geometric mean = unique homogeneous q.a. mean), and the
+    #     axiom-free conditional CUT-1 conclusion cut1_conditional_lambda re-exported through the
+    #     Wave15 bisymmetry bridge lambda_unique_of_bisymmetric_separable (bisymmetry as a
+    #     CHECKABLE property, NO A6 axiom token).
+    # The ONLY remaining gap to full CUT-1 = the topological dyadic_image_dense lemma (BKS
+    # arXiv:2208.07083 Step 2; NOT in Mathlib v4.18.0; honestly documented, NOT faked, NO axiom).
+    # Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
+    os.path.join("Lutar", "Wave18") + os.sep,
 )
 
 
