@@ -27,7 +27,7 @@ We formalize this in three honest layers:
   disjointness of the image intervals. Both are recorded as hypotheses with their BKS provenance;
   see the report for the honest status of (B).
 
-NO `sorry`, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
 
 ## Sources
 * Burai, Kiss, Szokol (2022), *A dichotomy result for strictly increasing bisymmetric maps*,
