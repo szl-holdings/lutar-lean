@@ -348,7 +348,7 @@ import Lutar.Wave18.Cut1Chain
 -- is the capstone: `dyadic_image_dense_via_perfect` proves density kernel-clean from exactly TWO
 -- named BKS literature residuals (B-residual: perfect subset of two-sided acc points; C-order: the
 -- gap-separated image endpoints), and `continuous_of_perfect_accumulation` carries it to
--- continuity. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom; NO sorry.
+-- continuity. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom; no proof placeholders.
 -- The residual is the BKS self-similar generator structure (Aczél–Dhombres pp.287–290), HONESTLY
 -- documented, NOT faked. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven set STAYS
 -- EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave19/) in lean_numbers.py.
