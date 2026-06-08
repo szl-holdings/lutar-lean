@@ -415,6 +415,24 @@ import Lutar.Wave22.CorderClosure
 import Lutar.Wave22.Cut1Corder
 import Lutar.Wave22.LambdaConditional
 
+-- Wave23 frontier (EXPERIMENTAL · kernel-clean): CONDITIONAL Khipu BFT SAFETY — attacks the genuine
+-- open conjecture (Khipu Conjecture 2, ubuntu_quorum_safety). UNCONDITIONAL safety stays Conjecture
+-- 2 (a Byzantine organ can equivocate; n ≤ 3f is impossible — Lamport–Shostak–Pease, Wave8). We do
+-- NOT attempt the false unconditional statement. QuorumSafety.lean identifies the WEAKEST CHECKABLE
+-- hypothesis that turns quorum safety into a THEOREM — honest non-equivocation under signed votes
+-- (the BFT analog of slice-multiplicativity for Λ): votes are a RELATION (faulty organs MAY
+-- equivocate), honest organs satisfy HonestNonEquivocation. exists_honest_of_card_gt /
+-- exists_honest_in_inter DISCHARGE the non-faulty-witness residual the kernel/Round12
+-- ubuntu_quorum_safety left deferred (Finset.not_subset + card_le_card). Reusing the in-tree,
+-- placeholder-free quorum_intersection_honest (Round12, n ≥ 3f+1 ⟹ |Q₁∩Q₂| > f),
+-- khipu_quorum_safety_conditional proves agreement (no split-brain): two quorums of size ≥ n−f
+-- certifying v₁,v₂ ⟹ v₁ = v₂. subsumes_single_valued_shadow re-derives the Wave13 single-valued
+-- shadow, witnessing strict generality. All #print axioms ⊆ {propext, Classical.choice, Quot.sound};
+-- NO new axiom; no proof placeholders. CONDITIONAL on {n ≥ 3f+1, |faulty| ≤ f, |Qᵢ| ≥ n−f, honest
+-- non-equivocation}; UNCONDITIONAL BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 5;
+-- Λ STAYS Conjecture 1. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave23/).
+import Lutar.Wave23.QuorumSafety
+
 
 /-!
 # Lutar — root module
