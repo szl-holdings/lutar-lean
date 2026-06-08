@@ -305,6 +305,17 @@ import Lutar.Wave16.PinskerConvexity
 import Lutar.Wave16.Cut1MeanAxioms
 import Lutar.Wave16.LambdaScaleInvariance
 import Lutar.Wave16.AbacusPlaceValue
+-- Wave17 frontier (EXPERIMENTAL · CI-green · kernel-clean): CF-23 FULL binary (two-bin) Pinsker
+-- 2(p-q)² ≤ KL_bin(p,q) (assembling Wave16's g''≥0 crux into the full MVT chain), CF-27 monDEQ
+-- well-posedness (strong-monotonicity ⇒ unique equilibrium; pattern-only, arXiv:2006.08591), and
+-- CF-28 recurrent-depth contraction amplification (Kʳ-Lipschitz of an r-step recurrent block;
+-- mcleish7/retrofitting-recurrence Apache-2.0, arXiv:2511.07384, concept-only). All #print axioms
+-- ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry. Λ STAYS Conjecture 1;
+-- DPO `pinsker` STAYS FALSE-as-stated (token UNTOUCHED — binary Pinsker is the CONDITIONAL
+-- two-bin case, not the unconditional simplex axiom). Locked-proven set STAYS EXACTLY 5.
+import Lutar.Wave17.BinaryPinsker
+import Lutar.Wave17.MonDEQWellPosed
+import Lutar.Wave17.RecurrentDepth
 
 
 /-!
