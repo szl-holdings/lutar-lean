@@ -11,20 +11,17 @@ require mathlib from git
 lean_lib «Lutar» where
   -- Library root: Lutar/
 
+@[default_target]
+lean_lib «PutnamSet» where
+  -- Putnam 2025 showcase + SZL originals: forces CI kernel compilation of the
+  -- 12 Lutar/Putnam/P_* statements and the 3 Lutar/Putnam/SZL/ originals.
+  -- Deferred proofs are `sorry` (build warnings, not errors).
+  roots := #[`PutnamSet]
+
 lean_lib «RefVectors» where
   -- Top-level module imported by MainRef; declared as its own lean_lib so
   -- `lake exe ref_vectors` can resolve `import RefVectors`.
   roots := #[`RefVectors]
-
-@[default_target]
-lean_lib «PutnamShowcase» where
-  -- Putnam formalization showcase (Showcase/PutnamLean/). Mathlib-free, core
-  -- Lean only; each module is honestly labeled REAL (kernel-checked, zero
-  -- `sorry`) or DEMO (statement formalized, proof `sorry`). Lives outside
-  -- Lutar/ so it is NOT counted by .github/scripts/lean_numbers.py and does not
-  -- touch the locked Doctrine-v11 baseline. Built by `lake build` (default).
-  srcDir := "Showcase/PutnamLean"
-  roots := #[`P01, `P02, `P03, `P04]
 
 @[default_target]
 lean_exe «check» where

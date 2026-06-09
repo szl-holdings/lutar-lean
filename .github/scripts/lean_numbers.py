@@ -55,6 +55,13 @@ EXPERIMENTAL_SCOPES = (
     os.path.join("Lutar", "Puriq", "Formulas") + os.sep,
     # Bekenstein-bound scaffold (additive, Putnam) — 1 proved anchor + tracking sorry.
     os.path.join("Lutar", "Putnam", "BekensteinBound.lean"),
+    # SZL Putnam originals (additive, EXPERIMENTAL) — 3 genuinely kernel-clean
+    # Lean-core + Mathlib companions to the Putnam set: positive-scaling
+    # equivalence relation (LambdaEquiv), receipt sign/verify
+    # soundness+completeness+tamper-evidence (ReceiptVerify), and scaling
+    # Lipschitz/nonexpansiveness (Robustness). Namespace Lutar.Putnam.SZL.
+    # NO sorry, NO new declared axiom. NOT folded into the locked v11 baseline.
+    os.path.join("Lutar", "Putnam", "SZL") + os.sep,
     # Agentic-loop end-to-end system proofs (prove-agentic) — additive, NOT wired
     # into Lutar.lean; new namespace Lutar.Agentic.Pipeline. P1–P6 RAG→MCP→kernel
     # pipeline theorems (Mathlib-free, sorry-free) + one declared crypto axiom

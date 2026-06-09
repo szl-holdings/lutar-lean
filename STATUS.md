@@ -16,7 +16,8 @@
 
 ## What's Experimental
 
-- **Putnam sorry reduction** — 51 Putnam sorries are open; reduction in progress
+- **Putnam 2025 canonical set** — the 12 `Lutar/Putnam/P_A1..P_B6` files carry faithful Lean statements of the **Putnam 2025** problems with honest REAL/DEMO/OPEN labels; deferred proofs are explicit `sorry` (build warnings). An earlier internal "2023" tag was an error and is documented as drift in the file docstrings. Plus 3 kernel-clean SZL originals under `Lutar/Putnam/SZL/` (no `sorry`, no new axiom). All forced into `lake build` via the `PutnamSet` aggregator (`@[default_target]`). Never folded into the locked count.
+- **Putnam sorry reduction** — open Putnam sorries remain; reduction in progress
 - **Mathlib alignment** — periodic Mathlib upgrades may require proof adjustments
 
 ## What's Deprecated
