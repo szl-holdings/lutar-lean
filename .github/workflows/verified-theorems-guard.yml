@@ -1,0 +1,49 @@
+name: Verified-theorems guard
+
+# Self-protection for the machine-checked VERIFIED_THEOREMS surface.
+#
+# lake-build.yml regenerates + drift-gates the honest "solved theorems" list on
+# every push/PR to main (sorry gate -> generator -> drift gate). This guard
+# fails loudly if any of those three invocations is ever removed from
+# lake-build.yml, so the surface can never silently stop being enforced.
+#
+# It is intentionally cheap (pure-stdlib text check, no Lean toolchain) and
+# self-tests its own checker against negative fixtures before trusting it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Deny-by-default; the job grants only what it needs (Scorecard Token-Permissions).
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: verified-theorems wiring
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Guard self-test (negative fixtures)
+        run: python3 .github/scripts/check_verified_theorems_guard.py --self-test
+
+      - name: Verified-theorems steps are wired into lake-build.yml
+        run: python3 .github/scripts/check_verified_theorems_guard.py --workflow .github/workflows/lake-build.yml
