@@ -36,6 +36,7 @@ theorem verify_iff (key : ℕ → ℕ) (payload tag : ℕ) :
 (REAL). -/
 theorem verify_tamper (key : ℕ → ℕ) (payload tag : ℕ) (h : tag ≠ key payload) :
     verify key payload tag ≠ true := by
-  rw [verify_iff]; exact h
+  intro hv
+  exact h ((verify_iff key payload tag).mp hv)
 
 end Lutar.Putnam.SZL.ReceiptVerify

@@ -33,7 +33,7 @@ theorem card_positions (n : ℕ) : Fintype.card (Pos n) = 3 ^ n := by
   simp
 
 /-- `3 ^ n` is odd (REAL). -/
-theorem three_pow_odd' (n : ℕ) : Odd ((3 : ℕ) ^ n) := (by norm_num : Odd (3 : ℕ)).pow
+theorem three_pow_odd' (n : ℕ) : Odd ((3 : ℕ) ^ n) := (by decide : Odd (3 : ℕ)).pow
 
 /-- Two positions are adjacent iff they differ by ±1 (no wraparound) in exactly
 one coordinate. -/
