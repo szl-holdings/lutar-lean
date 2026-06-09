@@ -101,12 +101,26 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 'Lutar.Wave6.SetDelta.arithmeticMean_not_delta5' depends on axioms: [propext, Classical.choice, Quot.sound]  -- impostor death, axiom-free
 ```
 
+### Theorem U — governance-safe uniqueness (REAL · CONDITIONAL, axiom-free)
+
+**Rule of citation (Doctrine v11):** any Λ-uniqueness claim cites **Theorem U** or its corollaries **U₁** / **U₂** — uniqueness holds *modulo* the audit-invariant equivalence `≈Λ` under the **Identifiability Assumptions (IA)**; strict `=` only under the documented `Anchored` / `Normalized` predicate. Source: [`Lutar/Uniqueness/TheoremU.lean`](./Lutar/Uniqueness/TheoremU.lean) (+ `LambdaEquiv.lean`, `Identifiability.lean`, `AxiomCheck.lean`); dependency ledger [`DEPENDENCY_MAP.md`](./DEPENDENCY_MAP.md).
+
+| Result | Statement | Maturity |
+|---|---|---|
+| **Theorem U** (`TheoremU_LambdaUnique`) | any two IA-solutions are `≈Λ` (indeed `=`), **by REDUCTION** to Round13 — no new axiom, no `sorry` | **REAL · CONDITIONAL** (axiom-free) |
+| **Corollary U₁** (`CorollaryU1_LambdaUnique_Separable`) | separable, slice-multiplicative aggregator ⇒ Λ (`Round13.lambda_unique_of_separable`) | **REAL · CONDITIONAL** |
+| **Corollary U₂** (`CorollaryU2_LambdaUnique_Factors`) | power-law factorization `Φ x = ∏ (x i)^(αᵢ)` ⇒ Λ (`Round13.lambda_unique_of_factors`) | **REAL · CONDITIONAL** |
+| strict `=` (`TheoremU_LambdaUnique_eq`, `lambda_equiv_to_eq_of_anchored`) | `≈Λ` collapses to `=` **only** under `Anchored` / `Normalized` | **REAL · CONDITIONAL** |
+| **Conjecture 1** (`Conjecture1_LambdaUnique`) | unconditional uniqueness under bare A1–A5 | **OPEN — non-claim**: statement-only, machine-checked **FALSE** as stated; bounty [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) |
+
+> Theorem U is **EXPERIMENTAL · additive** — it does **not** move the locked count of 5 and does **not** change Λ's Conjecture-1 status. The `≈Λ` relation is genuinely non-trivial: the proven A1–A5 counterexample `maxAgg` is `≉Λ` to `Λ 2` (`lambdaEquiv_nondegenerate`), so "uniqueness modulo `≈Λ`" excludes the impostor.
+
 ### What we do **not** claim
 
 - **NOT** unconditional uniqueness under the original weaker axioms A1–A5. That statement is **machine-checked false** — the in-tree counterexample `Round13.maxAgg_ne_Lambda` exhibits an aggregator satisfying A1–A5 that is **not** Λ.
-- Λ-uniqueness therefore **stays Conjecture 1**, never a theorem. Strengthening the axiom class (A5 → A5′ multiplicativity, or deriving continuity via Kiss–Shulman) is *how* the conditional results become provable; it does not close the original weaker conjecture.
+- Λ-uniqueness therefore **stays Conjecture 1**, never a theorem. Strengthening the axiom class (A5 → A5′ multiplicativity, or deriving continuity via Kiss–Shulman) or reframing modulo `≈Λ` under IA (Theorem U) is *how* the conditional results become provable; it does not close the original weaker conjecture.
 
-**Open bounty:** [BOUNTY.md](https://github.com/szl-holdings/lutar-lean/blob/main/BOUNTY.md).
+**Open bounty:** [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) · [BOUNTY.md](https://github.com/szl-holdings/lutar-lean/blob/main/BOUNTY.md).
 
 ---
 
