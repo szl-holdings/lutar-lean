@@ -197,11 +197,46 @@ jobs:
             lake-manifest.json
           if-no-files-found: error
 
-      - name: Drift gate (fail on unexpected decl/axiom/sorry change)
+      # ---- Verified-theorems surface (machine-checked "solved" list) ----
+      # Honest, kernel-checked list of REAL theorems on the governed uniqueness /
+      # identifiability surface, regenerated from THIS build and gated so the
+      # published list can never drift from what the kernel verifies. See
+      # .github/scripts/gen_verified_theorems.py.
+      - name: Sorry gate (governance-surface directories)
         run: |
-          python3 .github/scripts/check_numbers_drift.py \
-            --baseline .github/data/lean_numbers.json \
-            --measured lean_numbers.measured.json
+          set -euo pipefail
+          # Fails on any non-comment `sorry` under Lutar/Uniqueness/ (the Theorem U
+          # kernel surface). DIRECTORY-scoped on purpose: the legacy file
+          # Lutar/Uniqueness.lean keeps tagged open obligations (Conjecture 1) by
+          # design, so it is NOT gated. Absent dir = vacuous pass (auto-enforces
+          # the moment the Theorem U directory lands).
+          python3 .github/scripts/sorry_gate.py --repo-path . --dir Lutar/Uniqueness
+
+      - name: Generate VERIFIED_THEOREMS from the build
+        run: |
+          set -euo pipefail
+          # Re-elaborates each governed candidate via `lake env lean` (#print axioms),
+          # so the footprint is read from the real build and is robust to the
+          # restored .lake cache.
+          python3 .github/scripts/gen_verified_theorems.py \
+            --repo-path . --out VERIFIED_THEOREMS.generated.md
+          echo "----- generated VERIFIED_THEOREMS.md -----"
+          cat VERIFIED_THEOREMS.generated.md
+
+      - name: Upload VERIFIED_THEOREMS artifact (for bootstrap / review)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verified-theorems-${{ github.sha }}
+          path: VERIFIED_THEOREMS.generated.md
+          if-no-files-found: error
+
+      - name: Drift gate (VERIFIED_THEOREMS.md out of date vs build)
+        run: |
+          # Bootstrap-tolerant: passes with a notice until the first generated file
+          # is committed; then enforces an exact match against the build.
+          python3 .github/scripts/check_verified_theorems_drift.py \
+            --committed VERIFIED_THEOREMS.md \
+            --generated VERIFIED_THEOREMS.generated.md
 
       - name: Post numbers as PR comment
         if: github.event_name == 'pull_request'
