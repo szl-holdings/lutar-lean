@@ -344,8 +344,9 @@ EXPERIMENTAL_SCOPES = (
     # FactorAssumptions / SeparableAssumptions / IdentifiabilityAssumptions (IA) with the bridges
     # factorAssumptions_to_IA / separableAssumptions_to_IA. TheoremU.lean lands Theorem U BY
     # REDUCTION to the already-proven Round13 conditional theorems lambda_unique_of_separable /
-    # lambda_unique_of_factors: CorollaryU1/U2, identifiability_forces_lambda, TheoremU_LambdaUnique
-    # (IA-solutions are ~Lambda), TheoremU_LambdaUnique_eq (strict =), lambda_equiv_to_eq_of_anchored
+    # lambda_unique_of_factors: CorollaryU1/U2, plus identifiability_forces_lambda.
+    # TheoremU_LambdaUnique (conditional only; Λ unconditional uniqueness stays Conjecture 1),
+    # TheoremU_LambdaUnique_eq (strict =, conditional Conjecture-1-gauge), lambda_equiv_to_eq_of_anchored
     # (gauge upgrade under Anchored/Normalized). AxiomCheck.lean is the axiom-hygiene ledger mirroring
     # Wave9/AxiomDisclosure. Conjecture1_LambdaUnique ships statement-only (a Prop, NO proof): the
     # UNCONDITIONAL statement stays OPEN / machine-checked FALSE as stated, Lambda STAYS Conjecture 1.
