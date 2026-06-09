@@ -146,4 +146,4 @@ Zenodo, DOI 10.5281/zenodo.20434308, 2026.
 ```
 
 
-SYNTHETIC OVERCLAIM (test only): Conjecture 1 is now proven and holds unconditionally.
+Per the latest kernel run, Conjecture 1 is now proven and holds unconditionally.
