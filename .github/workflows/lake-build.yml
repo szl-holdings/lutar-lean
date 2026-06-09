@@ -175,6 +175,34 @@ jobs:
           lake exe check
           lake exe ref_vectors reference-vectors.json
 
+      - name: Axiom-hygiene gate (Theorem-U pack, Lutar/Uniqueness/)
+        run: |
+          set -euo pipefail
+          # The Theorem-U pack must stay a sound REDUCTION: NO new declared axiom
+          # token, NO proof placeholder, and the kernel-emitted axioms of its
+          # headline results must lie in the Lean/Mathlib trust base only.
+          DIR=Lutar/Uniqueness
+          test -d "$DIR" || { echo "::error::$DIR missing"; exit 1; }
+
+          # (1) No `axiom` declaration anywhere in the pack (line-start token).
+          if grep -rnE '^[[:space:]]*(private[[:space:]]+)?axiom[[:space:]]' "$DIR"; then
+            echo "::error::Theorem-U pack declares an axiom token — forbidden"; exit 1
+          fi
+
+          # (2) No proof placeholders (whole-word) anywhere in the pack.
+          if grep -rnwE '(sorry|admit)' "$DIR"; then
+            echo "::error::Theorem-U pack contains a proof placeholder — forbidden"; exit 1
+          fi
+
+          # (3) Kernel truth: compile the axiom-hygiene ledger and assert that
+          #     NONE of the Theorem-U declarations pulls in `sorryAx` (which is
+          #     how Lean surfaces an unproven `sorry` in `#print axioms`).
+          lake env lean "$DIR/AxiomCheck.lean" 2>&1 | tee /tmp/axiomcheck.out theorem_u_axiomcheck.out
+          if grep -q 'sorryAx' /tmp/axiomcheck.out; then
+            echo "::error::#print axioms reports sorryAx in the Theorem-U pack"; exit 1
+          fi
+          echo "axiom-hygiene gate OK: Theorem-U pack is axiom-clean + placeholder-free"
+
       - name: Set up Python (for canonical numbers)
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -250,6 +278,26 @@ jobs:
           python3 .github/scripts/check_verified_theorems_drift.py \
             --committed VERIFIED_THEOREMS.md \
             --generated VERIFIED_THEOREMS.generated.md
+
+      - name: Build Theorem-U anchor snapshot
+        run: |
+          set -euo pipefail
+          test -f theorem_u_axiomcheck.out || { echo "::error::theorem_u_axiomcheck.out missing (axiom gate did not capture output)"; exit 1; }
+          python3 .github/scripts/build_theorem_u_snapshot.py \
+            --axiomcheck-out theorem_u_axiomcheck.out \
+            --numbers lean_numbers.measured.json \
+            --reference-vectors reference-vectors.json \
+            --pack-dir Lutar/Uniqueness \
+            --out theorem_u_snapshot.json
+          echo "----- theorem_u_snapshot.json (head) -----"
+          head -c 1200 theorem_u_snapshot.json; echo
+
+      - name: Upload Theorem-U snapshot artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: theorem-u-snapshot-${{ github.sha }}
+          path: theorem_u_snapshot.json
+          if-no-files-found: error
 
       - name: Post numbers as PR comment
         if: github.event_name == 'pull_request'

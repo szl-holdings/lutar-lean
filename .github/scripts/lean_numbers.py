@@ -331,6 +331,26 @@ EXPERIMENTAL_SCOPES = (
     # Byzantine BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 5; Lambda STAYS
     # Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave23") + os.sep,
+    # Theorem-U pack (theorem-u-kernel) — additive, EXPERIMENTAL, NOT folded into the locked
+    # v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Uniqueness/, all kernel-clean
+    # (every #print axioms subset {propext, funext, Classical.choice, Quot.sound}), no proof
+    # placeholders, NO new declared axiom token. Reframes the TARGET of Lambda-uniqueness as the
+    # audit-invariant equivalence ~Lambda (LambdaEquiv): two aggregators are ~Lambda exactly when
+    # they share the canonical audit-probe invariant; lambdaEquiv_equivalence proves it is a genuine
+    # Equivalence (refl/symm/trans), instDecidableLambdaEquiv gives it a Decidable instance, and
+    # lambdaEquiv_nondegenerate is the ANTI-VACUITY guard (the proven A1-A5 counterexample maxAgg is
+    # NOT ~Lambda to Lambda 2, reusing the exact rpow script of Round13.maxAgg_ne_Lambda — so
+    # "uniqueness modulo ~Lambda" is non-trivial, not vacuously true). Identifiability.lean bundles
+    # FactorAssumptions / SeparableAssumptions / IdentifiabilityAssumptions (IA) with the bridges
+    # factorAssumptions_to_IA / separableAssumptions_to_IA. TheoremU.lean lands Theorem U BY
+    # REDUCTION to the already-proven Round13 conditional theorems lambda_unique_of_separable /
+    # lambda_unique_of_factors: CorollaryU1/U2, identifiability_forces_lambda, TheoremU_LambdaUnique
+    # (IA-solutions are ~Lambda), TheoremU_LambdaUnique_eq (strict =), lambda_equiv_to_eq_of_anchored
+    # (gauge upgrade under Anchored/Normalized). AxiomCheck.lean is the axiom-hygiene ledger mirroring
+    # Wave9/AxiomDisclosure. Conjecture1_LambdaUnique ships statement-only (a Prop, NO proof): the
+    # UNCONDITIONAL statement stays OPEN / machine-checked FALSE as stated, Lambda STAYS Conjecture 1.
+    # Locked-proven set STAYS EXACTLY 5.
+    os.path.join("Lutar", "Uniqueness") + os.sep,
 )
 
 

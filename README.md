@@ -63,15 +63,20 @@ These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1�
 
 ### The Λ line — Conjecture 1 (do not misquote this)
 
+> **Rule of citation (Doctrine v11).** Any uniqueness claim about Λ must cite **Theorem U** (`TheoremU_LambdaUnique`) or its corollaries **U₁** (separable) / **U₂** (power-law factors): uniqueness holds *modulo* the audit-invariant equivalence `≈Λ` under the Identifiability Assumptions (IA). **Strict equality (`=`)** may be claimed **only** under the documented `Anchored` / `Normalized` predicate. *Unconditional* uniqueness under bare A1–A5 is **Conjecture 1 — OPEN** (machine-checked false as stated). Never write "Λ is unique" without one of these qualifiers — the [overclaim guard](./.github/workflows/overclaim-guard.yml) fails CI if you do.
+
 | Claim | Status |
 |---|---|
 | Λ satisfies A1–A5 | **Proven** (`lambda_satisfiesAxioms_round13`), sorry-free |
-| Λ uniqueness, **unconditional** under A1–A5 | **Machine-checked FALSE** (`Round13.maxAgg_ne_Lambda`: `maxAgg` and `min` satisfy A1–A5 and are not Λ) — stays **Conjecture 1** |
+| Λ uniqueness, **unconditional** under A1–A5 (`Conjecture1_LambdaUnique`) | **Conjecture 1 — OPEN.** Ships **statement-only**; machine-checked **FALSE** as stated (`Round13.maxAgg_ne_Lambda`: `maxAgg` and `min` satisfy A1–A5 and are not Λ). Open prize: [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) |
+| **Theorem U** — Λ uniqueness *modulo* `≈Λ` under IA | **REAL · CONDITIONAL** (axiom-free, no sorry): any two IA-solutions are `≈Λ` (`TheoremU_LambdaUnique`), with strict `=` **only** under `Anchored`/`Normalized` (`TheoremU_LambdaUnique_eq`, `lambda_equiv_to_eq_of_anchored`). By REDUCTION to Round13, **no new axiom token**. See [`Lutar/Uniqueness/TheoremU.lean`](./Lutar/Uniqueness/TheoremU.lean), [`DEPENDENCY_MAP.md`](./DEPENDENCY_MAP.md) |
+| **Corollary U₁** — separable slices | **Proven** (`CorollaryU1_LambdaUnique_Separable` → `Round13.lambda_unique_of_separable`) |
+| **Corollary U₂** — power-law factorization | **Proven** (`CorollaryU2_LambdaUnique_Factors` → `Round13.lambda_unique_of_factors`) |
 | Λ uniqueness, **conditional** (CUT-2, axiom-free) | **Proven**: any A1–A5 aggregator with multiplicative, separable per-axis slices equals Λ (`lambda_unique_of_separable`), reducing to the in-tree `multiplicative_monotone_isPow_pos` + `lambda_unique_of_factors` with **no new axiom token** |
 | Λ uniqueness, **conditional** (Set α / Set δ) | **Proven** under explicitly declared, cited bridge axioms ([PR #192](https://github.com/szl-holdings/lutar-lean/pull/192)) |
 | Byzantine BFT safety (equivocating organ) | **Khipu Conjecture 2 — open.** The Wave-13 `quorum_agreement_single_valued_vote` is an honestly-labeled *non-Byzantine shadow* (single-valued `voteOf`); the real `ubuntu_quorum_safety` obligation is left untouched. |
 
-> **Bottom line:** Λ is **Conjecture 1**. We have a *proven, axiom-free conditional* core (CUT-2) and *proven conditional* variants — but **never** an unconditional uniqueness theorem, because that statement is false. Open prize: [BOUNTY.md](./BOUNTY.md).
+> **Bottom line:** Λ is **Conjecture 1**. We have a *proven, axiom-free conditional* core — **Theorem U** (uniqueness modulo `≈Λ` under IA, strict `=` only under `Anchored`/`Normalized`) plus CUT-2 and the Set α / Set δ variants — but **never** an unconditional uniqueness theorem, because that statement is false. Open prize: [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) · [BOUNTY.md](./BOUNTY.md).
 
 Full proof table with verbatim `#print axioms`, run IDs, and per-result maturity → **[PROVEN_FORMULAS.md](./PROVEN_FORMULAS.md)**.
 
