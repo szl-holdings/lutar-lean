@@ -1,0 +1,221 @@
+# SPDX-License-Identifier: Apache-2.0
+# SZL Holdings — Open-Problem Bounty Board · Doctrine v11
+#
+# Auto-closes a bounty board entry the moment its proof is *accepted* by the
+# no-bypass arbiter, so the public board never shows a stale "OPEN" on a solved
+# problem. It NEVER decides eligibility itself — it only reacts to a green arbiter:
+#
+#   * Conjecture 1 (Lambda uniqueness): szl-holdings/lambda-bounty's verify-proof
+#     CI, on a green proof landing on its main, fires a repository_dispatch
+#     (event_type: bounty-solved) into this repo with the solver + proof commit.
+#   * Conjecture 2 (Khipu BFT safety): this repo's own "Lean kernel check"
+#     (lean.yml) — on a green run on main where the target theorem
+#     ubuntu_quorum_safety is actually discharged (no sorry) — is observed via
+#     workflow_run and closes Conjecture 2.
+#   * workflow_dispatch: a manual founder fallback with explicit inputs.
+#
+# The close is proposed as a SIGNED commit on a branch + a PR (createCommitOnBranch
+# produces a GitHub-verified commit, satisfying main's signed-commit protection);
+# the founder merges. check_bounties.py runs first and refuses a half-filled close.
+name: Close Bounty
+
+on:
+  repository_dispatch:
+    types: [bounty-solved]
+  workflow_run:
+    workflows: ["Lean kernel check"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      bounty_id:
+        description: "Bounty id (== YAML filename stem)"
+        required: true
+      solver:
+        description: "Solver GitHub handle / name"
+        required: true
+      proof_commit:
+        description: "Accepted proof commit SHA"
+        required: true
+      proof_repo:
+        description: "szl-holdings/<repo> the proof landed in"
+        required: false
+        default: ""
+      verify_run:
+        description: "URL of the green arbiter CI run"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: close-bounty
+  cancel-in-progress: false
+
+jobs:
+  close:
+    name: Propose bounty close
+    runs-on: ubuntu-latest
+    # For the workflow_run trigger only act on a GREEN run that built main; the
+    # other triggers always proceed (the dispatcher already gated eligibility).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          # For workflow_run, check out the exact verified commit; otherwise the
+          # default ref (main HEAD) is used.
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --no-cache-dir pyyaml
+
+      - name: Resolve close parameters
+        id: params
+        env:
+          EVENT: ${{ github.event_name }}
+          # repository_dispatch payload (Conjecture 1, from lambda-bounty)
+          RD_BOUNTY: ${{ github.event.client_payload.bounty_id }}
+          RD_SOLVER: ${{ github.event.client_payload.solver }}
+          RD_COMMIT: ${{ github.event.client_payload.proof_commit }}
+          RD_REPO: ${{ github.event.client_payload.proof_repo }}
+          RD_RUN: ${{ github.event.client_payload.verify_run }}
+          # workflow_dispatch inputs (manual founder fallback)
+          WD_BOUNTY: ${{ github.event.inputs.bounty_id }}
+          WD_SOLVER: ${{ github.event.inputs.solver }}
+          WD_COMMIT: ${{ github.event.inputs.proof_commit }}
+          WD_REPO: ${{ github.event.inputs.proof_repo }}
+          WD_RUN: ${{ github.event.inputs.verify_run }}
+          # workflow_run context (Conjecture 2, this repo's kernel check)
+          WR_SHA: ${{ github.event.workflow_run.head_sha }}
+          WR_ACTOR: ${{ github.event.workflow_run.head_commit.author.name }}
+          WR_RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          set -euo pipefail
+          ACT=true
+          case "$EVENT" in
+            repository_dispatch)
+              BOUNTY="$RD_BOUNTY"; SOLVER="$RD_SOLVER"; COMMIT="$RD_COMMIT"
+              REPO="$RD_REPO"; RUN="$RD_RUN"
+              ;;
+            workflow_dispatch)
+              BOUNTY="$WD_BOUNTY"; SOLVER="$WD_SOLVER"; COMMIT="$WD_COMMIT"
+              REPO="$WD_REPO"; RUN="$WD_RUN"
+              ;;
+            workflow_run)
+              # Conjecture 2: the green kernel check proves the whole library
+              # builds; here we additionally require zero (non-comment) sorry in
+              # the target obligation file before declaring it discharged.
+              BOUNTY="conjecture-2-khipu-bft-safety"
+              TARGET="Lutar/Innovations/round12/Identity_Ayni_Quorum.lean"
+              if [ ! -f "$TARGET" ]; then
+                echo "::notice::target file $TARGET absent — nothing to close."
+                ACT=false
+              elif grep -REn '(^|[^A-Za-z_])sorry([^A-Za-z_]|$)' "$TARGET" | grep -vqE '^[0-9]+:[[:space:]]*--'; then
+                echo "::notice::Conjecture 2 still OPEN — sorry remains in $TARGET."
+                ACT=false
+              fi
+              SOLVER="${WR_ACTOR:-unknown}"; COMMIT="$WR_SHA"
+              REPO="${GITHUB_REPOSITORY}"; RUN="$WR_RUN_URL"
+              ;;
+            *)
+              echo "::error::unsupported event $EVENT"; exit 1 ;;
+          esac
+
+          if [ "$ACT" = "true" ]; then
+            : "${BOUNTY:?bounty_id required}"
+            : "${SOLVER:?solver required}"
+            : "${COMMIT:?proof_commit required}"
+          fi
+          {
+            echo "act=$ACT"
+            echo "bounty=$BOUNTY"
+            echo "solver=$SOLVER"
+            echo "commit=$COMMIT"
+            echo "repo=$REPO"
+            echo "run=$RUN"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Edit board entry
+        if: steps.params.outputs.act == 'true'
+        env:
+          BOUNTY: ${{ steps.params.outputs.bounty }}
+          SOLVER: ${{ steps.params.outputs.solver }}
+          COMMIT: ${{ steps.params.outputs.commit }}
+          PROOF_REPO: ${{ steps.params.outputs.repo }}
+          RUN_URL: ${{ steps.params.outputs.run }}
+        run: |
+          set -euo pipefail
+          ARGS=(--bounty-id "$BOUNTY" --solver "$SOLVER" --proof-commit "$COMMIT")
+          [ -n "$PROOF_REPO" ] && ARGS+=(--proof-repo "$PROOF_REPO")
+          [ -n "$RUN_URL" ] && ARGS+=(--verify-run "$RUN_URL")
+          python3 scripts/close_bounty.py "${ARGS[@]}"
+
+      - name: Validate board (no-bypass gate)
+        if: steps.params.outputs.act == 'true'
+        run: python3 scripts/check_bounties.py
+
+      - name: Open signed PR with the close
+        if: steps.params.outputs.act == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BOUNTY: ${{ steps.params.outputs.bounty }}
+          SOLVER: ${{ steps.params.outputs.solver }}
+          COMMIT: ${{ steps.params.outputs.commit }}
+          PROOF_REPO: ${{ steps.params.outputs.repo }}
+          RUN_URL: ${{ steps.params.outputs.run }}
+        run: |
+          set -euo pipefail
+          FILE="bounties/${BOUNTY}.yaml"
+          [ -f "$FILE" ] || FILE="bounties/${BOUNTY}.yml"
+          BRANCH="auto/close-${BOUNTY}"
+          BASE_OID="$(git rev-parse HEAD)"
+
+          # Don't duplicate an already-open PR for this branch.
+          OPEN_COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
+          if [ "$OPEN_COUNT" != "0" ]; then
+            echo "::notice::A PR for $BRANCH is already open — skipping."
+            exit 0
+          fi
+
+          # Reset the branch ref to the current base (delete-if-exists, then create).
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" >/dev/null 2>&1 || true
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/heads/${BRANCH}" -f sha="${BASE_OID}" >/dev/null
+
+          # Signed commit via createCommitOnBranch (GitHub verifies the commit).
+          CONTENT_B64="$(base64 -w0 "$FILE")"
+          gh api graphql \
+            -f query='mutation($repo:String!,$branch:String!,$oid:GitObjectID!,$path:String!,$content:Base64String!,$msg:String!){createCommitOnBranch(input:{branch:{repositoryNameWithOwner:$repo,branchName:$branch},expectedHeadOid:$oid,message:{headline:$msg},fileChanges:{additions:[{path:$path,contents:$content}]}}){commit{url}}}' \
+            -f repo="${GITHUB_REPOSITORY}" \
+            -f branch="${BRANCH}" \
+            -f oid="${BASE_OID}" \
+            -f path="${FILE}" \
+            -f content="${CONTENT_B64}" \
+            -f msg="board: close ${BOUNTY} — proof accepted (solver ${SOLVER})" >/dev/null
+
+          # PR body (written to a file to avoid heredoc indentation pitfalls).
+          {
+            printf 'Auto-generated by the bounty auto-close pipeline: the proof arbiter accepted a proof for **%s**.\n\n' "$BOUNTY"
+            printf -- '- **Solver:** %s\n' "$SOLVER"
+            printf -- '- **Proof commit:** `%s`\n' "$COMMIT"
+            printf -- '- **Proof repo:** %s\n' "${PROOF_REPO:-(this repo)}"
+            printf -- '- **Arbiter run:** %s\n\n' "${RUN_URL:-n/a}"
+            printf 'This flips `status` to `CLOSED` and records the `solved` provenance block. '
+            printf '`check_bounties.py` has already validated the closed state. '
+            printf 'Founder: please review the honesty prose (summary / honesty notes still describe the OPEN framing) before or at merge.\n'
+          } > /tmp/pr-body.md
+
+          gh pr create --base main --head "$BRANCH" \
+            --title "board: close ${BOUNTY} — proof accepted" \
+            --body-file /tmp/pr-body.md

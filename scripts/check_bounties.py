@@ -11,6 +11,8 @@ OPEN problem under the SZL honesty doctrine (v11):
   - reward.amount is founder-set, never an invented figure
   - acceptance criteria are non-empty and id'd
   - an OPEN conjecture is never represented as proved
+  - a CLOSED/AWARDED (solved) bounty records a real solver + proof_commit and is
+    never left half-filled (and an unsolved bounty never carries a `solved` block)
 """
 from __future__ import annotations
 
@@ -28,7 +30,13 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BOUNTIES = ROOT / "bounties"
 
 ALLOWED_STATUS = {"OPEN", "CLAIMED", "AWARDED", "CLOSED"}
+# Statuses that assert the problem has actually been solved: they MUST carry a
+# fully-filled `solved` block (solver + proof_commit) so the public board can never
+# show a "solved" bounty with no provenance.
+SOLVED_STATUS = {"AWARDED", "CLOSED"}
 AXIOM_ALLOWLIST = "[propext, Quot.sound, Classical.choice]"
+# A git commit SHA: 7-40 lowercase hex chars (short or full).
+SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 REQUIRED = [
     "id",
     "title",
@@ -55,6 +63,55 @@ MONEY = re.compile(r"\d")
 
 def fail(errors: list[str], path: pathlib.Path, msg: str) -> None:
     errors.append(f"{path.name}: {msg}")
+
+
+def check_solved_block(path: pathlib.Path, data: dict, status: str, errors: list[str]) -> None:
+    """Validate the `solved` provenance block against the bounty status.
+
+    SOLVED_STATUS bounties MUST have a complete `solved` mapping (a non-empty solver
+    and a commit-SHA-shaped proof_commit); every other status MUST NOT carry one (so
+    an OPEN problem can never silently ship solver provenance for a proof it lacks).
+    """
+    solved = data.get("solved")
+
+    if status not in SOLVED_STATUS:
+        if solved not in (None, "", {}, []):
+            fail(
+                errors,
+                path,
+                f"status '{status}' must not carry a 'solved' block "
+                "(only AWARDED/CLOSED bounties record a solver)",
+            )
+        return
+
+    # status is AWARDED or CLOSED → require a complete solved block.
+    if not isinstance(solved, dict) or not solved:
+        fail(
+            errors,
+            path,
+            f"status '{status}' requires a non-empty 'solved' mapping with "
+            "'solver' and 'proof_commit' (a solved bounty must record who solved it)",
+        )
+        return
+
+    solver = solved.get("solver")
+    if not isinstance(solver, str) or not solver.strip():
+        fail(errors, path, "solved.solver must be a non-empty string for a solved bounty")
+
+    commit = solved.get("proof_commit")
+    if not isinstance(commit, str) or not commit.strip():
+        fail(errors, path, "solved.proof_commit must be a non-empty string for a solved bounty")
+    elif not SHA_RE.match(commit.strip()):
+        fail(
+            errors,
+            path,
+            f"solved.proof_commit '{commit}' must be a git commit SHA (7-40 hex chars)",
+        )
+
+    # proof_repo is optional, but if present it must be an szl-holdings repo.
+    repo = solved.get("proof_repo")
+    if repo is not None and "szl-holdings/" not in str(repo):
+        fail(errors, path, "solved.proof_repo must be a 'szl-holdings/<repo>' reference")
 
 
 def check_file(path: pathlib.Path, seen_ids: dict[str, str], errors: list[str]) -> None:
@@ -127,6 +184,10 @@ def check_file(path: pathlib.Path, seen_ids: dict[str, str], errors: list[str]) 
         intake = str(sub.get("intake_repo", ""))
         if "github.com/szl-holdings/" not in intake:
             fail(errors, path, "submission.intake_repo must be a github.com/szl-holdings/* URL")
+
+    # solved-state provenance: a CLOSED/AWARDED bounty must record its solver.
+    if isinstance(status, str):
+        check_solved_block(path, data, status, errors)
 
     # honesty: OPEN bounties must not be represented as proved
     blob = yaml.safe_dump(data)
