@@ -1,0 +1,429 @@
+#!/usr/bin/env python3
+"""Anchor a cosign-signed Theorem-U snapshot into szl-holdings/szl-lake.
+
+Runs in lutar-lean CI (anchor-szl-lake.yml) after the snapshot artifact has been
+downloaded from a GREEN lake-build run and signed with `cosign attest-blob`
+(keyless OIDC, DSSE in-toto). This script:
+
+  1. Cross-checks the cosign Sigstore bundle: the DSSE in-toto subject digest MUST
+     equal the snapshot sha256, the signing certificate SAN identity MUST be a
+     lutar-lean workflow, and the OIDC issuer MUST be GitHub Actions. (No fabricated
+     signatures: if any check fails we abort.)
+  2. Builds an append-only DSSE Khipu receipt (schema szl.khipu.receipt/v1) that
+     embeds the snapshot, the verified source-run pointer, and the full cosign
+     bundle (base64) plus parsed Rekor/identity material for offline verification.
+  3. chain_index advances by exactly one over the existing lutar-lean chain
+     (genesis count 0 -> first receipt chain_index 1, prev_hash null). Idempotent:
+     if this kernel_commit + snapshot is already anchored, it is a no-op.
+  4. Appends the receipt to BOTH surfaces:
+       * HF dataset SZLHOLDINGS/szl-lake : khipu/lutar_lean_receipts.ndjson (canonical)
+       * GitHub szl-holdings/szl-lake     : data/khipu/lutar_lean_receipts.ndjson
+         + updates the front-door lake_index.json (counts + theorem_u_anchor pointer)
+     The GitHub commit is GitHub-signed via GraphQL createCommitOnBranch with a
+     DCO Signed-off-by trailer (main requires signed commits + DCO).
+  5. Re-reads the HF NDJSON and asserts the new receipt is present and the chain
+     advanced by exactly one.
+
+Honesty doctrine v11 is carried verbatim from the snapshot: Theorem U is
+REAL-conditional; Conjecture 1 is OPEN / machine-checked FALSE.
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import datetime as _dt
+import hashlib
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+
+HF_REPO = "SZLHOLDINGS/szl-lake"
+GH_REPO = "szl-holdings/szl-lake"
+HF_NDJSON = "khipu/lutar_lean_receipts.ndjson"
+GH_NDJSON = "data/khipu/lutar_lean_receipts.ndjson"
+GH_INDEX = "lake_index.json"
+
+GH_OIDC_ISSUER = "https://token.actions.githubusercontent.com"
+IDENTITY_PREFIX = "https://github.com/szl-holdings/lutar-lean/"
+
+# DCO / commit identity (org-owner token).
+COMMIT_NAME = os.environ.get("ANCHOR_COMMIT_NAME", "Lutar, Stephen P.")
+COMMIT_EMAIL = os.environ.get("ANCHOR_COMMIT_EMAIL", "stephenlutar2@gmail.com")
+
+UA = "szl-lake-anchor/1.0"
+
+
+def _utcnow() -> str:
+    return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _sha256_bytes(b: bytes) -> str:
+    return hashlib.sha256(b).hexdigest()
+
+
+def canonical_hash(obj) -> str:
+    return _sha256_bytes(json.dumps(obj, sort_keys=True, separators=(",", ":")).encode())
+
+
+# --------------------------------------------------------------------------- #
+# cosign bundle inspection
+# --------------------------------------------------------------------------- #
+def parse_cosign_bundle(bundle: dict, snapshot_sha: str) -> dict:
+    """Validate the Sigstore bundle and extract verification material.
+
+    Aborts (raises) on any mismatch -- this is the no-fabricated-signature gate.
+    """
+    vm = bundle.get("verificationMaterial") or {}
+
+    # Certificate (single leaf or chain).
+    cert_b64 = None
+    if "certificate" in vm and vm["certificate"].get("rawBytes"):
+        cert_b64 = vm["certificate"]["rawBytes"]
+    elif "x509CertificateChain" in vm:
+        certs = vm["x509CertificateChain"].get("certificates") or []
+        if certs:
+            cert_b64 = certs[0].get("rawBytes")
+    if not cert_b64:
+        raise SystemExit("::error::cosign bundle has no signing certificate")
+
+    san_uris, oidc_issuer = _cert_identity(base64.b64decode(cert_b64))
+    matching = [u for u in san_uris if u.startswith(IDENTITY_PREFIX)]
+    if not matching:
+        raise SystemExit(
+            f"::error::cert SAN identity is not a lutar-lean workflow: {san_uris}")
+    if oidc_issuer and oidc_issuer != GH_OIDC_ISSUER:
+        raise SystemExit(f"::error::unexpected OIDC issuer in cert: {oidc_issuer}")
+
+    # DSSE in-toto subject digest must equal the snapshot sha256.
+    env = bundle.get("dsseEnvelope") or {}
+    payload_b64 = env.get("payload")
+    payload_type = env.get("payloadType")
+    if not payload_b64:
+        raise SystemExit("::error::cosign bundle has no DSSE envelope payload")
+    statement = json.loads(base64.b64decode(payload_b64))
+    subj_digests = [
+        s.get("digest", {}).get("sha256")
+        for s in statement.get("subject", [])
+    ]
+    if snapshot_sha not in subj_digests:
+        raise SystemExit(
+            f"::error::DSSE subject digest {subj_digests} != snapshot sha256 {snapshot_sha}")
+
+    # Rekor transparency log entry.
+    rekor_log_index = None
+    rekor_integrated_time = None
+    tlog = vm.get("tlogEntries") or []
+    if tlog:
+        rekor_log_index = tlog[0].get("logIndex")
+        rekor_integrated_time = tlog[0].get("integratedTime")
+
+    return {
+        "mode": "cosign-keyless-oidc",
+        "dsse": True,
+        "payload_type": payload_type,
+        "predicate_type": statement.get("predicateType"),
+        "fulcio_identity": matching[0],
+        "fulcio_san_uris": san_uris,
+        "oidc_issuer": oidc_issuer or GH_OIDC_ISSUER,
+        "rekor_log_index": rekor_log_index,
+        "rekor_integrated_time": rekor_integrated_time,
+        "bundle_media_type": bundle.get("mediaType"),
+    }
+
+
+def _cert_identity(der: bytes):
+    """Return (san_uris, oidc_issuer) from a Fulcio leaf certificate."""
+    try:
+        from cryptography import x509
+        from cryptography.x509.oid import ExtensionOID, ObjectIdentifier
+    except Exception as exc:  # pragma: no cover
+        raise SystemExit(f"::error::cryptography unavailable to parse cert: {exc}")
+    cert = x509.load_der_x509_certificate(der)
+    san_uris: list[str] = []
+    try:
+        san = cert.extensions.get_extension_for_oid(
+            ExtensionOID.SUBJECT_ALTERNATIVE_NAME).value
+        san_uris = list(san.get_values_for_type(x509.UniformResourceIdentifier))
+    except Exception:
+        pass
+    oidc_issuer = None
+    # Fulcio OIDC issuer (v2) OID 1.3.6.1.4.1.57264.1.8, else legacy .1.1.
+    for oid in ("1.3.6.1.4.1.57264.1.8", "1.3.6.1.4.1.57264.1.1"):
+        try:
+            ext = cert.extensions.get_extension_for_oid(ObjectIdentifier(oid))
+            raw = ext.value.value
+            # v2 is a DER UTF8String; strip the 2-byte tag/len if present.
+            if len(raw) > 2 and raw[0] == 0x0C:
+                raw = raw[2:]
+            oidc_issuer = raw.decode("utf-8", "replace")
+            break
+        except Exception:
+            continue
+    return san_uris, oidc_issuer
+
+
+# --------------------------------------------------------------------------- #
+# HF dataset I/O
+# --------------------------------------------------------------------------- #
+def hf_read_ndjson(token: str) -> list[dict]:
+    url = f"https://huggingface.co/datasets/{HF_REPO}/raw/main/{HF_NDJSON}"
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            body = r.read().decode("utf-8")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return []
+        raise
+    return [json.loads(l) for l in body.splitlines() if l.strip()]
+
+
+def hf_upload(token: str, content: str, commit_msg: str) -> None:
+    from huggingface_hub import HfApi
+    import tempfile
+    api = HfApi(token=token)
+    with tempfile.NamedTemporaryFile("w", suffix=".ndjson", delete=False, encoding="utf-8") as tf:
+        tf.write(content)
+        tmp = tf.name
+    api.upload_file(
+        path_or_fileobj=tmp,
+        path_in_repo=HF_NDJSON,
+        repo_id=HF_REPO,
+        repo_type="dataset",
+        commit_message=commit_msg,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# GitHub szl-lake I/O (signed commit via GraphQL)
+# --------------------------------------------------------------------------- #
+def gh_api(token: str, method: str, path: str, body=None):
+    url = f"https://api.github.com{path}"
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method, headers={
+        "Authorization": f"Bearer {token}", "User-Agent": UA,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.status, json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read().decode() or "{}")
+
+
+def gh_get_raw(token: str, path: str, ref: str = "main"):
+    url = f"https://api.github.com/repos/{GH_REPO}/contents/{path}?ref={ref}"
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {token}", "User-Agent": UA,
+        "Accept": "application/vnd.github.raw",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read().decode("utf-8")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+
+
+def gh_graphql(token: str, query: str, variables: dict):
+    req = urllib.request.Request(
+        "https://api.github.com/graphql",
+        data=json.dumps({"query": query, "variables": variables}).encode(),
+        method="POST",
+        headers={"Authorization": f"Bearer {token}", "User-Agent": UA,
+                 "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return json.loads(r.read().decode())
+
+
+def gh_signed_commit(token: str, additions: list[dict], message: str) -> str:
+    """Create a GitHub-signed commit on szl-lake main with file additions."""
+    st, ref = gh_api(token, "GET", f"/repos/{GH_REPO}/git/ref/heads/main")
+    if st != 200:
+        raise SystemExit(f"::error::cannot read szl-lake main ref: {st} {ref}")
+    head_oid = ref["object"]["sha"]
+    q = """
+    mutation($input: CreateCommitOnBranchInput!) {
+      createCommitOnBranch(input: $input) { commit { oid url } }
+    }"""
+    variables = {"input": {
+        "branch": {"repositoryNameWithOwner": GH_REPO, "branchName": "main"},
+        "message": {"headline": message.split("\n")[0],
+                    "body": "\n".join(message.split("\n")[1:]).strip()},
+        "fileChanges": {"additions": additions},
+        "expectedHeadOid": head_oid,
+    }}
+    res = gh_graphql(token, q, variables)
+    if res.get("errors"):
+        raise SystemExit(f"::error::createCommitOnBranch failed: {res['errors']}")
+    return res["data"]["createCommitOnBranch"]["commit"]["url"]
+
+
+# --------------------------------------------------------------------------- #
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--snapshot", required=True)
+    ap.add_argument("--bundle", required=True)
+    ap.add_argument("--source-run-id", required=True)
+    ap.add_argument("--source-run-url", default="")
+    ap.add_argument("--source-workflow", default="Lake build (gate + numbers)")
+    args = ap.parse_args()
+
+    gh_token = os.environ["SZL_LAKE_TOKEN"]
+    hf_token = os.environ["HF_LAKE_TOKEN"]
+
+    with open(args.snapshot, "rb") as fh:
+        snap_bytes = fh.read()
+    snapshot = json.loads(snap_bytes)
+    snapshot_sha = _sha256_bytes(snap_bytes)
+    with open(args.bundle, "r", encoding="utf-8") as fh:
+        bundle_raw = fh.read()
+    bundle = json.loads(bundle_raw)
+
+    signing = parse_cosign_bundle(bundle, snapshot_sha)
+    signing["bundle_b64"] = base64.b64encode(bundle_raw.encode()).decode()
+    signing["verify_cmd"] = (
+        "cosign verify-blob-attestation --new-bundle-format "
+        f"--bundle <bundle> --type {signing.get('predicate_type')} "
+        f"--certificate-identity-regexp '^{IDENTITY_PREFIX}' "
+        f"--certificate-oidc-issuer '{GH_OIDC_ISSUER}' theorem_u_snapshot.json")
+
+    kernel_commit = snapshot.get("kernel_commit", "")
+    numbers = snapshot.get("lean_numbers", {}).get("numbers", {})
+
+    # ---- chain state + idempotency -------------------------------------- #
+    existing = hf_read_ndjson(hf_token)
+    for rec in existing:
+        if rec.get("kind") == "theorem-u-anchor" and rec.get("kernel_commit") == kernel_commit \
+                and rec.get("subject", {}).get("sha256") == snapshot_sha:
+            print(f"already anchored: kernel_commit={kernel_commit} "
+                  f"chain_index={rec.get('chain_index')} receipt_id={rec.get('receipt_id')}")
+            print(f"::notice::idempotent no-op (HF chain length stays {len(existing)})")
+            return 0
+    prev_count = len(existing)
+    chain_index = prev_count + 1
+    prev_hash = existing[-1].get("receipt_id") if existing else None
+
+    # ---- build receipt --------------------------------------------------- #
+    receipt = {
+        "schema": "szl.khipu.receipt/v1",
+        "organ": "lutar-lean",
+        "kind": "theorem-u-anchor",
+        "chain_index": chain_index,
+        "prev_hash": prev_hash,
+        "timestamp": _utcnow(),
+        "kernel_commit": kernel_commit,
+        "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
+        "branch": snapshot.get("branch", ""),
+        "source_run": {
+            "id": str(args.source_run_id),
+            "conclusion": "success",
+            "workflow": args.source_workflow,
+            "url": args.source_run_url,
+        },
+        "subject": {
+            "name": "theorem_u_snapshot.json",
+            "sha256": snapshot_sha,
+            "snapshot": snapshot,
+        },
+        "doctrine": "v11",
+        "theorem_u_status": "REAL-conditional",
+        "lambda_status": "Conjecture_1 (OPEN; unconditional uniqueness machine-checked FALSE)",
+        "numbers": {
+            "declarations": numbers.get("declarations"),
+            "axioms_unique": numbers.get("axioms_unique"),
+            "sorries_noncomment": numbers.get("sorries_noncomment"),
+        },
+        "honesty": snapshot.get("honesty", {}),
+        "signing": signing,
+    }
+    receipt["receipt_id"] = canonical_hash(receipt)
+    line = json.dumps(receipt, sort_keys=True, ensure_ascii=False)
+
+    # ---- append to HF (canonical) --------------------------------------- #
+    hf_content = ("\n".join(json.dumps(r, sort_keys=True, ensure_ascii=False)
+                            for r in existing) + ("\n" if existing else "") + line + "\n")
+    hf_upload(hf_token, hf_content,
+              f"anchor: Theorem-U snapshot {kernel_commit[:12]} (chain_index {chain_index})")
+    print(f"HF appended: chain_index={chain_index} receipt_id={receipt['receipt_id']}")
+
+    # ---- append to GitHub front-door (signed commit) -------------------- #
+    gh_existing = gh_get_raw(gh_token, GH_NDJSON) or ""
+    gh_new = (gh_existing + ("" if gh_existing.endswith("\n") or not gh_existing else "\n")
+              + line + "\n")
+
+    # Preserve the EXISTING front-door schema verbatim; ADD only the Theorem-U
+    # anchor pointer + an anchored-at timestamp. Idempotent (set, not increment)
+    # so a re-run never double-counts. We deliberately do NOT invent a
+    # `szl.lake.index/v1`/khipu_receipt_counts shape here -- that lives in
+    # data/lake_index.json and is maintained by the HF->GitHub sync, not us.
+    idx_raw = gh_get_raw(gh_token, GH_INDEX)
+    index = json.loads(idx_raw) if idx_raw else {
+        "canonical_source": f"https://huggingface.co/datasets/{HF_REPO}",
+        "doctrine": "v11",
+    }
+    index["theorem_u_anchor"] = {
+        "kernel_commit": kernel_commit,
+        "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
+        "chain_index": chain_index,
+        "receipt_id": receipt["receipt_id"],
+        "snapshot_sha256": snapshot_sha,
+        "verified_run_url": args.source_run_url,
+        "status": "REAL-conditional (Theorem U); Conjecture 1 OPEN / machine-checked FALSE",
+        "doctrine": "v11",
+        "headline_decls": snapshot.get("theorem_u", {}).get("headline_decls", []),
+        "signing": {
+            "mode": signing["mode"],
+            "fulcio_identity": signing["fulcio_identity"],
+            "oidc_issuer": signing["oidc_issuer"],
+            "rekor_log_index": signing["rekor_log_index"],
+        },
+        "hf_receipt": f"datasets/{HF_REPO} :: {HF_NDJSON}",
+        "github_receipt": GH_NDJSON,
+    }
+    index["theorem_u_anchored_at_utc"] = _utcnow()
+    index_str = json.dumps(index, indent=2, ensure_ascii=False) + "\n"
+
+    additions = [
+        {"path": GH_NDJSON, "contents": base64.b64encode(gh_new.encode()).decode()},
+        {"path": GH_INDEX, "contents": base64.b64encode(index_str.encode()).decode()},
+    ]
+    msg = (f"anchor: Theorem-U snapshot {kernel_commit[:12]} into szl-lake "
+           f"(chain_index {chain_index})\n\n"
+           f"Cosign-keyless DSSE receipt for the kernel-verified Theorem-U snapshot.\n"
+           f"Theorem U = REAL-conditional; Conjecture 1 = OPEN (machine-checked FALSE).\n"
+           f"receipt_id={receipt['receipt_id']}\n"
+           f"snapshot_sha256={snapshot_sha}\n\n"
+           f"Signed-off-by: {COMMIT_NAME} <{COMMIT_EMAIL}>")
+    commit_url = gh_signed_commit(gh_token, additions, msg)
+    print(f"GitHub front-door committed: {commit_url}")
+
+    # ---- verify HF chain advanced by exactly one ------------------------ #
+    after = hf_read_ndjson(hf_token)
+    if len(after) != prev_count + 1:
+        raise SystemExit(f"::error::HF chain length {len(after)} != expected {prev_count + 1}")
+    last = after[-1]
+    if last.get("receipt_id") != receipt["receipt_id"] or last.get("chain_index") != chain_index:
+        raise SystemExit("::error::HF tail receipt does not match the anchored receipt")
+    print(f"::notice::VERIFIED: HF chain {prev_count} -> {len(after)} "
+          f"(chain_index advanced by 1 to {chain_index})")
+
+    # Emit machine-readable summary for the workflow step.
+    with open("anchor_result.json", "w", encoding="utf-8") as fh:
+        json.dump({
+            "kernel_commit": kernel_commit, "chain_index": chain_index,
+            "receipt_id": receipt["receipt_id"], "snapshot_sha256": snapshot_sha,
+            "hf_chain_length": len(after), "github_commit": commit_url,
+            "fulcio_identity": signing["fulcio_identity"],
+            "rekor_log_index": signing["rekor_log_index"],
+        }, fh, indent=2)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

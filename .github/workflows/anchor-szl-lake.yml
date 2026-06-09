@@ -1,0 +1,182 @@
+name: Anchor verified snapshot into szl-lake
+
+# Cryptographically anchor a kernel-verified Theorem-U snapshot from a GREEN
+# `Lake build (gate + numbers)` run into szl-holdings/szl-lake.
+#
+# Flow (dispatch-only; you pass the run id of the verified build):
+#   1. Re-confirm the source run is `Lake build (gate + numbers)` AND conclusion
+#      == success (gate: no anchoring of red/partial builds).
+#   2. Download that run's `theorem-u-snapshot-<sha>` artifact and assert the
+#      Theorem-U headline declarations are present + kernel-only.
+#   3. cosign attest-blob (keyless OIDC, DSSE in-toto) over the snapshot. No new
+#      key is introduced -- this is the same keyless Sigstore mechanism as
+#      cosign.yml. Verify the attestation in-CI before publishing.
+#   4. Append a DSSE Khipu receipt to BOTH szl-lake surfaces (HF NDJSON canonical
+#      + GitHub front-door lake_index.json), chain_index +1, idempotent.
+#
+# Honesty doctrine v11: Theorem U is REAL-conditional; Conjecture 1 (unconditional
+# Lambda uniqueness) is OPEN and machine-checked FALSE. Carried verbatim into the
+# receipt; never asserted as closed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Run id of the GREEN 'Lake build (gate + numbers)' run on theorem-u-kernel"
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: anchor-szl-lake
+  cancel-in-progress: false
+
+jobs:
+  anchor:
+    name: Anchor Theorem-U snapshot (cosign keyless -> szl-lake)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write   # keyless OIDC signing
+      actions: read     # read source run + download its artifact
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout (scripts)
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Validate source run is GREEN lake-build
+        id: src
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const run_id = Number('${{ github.event.inputs.run_id }}');
+            const {owner, repo} = context.repo;
+            const {data: run} = await github.rest.actions.getWorkflowRun({owner, repo, run_id});
+            core.info(`source run: ${run.name} #${run.id} status=${run.status} conclusion=${run.conclusion} sha=${run.head_sha} branch=${run.head_branch}`);
+            if (run.name !== 'Lake build (gate + numbers)') {
+              core.setFailed(`source run is '${run.name}', expected 'Lake build (gate + numbers)'`);
+              return;
+            }
+            if (run.status !== 'completed' || run.conclusion !== 'success') {
+              core.setFailed(`source run not GREEN (status=${run.status} conclusion=${run.conclusion})`);
+              return;
+            }
+            core.setOutput('head_sha', run.head_sha);
+            core.setOutput('html_url', run.html_url);
+            core.setOutput('name', run.name);
+
+      - name: Download Theorem-U snapshot artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: theorem-u-snapshot-${{ steps.src.outputs.head_sha }}
+          run-id: ${{ github.event.inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: .
+
+      - name: Assert snapshot is a kernel-only Theorem-U snapshot
+        run: |
+          set -euo pipefail
+          test -f theorem_u_snapshot.json || { echo "::error::snapshot missing"; exit 1; }
+          python3 - <<'PY'
+          import json, sys
+          s = json.load(open("theorem_u_snapshot.json"))
+          tu = s.get("theorem_u", {})
+          need = {"TheoremU_LambdaUnique","CorollaryU1_LambdaUnique_Separable","CorollaryU2_LambdaUnique_Factors"}
+          have = set(tu.get("headline_decls", []))
+          missing = need - have
+          if missing:
+              print(f"::error::snapshot missing headline decls: {missing}"); sys.exit(1)
+          if not tu.get("kernel_only"):
+              print("::error::snapshot not kernel_only"); sys.exit(1)
+          if s.get("honesty", {}).get("locked_five_unchanged") is not True:
+              print("::error::snapshot honesty.locked_five_unchanged != true"); sys.exit(1)
+          print(f"snapshot OK: commit={s.get('kernel_commit')} decls={sorted(have)}")
+          PY
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign snapshot (cosign attest-blob, keyless DSSE)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          s = json.load(open("theorem_u_snapshot.json"))
+          predicate = {
+              "kernel_commit": s.get("kernel_commit"),
+              "branch": s.get("branch"),
+              "theorem_u": {
+                  "status": s.get("theorem_u", {}).get("status"),
+                  "headline_decls": s.get("theorem_u", {}).get("headline_decls"),
+                  "headline_axiom_footprint": s.get("theorem_u", {}).get("headline_axiom_footprint"),
+                  "kernel_only": s.get("theorem_u", {}).get("kernel_only"),
+              },
+              "lean_numbers": s.get("lean_numbers", {}).get("numbers"),
+              "replay_hash": s.get("lean_numbers", {}).get("replay_hash"),
+              "honesty": s.get("honesty"),
+              "source_run_url": "${{ steps.src.outputs.html_url }}",
+          }
+          json.dump(predicate, open("theorem_u_predicate.json", "w"), indent=2, sort_keys=True)
+          PY
+          cosign attest-blob --yes \
+            --new-bundle-format \
+            --predicate theorem_u_predicate.json \
+            --type "https://szl-holdings/theorem-u-anchor/v1" \
+            --bundle theorem_u_snapshot.cosign.bundle \
+            theorem_u_snapshot.json
+          echo "bundle written:"; head -c 400 theorem_u_snapshot.cosign.bundle; echo
+
+      - name: Verify attestation in-CI (keyless)
+        run: |
+          set -euo pipefail
+          cosign verify-blob-attestation \
+            --new-bundle-format \
+            --bundle theorem_u_snapshot.cosign.bundle \
+            --type "https://szl-holdings/theorem-u-anchor/v1" \
+            --certificate-identity-regexp "^https://github.com/szl-holdings/lutar-lean/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            theorem_u_snapshot.json
+          echo "cosign verify-blob-attestation OK"
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install anchor deps
+        run: python3 -m pip install --quiet huggingface_hub cryptography
+
+      - name: Anchor into szl-lake (HF + GitHub front-door)
+        env:
+          SZL_LAKE_TOKEN: ${{ secrets.SZL_LAKE_TOKEN }}
+          HF_LAKE_TOKEN: ${{ secrets.HF_LAKE_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/anchor_szl_lake.py \
+            --snapshot theorem_u_snapshot.json \
+            --bundle theorem_u_snapshot.cosign.bundle \
+            --source-run-id "${{ github.event.inputs.run_id }}" \
+            --source-run-url "${{ steps.src.outputs.html_url }}" \
+            --source-workflow "${{ steps.src.outputs.name }}"
+          echo "----- anchor_result.json -----"
+          cat anchor_result.json
+
+      - name: Upload anchor receipt + bundle
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: theorem-u-anchor-${{ steps.src.outputs.head_sha }}
+          path: |
+            theorem_u_snapshot.json
+            theorem_u_predicate.json
+            theorem_u_snapshot.cosign.bundle
+            anchor_result.json
+          if-no-files-found: warn
