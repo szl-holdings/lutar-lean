@@ -34,3 +34,28 @@
 - `Lambda_A5_perm_invariant {k : Nat} (hk : 0 < k) (x : Axes k) (σ : Fin k ≃ Fin k) : Λ k (x ∘ ↑σ) = Λ k x`
 - `lambda_isPermutationInvariant {k : Nat} (hk : 0 < k) : IsPermutationInvariant (Λ k)`
 - `lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) : LutarAxioms (Λ k)`
+
+## `Lutar/Uniqueness/AxiomCheck.lean`
+
+- `theoremU_axiom_sets_kernel_only : theoremUDisclosed.all (fun p => axiomsAllowed p.2) = true`
+- `locked_count_five : lockedNames.length = 5`
+- `theoremU_excluded_from_locked : theoremUDisclosed.all (fun p => ! lockedNames.contains p.1) = true`
+- `conjecture1_still_open : openConjectures.length = 1`
+
+## `Lutar/Uniqueness/LambdaEquiv.lean`
+
+- `lambdaEquiv_refl {k : ℕ} (Φ : Aggregator k) : LambdaEquiv Φ Φ`
+- `lambdaEquiv_symm {k : ℕ} {Φ Ψ : Aggregator k} (h : LambdaEquiv Φ Ψ) : LambdaEquiv Ψ Φ`
+- `lambdaEquiv_trans {k : ℕ} {Φ Ψ Χ : Aggregator k} (h₁ : LambdaEquiv Φ Ψ) (h₂ : LambdaEquiv Ψ Χ) : LambdaEquiv Φ Χ`
+- `lambdaEquiv_equivalence {k : ℕ} : Equivalence (@LambdaEquiv k)`
+- `auditProbe_two : auditProbe 2 = (![4, 1] : Axes 2)`
+- `lambdaEquiv_nondegenerate : ∃ Φ Ψ : Aggregator 2, ¬ LambdaEquiv Φ Ψ`
+
+## `Lutar/Uniqueness/TheoremU.lean`
+
+- `CorollaryU2_LambdaUnique_Factors {k : ℕ} (Φ : Aggregator k) (fa : FactorAssumptions Φ) : Φ = Λ k`
+- `CorollaryU1_LambdaUnique_Separable {k : ℕ} (Φ : Aggregator k) (sa : SeparableAssumptions Φ) : Φ = Λ k`
+- `identifiability_forces_lambda {k : ℕ} (Φ : Aggregator k) (ia : IdentifiabilityAssumptions Φ) : Φ = Λ k`
+- `TheoremU_LambdaUnique {k : ℕ} (Φ Ψ : Aggregator k) (iaΦ : IdentifiabilityAssumptions Φ) (iaΨ : IdentifiabilityAssumptions Ψ) : LambdaEquiv Φ Ψ`
+- `TheoremU_LambdaUnique_eq {k : ℕ} (Φ Ψ : Aggregator k) (iaΦ : IdentifiabilityAssumptions Φ) (iaΨ : IdentifiabilityAssumptions Ψ) : Φ = Ψ`
+- `lambda_equiv_to_eq_of_anchored {k : ℕ} {Φ Ψ : Aggregator k} (_h : LambdaEquiv Φ Ψ) (hΦ : Anchored Φ) (hΨ : Anchored Ψ) : Φ = Ψ`
