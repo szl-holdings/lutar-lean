@@ -197,6 +197,19 @@ jobs:
             lake-manifest.json
           if-no-files-found: error
 
+      # ---- Putnam showcase REAL/DEMO label honesty gate ----
+      # The showcase (Showcase/PutnamLean/*.lean) lives OUTSIDE Lutar/, so the
+      # canonical numbers/drift gate above does not cover it. This gate keeps each
+      # problem's claimed label (declared in Showcase/Putnam/<id>.md) in lockstep
+      # with what the kernel accepts: REAL must be sorry-free with an in-policy
+      # axiom footprint; DEMO must actually carry a `sorry`. The axiom check reuses
+      # the warm `.lake` build above (`lake env lean` re-elaborates #print axioms).
+      - name: Showcase label gate self-test
+        run: python3 .github/scripts/check_showcase_labels.py --self-test
+
+      - name: Showcase REAL/DEMO label honesty gate
+        run: python3 .github/scripts/check_showcase_labels.py --repo-path . --with-axioms
+
       # ---- Verified-theorems surface (machine-checked "solved" list) ----
       # Honest, kernel-checked list of REAL theorems on the governed uniqueness /
       # identifiability surface, regenerated from THIS build and gated so the
