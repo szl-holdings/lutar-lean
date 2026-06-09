@@ -12,13 +12,24 @@ namespace Lutar.Putnam.Sampler
 factor; not all its prime factors can be `≡ 1 (mod 4)` (their product would be `≡ 1`), so
 some prime factor is `≡ 3 (mod 4)`, and it is not in the finite list — contradiction.
 
-**Status: HONEST OPEN ATTEMPT.** This is a genuine theorem (special case of Dirichlet),
-but a clean, kernel-checked Lean proof — either via Mathlib's Dirichlet machinery or a
-self-contained Euclid argument over `ZMod 4` — is not yet closed here. The residual below is
-an explicitly-labeled `sorry`, NOT a hidden one. It is counted as OPEN, not proven.
+**Status: CLOSED — KERNEL-VERIFIED (no `sorry`).** Discharged from Mathlib's Dirichlet
+machinery: `Nat.setOf_prime_and_eq_mod_infinite` gives infinitude of primes in the residue
+class `a` modulo `q` whenever `a` is a unit of `ZMod q`; here `q = 4`, `a = 3` (a unit since
+`3 · 3 = 1` in `ZMod 4`). A short `ZMod.natCast_eq_natCast_iff'` bridge identifies the
+congruence `(p : ZMod 4) = 3` with `p % 4 = 3`. No new declared axiom token.
 -/
 
 theorem p04 : {p : ℕ | p.Prime ∧ p % 4 = 3}.Infinite := by
-  sorry -- sorry_sampler_p04: infinitude of primes ≡ 3 (mod 4) — open attempt (honest residual)
+  have hu : IsUnit (3 : ZMod 4) := isUnit_of_mul_eq_one 3 3 (by decide)
+  have h := Nat.setOf_prime_and_eq_mod_infinite (q := 4) (a := (3 : ZMod 4)) hu
+  have hset :
+      {p : ℕ | p.Prime ∧ (p : ZMod 4) = 3} = {p : ℕ | p.Prime ∧ p % 4 = 3} := by
+    ext p
+    simp only [Set.mem_setOf_eq, and_congr_right_iff]
+    intro _
+    have h3 : (3 : ZMod 4) = ((3 : ℕ) : ZMod 4) := by norm_cast
+    rw [h3, ZMod.natCast_eq_natCast_iff']
+    constructor <;> intro hh <;> omega
+  rwa [hset] at h
 
 end Lutar.Putnam.Sampler
