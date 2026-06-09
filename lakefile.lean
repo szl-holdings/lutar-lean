@@ -17,6 +17,16 @@ lean_lib «RefVectors» where
   roots := #[`RefVectors]
 
 @[default_target]
+lean_lib «PutnamShowcase» where
+  -- Putnam formalization showcase (Showcase/PutnamLean/). Mathlib-free, core
+  -- Lean only; each module is honestly labeled REAL (kernel-checked, zero
+  -- `sorry`) or DEMO (statement formalized, proof `sorry`). Lives outside
+  -- Lutar/ so it is NOT counted by .github/scripts/lean_numbers.py and does not
+  -- touch the locked Doctrine-v11 baseline. Built by `lake build` (default).
+  srcDir := "Showcase/PutnamLean"
+  roots := #[`P01, `P02, `P03, `P04]
+
+@[default_target]
 lean_exe «check» where
   root := `Main
 
