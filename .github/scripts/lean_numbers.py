@@ -369,6 +369,16 @@ EXPERIMENTAL_SCOPES = (
     # (Mathlib-free, sorry-free). EXPERIMENTAL; chi=4 PROVEN_EXACT for this instance
     # only; no general claim. Surfaced on the a11oy console next to the Putnam Sampler.
     os.path.join("Lutar", "Frontier") + os.sep,
+    # Putnam sampler pack (branch sampler-putnam-10) — additive, EXPERIMENTAL, NOT folded into
+    # the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Putnam/Sampler/.
+    # Ten formalized PDF Putnam-sampler problems (P01..P10). Seven are KERNEL-VERIFIED, sorry-free
+    # (P01,P02,P03,P06,P07,P08,P10); three are HONEST OPEN ATTEMPTS carrying a single explicitly
+    # labeled `sorry` each (P04 infinitude of primes ≡3 mod4, P05 Cauchy FE+continuity⇒linear,
+    # P09 no polynomial with p(0)=0,p(1)=1,p(x)²=p(x²)) — NOT hidden, counted as OPEN. This scope is
+    # excluded from ALL v11 numbers (declarations/axioms/sorries), so the locked baseline and the
+    # drift gate are untouched; locked-proven set STAYS EXACTLY 5; Λ STAYS Conjecture 1; BFT STAYS
+    # Conjecture 2. NO new declared axiom token anywhere in this scope.
+    os.path.join("Lutar", "Putnam", "Sampler") + os.sep,
 )
 
 
