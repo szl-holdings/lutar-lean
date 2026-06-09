@@ -52,10 +52,10 @@ Round13.LambdaSeparable ─┤        (lambda_unique_of_separable)
 | `Conjecture1_LambdaUnique` | Identifiability | **statement-only `Prop`** (NO proof) | no |
 | `CorollaryU2_LambdaUnique_Factors` | TheoremU | `Round13.lambda_unique_of_factors` | no |
 | `CorollaryU1_LambdaUnique_Separable` | TheoremU | `Round13.lambda_unique_of_separable` | no |
-| `identifiability_forces_lambda` | TheoremU | `Round13.lambda_unique_of_separable` | no |
+| `identifiability_forces_lambda` | TheoremU | `Round13.lambda_unique_of_separable` | no (conditional only; Λ unconditional uniqueness stays Conjecture 1) |
 | `TheoremU_LambdaUnique` (`≈Λ`) | TheoremU | `identifiability_forces_lambda` (reduction) | no |
 | `TheoremU_LambdaUnique_eq` (strict `=`) | TheoremU | `identifiability_forces_lambda` | no |
-| `lambda_equiv_to_eq_of_anchored` | TheoremU | `Anchored` (`Eq.trans`/`symm`) | no |
+| `lambda_equiv_to_eq_of_anchored` | TheoremU | `Anchored` (`Eq.trans`/`symm`) | no (conditional only; Λ unconditional uniqueness stays Conjecture 1) |
 | `theoremU_axiom_sets_kernel_only`, `locked_count_five`, `theoremU_excluded_from_locked`, `conjecture1_still_open` | AxiomCheck | `decide` | no |
 
 **No row introduces a declared axiom.** The only trust base is the Lean kernel
