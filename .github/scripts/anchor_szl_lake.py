@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Anchor a cosign-signed Theorem-U snapshot into szl-holdings/szl-lake.
+"""Anchor a cosign-signed proof-milestone snapshot into szl-holdings/szl-lake.
 
 Runs in lutar-lean CI (anchor-szl-lake.yml) after the snapshot artifact has been
-downloaded from a GREEN lake-build run and signed with `cosign attest-blob`
+downloaded from a GREEN build run and signed with `cosign attest-blob`
 (keyless OIDC, DSSE in-toto). This script:
 
   1. Cross-checks the cosign Sigstore bundle: the DSSE in-toto subject digest MUST
@@ -14,18 +14,21 @@ downloaded from a GREEN lake-build run and signed with `cosign attest-blob`
      bundle (base64) plus parsed Rekor/identity material for offline verification.
   3. chain_index advances by exactly one over the existing lutar-lean chain
      (genesis count 0 -> first receipt chain_index 1, prev_hash null). Idempotent:
-     if this kernel_commit + snapshot is already anchored, it is a no-op.
+     if this (kind, kernel_commit, snapshot) is already anchored, it is a no-op.
   4. Appends the receipt to BOTH surfaces:
        * HF dataset SZLHOLDINGS/szl-lake : khipu/lutar_lean_receipts.ndjson (canonical)
        * GitHub szl-holdings/szl-lake     : data/khipu/lutar_lean_receipts.ndjson
-         + updates the front-door lake_index.json (counts + theorem_u_anchor pointer)
+         + updates the front-door lake_index.json (per-kind `anchors` pointer +
+           `latest_anchor`; the legacy `theorem_u_anchor` pointer is preserved and
+           only refreshed when kind == theorem-u)
      The GitHub commit is GitHub-signed via GraphQL createCommitOnBranch with a
      DCO Signed-off-by trailer (main requires signed commits + DCO).
   5. Re-reads the HF NDJSON and asserts the new receipt is present and the chain
      advanced by exactly one.
 
-Honesty doctrine v11 is carried verbatim from the snapshot: Theorem U is
-REAL-conditional; Conjecture 1 is OPEN / machine-checked FALSE.
+Originally Theorem-U-specific; now generalized so ANY green proof milestone can be
+anchored on the same append-only chain. The honesty labeling is carried verbatim,
+per-snapshot, from the snapshot's own honesty block -- never a blanket "proven".
 """
 from __future__ import annotations
 
@@ -48,11 +51,13 @@ GH_INDEX = "lake_index.json"
 GH_OIDC_ISSUER = "https://token.actions.githubusercontent.com"
 IDENTITY_PREFIX = "https://github.com/szl-holdings/lutar-lean/"
 
+DEFAULT_PREDICATE_TYPE = "https://szl-holdings/theorem-u-anchor/v1"
+
 # DCO / commit identity (org-owner token).
 COMMIT_NAME = os.environ.get("ANCHOR_COMMIT_NAME", "Lutar, Stephen P.")
 COMMIT_EMAIL = os.environ.get("ANCHOR_COMMIT_EMAIL", "stephenlutar2@gmail.com")
 
-UA = "szl-lake-anchor/1.0"
+UA = "szl-lake-anchor/2.0"
 
 
 def _utcnow() -> str:
@@ -65,6 +70,11 @@ def _sha256_bytes(b: bytes) -> str:
 
 def canonical_hash(obj) -> str:
     return _sha256_bytes(json.dumps(obj, sort_keys=True, separators=(",", ":")).encode())
+
+
+def get_milestone(snapshot: dict) -> dict:
+    """Return the milestone block, tolerating the legacy `theorem_u` key."""
+    return snapshot.get("milestone") or snapshot.get("theorem_u") or {}
 
 
 # --------------------------------------------------------------------------- #
@@ -272,6 +282,8 @@ def main() -> int:
     ap.add_argument("--source-run-id", required=True)
     ap.add_argument("--source-run-url", default="")
     ap.add_argument("--source-workflow", default="Lake build (gate + numbers)")
+    ap.add_argument("--predicate-type", default=DEFAULT_PREDICATE_TYPE,
+                    help="cosign attestation predicate type used to sign the snapshot")
     args = ap.parse_args()
 
     gh_token = os.environ["SZL_LAKE_TOKEN"]
@@ -285,13 +297,18 @@ def main() -> int:
         bundle_raw = fh.read()
     bundle = json.loads(bundle_raw)
 
+    kind = snapshot.get("kind", "theorem-u")
+    milestone = get_milestone(snapshot)
+    receipt_kind = f"{kind}-anchor"
+
     signing = parse_cosign_bundle(bundle, snapshot_sha)
     signing["bundle_b64"] = base64.b64encode(bundle_raw.encode()).decode()
+    predicate_type = signing.get("predicate_type") or args.predicate_type
     signing["verify_cmd"] = (
         "cosign verify-blob-attestation --new-bundle-format "
-        f"--bundle <bundle> --type {signing.get('predicate_type')} "
+        f"--bundle <bundle> --type {predicate_type} "
         f"--certificate-identity-regexp '^{IDENTITY_PREFIX}' "
-        f"--certificate-oidc-issuer '{GH_OIDC_ISSUER}' theorem_u_snapshot.json")
+        f"--certificate-oidc-issuer '{GH_OIDC_ISSUER}' {os.path.basename(args.snapshot)}")
 
     kernel_commit = snapshot.get("kernel_commit", "")
     numbers = snapshot.get("lean_numbers", {}).get("numbers", {})
@@ -299,9 +316,9 @@ def main() -> int:
     # ---- chain state + idempotency -------------------------------------- #
     existing = hf_read_ndjson(hf_token)
     for rec in existing:
-        if rec.get("kind") == "theorem-u-anchor" and rec.get("kernel_commit") == kernel_commit \
+        if rec.get("kind") == receipt_kind and rec.get("kernel_commit") == kernel_commit \
                 and rec.get("subject", {}).get("sha256") == snapshot_sha:
-            print(f"already anchored: kernel_commit={kernel_commit} "
+            print(f"already anchored: kind={kind} kernel_commit={kernel_commit} "
                   f"chain_index={rec.get('chain_index')} receipt_id={rec.get('receipt_id')}")
             print(f"::notice::idempotent no-op (HF chain length stays {len(existing)})")
             return 0
@@ -310,10 +327,14 @@ def main() -> int:
     prev_hash = existing[-1].get("receipt_id") if existing else None
 
     # ---- build receipt --------------------------------------------------- #
+    milestone_status = milestone.get("status", "")
     receipt = {
         "schema": "szl.khipu.receipt/v1",
         "organ": "lutar-lean",
-        "kind": "theorem-u-anchor",
+        "kind": receipt_kind,
+        "milestone_kind": kind,
+        "milestone_title": milestone.get("title", kind),
+        "milestone_status": milestone_status,
         "chain_index": chain_index,
         "prev_hash": prev_hash,
         "timestamp": _utcnow(),
@@ -327,13 +348,11 @@ def main() -> int:
             "url": args.source_run_url,
         },
         "subject": {
-            "name": "theorem_u_snapshot.json",
+            "name": os.path.basename(args.snapshot),
             "sha256": snapshot_sha,
             "snapshot": snapshot,
         },
-        "doctrine": "v11",
-        "theorem_u_status": "REAL-conditional",
-        "lambda_status": "Conjecture_1 (OPEN; unconditional uniqueness machine-checked FALSE)",
+        "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
         "numbers": {
             "declarations": numbers.get("declarations"),
             "axioms_unique": numbers.get("axioms_unique"),
@@ -342,6 +361,12 @@ def main() -> int:
         "honesty": snapshot.get("honesty", {}),
         "signing": signing,
     }
+    # Backward-compatible aliases for the original Theorem-U receipt shape so any
+    # consumer keyed on these keys keeps working for the theorem-u lane.
+    if kind == "theorem-u":
+        receipt["theorem_u_status"] = milestone_status or "REAL-conditional"
+        receipt["lambda_status"] = (
+            "Conjecture_1 (OPEN; unconditional uniqueness machine-checked FALSE)")
     receipt["receipt_id"] = canonical_hash(receipt)
     line = json.dumps(receipt, sort_keys=True, ensure_ascii=False)
 
@@ -349,54 +374,86 @@ def main() -> int:
     hf_content = ("\n".join(json.dumps(r, sort_keys=True, ensure_ascii=False)
                             for r in existing) + ("\n" if existing else "") + line + "\n")
     hf_upload(hf_token, hf_content,
-              f"anchor: Theorem-U snapshot {kernel_commit[:12]} (chain_index {chain_index})")
-    print(f"HF appended: chain_index={chain_index} receipt_id={receipt['receipt_id']}")
+              f"anchor: {kind} snapshot {kernel_commit[:12]} (chain_index {chain_index})")
+    print(f"HF appended: kind={kind} chain_index={chain_index} receipt_id={receipt['receipt_id']}")
 
     # ---- append to GitHub front-door (signed commit) -------------------- #
     gh_existing = gh_get_raw(gh_token, GH_NDJSON) or ""
     gh_new = (gh_existing + ("" if gh_existing.endswith("\n") or not gh_existing else "\n")
               + line + "\n")
 
-    # Preserve the EXISTING front-door schema verbatim; ADD only the Theorem-U
-    # anchor pointer + an anchored-at timestamp. Idempotent (set, not increment)
-    # so a re-run never double-counts. We deliberately do NOT invent a
-    # `szl.lake.index/v1`/khipu_receipt_counts shape here -- that lives in
-    # data/lake_index.json and is maintained by the HF->GitHub sync, not us.
+    # Preserve the EXISTING front-door schema verbatim; ADD only per-kind anchor
+    # pointers. Idempotent (set, not increment) so a re-run never double-counts. We
+    # deliberately do NOT invent a `szl.lake.index/v1`/khipu_receipt_counts shape
+    # here -- that lives in data/lake_index.json and is maintained by the
+    # HF->GitHub sync, not us.
     idx_raw = gh_get_raw(gh_token, GH_INDEX)
     index = json.loads(idx_raw) if idx_raw else {
         "canonical_source": f"https://huggingface.co/datasets/{HF_REPO}",
         "doctrine": "v11",
     }
-    index["theorem_u_anchor"] = {
+    pointer = {
+        "kind": kind,
+        "title": milestone.get("title", kind),
+        "status": milestone_status,
         "kernel_commit": kernel_commit,
         "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
         "chain_index": chain_index,
         "receipt_id": receipt["receipt_id"],
         "snapshot_sha256": snapshot_sha,
         "verified_run_url": args.source_run_url,
-        "status": "REAL-conditional (Theorem U); Conjecture 1 OPEN / machine-checked FALSE",
-        "doctrine": "v11",
-        "headline_decls": snapshot.get("theorem_u", {}).get("headline_decls", []),
+        "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
+        "headline_decls": milestone.get("headline_decls", []),
         "signing": {
             "mode": signing["mode"],
+            "predicate_type": predicate_type,
             "fulcio_identity": signing["fulcio_identity"],
             "oidc_issuer": signing["oidc_issuer"],
             "rekor_log_index": signing["rekor_log_index"],
         },
         "hf_receipt": f"datasets/{HF_REPO} :: {HF_NDJSON}",
         "github_receipt": GH_NDJSON,
+        "anchored_at_utc": _utcnow(),
     }
-    index["theorem_u_anchored_at_utc"] = _utcnow()
+    # Generic, per-kind pointer map + latest pointer (new, additive).
+    anchors = index.get("anchors")
+    if not isinstance(anchors, dict):
+        anchors = {}
+    anchors[kind] = pointer
+    index["anchors"] = anchors
+    index["latest_anchor"] = pointer
+    index["latest_anchored_at_utc"] = pointer["anchored_at_utc"]
+    # Legacy Theorem-U pointer: preserve existing keys, refresh only for theorem-u.
+    if kind == "theorem-u":
+        legacy = index.get("theorem_u_anchor")
+        legacy = dict(legacy) if isinstance(legacy, dict) else {}
+        legacy.update({
+            "kernel_commit": kernel_commit,
+            "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
+            "chain_index": chain_index,
+            "receipt_id": receipt["receipt_id"],
+            "snapshot_sha256": snapshot_sha,
+            "verified_run_url": args.source_run_url,
+            "status": (f"{milestone_status} (Theorem U); "
+                       "Conjecture 1 OPEN / machine-checked FALSE"),
+            "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
+            "headline_decls": milestone.get("headline_decls", []),
+            "signing": pointer["signing"],
+            "hf_receipt": pointer["hf_receipt"],
+            "github_receipt": GH_NDJSON,
+        })
+        index["theorem_u_anchor"] = legacy
+        index["theorem_u_anchored_at_utc"] = pointer["anchored_at_utc"]
     index_str = json.dumps(index, indent=2, ensure_ascii=False) + "\n"
 
     additions = [
         {"path": GH_NDJSON, "contents": base64.b64encode(gh_new.encode()).decode()},
         {"path": GH_INDEX, "contents": base64.b64encode(index_str.encode()).decode()},
     ]
-    msg = (f"anchor: Theorem-U snapshot {kernel_commit[:12]} into szl-lake "
+    msg = (f"anchor: {kind} snapshot {kernel_commit[:12]} into szl-lake "
            f"(chain_index {chain_index})\n\n"
-           f"Cosign-keyless DSSE receipt for the kernel-verified Theorem-U snapshot.\n"
-           f"Theorem U = REAL-conditional; Conjecture 1 = OPEN (machine-checked FALSE).\n"
+           f"Cosign-keyless DSSE receipt for the kernel-verified {kind} snapshot.\n"
+           f"Milestone status: {milestone_status or 'n/a'} (per-snapshot honesty carried verbatim).\n"
            f"receipt_id={receipt['receipt_id']}\n"
            f"snapshot_sha256={snapshot_sha}\n\n"
            f"Signed-off-by: {COMMIT_NAME} <{COMMIT_EMAIL}>")
@@ -416,7 +473,7 @@ def main() -> int:
     # Emit machine-readable summary for the workflow step.
     with open("anchor_result.json", "w", encoding="utf-8") as fh:
         json.dump({
-            "kernel_commit": kernel_commit, "chain_index": chain_index,
+            "kind": kind, "kernel_commit": kernel_commit, "chain_index": chain_index,
             "receipt_id": receipt["receipt_id"], "snapshot_sha256": snapshot_sha,
             "hf_chain_length": len(after), "github_commit": commit_url,
             "fulcio_identity": signing["fulcio_identity"],
