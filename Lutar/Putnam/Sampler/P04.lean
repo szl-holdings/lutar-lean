@@ -28,8 +28,13 @@ theorem p04 : {p : ℕ | p.Prime ∧ p % 4 = 3}.Infinite := by
     simp only [Set.mem_setOf_eq, and_congr_right_iff]
     intro _
     have h3 : (3 : ZMod 4) = ((3 : ℕ) : ZMod 4) := by norm_cast
-    rw [h3, ZMod.natCast_eq_natCast_iff']
-    constructor <;> intro hh <;> omega
+    constructor
+    · intro hh
+      rw [h3, ZMod.natCast_eq_natCast_iff'] at hh
+      omega
+    · intro hh
+      rw [h3, ZMod.natCast_eq_natCast_iff']
+      omega
   rwa [hset] at h
 
 end Lutar.Putnam.Sampler
