@@ -144,3 +144,38 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 - DOI lineage: [Zenodo concept DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 
 *Proof reports: `team/PROVE_WAVE5..7_REPORT.md`, `team/PROVE_AGENTIC_LOOP_REPORT.md`, `team/LAMBDA_UNIQUENESS_PROOF_REPORT.md`. All commits Signed-off-by Stephen P. Lutar Jr. <stephenlutar2@gmail.com>.*
+
+
+---
+
+## 6. Putnam 2025 — honest current verdict (additive)
+
+The honest, doctrine-v11 per-problem verdict for the canonical **Putnam 2025** set (86th William Lowell Putnam Mathematical Competition, Dec 6 2025: A1–A6, B1–B6), computed from the Lean kernel on `lutar-lean` main @ `b7c3e38`. This section is additive — the locked-5 `{F1, F11, F12, F18, F19}` @ `c7c0ba17` and the Λ = Conjecture 1 line above are unchanged.
+
+> We are not doing "drones solve Putnam." We are doing: Intelligence → Structure → Conjecture → Certificate. killinchu supplies intelligence (tracking, fusion, ROE decisions, signed receipts). We extract mathematical structure (graphs, constraints, optimization instances). We pose Putnam-grade + SZL-native problems. We ship certificates (Lean-verified REAL theorems, reproducible benchmarks, provenance).
+
+**Headline: 0 REAL / 11 DEMO / 1 OPEN.** The headline number is the count of **REAL** (Lean-kernel-checked) theorems.
+
+| Label | Meaning |
+|---|---|
+| **REAL** | Lean-kernel checked, no sorry, no extra axioms beyond declared |
+| **DEMO** | compiles but uses sorry/unproven lemmas |
+| **OPEN** | statement only |
+
+| Problem | Lean proof file | Status | Note |
+|---|---|---|---|
+| A1 | `Lutar/Putnam/P_A1.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| A2 | `Lutar/Putnam/P_A2.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| A3 | `Lutar/Putnam/P_A3.lean` | OPEN | statement only (True-shell); official answer withheld pending a real proof |
+| A4 | `Lutar/Putnam/P_A4.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| A5 | `Lutar/Putnam/P_A5.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| A6 | `Lutar/Putnam/P_A6.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B1 | `Lutar/Putnam/P_B1.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B2 | `Lutar/Putnam/P_B2.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B3 | `Lutar/Putnam/P_B3.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B4 | `Lutar/Putnam/P_B4.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B5 | `Lutar/Putnam/P_B5.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| B6 | `Lutar/Putnam/P_B6.lean` | DEMO | formalized statement; proof uses sorry/unproven lemmas |
+| SZL-12A / SZL-12B | — not yet on `main` | PENDING | SZL-native originals — pending upstream kernel work |
+
+A3 is OPEN (statement-only True-shell); the official 2025 A3 answer is intentionally withheld here until a REAL proof exists. No problem is currently REAL: each DEMO file formalizes the statement but discharges the proof with `sorry` or unproven lemmas. This page will show REAL counts the moment the kernel run lands verified proofs.
