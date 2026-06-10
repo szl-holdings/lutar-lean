@@ -10,7 +10,7 @@ Wave11 FRONTIER candidate-theorem pack (CF-1, CF-2, CF-3, CF-5) is
 EXPERIMENTAL/additive and leaves the LOCKED baseline untouched.  We model the
 disclosed `#print axioms` set of each Wave11 theorem as a `List String` and
 prove they are all kernel-only, while RE-ASSERTING the locked invariant
-`locked_count_five = 5`.
+`locked_count_eight = 8`.
 
 The verbatim ground-truth `#print axioms` lines are emitted per theorem in each
 Wave11 file (and in the CI build log); this file is a meta-level summary, not a
@@ -22,14 +22,14 @@ re-verification of those kernel proofs.
   from the local `lake env lean` kernel build (Lean 4.18.0 / Mathlib v4.18.0).
 - `wave11_axiom_sets_kernel_only` — every Wave11 disclosed set is kernel-only
   (`decide`): no Wave11 theorem introduces a custom axiom (no sorryAx).
-- `locked_count_five` — RE-ASSERTED invariant: the locked baseline is EXACTLY the
-  five {F1,F11,F12,F18,F19}. Wave11 does NOT change this (`decide`).
+- `locked_count_eight` — RE-ASSERTED invariant: the locked baseline is EXACTLY the
+  eight {F1,F4,F7,F11,F12,F18,F19,F22}. Wave11 does NOT change this (`decide`).
 - `wave11_excluded_from_locked` — Wave11 theorem names are disjoint from the
-  locked five: Wave11 is additive and excluded from the locked baseline.
+  locked eight: Wave11 is additive and excluded from the locked baseline.
 
 ## Honesty / scope
 - EXPERIMENTAL (`Lutar.Wave11`) — NOT in the LOCKED v11 baseline (749/14/163 @
-  c7c0ba17). Locked-proven stays exactly 5 {F1,F11,F12,F18,F19}. Λ Conjecture 1.
+  c7c0ba17). Locked-proven stays exactly 8 {F1,F4,F7,F11,F12,F18,F19,F22}. Λ Conjecture 1.
 - Lean-core only; NO Mathlib, NO new declared axiom, NO sorry.
 - The CF-5 entries are the DISCRETE Neyman-Pearson core; the measure-theoretic
   Gaussian-shift `sorry₁` in `Robustness/CertifiedRadius.lean` remains OPEN
@@ -93,11 +93,11 @@ theorem wave11_axiom_sets_kernel_only :
     wave11Disclosed.all (fun p => axiomsAllowed p.2) = true := by decide
 
 /-- The LOCKED baseline names (RE-ASSERTED, NOT modified by Wave11). -/
-def lockedNames : List String := ["F1", "F11", "F12", "F18", "F19"]
+def lockedNames : List String := ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"]
 
-/-- RE-ASSERTED locked invariant: exactly five locked theorems. Wave11 leaves
+/-- RE-ASSERTED locked invariant: exactly eight locked theorems. Wave11 leaves
 this unchanged. -/
-theorem locked_count_five : lockedNames.length = 5 := by decide
+theorem locked_count_eight : lockedNames.length = 8 := by decide
 
 /-- Wave11 is additive: none of the Wave11 theorem identifiers collide with a
 locked name (Wave11 is excluded from the locked baseline). -/
@@ -109,7 +109,7 @@ all experimental/additive. -/
 theorem wave11_theorem_count : wave11Disclosed.length = 24 := by decide
 
 #print axioms wave11_axiom_sets_kernel_only
-#print axioms locked_count_five
+#print axioms locked_count_eight
 #print axioms wave11_excluded_from_locked
 #print axioms wave11_theorem_count
 

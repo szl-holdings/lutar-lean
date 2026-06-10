@@ -241,7 +241,7 @@ import Lutar.Wave9.AxiomDisclosure
 --        Lamport 1978);
 --   MR-1 mesh reachability / route monotonicity (CLRS; cf Mathlib
 --        Relation.ReflTransGen).
--- Plus a Wave10 AxiomDisclosure ledger re-asserting locked_count_five = 5.
+-- Plus a Wave10 AxiomDisclosure ledger re-asserting locked_count_eight = 8 (locked set {F1,F4,F7,F11,F12,F18,F19,F22} after the 2026-06-10 real F4/F7 proofs).
 import Lutar.Wave10.STLRobustness
 import Lutar.Wave10.QuorumIntersection
 import Lutar.Wave10.DSSEToken
