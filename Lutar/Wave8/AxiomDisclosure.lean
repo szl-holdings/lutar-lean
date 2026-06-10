@@ -14,14 +14,19 @@ trust base `{propext, funext, Classical.choice, Quot.sound}`), and prove:
   * `disclosure_sound`  — if a decl's disclosed axiom set is `axiomsAllowed`,
     then every disclosed axiom is a member of `leanKernelAxioms`;
   * `locked_axiom_sets_kernel_only` — the disclosed axiom sets we publish for the
-    five LOCKED theorems {F1,F11,F12,F18,F19} are each kernel-only (`decide`).
+    eight LOCKED theorems {F1,F4,F7,F11,F12,F18,F19,F22} are each kernel-only
+    (`decide`).
 
 This is the honest-by-construction narrative made into a theorem: the axiom set
 underlying every governance proof is enumerable, bounded, and publicly auditable.
 
 ## Honesty / scope
 - EXPERIMENTAL (`Lutar.Wave8` scope) — NOT folded into the LOCKED v11 baseline
-  (749/14/163 @ c7c0ba17). Locked-proven stays exactly 5 {F1,F11,F12,F18,F19}.
+  (749/14/163 @ c7c0ba17). Locked-proven is now exactly 8
+  {F1,F4,F7,F11,F12,F18,F19,F22} — F4/F7 were upgraded from vacuous to GENUINE,
+  non-vacuous, sorry-free, axiom-clean proofs on 2026-06-10 (real DAG-acyclicity
+  and FIFO-ordering theorems in `Lutar/Puriq/Formulas/ProvedFormulas.lean`);
+  F22 was already genuine. See `team/LEAN_F4F7_PROOFS_REPORT.md`.
 - Λ (F23) is untouched — it remains Conjecture 1.
 - This file is a META-LEVEL property of disclosed axiom *names*; it does not, and
   cannot, by itself re-verify the underlying kernel proofs. The ground truth for
@@ -64,28 +69,34 @@ theorem no_custom_axiom (used : List String) (h : axiomsAllowed used = true) :
 /-- The empty disclosed set (a fully axiom-free decl) trivially passes. -/
 theorem empty_allowed : axiomsAllowed [] = true := by decide
 
-/-- The disclosed axiom sets we publish for the five LOCKED theorems
-{F1,F11,F12,F18,F19}. These mirror the `#print axioms` lines reported in CI for
-the locked kernel; we model each as a concrete `List String`. -/
+/-- The disclosed axiom sets we publish for the eight LOCKED theorems
+{F1,F4,F7,F11,F12,F18,F19,F22}. These mirror the `#print axioms` lines reported
+in CI for the locked kernel; we model each as a concrete `List String`. F4/F7/F22
+were added 2026-06-10 with the genuine non-vacuous proofs (DAG-acyclicity /
+FIFO-ordering / emit-monotonicity); each remains kernel-only. -/
 def lockedDisclosed : List (String × List String) :=
   [ ("F1",  ["propext", "Classical.choice", "Quot.sound"]),
+    ("F4",  ["propext", "funext", "Classical.choice", "Quot.sound"]),
+    ("F7",  ["propext", "funext", "Classical.choice", "Quot.sound"]),
     ("F11", ["propext", "Classical.choice", "Quot.sound"]),
     ("F12", ["propext", "Classical.choice", "Quot.sound"]),
     ("F18", ["propext", "funext", "Classical.choice", "Quot.sound"]),
-    ("F19", ["propext", "Classical.choice", "Quot.sound"]) ]
+    ("F19", ["propext", "Classical.choice", "Quot.sound"]),
+    ("F22", ["propext", "funext", "Classical.choice", "Quot.sound"]) ]
 
 /-- META-THEOREM (Ph1): every LOCKED theorem's disclosed axiom set is
 kernel-only. Decided by the kernel — depends on NO axioms itself. -/
 theorem locked_axiom_sets_kernel_only :
     lockedDisclosed.all (fun p => axiomsAllowed p.2) = true := by decide
 
-/-- Corollary: there are exactly five locked entries, matching the locked count. -/
-theorem locked_count_five : lockedDisclosed.length = 5 := by decide
+/-- Corollary: there are exactly EIGHT locked entries, matching the locked count.
+(Moved 5 → 8 in lockstep with the real F4/F7 proofs landed 2026-06-10.) -/
+theorem locked_count_eight : lockedDisclosed.length = 8 := by decide
 
 #print axioms disclosure_sound
 #print axioms no_custom_axiom
 #print axioms empty_allowed
 #print axioms locked_axiom_sets_kernel_only
-#print axioms locked_count_five
+#print axioms locked_count_eight
 
 end Lutar.Wave8.AxiomDisclosure
