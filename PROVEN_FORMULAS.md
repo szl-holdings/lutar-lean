@@ -2,12 +2,12 @@
   szl-holdings/lutar-lean — PROVEN_FORMULAS.md
   The single honest showcase of every proven / kernel-verified result, with proof links + maturity.
   Source of truth: lutar-lean@main (kernel c7c0ba17, 749 declarations / 14 unique axioms / 163 sorries).
-  Honesty doctrine v11 LOCKED — locked proven = exactly 5; Λ = Conjecture 1 (never a theorem).
+  Honesty doctrine v11 LOCKED — locked proven = exactly 8 (was 5; F4/F7 upgraded to genuine 2026-06-10); Λ = Conjecture 1 (never a theorem).
 -->
 
 # Proven Formulas — the honest showcase
 
-> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly five formulas** — a fact itself machine-enforced by `Lutar.Wave8.AxiomDisclosure.locked_count_five` (depends on **no** axioms). On top of that locked floor, **~36 experimental theorems** are kernel-verified and **CI-green on `main` @ `7885fd9`** (waves 5/6/7/8 + agentic P1–P6 + airtight Λ + coder). Everything newer than the locked 5 is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
+> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly eight formulas** `{F1,F4,F7,F11,F12,F18,F19,F22}` — a fact itself machine-enforced by `Lutar.Wave8.AxiomDisclosure.locked_count_eight` (depends on **no** axioms). (It was 5 until 2026-06-10, when F4 and F7 were upgraded from vacuous placeholders to genuine non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO order-preservation — joining the already-genuine F22; see `team/LEAN_F4F7_PROOFS_REPORT.md`.) On top of that locked floor, **~36 experimental theorems** are kernel-verified and **CI-green on `main` @ `7885fd9`** (waves 5/6/7/8 + agentic P1–P6 + airtight Λ + coder). Everything newer than the locked 5 is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
 
 **Locked-kernel toolchain:** Lean `v4.13.0` · Mathlib pinned `d7317655` (`v4.13.0`)
 **Locked kernel:** `c7c0ba17` · **749** declarations / **14** unique axioms / **163** tracked sorries · `lake build` clean
@@ -16,9 +16,9 @@
 
 ---
 
-## 1. Locked kernel — proven, sorry-free (exactly 5)
+## 1. Locked kernel — proven, sorry-free (exactly 8)
 
-These five are the only formulas counted as **proven** in the locked Doctrine-v11 kernel `c7c0ba17`. Source: [`Lutar/Puriq/Formulas/PuriqFormulaLean.lean`](https://github.com/szl-holdings/lutar-lean/blob/main/Lutar/Puriq/Formulas/PuriqFormulaLean.lean).
+These eight are the only formulas counted as **proven** in the locked Doctrine-v11 kernel. The original five (F1, F11, F12, F18, F19) plus F4, F7, F22 — the latter three now carrying GENUINE, non-vacuous, sorry-free, Lean-core proofs in [`Lutar/Puriq/Formulas/ProvedFormulas.lean`](https://github.com/szl-holdings/lutar-lean/blob/main/Lutar/Puriq/Formulas/ProvedFormulas.lean). Source: [`PuriqFormulaLean.lean`](https://github.com/szl-holdings/lutar-lean/blob/main/Lutar/Puriq/Formulas/PuriqFormulaLean.lean) + `ProvedFormulas.lean`.
 
 | ID | Theorem | What it proves | Maturity | `#print axioms` |
 |---|---|---|---|---|
@@ -27,6 +27,9 @@ These five are the only formulas counted as **proven** in the locked Doctrine-v1
 | **F12** | Kuramoto Phase-Coupling Boundedness — **additive fragment** (`f12_*`) | The discretised reciprocity coupling stays bounded under additive superposition over an organ set. **Honesty caveat: additive scaffolding ONLY — NOT the full nonlinear Kuramoto synchronization.** | **PROVEN** (additive fragment) | Lean-core only |
 | **F18** | Reed–Solomon `RS(10,6)` Recovery Arithmetic (`f18_*`) | Erasure tolerance: data is recoverable **iff at least 6 of 10 shards survive** — the resilience arithmetic for the receipt/payload encoding. | **PROVEN** | Lean-core only |
 | **F19** | Bekenstein Additive Scaffolding (`f19_*`) | Entropy budget is additive and monotone over a region partition (per-region ≤ total). **Honesty caveat: monotone scaffolding ONLY — NOT the full Bekenstein bound `S ≤ 2πkRE/(ℏc)`.** | **PROVEN** (additive fragment) | Lean-core only |
+| **F4** | Khipu DAG acyclicity preservation (`f4_khipu_dag_acyclic_preserved`, `f4_khipu_no_cycle`, `f4_khipu_reach_decreases`, `f4_khipu_append_preserves_invariant`) | Models the Khipu DAG as an edge list under the append-only backward-edge invariant `dst < src`; defines reachability as the transitive closure; PROVES any path strictly decreases the node index, hence NO node reaches itself (acyclic), and appending a fresh max node `k` (all targets `< k`) PRESERVES acyclicity. **Genuine (2026-06-10) — replaces the prior vacuous `t<k → t<k ∧ k≠t`.** | **PROVEN** | Lean-core only |
+| **F7** | Chaski FIFO reception ordering (`f7_chaski_fifo_order`, `f7_chaski_fifo_positional`, `f7_chaski_drain_eq`) | Models a FIFO channel (enqueue = append to back, dequeue/drain = serve from front); PROVES the drained RECEPTION order EQUALS the SEND order (`drain (enqueueAll [] msgs) = msgs`) and, positionally, the `i`-th received = `i`-th sent. **Genuine (2026-06-10) — replaces the prior tautology `msgs = msgs`.** | **PROVEN** | Lean-core only |
+| **F22** | Khipu emit append-only monotonicity (`f22_khipu_emit_monotone`, `f22_emit_appends_length`, `f22_emit_strictly_greater`) | Indexes the real append-only log `seqLog n = List.range n`; PROVES sequence numbers strictly increase with position. Genuine (already held in prior sprint). | **PROVEN** | Lean-core only |
 
 > F12 and F19 prove **only the additive / linear fragment** — never described as "Kuramoto synchronization proved" or "Bekenstein bound proved." The Lean docstrings carry the caveat verbatim.
 
@@ -75,7 +78,7 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 | **Q2** | governance spectral (real) | Governance operator has real spectrum — well-posed scoring. | `[propext, Classical.choice, Quot.sound]` |
 | **L3** | Λ strict monotonicity | Λ is strictly monotone per axis — more evidence never lowers the score spuriously. | `[propext, Classical.choice, Quot.sound]` |
 
-> Wave-8 is **experimental**. It does not change the locked count of 5 and does not change Λ's Conjecture-1 status. The locked-count-five fact itself is a Wave-8 theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_five`) that **depends on no axioms** — the locked set cannot silently grow.
+> Wave-8 is **experimental**. It does not change the locked count and does not change Λ's Conjecture-1 status. The locked-count fact itself is a Wave-8 theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_eight`) that **depends on no axioms** — the locked set cannot silently grow, and only grew to 8 in lockstep with the genuine F4/F7 proofs.
 
 ---
 
@@ -128,7 +131,7 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 
 | Metric | Value |
 |---|---|
-| **Locked proven formulas** | **5** — `{F1, F11, F12, F18, F19}` @ `c7c0ba17`; the count is itself a no-axiom Lean theorem (`locked_count_five`) |
+| **Locked proven formulas** | **8** — `{F1, F4, F7, F11, F12, F18, F19, F22}`; the count is itself a no-axiom Lean theorem (`locked_count_eight`). Was 5 until 2026-06-10, when F4/F7 were upgraded from vacuous placeholders to genuine non-vacuous proofs (joining already-genuine F22). PENDING founder Lean-runner `#print axioms` verification before the served surfaces flip. |
 | Locked kernel | `749` declarations / `14` unique axioms / `163` tracked sorries · Lean `v4.13.0` · `lake build` clean |
 | Experimental scope (current `main`) | `7885fd9` · Lean `v4.18.0` · `1304` declarations / `22` unique axioms · CI-green |
 | Experimental kernel-verified (CI-green) — **~36 theorems** | wave-5 (11), wave-6 (11), wave-7 (10), wave-8 (10), agentic-loop (28), airtight Λ Set α+δ (22 results) — **never in the locked count** |
