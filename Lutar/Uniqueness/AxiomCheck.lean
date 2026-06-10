@@ -77,7 +77,7 @@ theorem theoremU_axiom_sets_kernel_only :
     theoremUDisclosed.all (fun p => axiomsAllowed p.2) = true := by decide
 
 /-- The LOCKED baseline names (RE-ASSERTED, NOT modified by Theorem U).
-Upgraded 2026-06-10: F4/F7/F22 are now GENUINE, non-vacuous, placeholder-free (no `sorry`/`admit`),
+Upgraded 2026-06-10: F4/F7/F22 are now GENUINE, non-vacuous, proof-placeholder-free,
 axiom-clean proofs in `Lutar/Puriq/Formulas/ProvedFormulas.lean`
 (F4 = append-preserves-DAG-acyclicity, F7 = FIFO reception order = send order,
 F22 = emit monotonicity). The locked set is therefore the eight
