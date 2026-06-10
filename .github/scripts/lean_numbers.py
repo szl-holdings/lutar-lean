@@ -331,6 +331,16 @@ EXPERIMENTAL_SCOPES = (
     # Byzantine BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 5; Lambda STAYS
     # Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave23") + os.sep,
+    # Wave24 admissibility-membership certification (wave24-admissibility-certificate) —
+    # additive, EXPERIMENTAL, NOT folded into the locked v11 baseline (stays 5
+    # {F1,F11,F12,F18,F19}). One file, three kernel-clean theorems formalizing the GPD
+    # Adm-membership certifier as a structure + a first Semantic Linearizability property
+    # (single linearization point: at most one verdict commits), proved BY REDUCTION to
+    # Wave23 khipu_quorum_safety_conditional (NO new mathematics). Intended #print axioms
+    # ⊆ {propext, Classical.choice, Quot.sound}; NO sorry / NO new declared axiom. CONDITIONAL
+    # (inherits Wave23 hypotheses); unconditional BFT safety stays Khipu Conjecture 2; Λ
+    # remains Conjecture 1.
+    os.path.join("Lutar", "Wave24") + os.sep,
     # Theorem-U pack (theorem-u-kernel) — additive, EXPERIMENTAL, NOT folded into the locked
     # v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Uniqueness/, all kernel-clean
     # (every #print axioms subset {propext, funext, Classical.choice, Quot.sound}), no proof
