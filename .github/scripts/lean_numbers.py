@@ -89,7 +89,7 @@ EXPERIMENTAL_SCOPES = (
     # (Ville-assembly core), IF2 robust-declassification non-interference. All
     # CI-green, Mathlib- or kernel-backed, NO sorry / NO open obligation / NO new
     # declared axiom. EXPERIMENTAL, NOT folded into the locked v11 baseline
-    # (stays 5 {F1,F11,F12,F18,F19}). Λ remains Conjecture 1.
+    # (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Λ remains Conjecture 1.
     os.path.join("Lutar", "Wave9") + os.sep,
     # Wave10 candidate-theorem pack (wave10-experimental) — 6 additive known-theorem
     # formalizations, all Mathlib-FREE / Lean-core-only (build & kernel-verify on a
@@ -102,9 +102,9 @@ EXPERIMENTAL_SCOPES = (
     # audit-replay determinism + tamper localization (Schneider 1990; Lamport
     # 1978), MR-1 mesh reachability / route monotonicity (CLRS; cf Mathlib
     # Relation.ReflTransGen). Plus a Wave10 AxiomDisclosure ledger re-asserting
-    # locked_count_five = 5. All CI-green, kernel-only axioms (propext/Quot.sound
+    # locked_count_eight = 8. All CI-green, kernel-only axioms (propext/Quot.sound
     # or none), NO sorry / NO open obligation / NO new declared axiom. EXPERIMENTAL,
-    # NOT folded into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}).
+    # NOT folded into the locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}).
     # Λ remains Conjecture 1.
     os.path.join("Lutar", "Wave10") + os.sep,
     # Wave11 FRONTIER proven pack (wave11-frontier) — 24 additive theorems across
@@ -124,14 +124,14 @@ EXPERIMENTAL_SCOPES = (
     # optimality via the pointwise sign lemma; Neyman-Pearson 1933,
     # Cohen-Rosenfeld-Kolter arXiv:1902.02918 — the measure-theoretic
     # Gaussian-shift sorry₁ in Robustness/CertifiedRadius.lean stays OPEN). Plus a
-    # Wave11 AxiomDisclosure ledger re-asserting locked_count_five = 5 and
+    # Wave11 AxiomDisclosure ledger re-asserting locked_count_eight = 8 and
     # wave11_theorem_count = 24. All CI-green, kernel-only axioms, NO sorry /
     # NO open obligation / NO new declared axiom. EXPERIMENTAL, NOT folded into
-    # the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Λ remains
+    # the locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Λ remains
     # Conjecture 1.
     os.path.join("Lutar", "Wave11") + os.sep,
     # Wave13 full proof-sweep pack (wave13-sweep) — additive, EXPERIMENTAL, NOT folded
-    # into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three kernel-clean
+    # into the locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Three kernel-clean
     # theorems (every #print axioms is a subset of {propext, Classical.choice,
     # Quot.sound}): quorum_agreement_single_valued_vote (the SIMPLIFIED non-Byzantine
     # single-valued-vote shadow of quorum agreement — explicitly NOT Khipu Conjecture 2,
@@ -143,7 +143,7 @@ EXPERIMENTAL_SCOPES = (
     # same PR. Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
     os.path.join("Lutar", "Wave13") + os.sep,
     # Wave14 frontier pack (wave14-frontier) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Four files, nine kernel-clean
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Four files, nine kernel-clean
     # theorems (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry /
     # NO new declared axiom). Each is a clean COMPANION upgrading an existing tab without
     # editing the baseline file (whose tracked sorrys stay honest):
@@ -161,7 +161,7 @@ EXPERIMENTAL_SCOPES = (
     # Λ remains Conjecture 1; Byzantine BFT safety remains Khipu Conjecture 2.
     os.path.join("Lutar", "Wave14") + os.sep,
     # Wave15 frontier pack (wave15-frontier) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three files, kernel-clean theorems
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Three files, kernel-clean theorems
     # (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry / NO new
     # declared axiom). Each is a clean COMPANION upgrading an existing tab without editing the
     # baseline file (whose tracked sorrys/axioms stay honest):
@@ -228,7 +228,7 @@ EXPERIMENTAL_SCOPES = (
     # locked-proven stays 5; Λ stays Conjecture 1; nothing folded in.
     os.path.join("Lutar", "Wave17") + os.sep,
     # Wave18 frontier pack (wave18-cut1) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Two files under Lutar/Wave18/, all
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Two files under Lutar/Wave18/, all
     # kernel-clean (#print axioms in every theorem ⊆ {propext, Classical.choice, Quot.sound}),
     # NO sorry, NO new declared axiom token, each compiled locally to ZERO errors against the
     # cached Mathlib v4.18.0 oleans. CF-29 = the Aczél quasi-arithmetic REPRESENTATION theorem,
@@ -251,7 +251,7 @@ EXPERIMENTAL_SCOPES = (
     # Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave18") + os.sep,
     # Wave19 frontier pack (wave19-cut1-density) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave19/. Builds the
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Files under Lutar/Wave19/. Builds the
     # MISSING density engine of BKS arXiv:2208.07083 Lemma 6 Step 2: the
     # "countably-many-pairwise-disjoint-nonempty-opens on a separable line" contradiction engine
     # (countable_of_pairwiseDisjoint_open / false_of_uncountable_pairwiseDisjoint_Ioo), the
@@ -259,7 +259,7 @@ EXPERIMENTAL_SCOPES = (
     # axiom token. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE).
     os.path.join("Lutar", "Wave19") + os.sep,
     # Wave20 density PRIMITIVES pack (wave20-density-primitives) — additive, EXPERIMENTAL, NOT
-    # folded into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Two files under
+    # folded into the locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Two files under
     # Lutar/Wave20/, the standalone reusable engines behind BKS arXiv:2208.07083 Lemma 6 Step 2.
     # DisjointOpens.lean = PRIMITIVE A: pairwise-disjoint nonempty open sets are countable
     # (self-contained rational-injection proof over ℝ + general separable-space packaging +
@@ -272,7 +272,7 @@ EXPERIMENTAL_SCOPES = (
     # Classical.choice, Quot.sound}. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1.
     os.path.join("Lutar", "Wave20") + os.sep,
     # Wave21 frontier pack (wave21-cut1-final) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave21/. CLOSES the
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Files under Lutar/Wave21/. CLOSES the
     # FINAL residual of BKS arXiv:2208.07083 Lemma 6 Step-2 (dyadic_image_dense): the (B) residual
     # "uncountably many two-sided accumulation points" is discharged kernel-clean via the LIGHT
     # monotone-extension route of the parent paper arXiv:2107.07391 Theorem 8 — NO perfect-set /
@@ -289,7 +289,7 @@ EXPERIMENTAL_SCOPES = (
     # NOT unconditional. Locked-proven set STAYS EXACTLY 5.
     os.path.join("Lutar", "Wave21") + os.sep,
     # Wave22 frontier pack (wave22-cut1-corder) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave22/. CLOSES the ONE
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Files under Lutar/Wave22/. CLOSES the ONE
     # honest residual of CUT-1 carried by Wave21's dyadic_image_dense_complete: the BKS Fourth-step
     # (C-order) gap-shift ordering R s <= L t (arXiv:2107.07391 Theorem 8, eqs (8)-(9)).
     # GapShiftOrdering.lean derives the discrete midpoint chain F (f a)(f c) <= F (f b)(f d) from
@@ -310,7 +310,7 @@ EXPERIMENTAL_SCOPES = (
     # Conjecture 1 (machine-checked FALSE). Locked-proven set STAYS EXACTLY 5.
     os.path.join("Lutar", "Wave22") + os.sep,
     # Wave23 frontier pack (wave23-bft-safety) — additive, EXPERIMENTAL, NOT folded into the
-    # locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Wave23/. Attacks the
+    # locked v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Files under Lutar/Wave23/. Attacks the
     # GENUINE open conjecture (Khipu Conjecture 2, ubuntu_quorum_safety / khipu_consensus_safety):
     # Byzantine quorum SAFETY. UNCONDITIONAL safety stays Conjecture 2 (a faulty organ can
     # equivocate; n <= 3f is impossible per Lamport-Shostak-Pease, formalized in Lutar/Wave8). We do
@@ -342,7 +342,7 @@ EXPERIMENTAL_SCOPES = (
     # remains Conjecture 1.
     os.path.join("Lutar", "Wave24") + os.sep,
     # Theorem-U pack (theorem-u-kernel) — additive, EXPERIMENTAL, NOT folded into the locked
-    # v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Files under Lutar/Uniqueness/, all kernel-clean
+    # v11 baseline (now 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Files under Lutar/Uniqueness/, all kernel-clean
     # (every #print axioms subset {propext, funext, Classical.choice, Quot.sound}), no proof
     # placeholders, NO new declared axiom token. Reframes the TARGET of Lambda-uniqueness as the
     # audit-invariant equivalence ~Lambda (LambdaEquiv): two aggregators are ~Lambda exactly when
