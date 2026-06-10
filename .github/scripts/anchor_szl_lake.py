@@ -47,6 +47,11 @@ GH_REPO = "szl-holdings/szl-lake"
 HF_NDJSON = "khipu/lutar_lean_receipts.ndjson"
 GH_NDJSON = "data/khipu/lutar_lean_receipts.ndjson"
 GH_INDEX = "lake_index.json"
+# Per-theorem anchor manifests land at the SAME relative path on both surfaces so
+# the GitHub and HF copies are byte-identical.
+THEOREMS_DIR = "attestations/innovations/theorems"
+
+THEOREM_ANCHOR_SCHEMA = "szl.lake.theorem-anchors/v1"
 
 GH_OIDC_ISSUER = "https://token.actions.githubusercontent.com"
 IDENTITY_PREFIX = "https://github.com/szl-holdings/lutar-lean/"
@@ -235,6 +240,65 @@ def hf_upload(token: str, content: str, commit_msg: str) -> None:
     )
 
 
+def hf_upload_file(token: str, path_in_repo: str, content: str, commit_msg: str) -> None:
+    """Upload an arbitrary text file to the HF dataset (used for theorem manifests)."""
+    from huggingface_hub import HfApi
+    import tempfile
+    api = HfApi(token=token)
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
+        tf.write(content)
+        tmp = tf.name
+    api.upload_file(
+        path_or_fileobj=tmp,
+        path_in_repo=path_in_repo,
+        repo_id=HF_REPO,
+        repo_type="dataset",
+        commit_message=commit_msg,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Per-theorem anchor manifest (every CI-green theorem -> szl-lake)
+# --------------------------------------------------------------------------- #
+def build_theorem_manifest(snapshot: dict, snapshot_sha: str, kind: str,
+                           kernel_commit: str, receipt_id: str, chain_index: int,
+                           verify_cmd: str):
+    """Build the deterministic per-theorem anchor manifest from the snapshot.
+
+    Returns (relpath, manifest_str) or (None, None) when the snapshot carries no
+    verified_theorems block. The manifest carries NO timestamp so its bytes depend
+    only on the (idempotent) snapshot + chain position -- making the GitHub and HF
+    copies byte-identical and a re-anchor of the same milestone reproducible.
+    """
+    vt = snapshot.get("verified_theorems") or {}
+    theorems = vt.get("theorems") or []
+    if not theorems:
+        return None, None
+    rel = f"{THEOREMS_DIR}/{kernel_commit or snapshot_sha}.json"
+    manifest = {
+        "schema": THEOREM_ANCHOR_SCHEMA,
+        "organ": "lutar-lean",
+        "milestone_kind": kind,
+        "kernel_commit": kernel_commit,
+        "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
+        "branch": snapshot.get("branch", ""),
+        "snapshot_sha256": snapshot_sha,
+        "receipt_id": receipt_id,
+        "chain_index": chain_index,
+        "doctrine": vt.get("doctrine") or snapshot.get("honesty", {}).get("doctrine", "v11"),
+        "source": vt.get("source"),
+        "source_sha256": vt.get("source_sha256"),
+        "count": vt.get("count", len(theorems)),
+        "honesty": snapshot.get("honesty", {}),
+        "theorems": theorems,
+        "github_path": rel,
+        "hf_path": rel,
+        "verify_cmd": verify_cmd,
+    }
+    manifest_str = json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    return rel, manifest_str
+
+
 # --------------------------------------------------------------------------- #
 # GitHub szl-lake I/O (signed commit via GraphQL)
 # --------------------------------------------------------------------------- #
@@ -304,16 +368,77 @@ def gh_signed_commit(token: str, additions: list[dict], message: str) -> str:
 
 
 # --------------------------------------------------------------------------- #
+def _self_test() -> int:
+    """Offline self-test for the per-theorem manifest (no network/cosign/build)."""
+    snap = {
+        "kind": "theorem-u",
+        "kernel_commit": "deadbeef" * 5,
+        "kernel_commit_short": "deadbeefdead",
+        "branch": "main",
+        "honesty": {"doctrine": "v11"},
+        "verified_theorems": {
+            "schema": "szl.lake.verified-theorems/v1",
+            "source": "VERIFIED_THEOREMS.generated.md",
+            "source_sha256": "a" * 64,
+            "doctrine": "v11",
+            "count": 2,
+            "theorems": [
+                {"file": "Lutar/Uniqueness.lean", "name": "lambda_satisfiesAxioms",
+                 "signature": "lambda_satisfiesAxioms ... : LutarAxioms (\u039b k)"},
+                {"file": "Lutar/Uniqueness/TheoremU.lean", "name": "TheoremU_LambdaUnique",
+                 "signature": "TheoremU_LambdaUnique ... : LambdaEquiv \u03a6 \u03a8"},
+            ],
+        },
+    }
+    ok = True
+
+    def chk(cond, msg):
+        nonlocal ok
+        if not cond:
+            ok = False
+            print(f"SELF-TEST FAIL: {msg}")
+
+    rel1, m1 = build_theorem_manifest(snap, "f" * 64, "theorem-u",
+                                      snap["kernel_commit"], "rid123", 7, "cosign verify ...")
+    rel2, m2 = build_theorem_manifest(snap, "f" * 64, "theorem-u",
+                                      snap["kernel_commit"], "rid123", 7, "cosign verify ...")
+    chk(rel1 == rel2 == f"{THEOREMS_DIR}/{snap['kernel_commit']}.json", f"manifest path: {rel1}")
+    chk(m1 == m2, "manifest must be deterministic (byte-identical re-build)")
+    obj = json.loads(m1)
+    chk(obj["schema"] == THEOREM_ANCHOR_SCHEMA, "schema")
+    chk(obj["count"] == 2 and len(obj["theorems"]) == 2, "theorem count")
+    chk(obj["receipt_id"] == "rid123", "receipt_id link")
+    chk(obj["github_path"] == obj["hf_path"] == rel1, "github/hf paths must match (byte-identical)")
+    chk("timestamp" not in obj and "anchored_at_utc" not in obj,
+        "manifest must carry NO timestamp (deterministic/byte-identical)")
+    rel0, m0 = build_theorem_manifest({"verified_theorems": {"theorems": []}},
+                                      "x", "k", "c", "r", 1, "v")
+    chk(rel0 is None and m0 is None, "empty theorem set -> no manifest")
+    rel_n, m_n = build_theorem_manifest({}, "x", "k", "c", "r", 1, "v")
+    chk(rel_n is None and m_n is None, "missing verified_theorems -> no manifest")
+    print("SELF-TEST: PASS" if ok else "SELF-TEST: FAILED")
+    return 0 if ok else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snapshot", required=True)
-    ap.add_argument("--bundle", required=True)
-    ap.add_argument("--source-run-id", required=True)
+    ap.add_argument("--snapshot", default=None)
+    ap.add_argument("--bundle", default=None)
+    ap.add_argument("--source-run-id", default=None)
     ap.add_argument("--source-run-url", default="")
     ap.add_argument("--source-workflow", default="Lake build (gate + numbers)")
     ap.add_argument("--predicate-type", default=DEFAULT_PREDICATE_TYPE,
                     help="cosign attestation predicate type used to sign the snapshot")
+    ap.add_argument("--self-test", action="store_true",
+                    help="run offline manifest self-tests (no network/cosign/build) and exit")
     args = ap.parse_args()
+
+    if args.self_test:
+        return _self_test()
+    missing = [f"--{n.replace('_', '-')}" for n in ("snapshot", "bundle", "source_run_id")
+               if not getattr(args, n)]
+    if missing:
+        ap.error("the following arguments are required: " + ", ".join(missing))
 
     gh_token = os.environ["SZL_LAKE_TOKEN"]
     hf_token = os.environ["HF_LAKE_TOKEN"]
@@ -397,12 +522,23 @@ def main() -> int:
     receipt["receipt_id"] = canonical_hash(receipt)
     line = json.dumps(receipt, sort_keys=True, ensure_ascii=False)
 
+    # ---- per-theorem anchor manifest (every CI-green theorem) ------------ #
+    manifest_rel, manifest_str = build_theorem_manifest(
+        snapshot, snapshot_sha, kind, kernel_commit,
+        receipt["receipt_id"], chain_index, signing["verify_cmd"])
+    vt_count = (snapshot.get("verified_theorems") or {}).get("count", 0)
+
     # ---- append to HF (canonical) --------------------------------------- #
     hf_content = ("\n".join(json.dumps(r, sort_keys=True, ensure_ascii=False)
                             for r in existing) + ("\n" if existing else "") + line + "\n")
     hf_upload(hf_token, hf_content,
               f"anchor: {kind} snapshot {kernel_commit[:12]} (chain_index {chain_index})")
     print(f"HF appended: kind={kind} chain_index={chain_index} receipt_id={receipt['receipt_id']}")
+    if manifest_str is not None:
+        hf_upload_file(hf_token, manifest_rel, manifest_str,
+                       f"anchor: {kind} verified-theorems manifest "
+                       f"{kernel_commit[:12]} ({vt_count} theorems)")
+        print(f"HF manifest written: {manifest_rel} ({vt_count} theorems)")
 
     # ---- append to GitHub front-door (signed commit) -------------------- #
     gh_existing = gh_get_raw(gh_token, GH_NDJSON) or ""
@@ -471,12 +607,31 @@ def main() -> int:
         })
         index["theorem_u_anchor"] = legacy
         index["theorem_u_anchored_at_utc"] = pointer["anchored_at_utc"]
+    # Per-theorem anchor pointer (additive; set, not increment -> idempotent).
+    if manifest_str is not None:
+        index["verified_theorems"] = {
+            "kind": kind,
+            "kernel_commit": kernel_commit,
+            "kernel_commit_short": snapshot.get("kernel_commit_short", ""),
+            "count": vt_count,
+            "chain_index": chain_index,
+            "receipt_id": receipt["receipt_id"],
+            "snapshot_sha256": snapshot_sha,
+            "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
+            "source_sha256": (snapshot.get("verified_theorems") or {}).get("source_sha256"),
+            "manifest_github": manifest_rel,
+            "manifest_hf": f"datasets/{HF_REPO} :: {manifest_rel}",
+            "anchored_at_utc": pointer["anchored_at_utc"],
+        }
     index_str = json.dumps(index, indent=2, ensure_ascii=False) + "\n"
 
     additions = [
         {"path": GH_NDJSON, "contents": base64.b64encode(gh_new.encode()).decode()},
         {"path": GH_INDEX, "contents": base64.b64encode(index_str.encode()).decode()},
     ]
+    if manifest_str is not None:
+        additions.append({"path": manifest_rel,
+                          "contents": base64.b64encode(manifest_str.encode()).decode()})
     msg = (f"anchor: {kind} snapshot {kernel_commit[:12]} into szl-lake "
            f"(chain_index {chain_index})\n\n"
            f"Cosign-keyless DSSE receipt for the kernel-verified {kind} snapshot.\n"
@@ -505,6 +660,8 @@ def main() -> int:
             "hf_chain_length": len(after), "github_commit": commit_url,
             "fulcio_identity": signing["fulcio_identity"],
             "rekor_log_index": signing["rekor_log_index"],
+            "verified_theorems_count": vt_count,
+            "verified_theorems_manifest": manifest_rel,
         }, fh, indent=2)
     return 0
 
