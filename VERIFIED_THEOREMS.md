@@ -9,15 +9,7 @@
 > `{propext, Classical.choice, Quot.sound}` plus the already-declared, cited repo
 > axioms in `.github/data/lean_numbers.json`.
 >
-> **Honesty doctrine v11 (updated 2026-06-10).** The locked-proven set is now
-> exactly 8 — `{F1,F4,F7,F11,F12,F18,F19,F22}` — after F4 and F7 were upgraded
-> from vacuous placeholders to GENUINE, non-vacuous, sorry-free, axiom-clean
-> proofs (real Khipu-DAG acyclicity preservation and Chaski FIFO
-> reception-order = send-order theorems in
-> `Lutar/Puriq/Formulas/ProvedFormulas.lean`; F22 was already genuine). The
-> machine-enforced count moved `locked_count_five` (=5) → `locked_count_eight`
-> (=8) in lockstep across `Wave8/9/10/11/AxiomDisclosure.lean` and
-> `Uniqueness/AxiomCheck.lean`. Conjecture 1
+> **Honesty doctrine v11.** The locked-proven set stays exactly 5. Conjecture 1
 > (unconditional Λ uniqueness, `∀ Φ, LutarAxioms Φ → Φ = Λ k`) is machine-checked
 > **FALSE** under A1–A5 — `Lutar.Round13.maxAgg_ne_Lambda` exhibits the max
 > aggregator as an A1–A5 counterexample — so it can never appear here. Only the
@@ -49,17 +41,6 @@
 - `locked_count_eight : lockedNames.length = 8`
 - `theoremU_excluded_from_locked : theoremUDisclosed.all (fun p => ! lockedNames.contains p.1) = true`
 - `conjecture1_still_open : openConjectures.length = 1`
-
-## `Lutar/Puriq/Formulas/ProvedFormulas.lean`
-
-- `f4_khipu_reach_decreases (es) (inv : KhipuBackwardInvariant es) (r : KhipuReach es a b) : b < a`
-- `f4_khipu_no_cycle (es) (inv : KhipuBackwardInvariant es) (a) : ¬ KhipuReach es a a`
-- `f4_khipu_append_preserves_invariant (es) (inv) (k) (newEdges) (hk) : KhipuBackwardInvariant (es ++ newEdges)`
-- `f4_khipu_dag_acyclic_preserved (es) (inv) (k) (newEdges) (hk) : ∀ a, ¬ KhipuReach (es ++ newEdges) a a`
-- `f7_chaski_drain_eq (q) : chaskiDrain q = q`
-- `f7_chaski_fifo_order (msgs) : chaskiDrain (chaskiEnqueueAll [] msgs) = msgs`
-- `f7_chaski_fifo_positional (msgs) (i) : (chaskiDrain (chaskiEnqueueAll [] msgs))[i]? = msgs[i]?`
-- `f22_khipu_emit_monotone (n i j) (hij : i < j) (hj : j < n) : (f22_seqLog n)[i] < (f22_seqLog n)[j]`
 
 ## `Lutar/Uniqueness/LambdaEquiv.lean`
 
