@@ -37,15 +37,15 @@ SZL runs a strict **two-tier** honesty doctrine. The two tiers never blend.
 
 ### Tier 1 — LOCKED (proven, sorry-free, count machine-enforced)
 
-> **Exactly 5 formulas are locked-proven: `F1, F11, F12, F18, F19`.**
+> **Exactly 8 formulas are locked-proven: `F1, F4, F7, F11, F12, F18, F19, F22`.**
 
-They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Quot.sound]`, and the fact that there are **exactly 5** is *itself* a Lean theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_five`, which depends on **no** axioms). The locked set cannot silently grow.
+They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Quot.sound]`, and the fact that there are **exactly 8** is *itself* a Lean theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_eight`, which depends on **no** axioms). The locked set cannot silently grow. **It grew from 5 to 8 on 2026-06-10** when F4 and F7 were upgraded from vacuous placeholders (`t<k → t<k ∧ k≠t`; `msgs = msgs`) to GENUINE, non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO reception-order = send-order — joining the already-genuine F22, with the count moved in lockstep across `Wave8/9/10/11/AxiomDisclosure.lean` and `Uniqueness/AxiomCheck.lean`. (Final kernel `#print axioms` verification by the founder Lean-runner is PENDING before the served surfaces flip.)
 
 ### Tier 2 — EXPERIMENTAL · CI-green (kernel-verified, labeled, never in the locked count)
 
 > The experimental library on `main` type-checks at **1323 declarations / 23 axioms (22 unique), CI-green** on Lean `v4.18.0` (`lake build + numbers` ✅, DCO ✅).
 
-These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-5.
+These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-8.
 
 **Frontier families (Waves 11–17, all `#print axioms` ⊆ `[propext, Classical.choice, Quot.sound]`, no new axiom, no `sorry`):**
 
@@ -59,7 +59,7 @@ These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1�
 | **16** | CF-23 binary-KL convexity crux · CF-24 `geoBin` satisfies the **full Aczél quasi-arithmetic axioms** (idempotent/symmetric/homogeneous/monotone — the last analytic step before CUT-1) · CF-25 Λ scale-invariance · CF-26 abacus place-value |
 | **17** | **CF-23 `binary_pinsker`** (full binary Pinsker `2(p−q)² ≤ KL`) · CF-27 monotone-DEQ unique equilibrium · CF-28 recurrent-depth `Kʳ`-Lipschitz |
 
-~100 kernel-clean theorems across these waves; every one is drift-gate-checked and CI-green on `main`. None changes the locked count of 5; Λ stays **Conjecture 1**.
+~100 kernel-clean theorems across these waves; every one is drift-gate-checked and CI-green on `main`. None changes the locked count of 8; Λ stays **Conjecture 1**.
 
 ### The Λ line — Conjecture 1 (do not misquote this)
 
@@ -89,11 +89,11 @@ Lutar/
 ├── Axioms.lean              -- LutarAxioms A1–A5 (monotone, 1-homogeneous,
 │                               diagonal-normalized, bounded-by-max, symmetric)
 ├── Puriq/Formulas/
-│   └── PuriqFormulaLean.lean -- the 5 LOCKED formula theorems {F1,F11,F12,F18,F19}
+│   └── PuriqFormulaLean.lean -- locked formula theorems (proved subset wired via ProvedFormulas.lean)
 ├── Round13/                 -- Λ-uniqueness machinery (Cauchy/Aczél, CUT-2 conditional)
 │   ├── CauchyND_Closure.lean   -- monotone+additive ⇒ linear (rational squeeze, 0 sorry)
 │   └── Lambda_Uniqueness.lean  -- maxAgg_ne_Lambda counterexample (Conjecture-1 anchor)
-├── Wave8/AxiomDisclosure.lean  -- locked_count_five (no-axiom theorem: exactly 5 locked)
+├── Wave8/AxiomDisclosure.lean  -- locked_count_eight (no-axiom theorem: exactly 8 locked)
 ├── Wave13/Sweep.lean        -- experimental: quorum shadow + HM bottleneck (CI-green)
 ├── Khipu/                   -- receipt summation invariants, hash-chain tamper-evidence
 ├── Innovations/round*/      -- experimental frontier formulas (labeled, gated)
@@ -117,7 +117,7 @@ Inspect the honest proof posture of any declaration:
 
 ```bash
 # the locked count is itself a no-axiom theorem
-echo '#print axioms Lutar.Wave8.AxiomDisclosure.locked_count_five' | lake env lean --stdin
+echo '#print axioms Lutar.Wave8.AxiomDisclosure.locked_count_eight' | lake env lean --stdin
 # the Conjecture-1 counterexample
 echo '#print axioms Lutar.Round13.maxAgg_ne_Lambda' | lake env lean --stdin
 ```
@@ -128,7 +128,7 @@ echo '#print axioms Lutar.Round13.maxAgg_ne_Lambda' | lake env lean --stdin
 
 - **Open `sorry`s are tracked, not hidden.** Putnam analysis, the xoshiro period bound (GF(2)²⁵⁶ companion-matrix primitivity), Hoeffding–Azuma assembly, Reed–Solomon Singleton, and the Brouwer/cohomology obligations are genuinely hard (multi-day to multi-week or need Mathlib facts absent at v4.18.0). They stay honest `sorry`s with their references intact.
 - **Declared axioms are honest assumptions**, not proofs: cryptographic-hardness axioms (SHA-256 collision-resistance, domain separation), the Λ-family bridge axioms, and deep-math axioms (Gleason, Reidemeister, Liu-Hui) are disclosed and isolated. `#print axioms` is the source of truth.
-- **No fabricated metrics. No inflated proof counts.** The locked count is exactly 5 and machine-enforced; the experimental count is reported separately and CI-measured.
+- **No fabricated metrics. No inflated proof counts.** The locked count is exactly 8 and machine-enforced (was 5 until the 2026-06-10 genuine F4/F7 proofs); the experimental count is reported separately and CI-measured.
 
 ---
 
