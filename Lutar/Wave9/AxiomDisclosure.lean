@@ -9,7 +9,7 @@ Mirrors `Lutar/Wave8/AxiomDisclosure.lean`: a machine-checked record that the
 Wave9 candidate-theorem pack is EXPERIMENTAL/additive and leaves the LOCKED
 baseline untouched. We model the disclosed `#print axioms` set of each Wave9
 theorem as a `List String` and prove they are all kernel-only, while RE-ASSERTING
-the locked invariant `locked_count_five = 5`.
+the locked invariant `locked_count_eight = 8`.
 
 The verbatim ground-truth `#print axioms` lines are emitted per theorem in each
 Wave9 file and in the CI build log; this file is a meta-level summary, not a
@@ -20,14 +20,14 @@ re-verification of those kernel proofs.
   theorems, modeled as concrete `List String` values.
 - `wave9_axiom_sets_kernel_only` — every Wave9 disclosed set is kernel-only
   (`decide`): no Wave9 theorem introduces a custom axiom.
-- `locked_count_five` — RE-ASSERTED invariant: the locked baseline is EXACTLY the
-  five {F1,F11,F12,F18,F19}. Wave9 does NOT change this (`decide`).
+- `locked_count_eight` — RE-ASSERTED invariant: the locked baseline is EXACTLY the
+  eight {F1,F4,F7,F11,F12,F18,F19,F22}. Wave9 does NOT change this (`decide`).
 - `wave9_excluded_from_locked` — the Wave9 theorem names are disjoint from the
-  locked five: Wave9 is additive and excluded from the locked baseline.
+  locked eight: Wave9 is additive and excluded from the locked baseline.
 
 ## Honesty / scope
 - EXPERIMENTAL (`Lutar.Wave9`) — NOT in the LOCKED v11 baseline (749/14/163 @
-  c7c0ba17). Locked-proven stays exactly 5 {F1,F11,F12,F18,F19}. Λ Conjecture 1.
+  c7c0ba17). Locked-proven stays exactly 8 {F1,F4,F7,F11,F12,F18,F19,F22}. Λ Conjecture 1.
 - Lean-core only; NO Mathlib, NO new declared axiom, NO sorry.
 
 ## Citations
@@ -74,11 +74,11 @@ theorem wave9_axiom_sets_kernel_only :
     wave9Disclosed.all (fun p => axiomsAllowed p.2) = true := by decide
 
 /-- The LOCKED baseline names (RE-ASSERTED, NOT modified by Wave9). -/
-def lockedNames : List String := ["F1", "F11", "F12", "F18", "F19"]
+def lockedNames : List String := ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"]
 
-/-- RE-ASSERTED locked invariant: exactly five locked theorems. Wave9 leaves this
+/-- RE-ASSERTED locked invariant: exactly eight locked theorems. Wave9 leaves this
 unchanged. -/
-theorem locked_count_five : lockedNames.length = 5 := by decide
+theorem locked_count_eight : lockedNames.length = 8 := by decide
 
 /-- Wave9 is additive: none of the Wave9 theorem identifiers collide with a locked
 name (Wave9 is excluded from the locked baseline). -/
@@ -86,7 +86,7 @@ theorem wave9_excluded_from_locked :
     wave9Disclosed.all (fun p => ! lockedNames.contains p.1) = true := by decide
 
 #print axioms wave9_axiom_sets_kernel_only
-#print axioms locked_count_five
+#print axioms locked_count_eight
 #print axioms wave9_excluded_from_locked
 
 end Lutar.Wave9.AxiomDisclosure
