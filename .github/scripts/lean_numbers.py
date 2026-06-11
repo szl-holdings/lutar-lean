@@ -379,6 +379,38 @@ EXPERIMENTAL_SCOPES = (
     # drift gate are untouched; locked-proven set STAYS EXACTLY 5; Λ STAYS Conjecture 1; BFT STAYS
     # Conjecture 2. NO new declared axiom token anywhere in this scope.
     os.path.join("Lutar", "Putnam", "Sampler") + os.sep,
+    # Allodial order-theory backbone (branch allodial/order-theory-proposed) —
+    # additive, EXPERIMENTAL/PROPOSED, NOT folded into the locked v11 baseline
+    # (stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}). One file Lutar/Allodial.lean
+    # (namespace Lutar.Allodial): five kernel-clean declarations machine-checking the
+    # order-theory behind the PROPOSED "Allodial AI" sovereignty ENGINEERING frame —
+    # allodial_dominates_all (le_top), allodial_iff_top (isMax_iff_eq_top),
+    # feudal_has_overlord (lt_top_iff_ne_top.symm), galois_preserves_allodial
+    # (GaloisConnection.u_top), and a self-contained Goguen-Meseguer non-interference
+    # lemma ni_low_independent_of_high (rw). All Mathlib aliases / trivial rewrites;
+    # every #print axioms reports NO axiom dependency (not even propext). NO sorry /
+    # NO new declared axiom token. This adds NOTHING to the locked-proven set and says
+    # NOTHING about Λ: Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked
+    # FALSE); the Allodial frame stays a PROPOSED engineering gate, never a theorem
+    # about Λ. Excluded from ALL v11 numbers, so the locked baseline is untouched.
+    os.path.join("Lutar", "Allodial.lean"),
+    # Entanglement capacity-bound backbone (branch entangle/capacity-bound-proposed) —
+    # additive, EXPERIMENTAL/PROPOSED, NOT folded into the locked v11 baseline
+    # (stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}). One file Lutar/Entanglement.lean
+    # (namespace Lutar.Entanglement): kernel-clean declarations machine-checking the
+    # order-theoretic backbone of SZL's PROPOSED entanglement-generating-capacity UPPER
+    # BOUND E_max(t) ≤ C₀·exp(−γt) (Streltsov 2015 ∘ merged Wave24 CoherenceDecay) —
+    # capBound (def C₀·exp(−γt)), capBound_nonneg (mul_nonneg ∘ Real.exp_nonneg),
+    # capBound_zero (simp), capBound_antitone (mul_le_mul_of_nonneg_left ∘
+    # Real.exp_le_exp.mpr ∘ linarith, giving Antitone), and entanglement_decays_under_bound
+    # (capacity-domination is inherited). All standard Mathlib lemmas / trivial rewrites;
+    # every #print axioms reports only Lean/Mathlib-core axioms (propext, Classical.choice,
+    # Quot.sound). NO sorry / NO new declared axiom token. This adds NOTHING to the
+    # locked-proven set and says NOTHING about Λ: Λ UNCONDITIONAL uniqueness STAYS
+    # Conjecture 1 (machine-checked FALSE); the capacity bound is a PROPOSED engineering
+    # frame and a CAPACITY UPPER BOUND, never a uniqueness/existence claim or a theorem
+    # about Λ. Excluded from ALL v11 numbers, so the locked baseline is untouched.
+    os.path.join("Lutar", "Entanglement.lean"),
 )
 
 
