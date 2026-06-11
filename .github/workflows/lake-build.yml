@@ -322,6 +322,7 @@ jobs:
             --numbers lean_numbers.measured.json \
             --reference-vectors reference-vectors.json \
             --pack-dir Lutar/Uniqueness \
+            --verified-theorems VERIFIED_THEOREMS.generated.md \
             --out theorem_u_snapshot.json
           echo "----- theorem_u_snapshot.json (head) -----"
           head -c 1200 theorem_u_snapshot.json; echo

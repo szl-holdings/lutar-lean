@@ -137,6 +137,103 @@ PROFILES: dict[str, dict] = {
 _DEPENDS_RE = re.compile(r"'([^']+)' depends on axioms:\s*\[([^\]]*)\]", re.DOTALL)
 _NODEPS_RE = re.compile(r"'([^']+)' does not depend on any axioms")
 
+# VERIFIED_THEOREMS(.generated).md is emitted by gen_verified_theorems.py as a
+# `## \`<relpath>\`` header per source file followed by `- \`<signature>\`` items,
+# one per REAL (kernel-checked, zero-sorry, in-policy axiom footprint) theorem on
+# the governed surface, and is CI-drift-gated against the real build. We parse it
+# back into a deterministic per-theorem list so EVERY CI-green theorem rides the
+# same cosign-signed snapshot/receipt the anchor workflow records into szl-lake.
+_VT_FILE_RE = re.compile(r"^##\s+`([^`]+)`\s*$")
+_VT_ITEM_RE = re.compile(r"^-\s+`(.+)`\s*$")
+_VT_NAME_RE = re.compile(r"^([^\s(){}:]+)")
+
+VERIFIED_THEOREMS_SCHEMA = "szl.lake.verified-theorems/v1"
+
+
+def parse_verified_theorems(md_text: str) -> list[dict]:
+    """Parse VERIFIED_THEOREMS(.generated).md into a deterministic theorem list.
+
+    Returns records {file, name, signature} sorted by (file, name) so the embedded
+    block is byte-stable at a fixed revision regardless of within-file ordering.
+    Each record is a kernel-checked REAL theorem (the source file is regenerated
+    from the real `lake build` and CI-drift-gated); we never invent entries.
+    """
+    out: list[dict] = []
+    current_file = None
+    for raw in md_text.splitlines():
+        line = raw.rstrip()
+        mf = _VT_FILE_RE.match(line)
+        if mf:
+            current_file = mf.group(1).strip()
+            continue
+        mi = _VT_ITEM_RE.match(line)
+        if mi and current_file:
+            sig = mi.group(1).strip()
+            mn = _VT_NAME_RE.match(sig)
+            if not mn:
+                continue
+            out.append({"file": current_file, "name": mn.group(1), "signature": sig})
+    out.sort(key=lambda r: (r["file"], r["name"]))
+    return out
+
+
+def build_verified_theorems_block(path: str, doctrine: str) -> dict | None:
+    """Build the embeddable verified_theorems block from the generated md file."""
+    if not path:
+        return None
+    if not os.path.exists(path):
+        print(f"::warning::--verified-theorems {path} not found; snapshot will omit "
+              "the verified_theorems block", file=sys.stderr)
+        return None
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    theorems = parse_verified_theorems(text)
+    return {
+        "schema": VERIFIED_THEOREMS_SCHEMA,
+        "source": os.path.basename(path),
+        "source_sha256": _sha256_bytes(text.encode()),
+        "doctrine": doctrine or "v11",
+        "count": len(theorems),
+        "theorems": theorems,
+    }
+
+
+def _self_test() -> int:
+    """Offline parser self-test (no lean, no build, no network)."""
+    fixture = (
+        "# Verified Theorems\n\n"
+        "> **Honesty doctrine v11.** Conjecture 1 is machine-checked FALSE.\n\n"
+        "## `Lutar/Uniqueness/TheoremU.lean`\n\n"
+        "- `TheoremU_LambdaUnique {k : \u2115} (\u03a6 \u03a8 : Aggregator k) : LambdaEquiv \u03a6 \u03a8`\n"
+        "- `identifiability_forces_lambda {k : \u2115} (\u03a6 : Aggregator k) : \u03a6 = \u039b k`\n\n"
+        "## `Lutar/Uniqueness/AxiomCheck.lean`\n\n"
+        "- `locked_count_eight : lockedNames.length = 8`\n"
+        "- `conjecture1_still_open : openConjectures.length = 1`\n"
+    )
+    ok = True
+
+    def chk(cond, msg):
+        nonlocal ok
+        if not cond:
+            ok = False
+            print(f"SELF-TEST FAIL: {msg}")
+
+    rows = parse_verified_theorems(fixture)
+    chk(len(rows) == 4, f"expected 4 theorems, got {len(rows)}")
+    names = [r["name"] for r in rows]
+    chk(names == ["conjecture1_still_open", "locked_count_eight",
+                  "TheoremU_LambdaUnique", "identifiability_forces_lambda"],
+        f"unexpected order/names: {names}")
+    chk(all(r["file"] and r["name"] and r["signature"] for r in rows),
+        "every record must have file/name/signature")
+    chk(all("`" not in r["signature"] for r in rows), "signatures must be backtick-free")
+    chk(parse_verified_theorems(fixture) == rows, "parser must be deterministic")
+    # Empty / headerless input yields an empty list (never crashes, never invents).
+    chk(parse_verified_theorems("# Verified Theorems\n\n_No REAL theorems._\n") == [],
+        "empty surface must parse to []")
+    print("SELF-TEST: PASS" if ok else "SELF-TEST: FAILED")
+    return 0 if ok else 1
+
 
 def _sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -243,19 +340,32 @@ def main() -> int:
     ap.add_argument("--no-require-headline", dest="require_headline",
                     action="store_false",
                     help="allow an empty/partial headline set")
-    ap.add_argument("--axiomcheck-out", required=True,
+    ap.add_argument("--axiomcheck-out", default=None,
                     help="captured stdout of the axiom-hygiene gate (#print axioms)")
-    ap.add_argument("--numbers", required=True,
+    ap.add_argument("--numbers", default=None,
                     help="regenerated canonical numbers (lean_numbers.measured.json)")
-    ap.add_argument("--reference-vectors", required=True,
+    ap.add_argument("--reference-vectors", default=None,
                     help="reference-vectors.json produced by `lake exe ref_vectors`")
     ap.add_argument("--pack-dir", default=None,
                     help="milestone pack source directory (overrides the profile)")
+    ap.add_argument("--verified-theorems", default=None,
+                    help="VERIFIED_THEOREMS(.generated).md to embed as the per-theorem "
+                         "anchor record set (every CI-green governed-surface theorem)")
     ap.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", "szl-holdings/lutar-lean"))
     ap.add_argument("--commit", default=os.environ.get("GITHUB_SHA", ""))
     ap.add_argument("--branch", default=os.environ.get("GITHUB_REF_NAME", ""))
     ap.add_argument("--out", default="theorem_u_snapshot.json")
+    ap.add_argument("--self-test", action="store_true",
+                    help="run offline parser self-tests (no lean/build/network) and exit")
     args = ap.parse_args()
+
+    if args.self_test:
+        return _self_test()
+    missing = [f"--{n.replace('_', '-')}" for n in
+               ("axiomcheck_out", "numbers", "reference_vectors")
+               if not getattr(args, n)]
+    if missing:
+        ap.error("the following arguments are required: " + ", ".join(missing))
 
     profile = _load_profile(args)
     headline_suffixes = profile["headline_suffixes"]
@@ -340,6 +450,15 @@ def main() -> int:
         },
         "honesty": honesty,
     }
+
+    # Embed EVERY CI-green governed-surface theorem (kernel-checked, drift-gated)
+    # so the cosign-signed snapshot/receipt anchored into szl-lake records them all.
+    vt_block = build_verified_theorems_block(
+        args.verified_theorems,
+        honesty.get("doctrine", "v11") if isinstance(honesty, dict) else "v11",
+    )
+    if vt_block is not None:
+        snapshot["verified_theorems"] = vt_block
 
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(snapshot, fh, indent=2, sort_keys=True, ensure_ascii=False)
