@@ -30,6 +30,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fast, Lean-free guard: the proof-snapshot build + szl-lake anchor invariants
+  # never regress. Asserts (1) the DEFAULT `build_proof_snapshot.py` run reproduces
+  # the canonical Theorem-U snapshot shape (schema/headline/honesty) and still
+  # passes check_theorem_u_snapshot.py; (2) a `--kind` with NO honesty block exits
+  # non-zero (a milestone may never anchor without a per-snapshot honesty
+  # statement); (3) anchor_szl_lake.py keeps chain_index = prev+1, prev_hash = last
+  # receipt_id, and the (kind, kernel_commit, snapshot_sha) idempotency tuple.
+  # Pure stdlib; runs in parallel with the heavy lake build so it gives fast
+  # feedback on a pipeline edit even if the Lean build is queued.
+  snapshot-anchor-selftest:
+    name: Snapshot + anchor invariants self-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Self-test the snapshot build + anchor chain-math invariants
+        run: python3 .github/scripts/test_anchor_and_snapshot.py
+
   build:
     name: lake build + numbers
     runs-on: ubuntu-latest

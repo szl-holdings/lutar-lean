@@ -77,6 +77,35 @@ def get_milestone(snapshot: dict) -> dict:
     return snapshot.get("milestone") or snapshot.get("theorem_u") or {}
 
 
+def find_existing_anchor(existing: list, receipt_kind: str,
+                         kernel_commit: str, snapshot_sha: str):
+    """Return the already-anchored receipt matching the idempotency tuple
+    (kind, kernel_commit, snapshot_sha), or None.
+
+    Anchoring is a no-op when this returns a record, so a re-run never
+    double-appends the same milestone. Extracted as a pure helper so the
+    idempotency contract is unit-testable (test_anchor_and_snapshot.py).
+    """
+    for rec in existing:
+        if (rec.get("kind") == receipt_kind
+                and rec.get("kernel_commit") == kernel_commit
+                and rec.get("subject", {}).get("sha256") == snapshot_sha):
+            return rec
+    return None
+
+
+def chain_position(existing: list):
+    """Return (chain_index, prev_hash) for the next receipt on the chain.
+
+    chain_index advances by exactly one (genesis count 0 -> first receipt 1);
+    prev_hash is the previous tail's receipt_id (None at genesis). Pure helper
+    so the chain math is unit-testable (test_anchor_and_snapshot.py).
+    """
+    chain_index = len(existing) + 1
+    prev_hash = existing[-1].get("receipt_id") if existing else None
+    return chain_index, prev_hash
+
+
 # --------------------------------------------------------------------------- #
 # cosign bundle inspection
 # --------------------------------------------------------------------------- #
@@ -315,16 +344,14 @@ def main() -> int:
 
     # ---- chain state + idempotency -------------------------------------- #
     existing = hf_read_ndjson(hf_token)
-    for rec in existing:
-        if rec.get("kind") == receipt_kind and rec.get("kernel_commit") == kernel_commit \
-                and rec.get("subject", {}).get("sha256") == snapshot_sha:
-            print(f"already anchored: kind={kind} kernel_commit={kernel_commit} "
-                  f"chain_index={rec.get('chain_index')} receipt_id={rec.get('receipt_id')}")
-            print(f"::notice::idempotent no-op (HF chain length stays {len(existing)})")
-            return 0
+    already = find_existing_anchor(existing, receipt_kind, kernel_commit, snapshot_sha)
+    if already is not None:
+        print(f"already anchored: kind={kind} kernel_commit={kernel_commit} "
+              f"chain_index={already.get('chain_index')} receipt_id={already.get('receipt_id')}")
+        print(f"::notice::idempotent no-op (HF chain length stays {len(existing)})")
+        return 0
     prev_count = len(existing)
-    chain_index = prev_count + 1
-    prev_hash = existing[-1].get("receipt_id") if existing else None
+    chain_index, prev_hash = chain_position(existing)
 
     # ---- build receipt --------------------------------------------------- #
     milestone_status = milestone.get("status", "")
