@@ -126,6 +126,39 @@ theorem lfp_eq_iSup_iterate_of_commute (Φ : α →o α)
       | succ k => exact iterate_succ_le_map_iSup Φ k
   exact le_antisymm (lfp_le Φ (le_of_eq hfix)) (iSup_iterate_le_lfp Φ)
 
+/-- **Kleene fixpoint theorem (unconditional under ω-Scott-continuity).**
+    When the aggregator `Φ` is ω-Scott-continuous (`OmegaCompletePartialOrder.ωScottContinuous`),
+    its least fixed point EQUALS the supremum of the Kleene iterate chain
+    `lfp Φ = ⨆ n, Φⁿ⊥`.  Unlike `lfp_eq_iSup_iterate_of_commute` (Wave25), this does NOT
+    carry the `Φ (⨆ iterate) = ⨆ Φ(iterate)` commute hypothesis as an explicit assumption:
+    the commute property is DERIVED automatically from ω-Scott-continuity.
+
+    Mechanism: the Kleene iterate sequence `iterate Φ` is monotone (`iterate_mono`), so it is
+    an `OmegaCompletePartialOrder.Chain α` (a monotone ℕ-indexed sequence).  For a
+    `CompleteLattice` the ωCPO `ωSup` of a chain is definitionally `⨆ i, c i`, so
+    `ωScottContinuous.map_ωSup` instantiated at that chain reads exactly
+    `Φ (⨆ n, iterate Φ n) = ⨆ n, Φ (iterate Φ n)` — the Wave25 commute hypothesis.  We then
+    discharge it through `lfp_eq_iSup_iterate_of_commute` (reusing the Wave25 antisymmetry
+    argument).  This is the standard Kleene fixpoint theorem; it remains a CONVERGENCE result
+    (the constructive computation of the lfp), NOT a uniqueness claim, and does NOT bear on
+    Conjecture 1.  Kernel-clean: `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`. -/
+theorem lfp_eq_iSup_iterate (Φ : α →o α)
+    (hΦ : OmegaCompletePartialOrder.ωScottContinuous (Φ : α → α)) :
+    lfp Φ = ⨆ n, iterate Φ n := by
+  -- Package the monotone Kleene iterate sequence as an ωCPO `Chain`.
+  let c : OmegaCompletePartialOrder.Chain α := ⟨iterate Φ, iterate_mono Φ⟩
+  -- ω-Scott-continuity distributes Φ over the chain's ωSup.
+  have hmap := hΦ.map_ωSup c
+  -- For a `CompleteLattice` the ωCPO `ωSup` of a chain is definitionally `⨆ i, c i`,
+  -- so `hmap` is exactly the Wave25 commute property after unfolding.
+  have hcommute : Φ (⨆ n, iterate Φ n) = ⨆ n, Φ (iterate Φ n) := by
+    have hL : (⨆ n, iterate Φ n) = OmegaCompletePartialOrder.ωSup c := rfl
+    have hR : (⨆ n, Φ (iterate Φ n))
+        = OmegaCompletePartialOrder.ωSup (c.map ⟨Φ, hΦ.monotone⟩) := rfl
+    rw [hL, hR, hmap]
+  -- Discharge through the Wave25 hypothesis-carrying Kleene theorem.
+  exact lfp_eq_iSup_iterate_of_commute Φ hcommute
+
 /-- **Λ-route stability certificate.** At the least fixed point of the Λ-aggregator,
     the routing weights are stable: applying one more aggregation step returns the
     same assignment.  This is the honest "the tier choice has converged" witness used
