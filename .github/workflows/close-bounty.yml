@@ -208,9 +208,15 @@ jobs:
         run: python3 scripts/check_bounties.py
 
       - name: Open signed PR with the close
+        id: openpr
         if: steps.params.outputs.act == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          # Optional PAT (a real user/org token) used ONLY to open the PR. This org
+          # forbids the Actions GITHUB_TOKEN from creating PRs (deliberate lockdown),
+          # so without this secret the workflow falls back to pushing the signed
+          # branch + surfacing a one-click compare URL for a human to open the PR.
+          PR_TOKEN: ${{ secrets.BOUNTY_BOARD_TOKEN }}
           REHEARSE: ${{ steps.params.outputs.rehearse }}
           BOUNTY: ${{ steps.params.outputs.bounty }}
           SOLVER: ${{ steps.params.outputs.solver }}
@@ -223,11 +229,14 @@ jobs:
           [ -f "$FILE" ] || FILE="bounties/${BOUNTY}.yml"
           BRANCH="auto/close-${BOUNTY}"
           BASE_OID="$(git rev-parse HEAD)"
+          CMP_URL="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
 
           # Don't duplicate an already-open PR for this branch.
-          OPEN_COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
+          OPEN_COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo 0)"
           if [ "$OPEN_COUNT" != "0" ]; then
             echo "::notice::A PR for $BRANCH is already open — skipping."
+            echo "pr_opened=true" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -244,7 +253,8 @@ jobs:
             PR_TITLE="board: close ${BOUNTY} — proof accepted"
           fi
 
-          # Signed commit via createCommitOnBranch (GitHub verifies the commit).
+          # Signed commit via createCommitOnBranch (GitHub verifies the commit; the
+          # Actions GITHUB_TOKEN is allowed to push to an unprotected auto/* branch).
           CONTENT_B64="$(base64 -w0 "$FILE")"
           gh api graphql \
             -f query='mutation($repo:String!,$branch:String!,$oid:GitObjectID!,$path:String!,$content:Base64String!,$msg:String!){createCommitOnBranch(input:{branch:{repositoryNameWithOwner:$repo,branchName:$branch},expectedHeadOid:$oid,message:{headline:$msg},fileChanges:{additions:[{path:$path,contents:$content}]}}){commit{url}}}' \
@@ -270,15 +280,36 @@ jobs:
             printf 'Founder: please review the honesty prose (summary / honesty notes still describe the OPEN framing) before or at merge.\n'
           } > /tmp/pr-body.md
 
-          gh pr create --base main --head "$BRANCH" \
-            --title "$PR_TITLE" \
-            --body-file /tmp/pr-body.md
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          if [ -n "${PR_TOKEN:-}" ]; then
+            # A PAT is provisioned — open the PR for real.
+            GH_TOKEN="$PR_TOKEN" gh pr create --base main --head "$BRANCH" \
+              --title "$PR_TITLE" \
+              --body-file /tmp/pr-body.md
+            echo "::notice::Opened PR on ${BRANCH}."
+            echo "pr_opened=true" >> "$GITHUB_OUTPUT"
+          else
+            # Org policy blocks Actions from opening PRs. Push the signed branch and
+            # FAIL-LOUD with a one-click compare URL (never silently mask).
+            echo "pr_opened=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Actions cannot open PRs in this org (GITHUB_TOKEN is blocked). The signed close commit is pushed to '${BRANCH}'. Open the PR here: ${CMP_URL}"
+            {
+              echo "### Bounty auto-close — open the PR manually"
+              echo ""
+              echo "Actions is not permitted to open PRs in this org, so the signed close commit was pushed to \`${BRANCH}\` and the PR was **not** auto-created."
+              echo ""
+              echo "**One-click open:** ${CMP_URL}"
+              echo ""
+              echo "_To make the PR open automatically, provision a \`BOUNTY_BOARD_TOKEN\` repo secret (a PAT with contents+pull-requests write on this repo)._"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Verify rehearsal outcome
         if: steps.params.outputs.act == 'true' && steps.params.outputs.rehearse == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BOUNTY: ${{ steps.params.outputs.bounty }}
+          PR_OPENED: ${{ steps.openpr.outputs.pr_opened }}
         run: |
           set -euo pipefail
           FILE="bounties/${BOUNTY}.yaml"
@@ -286,11 +317,18 @@ jobs:
           # 1. the local edit really flipped the entry
           grep -qE '^status:[[:space:]]*CLOSED' "$FILE" || { echo "::error::fixture not CLOSED"; exit 1; }
           grep -qE '^solved:' "$FILE" || { echo "::error::fixture missing solved block"; exit 1; }
-          # 2. a PR really opened on the auto/close-* branch
-          COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
-          [ "${COUNT}" -ge 1 ] || { echo "::error::rehearsal FAILED — no open PR on $BRANCH"; exit 1; }
-          NUM="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
-          echo "::notice::Rehearsal PASS — PR #${NUM} opened on ${BRANCH} with a CLOSED fixture entry."
+          # 2. the signed close commit really landed on the auto/close-* branch
+          gh api "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" >/dev/null \
+            || { echo "::error::rehearsal FAILED — branch $BRANCH was not created"; exit 1; }
+          # 3. the PR really opened (when a PAT is provisioned)
+          if [ "${PR_OPENED:-false}" = "true" ]; then
+            COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
+            [ "${COUNT}" -ge 1 ] || { echo "::error::rehearsal FAILED — pr_opened=true but no open PR on $BRANCH"; exit 1; }
+            NUM="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
+            echo "::notice::Rehearsal PASS — PR #${NUM} opened on ${BRANCH} with a CLOSED fixture entry."
+          else
+            echo "::notice::Rehearsal PASS (no-PAT path) — signed CLOSED commit on ${BRANCH}; PR-open step surfaced a compare URL (org blocks Actions PRs). Provision BOUNTY_BOARD_TOKEN to auto-open."
+          fi
 
       - name: Clean up rehearsal
         if: ${{ always() && steps.params.outputs.rehearse == 'true' }}
