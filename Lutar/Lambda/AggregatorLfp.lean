@@ -39,7 +39,6 @@ the locked 8.  Existence (Round5) is cited, NOT reclaimed.
   - Mathlib: `Mathlib.Order.FixedPoints` (`OrderHom.lfp`, `fixedPoints.lfp_eq_sSup_iterate`).
 -/
 import Mathlib.Order.FixedPoints
-import Mathlib.Order.OmegaCompletePartialOrder
 
 namespace Lutar.Lambda.AggregatorLfp
 
@@ -55,9 +54,7 @@ def iterate (Φ : α →o α) (n : ℕ) : α := (Φ^[n]) ⊥
 
 theorem iterate_succ (Φ : α →o α) (n : ℕ) :
     iterate Φ (n + 1) = Φ (iterate Φ n) := by
-  unfold iterate
-  rw [Function.iterate_succ']
-  rfl
+  simp only [iterate, Function.iterate_succ', Function.comp_apply]
 
 /-- **Monotone chain.** Each Kleene iterate dominates the previous one:
     `Φⁿ⊥ ≤ Φⁿ⁺¹⊥`.  The router's successive weight refinements never regress. -/
@@ -65,7 +62,9 @@ theorem iterate_mono (Φ : α →o α) : Monotone (iterate Φ) := by
   apply monotone_nat_of_le_succ
   intro n
   induction n with
-  | zero => simp [iterate, iterate_succ]
+  | zero =>
+      rw [iterate_zero, iterate_succ]
+      exact bot_le
   | succ k ih =>
       rw [iterate_succ Φ (k + 1), iterate_succ Φ k]
       exact Φ.monotone ih
@@ -82,7 +81,7 @@ theorem lfp_least (Φ : α →o α) {y : α} (hy : Φ y = y) : lfp Φ ≤ y :=
 /-- Every Kleene iterate is below the least fixed point. -/
 theorem iterate_le_lfp (Φ : α →o α) (n : ℕ) : iterate Φ n ≤ lfp Φ := by
   induction n with
-  | zero => simp [iterate]
+  | zero => rw [iterate_zero]; exact bot_le
   | succ k ih =>
       rw [iterate_succ]
       calc Φ (iterate Φ k) ≤ Φ (lfp Φ) := Φ.monotone ih
@@ -123,7 +122,7 @@ theorem lfp_eq_iSup_iterate_of_commute (Φ : α →o α)
       exact le_iSup (iterate Φ) (n + 1)
     · refine iSup_le (fun n => ?_)
       cases n with
-      | zero => simp [iterate]
+      | zero => rw [iterate_zero]; exact bot_le
       | succ k => exact iterate_succ_le_map_iSup Φ k
   exact le_antisymm (lfp_le Φ (le_of_eq hfix)) (iSup_iterate_le_lfp Φ)
 
