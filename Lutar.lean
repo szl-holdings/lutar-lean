@@ -483,3 +483,4 @@ v16 Feynman additions (PR #41):
 -/
 
 import Lutar.Scaling.MetabolicScaling
+import Lutar.Scaling.MetabolicScalingDeep
