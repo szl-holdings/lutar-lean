@@ -440,6 +440,25 @@ import Lutar.Uniqueness.TheoremU
 import Lutar.Uniqueness.AxiomCheck
 import Lutar.Wave24.AdmissibilityCertificate
 
+-- Putnam sampler pack (branch sampler-putnam-10) — additive, EXPERIMENTAL (registered under
+-- EXPERIMENTAL_SCOPES in lean_numbers.py as Lutar/Putnam/Sampler/). Ten formalized PDF
+-- Putnam-sampler problems P01..P10. Importing them here makes `lake build` (default_target)
+-- actually compile AND kernel-check them. Seven are KERNEL-VERIFIED / sorry-free
+-- (P01,P02,P03,P06,P07,P08,P10); three carry a single explicitly-labeled `sorry` as an HONEST
+-- OPEN ATTEMPT (P04,P05,P09), NOT a hidden one. Excluded from ALL v11 numbers, so the locked
+-- baseline is untouched: locked-proven set STAYS EXACTLY 5; Λ STAYS Conjecture 1; BFT STAYS
+-- Conjecture 2; NO new declared axiom token.
+import Lutar.Putnam.Sampler.P01
+import Lutar.Putnam.Sampler.P02
+import Lutar.Putnam.Sampler.P03
+import Lutar.Putnam.Sampler.P04
+import Lutar.Putnam.Sampler.P05
+import Lutar.Putnam.Sampler.P06
+import Lutar.Putnam.Sampler.P07
+import Lutar.Putnam.Sampler.P08
+import Lutar.Putnam.Sampler.P09
+import Lutar.Putnam.Sampler.P10
+
 
 /-!
 # Lutar — root module
