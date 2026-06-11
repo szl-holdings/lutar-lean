@@ -17,6 +17,17 @@
 # The close is proposed as a SIGNED commit on a branch + a PR (createCommitOnBranch
 # produces a GitHub-verified commit, satisfying main's signed-commit protection);
 # the founder merges. check_bounties.py runs first and refuses a half-filled close.
+#
+# REHEARSAL MODE (workflow_dispatch, rehearse=true):
+#   Because both real conjectures are genuinely OPEN, the happy path can't be tested
+#   on real data without faking a proof — which the honesty doctrine forbids. So a
+#   founder can run this workflow with `rehearse: true` to drill the WHOLE pipeline
+#   (stage fixture -> edit -> validate -> signed PR) against a throwaway fixture
+#   bounty (`rehearsal-do-not-merge`, from tests/fixtures/rehearsal_bounty.yaml).
+#   It NEVER touches a real OPEN bounty and NEVER claims a real solve; the fixture
+#   is committed only to a disposable auto/close-* branch. The run asserts the PR
+#   opened with a correctly-edited entry, then cleans up after itself (closes the
+#   test PR and deletes the branch).
 name: Close Bounty
 
 on:
@@ -27,15 +38,23 @@ on:
     types: [completed]
   workflow_dispatch:
     inputs:
+      rehearse:
+        description: "REHEARSAL drill: exercise the pipeline end to end against a throwaway fixture (never closes a real bounty)"
+        type: boolean
+        required: false
+        default: false
       bounty_id:
-        description: "Bounty id (== YAML filename stem)"
-        required: true
+        description: "Bounty id (== YAML filename stem). Required unless rehearse=true."
+        required: false
+        default: ""
       solver:
-        description: "Solver GitHub handle / name"
-        required: true
+        description: "Solver GitHub handle / name. Required unless rehearse=true."
+        required: false
+        default: ""
       proof_commit:
-        description: "Accepted proof commit SHA"
-        required: true
+        description: "Accepted proof commit SHA. Required unless rehearse=true."
+        required: false
+        default: ""
       proof_repo:
         description: "szl-holdings/<repo> the proof landed in"
         required: false
@@ -84,6 +103,8 @@ jobs:
         id: params
         env:
           EVENT: ${{ github.event_name }}
+          # rehearsal toggle (workflow_dispatch only; typed boolean -> "true"/"false")
+          REHEARSE: ${{ inputs.rehearse }}
           # repository_dispatch payload (Conjecture 1, from lambda-bounty)
           RD_BOUNTY: ${{ github.event.client_payload.bounty_id }}
           RD_SOLVER: ${{ github.event.client_payload.solver }}
@@ -103,14 +124,24 @@ jobs:
         run: |
           set -euo pipefail
           ACT=true
+          REHEARSE="${REHEARSE:-false}"
           case "$EVENT" in
             repository_dispatch)
               BOUNTY="$RD_BOUNTY"; SOLVER="$RD_SOLVER"; COMMIT="$RD_COMMIT"
               REPO="$RD_REPO"; RUN="$RD_RUN"
               ;;
             workflow_dispatch)
-              BOUNTY="$WD_BOUNTY"; SOLVER="$WD_SOLVER"; COMMIT="$WD_COMMIT"
-              REPO="$WD_REPO"; RUN="$WD_RUN"
+              if [ "$REHEARSE" = "true" ]; then
+                # Throwaway fixture values — clearly never a real solve.
+                BOUNTY="rehearsal-do-not-merge"
+                SOLVER="rehearsal-bot (NOT A REAL SOLVE)"
+                COMMIT="0000000000"
+                REPO="szl-holdings/lutar-lean"
+                RUN="https://example.invalid/rehearsal-${GITHUB_RUN_ID}"
+              else
+                BOUNTY="$WD_BOUNTY"; SOLVER="$WD_SOLVER"; COMMIT="$WD_COMMIT"
+                REPO="$WD_REPO"; RUN="$WD_RUN"
+              fi
               ;;
             workflow_run)
               # Conjecture 2: the green kernel check proves the whole library
@@ -139,12 +170,23 @@ jobs:
           fi
           {
             echo "act=$ACT"
+            echo "rehearse=$REHEARSE"
             echo "bounty=$BOUNTY"
             echo "solver=$SOLVER"
             echo "commit=$COMMIT"
             echo "repo=$REPO"
             echo "run=$RUN"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Stage rehearsal fixture
+        if: steps.params.outputs.act == 'true' && steps.params.outputs.rehearse == 'true'
+        run: |
+          set -euo pipefail
+          SRC="tests/fixtures/rehearsal_bounty.yaml"
+          DST="bounties/rehearsal-do-not-merge.yaml"
+          [ -f "$SRC" ] || { echo "::error::rehearsal fixture $SRC missing"; exit 1; }
+          cp "$SRC" "$DST"
+          echo "::notice::Staged throwaway rehearsal fixture into $DST (never merged to main)."
 
       - name: Edit board entry
         if: steps.params.outputs.act == 'true'
@@ -169,6 +211,7 @@ jobs:
         if: steps.params.outputs.act == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          REHEARSE: ${{ steps.params.outputs.rehearse }}
           BOUNTY: ${{ steps.params.outputs.bounty }}
           SOLVER: ${{ steps.params.outputs.solver }}
           COMMIT: ${{ steps.params.outputs.commit }}
@@ -193,6 +236,14 @@ jobs:
           gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
             -f ref="refs/heads/${BRANCH}" -f sha="${BASE_OID}" >/dev/null
 
+          if [ "${REHEARSE:-false}" = "true" ]; then
+            COMMIT_MSG="REHEARSAL (do not merge): drill close of ${BOUNTY} — pipeline test, not a real solve"
+            PR_TITLE="[REHEARSAL · DO NOT MERGE] board: drill close of ${BOUNTY}"
+          else
+            COMMIT_MSG="board: close ${BOUNTY} — proof accepted (solver ${SOLVER})"
+            PR_TITLE="board: close ${BOUNTY} — proof accepted"
+          fi
+
           # Signed commit via createCommitOnBranch (GitHub verifies the commit).
           CONTENT_B64="$(base64 -w0 "$FILE")"
           gh api graphql \
@@ -202,10 +253,13 @@ jobs:
             -f oid="${BASE_OID}" \
             -f path="${FILE}" \
             -f content="${CONTENT_B64}" \
-            -f msg="board: close ${BOUNTY} — proof accepted (solver ${SOLVER})" >/dev/null
+            -f msg="${COMMIT_MSG}" >/dev/null
 
           # PR body (written to a file to avoid heredoc indentation pitfalls).
           {
+            if [ "${REHEARSE:-false}" = "true" ]; then
+              printf '> **REHEARSAL — DO NOT MERGE.** This PR is an automated pipeline drill against a throwaway fixture (`%s`). It does NOT close a real bounty and claims NO real solve. The workflow closes this PR and deletes its branch automatically.\n\n' "$BOUNTY"
+            fi
             printf 'Auto-generated by the bounty auto-close pipeline: the proof arbiter accepted a proof for **%s**.\n\n' "$BOUNTY"
             printf -- '- **Solver:** %s\n' "$SOLVER"
             printf -- '- **Proof commit:** `%s`\n' "$COMMIT"
@@ -217,5 +271,36 @@ jobs:
           } > /tmp/pr-body.md
 
           gh pr create --base main --head "$BRANCH" \
-            --title "board: close ${BOUNTY} — proof accepted" \
+            --title "$PR_TITLE" \
             --body-file /tmp/pr-body.md
+
+      - name: Verify rehearsal outcome
+        if: steps.params.outputs.act == 'true' && steps.params.outputs.rehearse == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BOUNTY: ${{ steps.params.outputs.bounty }}
+        run: |
+          set -euo pipefail
+          FILE="bounties/${BOUNTY}.yaml"
+          BRANCH="auto/close-${BOUNTY}"
+          # 1. the local edit really flipped the entry
+          grep -qE '^status:[[:space:]]*CLOSED' "$FILE" || { echo "::error::fixture not CLOSED"; exit 1; }
+          grep -qE '^solved:' "$FILE" || { echo "::error::fixture missing solved block"; exit 1; }
+          # 2. a PR really opened on the auto/close-* branch
+          COUNT="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
+          [ "${COUNT}" -ge 1 ] || { echo "::error::rehearsal FAILED — no open PR on $BRANCH"; exit 1; }
+          NUM="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
+          echo "::notice::Rehearsal PASS — PR #${NUM} opened on ${BRANCH} with a CLOSED fixture entry."
+
+      - name: Clean up rehearsal
+        if: ${{ always() && steps.params.outputs.rehearse == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BOUNTY: ${{ steps.params.outputs.bounty }}
+        run: |
+          set -uo pipefail
+          BRANCH="auto/close-${BOUNTY}"
+          # Close the throwaway PR (if any) and delete its branch — no trace left.
+          gh pr close "$BRANCH" --comment "Rehearsal complete — closing throwaway drill PR." --delete-branch >/dev/null 2>&1 || true
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" >/dev/null 2>&1 || true
+          echo "::notice::Rehearsal cleanup done — PR closed and ${BRANCH} deleted."
