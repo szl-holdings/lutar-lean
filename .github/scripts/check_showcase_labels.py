@@ -50,6 +50,10 @@ import sys
 # Showcase layout (repo-relative).
 LEAN_DIR = os.path.join("Showcase", "PutnamLean")
 WRITEUP_DIR = os.path.join("Showcase", "Putnam")
+# The writeup directory's index file (not itself a per-problem writeup).
+README_NAME = "README.md"
+# A problem id in the README contents-table first column, e.g. "| P01 | ...".
+README_ID_RE = re.compile(r"^\|\s*(P\d+)\b", re.MULTILINE)
 
 # In-policy Lean-core axioms a REAL proof may depend on. The showcase is
 # Mathlib-free / core-only, so the policy is exactly the kernel set (no declared
@@ -240,6 +244,76 @@ def run_audit(root: str, audit_text: str) -> str:
 # ---------------------------------------------------------------------------
 # Gate
 # ---------------------------------------------------------------------------
+def find_lean_stems(root: str) -> set[str]:
+    """Stems of every `Showcase/PutnamLean/*.lean` file (empty if dir absent)."""
+    base = os.path.join(root, LEAN_DIR)
+    if not os.path.isdir(base):
+        return set()
+    return {os.path.splitext(fn)[0]
+            for fn in os.listdir(base) if fn.endswith(".lean")}
+
+
+def find_writeup_stems(root: str) -> set[str]:
+    """Stems of every per-problem writeup `Showcase/Putnam/*.md` (README.md is
+    the index, not a writeup, so it is excluded). Empty if the dir is absent."""
+    base = os.path.join(root, WRITEUP_DIR)
+    if not os.path.isdir(base):
+        return set()
+    return {os.path.splitext(fn)[0]
+            for fn in os.listdir(base)
+            if fn.endswith(".md") and fn != README_NAME}
+
+
+def read_readme_ids(root: str) -> list[str]:
+    """Problem ids listed in the `Showcase/Putnam/README.md` contents table
+    (first column, e.g. `P01`). Empty if the README is absent."""
+    md_path = os.path.join(root, WRITEUP_DIR, README_NAME)
+    if not os.path.isfile(md_path):
+        return []
+    with open(md_path, "r", encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+    return [m.group(1) for m in README_ID_RE.finditer(text)]
+
+
+def check_coverage(lean_stems: set[str], writeup_stems: set[str],
+                   readme_ids: "list[str]") -> list[str]:
+    """Catch a showcase that *advertises* a formalization with no Lean proof.
+
+    `gather()` already fails when a Lean file has no paired writeup (lean->md).
+    This is the reverse: a writeup, or a row in the README contents table, can
+    claim a problem exists with NO matching Lean file, and nothing else fails —
+    which lets the public showcase advertise a proof that does not exist.
+
+      * md -> lean: every per-problem writeup must have a paired Lean file;
+      * README -> {lean, writeup}: every id in the contents table must have BOTH
+        a Lean file and a writeup.
+    """
+    errors: list[str] = []
+    for stem in sorted(writeup_stems):
+        if stem not in lean_stems:
+            errors.append(
+                f"{os.path.join(WRITEUP_DIR, stem + '.md')}: writeup has no "
+                f"paired Lean file {os.path.join(LEAN_DIR, stem + '.lean')}. A "
+                f"showcase writeup must describe a formalization that actually "
+                f"exists — add the Lean proof or remove the writeup."
+            )
+    for pid in readme_ids:
+        if pid not in lean_stems:
+            errors.append(
+                f"{os.path.join(WRITEUP_DIR, README_NAME)}: contents table lists "
+                f"`{pid}` but there is no Lean file "
+                f"{os.path.join(LEAN_DIR, pid + '.lean')}. The showcase index "
+                f"must not advertise a formalization that does not exist."
+            )
+        if pid not in writeup_stems:
+            errors.append(
+                f"{os.path.join(WRITEUP_DIR, README_NAME)}: contents table lists "
+                f"`{pid}` but there is no writeup "
+                f"{os.path.join(WRITEUP_DIR, pid + '.md')}."
+            )
+    return errors
+
+
 def gather(root: str) -> tuple[list[dict], list[str]]:
     """Return (per-file records, errors). One record per Showcase Lean file."""
     errors: list[str] = []
@@ -435,6 +509,10 @@ def run_gate(root: str, with_axioms: bool) -> int:
     records, errors = gather(root)
     if not errors and not records:
         errors.append("no Showcase Lean files found — nothing to verify.")
+    # Coverage: a writeup or README index entry must not advertise a Lean proof
+    # that does not exist (the reverse of gather()'s lean->md pairing check).
+    errors += check_coverage(find_lean_stems(root), find_writeup_stems(root),
+                             read_readme_ids(root))
     errors += check_static(records)
     # `fps` stays None in the static phase (no Lean toolchain). When `--with-axioms`
     # is set we run the kernel footprint audit ONCE and feed it to both the
@@ -609,6 +687,38 @@ def self_test() -> int:
     removed = [r for r in locked_records() if r["module"] != "P03"]
     rerr = " ".join(check_locked(removed, None))
     check("P03.lean" in rerr and "missing" in rerr, "locked: removed proof caught")
+
+    # ---- Coverage: a writeup / README index entry must not advertise a proof
+    #      that has no Lean file (both reverse directions). ----
+    cov_lean = {"P01", "P02"}
+    cov_writeups = {"P01", "P02", "P99"}     # P99.md writeup has NO Lean file
+    cov_readme = ["P01", "P02", "P77"]       # P77 indexed but has NO lean / writeup
+    cerr = check_coverage(cov_lean, cov_writeups, cov_readme)
+    blob = " ".join(cerr)
+    # md -> lean direction: the orphan writeup is blamed.
+    check("P99.md" in blob, "coverage: orphan writeup (md without lean) caught")
+    check(any("writeup has no" in e and "Lean file" in e for e in cerr),
+          "coverage: md->lean direction covered")
+    # README -> {lean, writeup} direction: P77 is missing BOTH.
+    check(any("`P77`" in e and "no Lean file" in e for e in cerr),
+          "coverage: README->lean direction covered")
+    check(any("`P77`" in e and "no writeup" in e for e in cerr),
+          "coverage: README->writeup direction covered")
+    # Honest, paired ids are never flagged.
+    check("`P01`" not in blob and "`P02`" not in blob and "P01.md" not in blob,
+          "coverage: paired ids not flagged")
+    check(check_coverage({"P01", "P02"}, {"P01", "P02"}, ["P01", "P02"]) == [],
+          "coverage: fully-paired set passes")
+    # README id-parsing pulls only the contents-table first column.
+    sample_readme = (
+        "| # | Problem | Label |\n"
+        "|---|---------|-------|\n"
+        "| P01 | foo | REAL |\n"
+        "| P42 | bar | DEMO |\n"
+        "\nPer-problem writeups: [P01](P01.md) (not a table row).\n"
+    )
+    ids = [m.group(1) for m in README_ID_RE.finditer(sample_readme)]
+    check(ids == ["P01", "P42"], f"coverage: README id parse -> {ids}")
 
     print("SELF-TEST: PASS" if ok else "SELF-TEST: FAILED")
     return 0 if ok else 1
