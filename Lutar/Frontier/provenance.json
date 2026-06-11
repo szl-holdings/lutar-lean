@@ -1,0 +1,84 @@
+{
+  "source_url": "https://api.adsb.lol/v2/mil",
+  "source_description": "adsb.lol military ADS-B (public, unauthenticated broadcast) \u2014 same feed scraped by killinchu_backend.py",
+  "raw_snapshot_sha256": "2c1b4bc0255d0a799bdbb3db4b60d7d8fc0622843861fb7d8091203c539c4b24",
+  "feed_now_ms": 1781145219001,
+  "feed_ctime": 1781145219001,
+  "generated_utc": "2026-06-11T02:35:53Z",
+  "model": {
+    "vertex": "airborne military contact with valid lat/lon/altitude",
+    "edge_rule": "horizontal separation <= 50.0 nm AND vertical separation <= 5000 ft",
+    "subset_rule": "largest connected component of the conflict graph, capped at 32 vertices, contacts ordered by ICAO hex"
+  },
+  "instance": {
+    "contacts_total_with_position_and_alt": 40,
+    "vertices": 6,
+    "edges": 9
+  },
+  "witnesses": {
+    "greedy_coloring_colors_K": 4,
+    "clique_size_m": 4
+  },
+  "result": {
+    "chromatic_lower_bound": 4,
+    "chromatic_upper_bound": 4,
+    "status": "PROVEN_EXACT",
+    "claim": "chromatic number = 4 (kernel-verified: clique of 4 meets 4-coloring)"
+  },
+  "vertices_detail": [
+    {
+      "v": 0,
+      "hex": "adff6a",
+      "type": "T38",
+      "reg": "64-13202",
+      "lat": 34.5727,
+      "lon": -86.9612,
+      "alt": 3000
+    },
+    {
+      "v": 1,
+      "hex": "adff9c",
+      "type": "T38",
+      "reg": "68-8211",
+      "lat": 34.5484,
+      "lon": -86.7659,
+      "alt": 3725
+    },
+    {
+      "v": 2,
+      "hex": "ae0200",
+      "type": "TEX2",
+      "reg": "98-3540",
+      "lat": 34.6896,
+      "lon": -86.7813,
+      "alt": 1250
+    },
+    {
+      "v": 3,
+      "hex": "ae0890",
+      "type": "TEX2",
+      "reg": "99-3563",
+      "lat": 34.3501,
+      "lon": -86.8858,
+      "alt": 10000
+    },
+    {
+      "v": 4,
+      "hex": "ae1129",
+      "type": "TEX2",
+      "reg": "02-3654",
+      "lat": 34.6069,
+      "lon": -87.069,
+      "alt": 9975
+    },
+    {
+      "v": 5,
+      "hex": "ae1739",
+      "type": "TEX2",
+      "reg": "06-3839",
+      "lat": 34.865,
+      "lon": -86.7713,
+      "alt": 5975
+    }
+  ]
+}
