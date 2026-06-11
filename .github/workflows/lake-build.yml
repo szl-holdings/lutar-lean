@@ -299,6 +299,34 @@ jobs:
           path: theorem_u_snapshot.json
           if-no-files-found: error
 
+      # ---- Second anchored milestone (Task #723): locked-proven baseline ----
+      # ADDITIVE. Reuses the SAME green axiom-hygiene capture (theorem_u_axiomcheck.out)
+      # — it already contains the #print axioms output for the kernel meta-theorems
+      # (locked_count_eight, theoremU_excluded_from_locked, theoremU_axiom_sets_kernel_only,
+      # conjecture1_still_open) defined in Lutar/Uniqueness/AxiomCheck.lean. This proves
+      # the generalized build_proof_snapshot.py --kind path emits a kernel-only,
+      # NON-Theorem-U snapshot with its own honesty block, ready for anchor-szl-lake.yml.
+      - name: Build locked-baseline anchor snapshot (--kind locked-baseline)
+        run: |
+          set -euo pipefail
+          test -f theorem_u_axiomcheck.out || { echo "::error::theorem_u_axiomcheck.out missing (axiom gate did not capture output)"; exit 1; }
+          python3 .github/scripts/build_proof_snapshot.py \
+            --kind locked-baseline \
+            --axiomcheck-out theorem_u_axiomcheck.out \
+            --numbers lean_numbers.measured.json \
+            --reference-vectors reference-vectors.json \
+            --pack-dir Lutar/Uniqueness \
+            --out locked_baseline_snapshot.json
+          echo "----- locked_baseline_snapshot.json (head) -----"
+          head -c 1200 locked_baseline_snapshot.json; echo
+
+      - name: Upload locked-baseline snapshot artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: locked-baseline-snapshot-${{ github.sha }}
+          path: locked_baseline_snapshot.json
+          if-no-files-found: error
+
       - name: Post numbers as PR comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0

@@ -84,6 +84,54 @@ PROFILES: dict[str, dict] = {
             "locked_set": ["F1", "F11", "F12", "F18", "F19"],
         },
     },
+    # Second anchored milestone (Task #723): the kernel-verified meta-invariants
+    # that pin the LOCKED-proven baseline itself. These are `decide`-proven
+    # meta-theorems in Lutar/Uniqueness/AxiomCheck.lean (already emitted into the
+    # same axiom-hygiene capture the theorem-u snapshot reads), so anchoring this
+    # milestone needs NO new Lean files. It proves the generalized snapshot+anchor
+    # path works end-to-end for a NON-Theorem-U kind on the live Khipu chain.
+    # Honesty: this milestone asserts what the locked baseline IS (exactly the
+    # eight {F1,F4,F7,F11,F12,F18,F19,F22}); it does NOT prove those formulas and
+    # leaves Theorem U conditional / Conjecture 1 open.
+    "locked-baseline": {
+        "title": "Locked-proven baseline (Doctrine v11) — kernel meta-invariants",
+        "module": "Lutar.Uniqueness.AxiomCheck",
+        "pack_dir": "Lutar/Uniqueness",
+        "status": "REAL-invariant",
+        # Matched by FQN suffix (Lutar.Uniqueness.AxiomCheck.<name>).
+        "headline_suffixes": [
+            "locked_count_eight",
+            "theoremU_excluded_from_locked",
+            "theoremU_axiom_sets_kernel_only",
+            "conjecture1_still_open",
+        ],
+        "require_headline": True,
+        "honesty": {
+            "doctrine": "v11",
+            "locked_baseline": (
+                "REAL-invariant: kernel-verified meta-theorems in "
+                "Lutar/Uniqueness/AxiomCheck.lean (locked_count_eight, "
+                "theoremU_excluded_from_locked, theoremU_axiom_sets_kernel_only, "
+                "conjecture1_still_open) — each proven by `decide`, axiom footprint "
+                "within the Lean/Mathlib trust base, no sorry. They ASSERT that the "
+                "locked-proven baseline is EXACTLY the eight "
+                "{F1,F4,F7,F11,F12,F18,F19,F22}; they do NOT themselves re-prove "
+                "those formulas (the formula proofs live in "
+                "Lutar/Puriq/Formulas/ProvedFormulas.lean)."
+            ),
+            "locked_set": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
+            "theorem_u": (
+                "Theorem U stays REAL-conditional and EXCLUDED from this locked "
+                "baseline (theoremU_excluded_from_locked); anchoring this milestone "
+                "does not change Theorem U's status."
+            ),
+            "conjecture_1": (
+                "OPEN: unconditional Lambda uniqueness is Conjecture 1 and is "
+                "machine-checked FALSE as stated; conjecture1_still_open re-asserts "
+                "it stays open."
+            ),
+        },
+    },
 }
 
 _DEPENDS_RE = re.compile(r"'([^']+)' depends on axioms:\s*\[([^\]]*)\]", re.DOTALL)
