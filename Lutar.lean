@@ -482,6 +482,8 @@ import Lutar.Allodial
 import Lutar.Entanglement
 
 
+import Lutar.Scaling.MetabolicScaling
+import Lutar.Scaling.MetabolicScalingDeep
 /-!
 # Lutar — root module
 
