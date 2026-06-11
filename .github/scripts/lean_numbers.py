@@ -362,6 +362,13 @@ EXPERIMENTAL_SCOPES = (
     # UNCONDITIONAL statement stays OPEN / machine-checked FALSE as stated, Lambda STAYS Conjecture 1.
     # Locked-proven set STAYS EXACTLY 5.
     os.path.join("Lutar", "Uniqueness") + os.sep,
+    # Frontier pipeline (live-intelligence -> verified-math) -- additive, NOT wired
+    # into Lutar.lean; new namespace Lutar.Frontier. Auto-generated from a frozen,
+    # reproducible killinchu ADS-B snapshot: one graph-coloring (chromatic-number)
+    # instance whose proper-coloring + clique witnesses are kernel-checked by `decide`
+    # (Mathlib-free, sorry-free). EXPERIMENTAL; chi=4 PROVEN_EXACT for this instance
+    # only; no general claim. Surfaced on the a11oy console next to the Putnam Sampler.
+    os.path.join("Lutar", "Frontier") + os.sep,
 )
 
 
