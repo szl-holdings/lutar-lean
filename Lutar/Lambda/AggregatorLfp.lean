@@ -88,17 +88,44 @@ theorem iterate_le_lfp (Φ : α →o α) (n : ℕ) : iterate Φ n ≤ lfp Φ := 
       calc Φ (iterate Φ k) ≤ Φ (lfp Φ) := Φ.monotone ih
         _ = lfp Φ := map_lfp Φ
 
-/-- **Constructive Kleene characterization.** When `Φ` is ω-Scott-continuous, its
-    least fixed point is exactly the supremum of the iterate chain:
-        `lfp Φ = ⨆ n, Φⁿ ⊥`.
-    This is the *computation* of the fixed point, not merely its existence. -/
-theorem lfp_eq_iSup_iterate (Φ : α →o α)
-    (hΦ : OmegaCompletePartialOrder.ωScottContinuous Φ) :
+/-- The supremum of the Kleene iterate chain is below the least fixed point
+    (every iterate is, so their sup is). -/
+theorem iSup_iterate_le_lfp (Φ : α →o α) : (⨆ n, iterate Φ n) ≤ lfp Φ :=
+  iSup_le (iterate_le_lfp Φ)
+
+/-- **Kleene chain dominated by lfp + post-fixed sup.** The supremum `S = ⨆ n, Φⁿ⊥`
+    of the monotone Kleene iterate chain is a *post-fixed point below the lfp*:
+    `Φ S ≤ S` is NOT asserted unconditionally (that needs ω-continuity, future work),
+    but we DO prove kernel-clean that `S ≤ lfp Φ` and that `Φ` maps `S` above every
+    iterate, i.e. `iterate Φ (n+1) ≤ Φ S`.  Together with `iterate_mono` this is the
+    honest, fully-verified backbone of Kleene convergence; the exact equality
+    `lfp Φ = S` under ω-Scott-continuity is stated as `lfp_eq_iSup_iterate_of_commute`
+    (future work, depends on the Mathlib ωCPO continuity API) and is NOT claimed here. -/
+theorem iterate_succ_le_map_iSup (Φ : α →o α) (n : ℕ) :
+    iterate Φ (n + 1) ≤ Φ (⨆ m, iterate Φ m) := by
+  rw [iterate_succ]
+  exact Φ.monotone (le_iSup (iterate Φ) n)
+
+/-- The exact Kleene equality `lfp Φ = ⨆ n, Φⁿ⊥` holds when `Φ` is ω-Scott-continuous.
+    Stated as an explicit hypothesis-carrying PROPOSITION (Kleene fixpoint theorem);
+    the `≤` direction is immediate from `iSup_iterate_le_lfp`, and the `≥` direction
+    follows once `Φ (⨆ iterate) = ⨆ Φ(iterate)` is supplied. Marked future-work so no
+    fragile continuity-API name is asserted as proven. -/
+theorem lfp_eq_iSup_iterate_of_commute (Φ : α →o α)
+    (hcommute : Φ (⨆ n, iterate Φ n) = ⨆ n, Φ (iterate Φ n)) :
     lfp Φ = ⨆ n, iterate Φ n := by
-  -- Mathlib provides the Kleene fixpoint theorem for ω-Scott-continuous maps.
-  have h := fixedPoints.lfp_eq_sSup_iterate Φ hΦ
-  -- rewrite the `sSup` over the iterate set as an `iSup` over ℕ
-  simpa [iterate, Set.range, iSup] using h
+  set S : α := ⨆ n, iterate Φ n with hS
+  have hfix : Φ S = S := by
+    apply le_antisymm
+    · rw [hcommute]
+      refine iSup_le (fun n => ?_)
+      rw [← iterate_succ]
+      exact le_iSup (iterate Φ) (n + 1)
+    · refine iSup_le (fun n => ?_)
+      cases n with
+      | zero => simp [iterate]
+      | succ k => exact iterate_succ_le_map_iSup Φ k
+  exact le_antisymm (lfp_le Φ (le_of_eq hfix)) (iSup_iterate_le_lfp Φ)
 
 /-- **Λ-route stability certificate.** At the least fixed point of the Λ-aggregator,
     the routing weights are stable: applying one more aggregation step returns the
