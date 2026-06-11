@@ -460,6 +460,8 @@ import Lutar.Putnam.Sampler.P09
 import Lutar.Putnam.Sampler.P10
 
 
+import Lutar.Scaling.MetabolicScaling
+import Lutar.Scaling.MetabolicScalingDeep
 /-!
 # Lutar — root module
 
@@ -482,5 +484,3 @@ v16 Feynman additions (PR #41):
 - `Lutar.Knot.ReidemeisterConjecture` — R1/R2 axiom; R3 proved at flat-segment level
 -/
 
-import Lutar.Scaling.MetabolicScaling
-import Lutar.Scaling.MetabolicScalingDeep
