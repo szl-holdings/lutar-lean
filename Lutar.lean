@@ -468,6 +468,18 @@ import Lutar.Putnam.Sampler.P10
 -- {F1,F4,F7,F11,F12,F18,F19,F22}) and says NOTHING about Λ: Λ UNCONDITIONAL uniqueness
 -- STAYS Conjecture 1 (machine-checked FALSE). NO sorry / NO new declared axiom token.
 import Lutar.Allodial
+-- Entanglement capacity-bound backbone (branch entangle/capacity-bound-proposed) —
+-- additive, EXPERIMENTAL/PROPOSED, registered under EXPERIMENTAL_SCOPES in
+-- lean_numbers.py as Lutar/Entanglement.lean so it is EXCLUDED from ALL v11 numbers
+-- (the locked baseline is untouched). Importing it here makes `lake build`
+-- (default_target) actually compile + kernel-check its declarations. Composes the
+-- merged Wave24 CoherenceDecay envelope C₀·exp(−γt) with Streltsov 2015 to back the
+-- PROPOSED capacity UPPER BOUND E_max(t) ≤ C₀·exp(−γt); every #print axioms reports
+-- only Lean/Mathlib-core axioms. Adds NOTHING to the locked-proven set (STAYS EXACTLY
+-- 8 {F1,F4,F7,F11,F12,F18,F19,F22}) and says NOTHING about Λ: Λ UNCONDITIONAL
+-- uniqueness STAYS Conjecture 1 (machine-checked FALSE). This is a CAPACITY UPPER
+-- BOUND, not a uniqueness/existence claim. NO sorry / NO new declared axiom token.
+import Lutar.Entanglement
 
 
 /-!
