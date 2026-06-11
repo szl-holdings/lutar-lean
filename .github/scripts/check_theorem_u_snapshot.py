@@ -4,12 +4,12 @@
 """Guard: assert a green main lake-build actually PUBLISHED a usable Theorem-U snapshot.
 
 Every green `main` run of "Lake build (gate + numbers)" (lake-build.yml) builds a
-deterministic `theorem_u_snapshot.json` (via `.github/scripts/build_theorem_u_snapshot.py`)
+deterministic `theorem_u_snapshot.json` (via `.github/scripts/build_proof_snapshot.py`)
 and uploads it as the artifact `theorem-u-snapshot-<sha>`. That snapshot is the
 *subject* the szl-lake anchor workflow later cosign-signs and records, and the
 public proof state reads its honesty block from it.
 
-The emission is currently best-effort: if `build_theorem_u_snapshot.py` regresses,
+The emission is currently best-effort: if `build_proof_snapshot.py` regresses,
 or the upload step in lake-build.yml is renamed / dropped / bumped to an
 artifact-excluding action, the snapshot could quietly stop being produced (or be
 produced empty / malformed) on an otherwise green build, with nothing failing.

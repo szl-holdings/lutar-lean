@@ -8,7 +8,7 @@
 # ---------------
 # Task #581 brought the Theorem U proof into main, and every green main lake-build
 # now builds a deterministic `theorem_u_snapshot.json`
-# (.github/scripts/build_theorem_u_snapshot.py) and uploads it as the artifact
+# (.github/scripts/build_proof_snapshot.py) and uploads it as the artifact
 # `theorem-u-snapshot-<sha>`. That snapshot is the *subject* the szl-lake anchor
 # workflow later cosign-signs and records, and the public proof state reads its
 # honesty block from it.
@@ -142,7 +142,7 @@ jobs:
                 --repo "${GITHUB_REPOSITORY}" \
                 --pattern 'theorem-u-snapshot-*' \
                 --dir snapshot-artifact; then
-            echo "::error::green main lake-build run ${RID} did NOT publish a 'theorem-u-snapshot-<sha>' artifact (total_count 0). The szl-lake Theorem-U anchor would have no subject to sign. Most likely cause: the snapshot build/upload step in lake-build.yml was dropped/renamed, build_theorem_u_snapshot.py regressed, or upload-artifact was bumped to a version that excludes the file."
+            echo "::error::green main lake-build run ${RID} did NOT publish a 'theorem-u-snapshot-<sha>' artifact (total_count 0). The szl-lake Theorem-U anchor would have no subject to sign. Most likely cause: the snapshot build/upload step in lake-build.yml was dropped/renamed, build_proof_snapshot.py regressed, or upload-artifact was bumped to a version that excludes the file."
             exit 1
           fi
           echo "Downloaded artifact contents:"

@@ -283,7 +283,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f theorem_u_axiomcheck.out || { echo "::error::theorem_u_axiomcheck.out missing (axiom gate did not capture output)"; exit 1; }
-          python3 .github/scripts/build_theorem_u_snapshot.py \
+          python3 .github/scripts/build_proof_snapshot.py \
             --axiomcheck-out theorem_u_axiomcheck.out \
             --numbers lean_numbers.measured.json \
             --reference-vectors reference-vectors.json \
