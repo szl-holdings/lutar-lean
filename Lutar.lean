@@ -433,6 +433,7 @@ import Lutar.Wave22.LambdaConditional
 -- Λ STAYS Conjecture 1. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave23/).
 import Lutar.Wave23.QuorumSafety
 import Lutar.QuantumBio.CoherenceDecay
+import Lutar.Lambda.AggregatorLfp
 import Lutar.Uniqueness.LambdaEquiv
 import Lutar.Uniqueness.Identifiability
 import Lutar.Uniqueness.TheoremU
