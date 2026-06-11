@@ -22,8 +22,8 @@ unless the kernel actually checks it.*
 |---|---------|-------|-----------|--------|
 | P01 | Putnam 2001 A1 — `(a*b)*a = b ⟹ a*(b*a) = b` | **REAL** | [`PutnamLean/P01.lean`](../PutnamLean/P01.lean) | none |
 | P02 | Classic / Putnam-style — `n³ ≡ n (mod 6)` | **REAL** | [`PutnamLean/P02.lean`](../PutnamLean/P02.lean) | `propext` |
-| P03 | Putnam 2019 A1 — `A³+B³+C³−3ABC` representability | **DEMO** | [`PutnamLean/P03.lean`](../PutnamLean/P03.lean) | `sorryAx` |
-| P04 | Putnam 2020 A2 — `∑ 2^{k−j} C(k+j,j) = 4^k` | **DEMO** | [`PutnamLean/P04.lean`](../PutnamLean/P04.lean) | `sorryAx` |
+| P03 | Putnam 2019 A1 — `A³+B³+C³−3ABC` representability | **REAL** | [`PutnamLean/P03.lean`](../PutnamLean/P03.lean) | `propext`, `Classical.choice`, `Quot.sound` |
+| P04 | Putnam 2020 A2 — `∑ 2^{k−j} C(k+j,j) = 4^k` | **REAL** | [`PutnamLean/P04.lean`](../PutnamLean/P04.lean) | `propext`, `Quot.sound` |
 
 Per-problem writeups: [P01](P01.md) · [P02](P02.md) · [P03](P03.md) · [P04](P04.md).
 
@@ -44,8 +44,8 @@ which runs `lake build` over the whole library, and via the `Lean kernel check`
 workflow (`.github/workflows/lean.yml`).
 
 The honesty labels are independently reproducible: each REAL file emits a
-`#print axioms` line into the build log, and each DEMO file's `sorry` surfaces as
-a build warning. To check a single file locally with just the core toolchain:
+`#print axioms` line into the build log, and a DEMO file's `sorry` would surface
+as a build warning. To check a single file locally with just the core toolchain:
 
 ```bash
 export PATH="$HOME/.elan/bin:$PATH"
@@ -60,5 +60,6 @@ elan run leanprover/lean4:v4.18.0 lean Showcase/PutnamLean/P02.lean
 The showcase lives under `Showcase/` (outside `Lutar/`) and is therefore **not**
 counted by the canonical corpus counter
 (`.github/scripts/lean_numbers.py`, which walks only `Lutar/` + `Main.lean`).
-The DEMO `sorry`s here do **not** affect the locked Doctrine-v11 numbers and do
-**not** alter the locked-proven formula set. This showcase is purely additive.
+All four proofs here are REAL (kernel-checked, zero `sorry`); the showcase does
+**not** affect the locked Doctrine-v11 numbers and does **not** alter the
+locked-proven formula set. This showcase is purely additive.
