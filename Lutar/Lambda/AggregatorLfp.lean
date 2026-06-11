@@ -67,7 +67,7 @@ theorem iterate_mono (Φ : α →o α) : Monotone (iterate Φ) := by
       exact bot_le
   | succ k ih =>
       rw [iterate_succ Φ (k + 1), iterate_succ Φ k]
-      exact Φ.monotone ih
+      exact Φ.monotone (by rwa [iterate_succ Φ k] at ih)
 
 /-- The least fixed point is itself a fixed point (existence side — cited to Round5,
     restated here only as a building block for the constructive results). -/
