@@ -1,0 +1,205 @@
+# Copyright 2026 SZL Holdings
+# SPDX-License-Identifier: Apache-2.0
+#
+# theorem-u-snapshot-guard.yml — catch it in CI if a green main "Lake build
+# (gate + numbers)" run stops PUBLISHING its Theorem-U snapshot artifact.
+#
+# Why this exists
+# ---------------
+# Task #581 brought the Theorem U proof into main, and every green main lake-build
+# now builds a deterministic `theorem_u_snapshot.json`
+# (.github/scripts/build_theorem_u_snapshot.py) and uploads it as the artifact
+# `theorem-u-snapshot-<sha>`. That snapshot is the *subject* the szl-lake anchor
+# workflow later cosign-signs and records, and the public proof state reads its
+# honesty block from it.
+#
+# The emission is best-effort: if the build script regresses, or the upload step
+# is renamed / dropped / bumped to an artifact-excluding action, the snapshot
+# could quietly stop being produced (or be produced empty / malformed) on an
+# otherwise green build, with nothing failing. This mirrors the regression already
+# guarded for receipts by a11oy's release-receipt-summary-guard.yml.
+#
+# This guard audits the ACTUAL artifact a completed GREEN main lake-build run
+# published. It downloads `theorem-u-snapshot-*` — which FAILS if the run produced
+# no such artifact (total_count 0) — and asserts the snapshot parses AND keeps its
+# honesty block intact: locked_five_unchanged:true, locked_set {F1,F11,F12,F18,F19},
+# Theorem U = REAL-conditional, Conjecture 1 = OPEN / machine-checked FALSE. A
+# silently-disappearing snapshot, or one whose honesty was quietly loosened to
+# overclaim, can therefore never pass green.
+#
+# A self-test job proves the validator still FAILS on missing / empty / malformed
+# / dishonest fixtures before the audit job trusts it against the real run (org
+# guard pattern; cf. a11oy release-receipt-summary-guard.yml). Org policy:
+# github-owned actions only, SHAs pinned.
+# Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>
+
+name: Theorem-U Snapshot Guard
+
+on:
+  workflow_run:
+    workflows: ["Lake build (gate + numbers)"]
+    types: [completed]
+  pull_request:
+    paths:
+      - ".github/workflows/theorem-u-snapshot-guard.yml"
+      - ".github/scripts/check_theorem_u_snapshot.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/theorem-u-snapshot-guard.yml"
+      - ".github/scripts/check_theorem_u_snapshot.py"
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'lake-build run id to audit (default: latest completed green main run)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: theorem-u-snapshot-guard-${{ github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  # Prove the validator still rejects missing / empty / malformed / dishonest
+  # snapshots (i.e. is not silently passing) before the audit job trusts it. Runs
+  # on PR/push that touch the guard or its validator, and on manual dispatch.
+  self-test:
+    name: Self-test the snapshot validator (fixtures)
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Prove the validator rejects missing/empty/malformed/dishonest snapshots
+        run: python .github/scripts/check_theorem_u_snapshot.py --selftest
+
+  # Audit the artifact an actual GREEN main lake-build run published. Only a green
+  # build reaches the snapshot build + upload step, so we audit success only, and
+  # only on main (PR builds don't anchor). Also runnable on manual dispatch
+  # (optionally against a specific run id).
+  audit:
+    name: Audit the published Theorem-U snapshot artifact
+    if: >-
+      (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Self-test the validator before trusting it
+        run: python .github/scripts/check_theorem_u_snapshot.py --selftest
+
+      - name: Resolve the lake-build run to audit
+        id: target
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISPATCH_RUN_ID: ${{ github.event.inputs.run_id }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          RID="${DISPATCH_RUN_ID:-}"
+          if [ -z "${RID}" ]; then RID="${WORKFLOW_RUN_ID:-}"; fi
+          if [ -z "${RID}" ]; then
+            echo "No run id supplied — resolving the latest completed green main lake-build run."
+            RID="$(gh run list --repo "${GITHUB_REPOSITORY}" \
+                     --workflow lake-build.yml \
+                     --branch main --status success --limit 1 \
+                     --json databaseId -q '.[0].databaseId' 2>/dev/null || true)"
+          fi
+          if [ -z "${RID}" ] || [ "${RID}" = "null" ]; then
+            echo "::error::Could not resolve a green main lake-build run to audit."
+            exit 1
+          fi
+          echo "Auditing lake-build run ${RID}."
+          echo "run_id=${RID}" >> "$GITHUB_OUTPUT"
+
+      - name: Download the theorem-u-snapshot artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RID: ${{ steps.target.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p snapshot-artifact
+          # The artifact is named theorem-u-snapshot-<sha>; match by pattern so we
+          # need not know the head sha. gh run download FAILS (non-zero) when no
+          # artifact matches — exactly the "snapshot silently disappeared" case.
+          if ! gh run download "${RID}" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --pattern 'theorem-u-snapshot-*' \
+                --dir snapshot-artifact; then
+            echo "::error::green main lake-build run ${RID} did NOT publish a 'theorem-u-snapshot-<sha>' artifact (total_count 0). The szl-lake Theorem-U anchor would have no subject to sign. Most likely cause: the snapshot build/upload step in lake-build.yml was dropped/renamed, build_theorem_u_snapshot.py regressed, or upload-artifact was bumped to a version that excludes the file."
+            exit 1
+          fi
+          echo "Downloaded artifact contents:"
+          find snapshot-artifact -type f -printf '  %p (%s bytes)\n'
+
+      - name: Assert the snapshot is non-empty, well-formed and honest
+        run: python .github/scripts/check_theorem_u_snapshot.py --dir snapshot-artifact
+
+      - name: Theorem-U snapshot artifact is intact
+        run: echo "green main lake-build published a non-empty, well-formed, honest Theorem-U snapshot artifact."
+
+      # Direct push notification so a regressed/absent snapshot artifact is noticed
+      # immediately, not just buried in a red run on the Actions tab. Fires ONLY
+      # when an earlier audit step failed (failure()) — self-test-only PR/push runs
+      # never reach this job, so they cannot page. Posts to a Slack-compatible
+      # incoming webhook via curl (no third-party action, staying within the org's
+      # github-owned-actions-only policy); the szl-alert-relay flattens it to ntfy.
+      # If no webhook secret is configured it logs a notice and soft-skips — the red
+      # run still stands.
+      - name: Alert the team on snapshot-guard failure
+        if: ${{ failure() && (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch') }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO: ${{ github.repository }}
+          TARGET_RID: ${{ steps.target.outputs.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL secret not configured — skipping direct alert. The failed run still stands."
+            exit 0
+          fi
+
+          if [ -n "${TARGET_RID}" ] && [ "${TARGET_RID}" != "null" ]; then
+            verify_line="Audited lake-build run: ${TARGET_RID} (${SERVER_URL}/${REPO}/actions/runs/${TARGET_RID})"
+          else
+            verify_line="Audited lake-build run: (could not be resolved this run)"
+          fi
+
+          # Compose the message (real newlines), then JSON-encode it safely with jq
+          # (preinstalled on ubuntu-latest) so quotes/newlines can't break the
+          # payload. ntfy renders the Slack-style {text} field.
+          text=":rotating_light: *Theorem-U snapshot guard FAILED* in ${REPO}.
+          A green main lake-build published no / an empty / a malformed / a dishonest theorem-u-snapshot artifact, so the szl-lake Theorem-U anchor would have no honest subject to sign.
+          ${verify_line}
+          *Failing guard run:* ${RUN_URL}"
+
+          payload=$(jq -n --arg text "$text" '{text: $text}')
+
+          echo "Posting snapshot-guard failure alert to webhook..."
+          code=$(curl -sS -o /tmp/alert_resp.txt -w '%{http_code}' \
+                   -X POST -H 'Content-Type: application/json' \
+                   --max-time 20 --data "${payload}" "${SLACK_WEBHOOK_URL}")
+          echo "Webhook responded HTTP ${code}."
+          if [ "${code}" -lt 200 ] || [ "${code}" -ge 300 ]; then
+            echo "::error::Direct alert webhook POST failed (HTTP ${code}): $(cat /tmp/alert_resp.txt)"
+            exit 1
+          fi
+          echo "Direct alert delivered."
