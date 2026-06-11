@@ -1,0 +1,108 @@
+name: Conjecture Factory guard (self-tests + offline e2e dry-run)
+
+# Protects the Conjecture Factory pipeline. Runs on PRs / pushes that touch the
+# pipeline scripts, the sample candidate, or the workflows. NO signing, NO network,
+# NO szl-lake writes — it proves the scripts are self-consistent and that an
+# end-to-end run (intake -> novelty -> grade -> snapshot -> release) stays honest.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/scripts/conjecture_*.py"
+      - ".github/scripts/build_conjecture_snapshot.py"
+      - ".github/workflows/conjecture-factory*.yml"
+      - "conjectures/**"
+  pull_request:
+    paths:
+      - ".github/scripts/conjecture_*.py"
+      - ".github/scripts/build_conjecture_snapshot.py"
+      - ".github/workflows/conjecture-factory*.yml"
+      - "conjectures/**"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  guard:
+    name: Self-tests + offline e2e dry-run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Per-script offline self-tests
+        run: |
+          set -euo pipefail
+          for s in conjecture_intake conjecture_novelty conjecture_grader \
+                   build_conjecture_snapshot conjecture_release; do
+            echo "=== $s --self-test ==="
+            python3 ".github/scripts/$s.py" --self-test
+          done
+
+      - name: Offline end-to-end dry-run (no signing, no network, no ledger writes)
+        env:
+          CAND_DIR: conjectures/samples/szl-mixing-map
+          CAND_FILE: candidate.yaml
+        run: |
+          set -euo pipefail
+          test -f "$CAND_DIR/$CAND_FILE" || { echo "::error::sample candidate missing"; exit 1; }
+          python3 .github/scripts/conjecture_intake.py --in "$CAND_DIR/$CAND_FILE" --out candidate.json
+          python3 .github/scripts/conjecture_novelty.py --candidate candidate.json --corpus conjectures/corpus --out novelty.json
+          python3 .github/scripts/conjecture_grader.py --candidate candidate.json --out grade.json
+          python3 .github/scripts/build_conjecture_snapshot.py \
+            --candidate candidate.json --novelty novelty.json --grade grade.json \
+            --kernel-commit "${{ github.sha }}" --branch "${{ github.ref_name }}" \
+            --stage statement --out conjecture_snapshot.json
+
+          echo "=== honesty assertions on the dry-run snapshot ==="
+          python3 - <<'PY'
+          import json, sys
+          s = json.load(open("conjecture_snapshot.json"))
+          ms = s.get("milestone") or {}
+          g = s.get("grade") or {}
+          errs = []
+          if s.get("kind") != "conjecture-disclosure":
+              errs.append("kind != conjecture-disclosure")
+          if ms.get("status") != "OPEN":
+              errs.append("status != OPEN")
+          if ms.get("kernel_only") is not False:
+              errs.append("kernel_only must be False")
+          if "lean_numbers" in s:
+              errs.append("conjecture must not carry lean_numbers")
+          if (s.get("honesty") or {}).get("doctrine") != "v11":
+              errs.append("doctrine != v11")
+          if not s.get("novelty") or not s.get("grade"):
+              errs.append("novelty/grade not embedded")
+          # grade result must be one of the real verdicts (never a fabricated score)
+          if g.get("result") not in ("REFUTED", "VERIFIED-FINITE", "OPEN", "UNREACHABLE"):
+              errs.append(f"unexpected grade result {g.get('result')!r}")
+          if errs:
+              for e in errs: print(f"::error::{e}")
+              sys.exit(1)
+          print(f"dry-run snapshot honest: status=OPEN novelty={ms.get('novelty_verdict')} "
+                f"grade={g.get('result')} difficulty={ms.get('difficulty')}")
+          PY
+
+          echo "=== staged-release gate: teaser allowed, statement blocked pre-anchor ==="
+          python3 .github/scripts/conjecture_release.py --candidate candidate.json --stage teaser >/dev/null
+          if python3 .github/scripts/conjecture_release.py --candidate candidate.json --stage statement --ledger /dev/null >/dev/null 2>&1; then
+            echo "::error::statement stage must be BLOCKED before a disclosure receipt exists"
+            exit 1
+          fi
+          echo "guard OK: staged release refuses to publish a statement before it is timestamped"

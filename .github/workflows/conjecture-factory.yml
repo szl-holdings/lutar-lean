@@ -1,0 +1,244 @@
+name: Conjecture Factory (generate -> timestamp -> grade -> anchor)
+
+# Dispatch-only new-math-problem pipeline for szl-holdings/lutar-lean.
+#
+# Flow (one self-contained job; no external green build run is referenced):
+#   1. intake     : normalise the candidate -> szl.conjecture.candidate/v1
+#                   (stable id, canonical statement hash, taxonomy forced OPEN).
+#   2. novelty    : near-duplicate screen vs the local corpus, optionally + live
+#                   arXiv/Crossref (honest live/cached/unreachable labels).
+#   3. grade      : REAL bounded solver run over the candidate's executable
+#                   predicate (REFUTED+witness / VERIFIED-FINITE / OPEN /
+#                   UNREACHABLE). No score is fabricated.
+#   4. snapshot   : assemble the disclosure snapshot (kind=conjecture-disclosure,
+#                   status OPEN, NOT kernel_only, honesty v11, embeds the above).
+#   5. cosign     : keyless OIDC attest-blob (DSSE in-toto) over the snapshot —
+#                   the SAME Sigstore mechanism as anchor-szl-lake.yml. No new key.
+#   6. verify     : verify-blob-attestation in-CI before publishing.
+#   7. anchor     : append a DSSE Khipu receipt to szl-lake via the GENERIC
+#                   anchor_szl_lake.py (predicate-type conjecture-disclosure/v1).
+#
+# Honesty (doctrine v11): the disclosure is an OPEN problem with a cryptographic
+# timestamp. The signature attests the TIMESTAMP + CONTENT, never the truth of the
+# conjecture. This workflow MUST NOT apply the Theorem-U kernel_only gate — a
+# conjecture is by definition NOT a kernel-verified theorem.
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_dir:
+        description: "Directory holding the candidate (+ predicate.py)"
+        required: false
+        type: string
+        default: "conjectures/samples/szl-mixing-map"
+      candidate_file:
+        description: "Candidate filename inside candidate_dir (YAML or JSON)"
+        required: false
+        type: string
+        default: "candidate.yaml"
+      stage:
+        description: "Release stage to build (teaser|statement|solution)"
+        required: false
+        type: choice
+        default: "statement"
+        options: ["teaser", "statement", "solution"]
+      online_novelty:
+        description: "Also query live arXiv/Crossref for prior art"
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: conjecture-factory
+  cancel-in-progress: false
+
+env:
+  CAND_DIR: ${{ github.event.inputs.candidate_dir }}
+  CAND_FILE: ${{ github.event.inputs.candidate_file }}
+  STAGE: ${{ github.event.inputs.stage }}
+  SNAPSHOT_FILE: conjecture_snapshot.json
+  PREDICATE_TYPE: https://szl-holdings/conjecture-disclosure/v1
+
+jobs:
+  factory:
+    name: Generate -> screen -> grade -> sign -> anchor (conjecture disclosure)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write   # keyless OIDC signing
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Intake (normalise candidate)
+        run: |
+          set -euo pipefail
+          test -f "$CAND_DIR/$CAND_FILE" || { echo "::error::candidate $CAND_DIR/$CAND_FILE missing"; exit 1; }
+          python3 .github/scripts/conjecture_intake.py \
+            --in "$CAND_DIR/$CAND_FILE" --out candidate.json
+          cat candidate.json
+
+      - name: Novelty screen
+        run: |
+          set -euo pipefail
+          ONLINE=""
+          if [ "${{ github.event.inputs.online_novelty }}" = "true" ]; then ONLINE="--online"; fi
+          python3 .github/scripts/conjecture_novelty.py \
+            --candidate candidate.json --corpus conjectures/corpus $ONLINE \
+            --out novelty.json
+          cat novelty.json
+
+      - name: Grade (real bounded solver run)
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/conjecture_grader.py \
+            --candidate candidate.json --out grade.json
+          cat grade.json
+
+      - name: Build disclosure snapshot
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/build_conjecture_snapshot.py \
+            --candidate candidate.json \
+            --novelty novelty.json \
+            --grade grade.json \
+            --kernel-commit "${{ github.sha }}" \
+            --branch "${{ github.ref_name }}" \
+            --stage "$STAGE" \
+            --out "$SNAPSHOT_FILE"
+          cat "$SNAPSHOT_FILE"
+
+      - name: Assert disclosure is OPEN + honest (NOT kernel-only)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, sys
+          s = json.load(open(os.environ["SNAPSHOT_FILE"]))
+          ms = s.get("milestone") or {}
+          errs = []
+          if s.get("kind") != "conjecture-disclosure":
+              errs.append(f"kind must be conjecture-disclosure, got {s.get('kind')!r}")
+          if ms.get("status") != "OPEN":
+              errs.append(f"milestone.status must be OPEN, got {ms.get('status')!r}")
+          if ms.get("kernel_only") is not False:
+              errs.append("milestone.kernel_only must be False for a conjecture")
+          if "lean_numbers" in s:
+              errs.append("a conjecture snapshot must NOT carry lean_numbers")
+          if not s.get("honesty") or s["honesty"].get("doctrine") != "v11":
+              errs.append("honesty block missing or doctrine != v11")
+          if not s.get("novelty"):
+              errs.append("novelty screen result missing")
+          if not s.get("grade"):
+              errs.append("grade result missing")
+          # never present an OPEN problem as solved
+          if ms.get("release_stage") == "solution" and \
+                  (s.get("grade") or {}).get("result") not in ("REFUTED", "VERIFIED-FINITE"):
+              errs.append("solution stage for an unresolved candidate")
+          if errs:
+              for e in errs:
+                  print(f"::error::{e}")
+              sys.exit(1)
+          print(f"disclosure OK: id={ms.get('id')} status=OPEN stage={ms.get('release_stage')} "
+                f"novelty={ms.get('novelty_verdict')} grade={ms.get('grade_result')}")
+          PY
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign disclosure (cosign attest-blob, keyless DSSE)
+        env:
+          SOURCE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          s = json.load(open(os.environ["SNAPSHOT_FILE"]))
+          ms = s.get("milestone") or {}
+          predicate = {
+              "kind": s.get("kind"),
+              "kernel_commit": s.get("kernel_commit"),
+              "branch": s.get("branch"),
+              "milestone": {
+                  "id": ms.get("id"),
+                  "title": ms.get("title"),
+                  "status": ms.get("status"),
+                  "kernel_only": ms.get("kernel_only"),
+                  "statement_hash": ms.get("statement_hash"),
+                  "release_stage": ms.get("release_stage"),
+                  "novelty_verdict": ms.get("novelty_verdict"),
+                  "grade_result": ms.get("grade_result"),
+                  "difficulty": ms.get("difficulty"),
+              },
+              "honesty": s.get("honesty"),
+              "source_run_url": os.environ.get("SOURCE_RUN_URL", ""),
+          }
+          json.dump(predicate, open("snapshot_predicate.json", "w"), indent=2, sort_keys=True)
+          PY
+          cosign attest-blob --yes \
+            --new-bundle-format \
+            --predicate snapshot_predicate.json \
+            --type "$PREDICATE_TYPE" \
+            --bundle snapshot.cosign.bundle \
+            "$SNAPSHOT_FILE"
+          echo "bundle written:"; head -c 400 snapshot.cosign.bundle; echo
+
+      - name: Verify attestation in-CI (keyless)
+        run: |
+          set -euo pipefail
+          cosign verify-blob-attestation \
+            --new-bundle-format \
+            --bundle snapshot.cosign.bundle \
+            --type "$PREDICATE_TYPE" \
+            --certificate-identity-regexp "^https://github.com/szl-holdings/lutar-lean/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$SNAPSHOT_FILE"
+          echo "cosign verify-blob-attestation OK"
+
+      - name: Install anchor deps
+        run: python3 -m pip install --quiet huggingface_hub cryptography
+
+      - name: Anchor disclosure into szl-lake (HF + GitHub front-door)
+        env:
+          SZL_LAKE_TOKEN: ${{ secrets.SZL_LAKE_TOKEN }}
+          HF_LAKE_TOKEN: ${{ secrets.HF_LAKE_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/anchor_szl_lake.py \
+            --snapshot "$SNAPSHOT_FILE" \
+            --bundle snapshot.cosign.bundle \
+            --predicate-type "$PREDICATE_TYPE" \
+            --source-run-id "${{ github.run_id }}" \
+            --source-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --source-workflow "Conjecture Factory (generate -> timestamp -> grade -> anchor)"
+          echo "----- anchor_result.json -----"
+          cat anchor_result.json
+
+      - name: Upload disclosure receipt + bundle
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conjecture-disclosure-${{ github.sha }}
+          path: |
+            candidate.json
+            novelty.json
+            grade.json
+            conjecture_snapshot.json
+            snapshot_predicate.json
+            snapshot.cosign.bundle
+            anchor_result.json
+          if-no-files-found: warn

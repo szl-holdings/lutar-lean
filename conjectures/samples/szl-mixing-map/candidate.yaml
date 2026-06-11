@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# SZL Conjecture Factory — sample candidate (generated, OPEN). Doctrine v11.
+title: SZL mixing-map convergence conjecture
+domain: number-theory / arithmetic dynamics
+statement: |
+  Define M : Z+ -> Z+ by
+      M(n) = n / 2          if n is even,
+      M(n) = (3n + 1) / 2    if n is odd and n = 1 (mod 4),
+      M(n) = (n + 1) / 2     if n is odd and n = 3 (mod 4).
+  Conjecture: for every integer n >= 1 there exists k >= 0 with M^k(n) = 1.
+intended_solution_outline: |
+  Bound the orbit by a Lyapunov / drift argument on the 2-adic valuation: show the
+  contracting branch (n = 3 mod 4) dominates the accelerating branch (n = 1 mod 4)
+  in expectation, then rule out non-trivial cycles via a residue-class descent.
+  Status: OPEN — no proof is claimed; the predicate only performs bounded testing.
+predicate:
+  kind: python-callable
+  module: conjectures/samples/szl-mixing-map/predicate.py
+  entry: holds
+  description: >
+    Sound bounded-orbit checker: returns False only on a detected non-1 cycle (a
+    certain counterexample); inconclusive bounded runs assert no counterexample.
+references:
+  - conjectures/corpus/collatz.md (related but distinct: classical 3n+1 map)
+  - "Lagarias, J. (2010). The 3x+1 problem: an annotated bibliography."
