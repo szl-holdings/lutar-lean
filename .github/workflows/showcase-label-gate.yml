@@ -1,0 +1,60 @@
+name: Showcase label gate (static)
+
+# Fast, Lean-free half of the Putnam showcase REAL/DEMO label honesty gate.
+#
+# Why this exists (Task #700): the static half of the showcase gate (claimed
+# label vs non-comment `sorry`, plus the locked-REAL P01–P04 pin and the
+# writeup/README coverage check) needs nothing but Python. It previously only
+# ran inside lake-build.yml, which first restores the Mathlib cache and builds
+# the whole library — many minutes — so a mislabeled REAL/DEMO file, a removed
+# locked proof, or a README row advertising a non-existent proof was not flagged
+# until that heavy build finished. Running the static check + parser self-test in
+# a lightweight Python-only job gives near-instant feedback on PRs.
+#
+# The kernel-truth half (`--with-axioms`, which re-elaborates `#print axioms`)
+# stays in lake-build.yml unchanged — it requires the Lean toolchain and a warm
+# `lake build`. Total signal is unchanged; the static failures just surface
+# faster.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Deny-by-default; the job grants only what it needs (Scorecard Token-Permissions).
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  showcase-label-static:
+    name: Showcase REAL/DEMO label gate (static, Python-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Showcase label gate self-test
+        run: python3 .github/scripts/check_showcase_labels.py --self-test
+
+      - name: Showcase REAL/DEMO label honesty gate (static)
+        run: python3 .github/scripts/check_showcase_labels.py --repo-path .
