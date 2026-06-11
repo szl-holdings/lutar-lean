@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0
+# SZL Holdings — Open-Problem Bounty Board · Doctrine v11
+#
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │  REHEARSAL FIXTURE — NOT A REAL BOUNTY. DO NOT MERGE TO main.              │
+# │                                                                            │
+# │  This file is copied into bounties/ ONLY at runtime by the                 │
+# │  "Rehearse Auto-Close" workflow (close-bounty.yml, rehearse=true) to       │
+# │  exercise the auto-close pipeline end to end against a throwaway id.       │
+# │  It is committed only to a disposable auto/close-* branch and the          │
+# │  rehearsal deletes that branch + closes its PR afterwards. It never        │
+# │  touches a real OPEN bounty and never claims a real solve.                 │
+# └──────────────────────────────────────────────────────────────────────────┘
+id: rehearsal-do-not-merge
+title: "Rehearsal Fixture — auto-close pipeline drill (CLOSED)"
+doctrine: v11
+status: CLOSED
+
+summary: >
+  Synthetic throwaway bounty used only to rehearse the auto-close pipeline. It is
+  NOT a real open problem and carries no scientific claim of any kind.
+
+problem_statement: |
+  This is a rehearsal fixture. It exists so the bounty auto-close workflow can be
+  exercised end to end (edit -> validate -> signed PR) without faking a real solve
+  of either genuine open conjecture. It is never merged to main.
+
+acceptance_criteria:
+  - id: rehearsal-only
+    check: "This fixture is for pipeline rehearsal only and never represents a real proof."
+
+verification:
+  arbiter: "None — rehearsal fixture only; no real arbiter ever evaluates this entry."
+  must_become_real: true
+
+reward:
+  amount: founder-set
+  currency: USD
+  note: >
+    Not a real reward. This is a rehearsal fixture; the board never invents a figure.
+
+submission:
+  intake_repo: https://github.com/szl-holdings/lutar-lean
+  pull_request: "Rehearsal fixture — not open for submissions."
+
+references:
+  - "tests/fixtures/rehearsal_bounty.yaml (this file)"
+
+honesty: >
+  This is a rehearsal fixture and NOT a theorem. It carries no proof claim. It is
+  copied into the board only transiently to drill the auto-close mechanics and is
+  never merged to main.
+
+solved:
+  solver: "rehearsal-bot (NOT A REAL SOLVE)"
+  proof_commit: "0000000000"
+  proof_repo: "szl-holdings/lutar-lean"
+  verify_run: "https://example.invalid/rehearsal-27384878771"
+  accepted_at: "2026-06-11T23:50:17Z"
+  note: >
+    Auto-closed by the proof arbiter: the accepted proof discharged the open
+    obligation (lake build green, zero sorry, axioms allowlisted).
