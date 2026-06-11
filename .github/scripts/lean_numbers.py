@@ -411,6 +411,24 @@ EXPERIMENTAL_SCOPES = (
     # frame and a CAPACITY UPPER BOUND, never a uniqueness/existence claim or a theorem
     # about Λ. Excluded from ALL v11 numbers, so the locked baseline is untouched.
     os.path.join("Lutar", "Entanglement.lean"),
+    # Neuroplasticity learning-rule backbone (branch neuro/plasticity-properties-proposed) —
+    # additive, EXPERIMENTAL/PROPOSED, NOT folded into the locked v11 baseline
+    # (stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}). One file Lutar/Neuroplasticity.lean
+    # (namespace Lutar.Neuroplasticity): kernel-clean declarations machine-checking the
+    # order/analysis backbone of two CITED learning rules behind szl_neuroplasticity.py —
+    # cp (def of the Hubel–Wiesel critical-period envelope α_max·exp(−(t−t_peak)²/(2σ²))),
+    # cp_nonneg, cp_peak, cp_strict_antitone_after_peak (the envelope is STRICTLY decreasing
+    # for t>t_peak: plasticity only wanes after the peak — Real.exp_lt_exp ∘ pow_lt_pow_left₀
+    # ∘ positive-denominator division ∘ gcongr), bcmPhi (def φ(y)=y·(y−θ_M)) and
+    # bcm_potentiation_iff (BCM potentiates φ>0 iff y>θ_M for y>0 — nlinarith). Every
+    # #print axioms reports only Lean/Mathlib-core axioms (propext, Classical.choice,
+    # Quot.sound). NO sorry / NO new declared axiom token. This adds NOTHING to the
+    # locked-proven set and says NOTHING about Λ: Λ UNCONDITIONAL uniqueness STAYS
+    # Conjecture 1 (machine-checked FALSE); these learning-rule properties are a PROPOSED
+    # engineering frame, never a uniqueness/existence claim or a theorem about Λ. Citations:
+    # Hubel & Wiesel (Nobel 1981); Bienenstock–Cooper–Munro (1982). Excluded from ALL v11
+    # numbers, so the locked baseline is untouched.
+    os.path.join("Lutar", "Neuroplasticity.lean"),
 )
 
 

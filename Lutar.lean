@@ -480,6 +480,20 @@ import Lutar.Allodial
 -- uniqueness STAYS Conjecture 1 (machine-checked FALSE). This is a CAPACITY UPPER
 -- BOUND, not a uniqueness/existence claim. NO sorry / NO new declared axiom token.
 import Lutar.Entanglement
+-- Neuroplasticity learning-rule backbone (branch neuro/plasticity-properties-proposed) —
+-- additive, EXPERIMENTAL/PROPOSED, registered under EXPERIMENTAL_SCOPES in
+-- lean_numbers.py as Lutar/Neuroplasticity.lean so it is EXCLUDED from ALL v11 numbers
+-- (the locked baseline is untouched). Importing it here makes `lake build`
+-- (default_target) actually compile + kernel-check its declarations. Machine-checks the
+-- order/analysis backbone of two cited learning rules: the Hubel–Wiesel critical-period
+-- envelope α(t)=α_max·exp(−(t−t_peak)²/(2σ²)) is strictly antitone after the peak
+-- (cp_strict_antitone_after_peak), and the BCM plasticity sign φ(y)=y·(y−θ_M) is positive
+-- iff y>θ_M for y>0 (bcm_potentiation_iff); every #print axioms reports only Lean/Mathlib-
+-- core axioms (propext, Classical.choice, Quot.sound). Adds NOTHING to the locked-proven
+-- set (STAYS EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}) and says NOTHING about Λ: Λ
+-- UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE). These are
+-- PROPOSED learning-rule properties, never theorems about Λ. NO sorry / NO new axiom.
+import Lutar.Neuroplasticity
 
 
 import Lutar.Scaling.MetabolicScaling
