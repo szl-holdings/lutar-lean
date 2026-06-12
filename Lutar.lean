@@ -316,6 +316,7 @@ import Lutar.Wave16.AbacusPlaceValue
 import Lutar.Wave17.BinaryPinsker
 import Lutar.Wave17.MonDEQWellPosed
 import Lutar.Wave17.RecurrentDepth
+import Lutar.Wave17.MultiClassPinsker
 -- Wave18 frontier (EXPERIMENTAL · CI-green · kernel-clean): CF-29 the Aczél quasi-arithmetic
 -- REPRESENTATION theorem — honest forward construction toward CUT-1. AczelRepresentation.lean
 -- supplies the representation predicate `IsQuasiArithmetic2`, the BKS dyadic-midpoint recursion
