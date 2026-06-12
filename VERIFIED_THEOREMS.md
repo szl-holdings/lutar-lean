@@ -42,6 +42,12 @@
 - `theoremU_excluded_from_locked : theoremUDisclosed.all (fun p => ! lockedNames.contains p.1) = true`
 - `conjecture1_still_open : openConjectures.length = 1`
 
+## `Lutar/Uniqueness/Existence.lean`
+
+- `lambda_satisfies_IA {k : ℕ} (hk : 0 < k) : Nonempty (IdentifiabilityAssumptions (Λ k))`
+- `mem_identifiability_solutions_iff {k : ℕ} (hk : 0 < k) (Φ : Aggregator k) : Nonempty (IdentifiabilityAssumptions Φ) ↔ Φ = Λ k`
+- `identifiability_solution_set_eq_lambda {k : ℕ} (hk : 0 < k) : {Φ : Aggregator k | Nonempty (IdentifiabilityAssumptions Φ)} = {Λ k}`
+
 ## `Lutar/Uniqueness/LambdaEquiv.lean`
 
 - `lambdaEquiv_refl {k : ℕ} (Φ : Aggregator k) : LambdaEquiv Φ Φ`
