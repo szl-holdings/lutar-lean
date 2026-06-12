@@ -46,6 +46,7 @@ ledger here is a meta-level summary, not a re-verification of the kernel proofs.
 Signed-off-by: SZL CTO <cto@szl-holdings.com>
 -/
 import Lutar.Uniqueness.TheoremU
+import Lutar.Uniqueness.Existence
 
 namespace Lutar.Uniqueness.AxiomCheck
 
@@ -69,7 +70,12 @@ def theoremUDisclosed : List (String × List String) :=
     ("TheoremU_LambdaUnique_eq",           ["propext", "funext", "Classical.choice", "Quot.sound"]),
     ("lambda_equiv_to_eq_of_anchored",     ["propext", "funext", "Classical.choice", "Quot.sound"]),
     ("lambdaEquiv_equivalence",            ["propext", "funext", "Classical.choice", "Quot.sound"]),
-    ("lambdaEquiv_nondegenerate",          ["propext", "funext", "Classical.choice", "Quot.sound"]) ]
+    ("lambdaEquiv_nondegenerate",          ["propext", "funext", "Classical.choice", "Quot.sound"]),
+    -- EXISTENCE half (Lutar/Uniqueness/Existence.lean): Λ realizes IA, and the
+    -- IA-solution set is exactly {Λ}. Same kernel-only base, NO new declared axiom.
+    ("lambda_satisfies_IA",                ["propext", "funext", "Classical.choice", "Quot.sound"]),
+    ("mem_identifiability_solutions_iff",  ["propext", "funext", "Classical.choice", "Quot.sound"]),
+    ("identifiability_solution_set_eq_lambda", ["propext", "funext", "Classical.choice", "Quot.sound"]) ]
 
 /-- Every Theorem-U disclosed axiom set is kernel-only: no custom axiom anywhere
 in the Theorem-U pack. Decided by the kernel. -/
@@ -112,5 +118,11 @@ theorem conjecture1_still_open : openConjectures.length = 1 := by decide
 #print axioms TheoremU_LambdaUnique
 #print axioms TheoremU_LambdaUnique_eq
 #print axioms lambda_equiv_to_eq_of_anchored
+-- EXISTENCE half: ground-truth footprints for the realizability decls + capstone.
+#print axioms Lutar.Uniqueness.lambda_FactorAssumptions
+#print axioms Lutar.Uniqueness.lambda_IA
+#print axioms Lutar.Uniqueness.lambda_satisfies_IA
+#print axioms Lutar.Uniqueness.mem_identifiability_solutions_iff
+#print axioms Lutar.Uniqueness.identifiability_solution_set_eq_lambda
 
 end Lutar.Uniqueness.AxiomCheck

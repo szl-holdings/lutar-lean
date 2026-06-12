@@ -438,6 +438,7 @@ import Lutar.Lambda.AggregatorLfp
 import Lutar.Uniqueness.LambdaEquiv
 import Lutar.Uniqueness.Identifiability
 import Lutar.Uniqueness.TheoremU
+import Lutar.Uniqueness.Existence
 import Lutar.Uniqueness.AxiomCheck
 import Lutar.Wave24.AdmissibilityCertificate
 
