@@ -27,6 +27,16 @@ lean_lib «PutnamShowcase» where
   roots := #[`P01, `P02, `P03, `P04]
 
 @[default_target]
+lean_lib «FrontierShowcase» where
+  -- Celestial / infrared-triangle frontier instance (Showcase/Frontier/).
+  -- Mathlib-free, core Lean only; EXPERIMENTAL, kernel-checked by `decide`
+  -- (zero `sorry`). Lives outside Lutar/ so it is NOT counted by
+  -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
+  -- baseline. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`CelestialIRTriangle]
+
+@[default_target]
 lean_exe «check» where
   root := `Main
 
