@@ -219,7 +219,66 @@ jobs:
             --source-run-url "${{ steps.src.outputs.html_url }}" \
             --source-workflow "${{ steps.src.outputs.name }}"
           echo "----- anchor_result.json -----"
-          cat anchor_result.json
+          cat anchor_result.json || echo "(idempotent no-op: nothing newly anchored, no anchor_result.json)"
+
+      # Positive confirmation to the shared a11oy-uptime ntfy topic so the team
+      # SEES a new proof receipt land (mirrors verify-anchor-receipts.yml's
+      # failure alert, but for the happy path). Fires ONLY when this run actually
+      # appended a new receipt -- on an idempotent no-op the script returns before
+      # writing anchor_result.json, so there is no file and no spurious ping.
+      # SLACK_WEBHOOK_URL points at the org's ntfy relay; soft-skip with a warning
+      # if it is unset (the anchor + floor bump still landed). Honesty: the
+      # per-snapshot status is carried verbatim, never inflated to a blanket
+      # "proven" (Theorem U is REAL-conditional; Conjecture 1 is OPEN / FALSE).
+      - name: Confirm new anchor to the team (a11oy-uptime ntfy)
+        if: ${{ success() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ ! -f anchor_result.json ]; then
+            echo "::notice::No anchor_result.json (idempotent no-op / nothing newly anchored) — no team confirmation sent."
+            exit 0
+          fi
+          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL secret not configured — skipping the team confirmation. The anchor + verify-anchor-receipts floor bump still landed; see anchor_result.json."
+            exit 0
+          fi
+          text=$(python3 - <<'PY'
+          import json
+          r = json.load(open("anchor_result.json"))
+          import os
+          run_url = os.environ.get("RUN_URL", "")
+          bumped = r.get("baseline_bumped")
+          floor = r.get("baseline_min_receipts")
+          floor_line = (f"verify-anchor-receipts floor auto-raised to min_receipts={floor}"
+                        if bumped else f"verify-anchor-receipts floor unchanged (min_receipts={floor})")
+          lines = [
+              f":white_check_mark: *New szl-lake proof anchor landed* — kind `{r.get('kind')}` "
+              f"chain_index {r.get('chain_index')} in szl-holdings/szl-lake.",
+              f"*Milestone:* {r.get('milestone_title')} — status {r.get('milestone_status') or 'n/a'}",
+              f"*Honesty:* {r.get('honesty_note')}",
+              f"*Floor:* {floor_line}",
+              f"*Receipt:* {r.get('receipt_id')}",
+              f"*Rekor log index:* {r.get('rekor_log_index')}",
+              f"*Commit:* {r.get('github_commit')}",
+              f"*Anchor run:* {run_url}",
+          ]
+          print("\n".join(lines))
+          PY
+          )
+          payload=$(jq -n --arg text "$text" '{text: $text}')
+          echo "Posting new-anchor confirmation to webhook..."
+          code=$(curl -sS -o /tmp/confirm_resp.txt -w '%{http_code}' \
+                   -X POST -H 'Content-Type: application/json' \
+                   --max-time 20 --data "${payload}" "${SLACK_WEBHOOK_URL}")
+          echo "Webhook responded HTTP ${code}."
+          if [ "${code}" -lt 200 ] || [ "${code}" -ge 300 ]; then
+            echo "::error::New-anchor confirmation webhook POST failed (HTTP ${code}): $(cat /tmp/confirm_resp.txt)"
+            exit 1
+          fi
+          echo "New-anchor confirmation delivered."
 
       - name: Upload anchor receipt + bundle
         if: always()

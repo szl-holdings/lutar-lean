@@ -47,6 +47,18 @@ GH_REPO = "szl-holdings/szl-lake"
 HF_NDJSON = "khipu/lutar_lean_receipts.ndjson"
 GH_NDJSON = "data/khipu/lutar_lean_receipts.ndjson"
 GH_INDEX = "lake_index.json"
+# Append-only floor read by szl-lake's verify-anchor-receipts.yml. Bumped to the
+# new chain length in the SAME signed commit that appends a receipt (see
+# bump_baseline_floor + main); never lowered.
+GH_BASELINE = ".github/verify-anchor-receipts-baseline.json"
+BASELINE_COMMENT = (
+    "Append-only floor for the anchor ledger (khipu/lutar_lean_receipts.ndjson). "
+    "verify-anchor-receipts.yml fails LOUDLY if either surface drops below this "
+    "many receipts, so a wiped or truncated ledger can never pass green with "
+    "'nothing to check'. AUTO-MAINTAINED: lutar-lean's anchor_szl_lake.py raises "
+    "this to the new chain length in the SAME signed commit that appends a receipt "
+    "(chain_index N => min_receipts N); never lowered."
+)
 # Per-theorem anchor manifests land at the SAME relative path on both surfaces so
 # the GitHub and HF copies are byte-identical.
 THEOREMS_DIR = "attestations/innovations/theorems"
@@ -109,6 +121,41 @@ def chain_position(existing: list):
     chain_index = len(existing) + 1
     prev_hash = existing[-1].get("receipt_id") if existing else None
     return chain_index, prev_hash
+
+
+def baseline_floor(existing_raw) -> int:
+    """Return the current `min_receipts` floor from the raw baseline JSON (0 if
+    absent/malformed). Pure helper -> unit-testable."""
+    try:
+        doc = json.loads(existing_raw) if existing_raw else {}
+        return int(doc.get("min_receipts", 0)) if isinstance(doc, dict) else 0
+    except (ValueError, TypeError):
+        return 0
+
+
+def bump_baseline_floor(existing_raw, chain_index: int):
+    """Return the updated baseline JSON string when the append-only floor must
+    rise to `chain_index`, else None (idempotent / already at-or-above).
+
+    The floor in szl-lake's `.github/verify-anchor-receipts-baseline.json`
+    (`min_receipts`) defeats the "empty ledger passes green with nothing to check"
+    failure mode: verify-anchor-receipts.yml fails loud if either surface drops
+    below it. It is APPEND-ONLY -- this NEVER lowers the floor and only ever
+    returns a higher one. Preserves any other keys in the file and refreshes the
+    `_comment` to document the auto-maintenance. Pure helper so the never-lower
+    contract is unit-testable.
+    """
+    try:
+        doc = json.loads(existing_raw) if existing_raw else {}
+    except (ValueError, TypeError):
+        doc = {}
+    if not isinstance(doc, dict):
+        doc = {}
+    if chain_index <= baseline_floor(existing_raw):
+        return None
+    doc["_comment"] = BASELINE_COMMENT
+    doc["min_receipts"] = chain_index
+    return json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
 
 
 # --------------------------------------------------------------------------- #
@@ -632,10 +679,44 @@ def main() -> int:
     if manifest_str is not None:
         additions.append({"path": manifest_rel,
                           "contents": base64.b64encode(manifest_str.encode()).decode()})
+
+    # ---- bump the verify-anchor-receipts append-only floor (atomic) ------ #
+    # The floor lives in szl-lake but the in-CI GITHUB_TOKEN there cannot write
+    # main (signed-commits ruleset) and the org blocks Actions from opening PRs.
+    # This anchor already writes szl-lake main with the org-owner SZL_LAKE_TOKEN,
+    # so we raise the floor to the new chain length in the SAME signed commit that
+    # appends the receipt -- there is never a window where the receipt exists but
+    # the floor lags. Append-only: bump_baseline_floor never lowers it.
+    baseline_raw = gh_get_raw(gh_token, GH_BASELINE)
+    baseline_prev = baseline_floor(baseline_raw)
+    baseline_str = bump_baseline_floor(baseline_raw, chain_index)
+    baseline_bumped = baseline_str is not None
+    if baseline_bumped:
+        additions.append({"path": GH_BASELINE,
+                          "contents": base64.b64encode(baseline_str.encode()).decode()})
+        print(f"baseline floor bump: min_receipts {baseline_prev} -> {chain_index}")
+    else:
+        print(f"::notice::baseline floor already >= chain_index "
+              f"({baseline_prev} >= {chain_index}); no bump")
+    baseline_now = chain_index if baseline_bumped else baseline_prev
+
+    # Doctrine-preserving one-liner for the team confirmation; per-snapshot status
+    # is carried verbatim and NEVER inflated to a blanket "proven".
+    if kind == "theorem-u":
+        honesty_note = ("Theorem U REAL-conditional; "
+                        "Conjecture 1 OPEN / machine-checked FALSE")
+    else:
+        honesty_note = (f"{kind} status: {milestone_status or 'see per-snapshot honesty block'} "
+                        f"(carried verbatim)")
+
+    baseline_msg_line = (f"verify-anchor-receipts floor: min_receipts {baseline_prev} -> {chain_index}\n"
+                         if baseline_bumped else
+                         f"verify-anchor-receipts floor: min_receipts unchanged ({baseline_prev})\n")
     msg = (f"anchor: {kind} snapshot {kernel_commit[:12]} into szl-lake "
            f"(chain_index {chain_index})\n\n"
            f"Cosign-keyless DSSE receipt for the kernel-verified {kind} snapshot.\n"
            f"Milestone status: {milestone_status or 'n/a'} (per-snapshot honesty carried verbatim).\n"
+           f"{baseline_msg_line}"
            f"receipt_id={receipt['receipt_id']}\n"
            f"snapshot_sha256={snapshot_sha}\n\n"
            f"Signed-off-by: {COMMIT_NAME} <{COMMIT_EMAIL}>")
@@ -662,6 +743,13 @@ def main() -> int:
             "rekor_log_index": signing["rekor_log_index"],
             "verified_theorems_count": vt_count,
             "verified_theorems_manifest": manifest_rel,
+            "milestone_kind": kind,
+            "milestone_title": milestone.get("title", kind),
+            "milestone_status": milestone_status,
+            "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
+            "honesty_note": honesty_note,
+            "baseline_min_receipts": baseline_now,
+            "baseline_bumped": baseline_bumped,
         }, fh, indent=2)
     return 0
 

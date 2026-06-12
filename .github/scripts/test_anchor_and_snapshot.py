@@ -210,6 +210,42 @@ def test_canonical_hash_order_independent() -> None:
     )
 
 
+# --------------------------------------------------------------------------- #
+# (4) verify-anchor-receipts append-only floor: auto-bump, never lower.
+# --------------------------------------------------------------------------- #
+def test_baseline_floor_append_only() -> None:
+    # A new anchor at chain_index N raises the floor to N (preserving other keys).
+    up = A.bump_baseline_floor('{"_comment": "x", "min_receipts": 2}', 3)
+    assert up is not None, "a higher chain_index must bump the floor"
+    doc = json.loads(up)
+    assert doc["min_receipts"] == 3, doc
+    assert "_comment" in doc, "the _comment key must be preserved/refreshed"
+
+    # APPEND-ONLY: a lower chain_index must NEVER lower the floor (no write).
+    assert A.bump_baseline_floor('{"min_receipts": 5}', 3) is None, (
+        "the floor must never be lowered (5 -> 3 is a no-op)"
+    )
+    # No-op when already at the floor (idempotent re-anchor).
+    assert A.bump_baseline_floor('{"min_receipts": 3}', 3) is None, (
+        "an equal chain_index must be a no-op"
+    )
+    # Absent / empty baseline -> create it at the new floor.
+    created = A.bump_baseline_floor(None, 1)
+    assert created is not None and json.loads(created)["min_receipts"] == 1, (
+        "a missing baseline file must be created at the new floor"
+    )
+    assert json.loads(A.bump_baseline_floor("", 4))["min_receipts"] == 4, (
+        "an empty baseline body must be treated as floor 0 and created"
+    )
+    # Malformed JSON -> treated as floor 0, then set (never silently keep junk).
+    assert json.loads(A.bump_baseline_floor("not json", 4))["min_receipts"] == 4, (
+        "a malformed baseline must be repaired up to the new floor"
+    )
+    # baseline_floor reader is robust to junk/missing.
+    assert A.baseline_floor('{"min_receipts": 7}') == 7
+    assert A.baseline_floor(None) == 0 and A.baseline_floor("nope") == 0
+
+
 TESTS = [
     ("default theorem-u snapshot shape (back-compat)", test_default_theorem_u_shape),
     ("kind without honesty block is refused", test_kind_without_honesty_is_refused),
@@ -217,6 +253,7 @@ TESTS = [
     ("anchor chain_position genesis + advance", test_chain_position_genesis_and_advance),
     ("anchor idempotency tuple", test_idempotency_tuple),
     ("canonical_hash order independence", test_canonical_hash_order_independent),
+    ("verify-anchor-receipts floor is append-only", test_baseline_floor_append_only),
 ]
 
 
