@@ -1,6 +1,6 @@
 # STATUS.md — lutar-lean (Lean 4 Proof Kernel)
 
-**Updated:** 2026-06-02
+**Updated:** 2026-06-12
 **Doctrine v11 — 749 / 14 / 163 — replay hash c7c0ba17**
 
 ---
@@ -30,6 +30,7 @@
   statement `Conjecture1_LambdaUnique` ships **statement-only**: Λ stays **Conjecture 1**
   (machine-checked false as stated). A dedicated axiom-hygiene CI gate in `lake-build.yml` enforces
   the no-axiom / no-placeholder invariant; see `DEPENDENCY_MAP.md`.
+- **Machine-checked experimental backbones (NOT locked-8)** — recently merged, `lake`-verified Lean modules that are PROPOSED engineering backbones, deliberately **outside** the locked set (the locked-proven formula count stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ-uniqueness stays **Conjecture 1** — OPEN, machine-checked FALSE as stated) and **not** injected into the auto-generated `VERIFIED_THEOREMS.md`: `Lutar/Allodial.lean` ([#229](https://github.com/szl-holdings/lutar-lean/pull/229), `783a38d0`), `Lutar/Entanglement.lean` ([#230](https://github.com/szl-holdings/lutar-lean/pull/230), `7b344e11`), `Lutar/Neuroplasticity.lean` ([#231](https://github.com/szl-holdings/lutar-lean/pull/231), `9a0dcc77`) — each sorry-free, Mathlib/core-axiom-only. Honest index: [`szl-papers/thesis/EXPERIMENTAL_LEAN_THEOREMS.md`](https://github.com/szl-holdings/szl-papers/blob/main/thesis/EXPERIMENTAL_LEAN_THEOREMS.md).
 
 ## Uniqueness tracking (Doctrine v11 citation rule)
 
