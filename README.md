@@ -58,7 +58,7 @@ These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1�
 | **14** | CF-18 Leibniz/Mādhava alternating-series remainder · CF-19 Reed–Solomon MDS distance · CF-20 VCG efficiency + truthfulness core · CF-21 Cover–Thomas log-sum + Gibbs |
 | **15** | **CF-22 `dpo_klDivergence_nonneg_on_simplex`** (KL ≥ 0 on the simplex — conditionally repairs the false-as-stated DPO axiom) · CF-24 axiom-free bisymmetry→CUT-2 bridge |
 | **16** | CF-23 binary-KL convexity crux · CF-24 `geoBin` satisfies the **full Aczél quasi-arithmetic axioms** (idempotent/symmetric/homogeneous/monotone — the last analytic step before CUT-1) · CF-25 Λ scale-invariance · CF-26 abacus place-value |
-| **17** | **CF-23 `binary_pinsker`** (full binary Pinsker `2(p−q)² ≤ KL`) · CF-27 monotone-DEQ unique equilibrium · CF-28 recurrent-depth `Kʳ`-Lipschitz |
+| **17** | **CF-23 `binary_pinsker`** (full binary Pinsker `2(p−q)² ≤ KL`) · **CF-23-FULL `multiclass_pinsker`** (k-bin Pinsker via the binary data-processing reduction; axiom-free, conditional on a non-degenerate partition) · CF-27 monotone-DEQ unique equilibrium · CF-28 recurrent-depth `Kʳ`-Lipschitz |
 
 ~100 kernel-clean theorems across these waves; every one is drift-gate-checked and CI-green on `main`. None changes the locked count of 8; Λ stays **Conjecture 1**.
 
