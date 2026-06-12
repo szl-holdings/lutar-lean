@@ -34,7 +34,7 @@ lean_lib «FrontierShowcase» where
   -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
   -- baseline. Built by `lake build` (default).
   srcDir := "Showcase/Frontier"
-  roots := #[`CelestialIRTriangle, `QuantumInfoWitness]
+  roots := #[`CelestialIRTriangle, `QuantumInfoWitness, `TopoInfoWitness]
 
 @[default_target]
 lean_exe «check» where
