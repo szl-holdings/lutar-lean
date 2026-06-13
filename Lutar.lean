@@ -182,7 +182,7 @@ import Lutar.Coder.CoderProofs
 -- Wave8 PROVE-NOW experimental pack (prove-next10). EXPERIMENTAL scope:
 -- excluded from the LOCKED v11 baseline numbers via
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave8/).
--- locked-proven stays EXACTLY 5; Λ remains Conjecture 1.
+-- locked-proven stays EXACTLY 8; Λ remains Conjecture 1.
 -- Kernel-only Lean-core group (Ph1 axiom-disclosure, M2 hash-chain, L2 min-gate
 -- deny-by-default, B1 Byzantine n=3/f=1, S2 Simplex/RTA safety, CP1 split-conformal):
 import Lutar.Wave8.AxiomDisclosure
@@ -202,7 +202,7 @@ import Lutar.Wave8.LambdaMono
 -- Wave9 candidate-theorem pack (wave9-experimental). EXPERIMENTAL scope:
 -- excluded from the LOCKED v11 baseline numbers via
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave9/).
--- locked-proven stays EXACTLY 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1.
+-- locked-proven stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ remains Conjecture 1.
 -- 8 additive known-theorem formalizations (NO sorry / NO open obligation / NO
 -- new declared axiom; #print axioms = Lean/Mathlib core only, per file):
 --   MA1 Gershgorin zero-eigenvalue exclusion (spectral form, ℂ-general);
@@ -226,7 +226,7 @@ import Lutar.Wave9.AxiomDisclosure
 -- Wave10 candidate-theorem pack (wave10-experimental). EXPERIMENTAL scope:
 -- excluded from the LOCKED v11 baseline numbers via
 -- .github/scripts/lean_numbers.py EXPERIMENTAL_SCOPES (Lutar/Wave10/).
--- locked-proven stays EXACTLY 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1.
+-- locked-proven stays EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ remains Conjecture 1.
 -- 6 additive known-theorem formalizations, all Mathlib-FREE / Lean-core-only
 -- (NO sorry / NO open obligation / NO new declared axiom; #print axioms =
 -- kernel-only [propext, Quot.sound] or none, per file):
@@ -250,7 +250,7 @@ import Lutar.Wave10.ReplayDeterminism
 import Lutar.Wave10.ReachabilityRedundancy
 import Lutar.Wave10.AxiomDisclosure
 -- Wave13 full proof-sweep pack (wave13-sweep) — additive, EXPERIMENTAL, NOT folded
--- into the locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1;
+-- into the locked v11 baseline (stays 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ remains Conjecture 1;
 -- Byzantine BFT safety remains Khipu Conjecture 2). Closes findReplayRoot_complete
 -- in-tree (List.find?_isSome) and adds quorum single-valued-vote shadow +
 -- clean-statement HM bottleneck. All kernel-clean (axioms ⊆ {propext,
@@ -258,7 +258,7 @@ import Lutar.Wave10.AxiomDisclosure
 -- EXPERIMENTAL_SCOPES (Lutar/Wave13/) in .github/scripts/lean_numbers.py.
 import Lutar.Wave13.Sweep
 -- Wave14 frontier pack (wave14-frontier) — additive, EXPERIMENTAL, NOT folded into the
--- locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}; Λ remains Conjecture 1; Byzantine BFT
+-- locked v11 baseline (stays 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ remains Conjecture 1; Byzantine BFT
 -- safety remains Khipu Conjecture 2; DPO klDivergence/pinsker remain FALSE-as-stated).
 -- New axiom-free theorems (all axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry /
 -- NO new declared axiom), each upgrading an existing tab via a clean companion that does NOT
@@ -277,7 +277,7 @@ import Lutar.Wave14.ReedSolomonDistance
 import Lutar.Wave14.VCGEfficiency
 import Lutar.Wave14.LogSumInequality
 -- Wave15 frontier pack (wave15-frontier) — additive, EXPERIMENTAL, NOT folded into the
--- locked v11 baseline (stays 5 {F1,F11,F12,F18,F19}). Three files, kernel-clean theorems
+-- locked v11 baseline (stays 8 {F1,F4,F7,F11,F12,F18,F19,F22}). Three files, kernel-clean theorems
 -- (every #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry / NO new axiom):
 --   • Wave15.KLDivergenceSimplex (CF-22) — KL(p‖q) ≥ 0 ON THE SIMPLEX, the CONDITIONAL repair
 --                              of the FALSE-as-stated DPO klDivergence_nonneg axiom; direct
@@ -312,7 +312,7 @@ import Lutar.Wave16.AbacusPlaceValue
 -- mcleish7/retrofitting-recurrence Apache-2.0, arXiv:2511.07384, concept-only). All #print axioms
 -- ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry. Λ STAYS Conjecture 1;
 -- DPO `pinsker` STAYS FALSE-as-stated (token UNTOUCHED — binary Pinsker is the CONDITIONAL
--- two-bin case, not the unconditional simplex axiom). Locked-proven set STAYS EXACTLY 5.
+-- two-bin case, not the unconditional simplex axiom). Locked-proven set STAYS EXACTLY 8.
 import Lutar.Wave17.BinaryPinsker
 import Lutar.Wave17.MonDEQWellPosed
 import Lutar.Wave17.RecurrentDepth
@@ -331,7 +331,7 @@ import Lutar.Wave17.MultiClassPinsker
 -- axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom token; NO sorry. The ONLY
 -- remaining gap to full CUT-1 = the topological `dyadic_image_dense` lemma (BKS arXiv:2208.07083
 -- Step 2, NOT in Mathlib v4.18.0). Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven
--- set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave18/) in lean_numbers.py.
+-- set STAYS EXACTLY 8. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave18/) in lean_numbers.py.
 import Lutar.Wave18.AczelRepresentation
 import Lutar.Wave18.Cut1Chain
 -- Wave19 frontier (EXPERIMENTAL · CI-green · kernel-clean): CUT-1 DENSITY step — closes the
@@ -352,7 +352,7 @@ import Lutar.Wave18.Cut1Chain
 -- continuity. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom; no proof placeholders.
 -- The residual is the BKS self-similar generator structure (Aczél–Dhombres pp.287–290), HONESTLY
 -- documented, NOT faked. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven set STAYS
--- EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave19/) in lean_numbers.py.
+-- EXACTLY 8. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave19/) in lean_numbers.py.
 import Lutar.Wave19.DisjointOpens
 import Lutar.Wave19.Density
 import Lutar.Wave19.AccumulationUncountable
@@ -373,7 +373,7 @@ import Lutar.Wave19.DyadicImageDense
 -- perfect set of two-sided accumulation points; the Aczél–Dhombres self-similar structure, NOT
 -- faked, NOT axiomatised). All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new
 -- axiom; no proof placeholders. Λ UNCONDITIONAL uniqueness STAYS Conjecture 1. Locked-proven set
--- STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave20/) in lean_numbers.py.
+-- STAYS EXACTLY 8. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave20/) in lean_numbers.py.
 import Lutar.Wave20.DisjointOpens
 import Lutar.Wave20.Accumulation
 
@@ -391,7 +391,7 @@ import Lutar.Wave20.Accumulation
 -- cut1_conditional_lambda_closed. All #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO
 -- new axiom; no proof placeholders. Closing CUT-1 makes the CONDITIONAL Λ chain axiom-clean end to
 -- end on its stated hypotheses; Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked
--- FALSE). Locked-proven set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave21/).
+-- FALSE). Locked-proven set STAYS EXACTLY 8. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave21/).
 import Lutar.Wave21.Uncountable
 import Lutar.Wave21.DyadicImageDense
 import Lutar.Wave21.Cut1Final
@@ -410,7 +410,7 @@ import Lutar.Wave21.Cut1Final
 -- set {A1-A5}+separability+slice-multiplicativity+slice-monotonicity. All #print axioms ⊆ {propext,
 -- Classical.choice, Quot.sound}; NO new axiom; no proof placeholders. CUT-1 is now FULLY closed on
 -- its stated CHECKABLE hypotheses; Λ UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked
--- FALSE). Locked-proven set STAYS EXACTLY 5. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave22/).
+-- FALSE). Locked-proven set STAYS EXACTLY 8. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave22/).
 import Lutar.Wave22.GapShiftOrdering
 import Lutar.Wave22.CorderClosure
 import Lutar.Wave22.Cut1Corder
@@ -430,7 +430,7 @@ import Lutar.Wave22.LambdaConditional
 -- certifying v₁,v₂ ⟹ v₁ = v₂. subsumes_single_valued_shadow re-derives the Wave13 single-valued
 -- shadow, witnessing strict generality. All #print axioms ⊆ {propext, Classical.choice, Quot.sound};
 -- NO new axiom; no proof placeholders. CONDITIONAL on {n ≥ 3f+1, |faulty| ≤ f, |Qᵢ| ≥ n−f, honest
--- non-equivocation}; UNCONDITIONAL BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 5;
+-- non-equivocation}; UNCONDITIONAL BFT safety STAYS Conjecture 2. Locked-proven set STAYS EXACTLY 8;
 -- Λ STAYS Conjecture 1. Counted under EXPERIMENTAL_SCOPES (Lutar/Wave23/).
 import Lutar.Wave23.QuorumSafety
 import Lutar.QuantumBio.CoherenceDecay
@@ -448,7 +448,7 @@ import Lutar.Wave24.AdmissibilityCertificate
 -- actually compile AND kernel-check them. Seven are KERNEL-VERIFIED / sorry-free
 -- (P01,P02,P03,P06,P07,P08,P10); three carry a single explicitly-labeled `sorry` as an HONEST
 -- OPEN ATTEMPT (P04,P05,P09), NOT a hidden one. Excluded from ALL v11 numbers, so the locked
--- baseline is untouched: locked-proven set STAYS EXACTLY 5; Λ STAYS Conjecture 1; BFT STAYS
+-- baseline is untouched: locked-proven set STAYS EXACTLY 8; Λ STAYS Conjecture 1; BFT STAYS
 -- Conjecture 2; NO new declared axiom token.
 import Lutar.Putnam.Sampler.P01
 import Lutar.Putnam.Sampler.P02

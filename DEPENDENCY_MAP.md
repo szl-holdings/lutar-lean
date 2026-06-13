@@ -6,7 +6,7 @@ in-tree results plus the Lean/Mathlib trust base — it introduces **NO new
 `axiom` token** and **no proof placeholder**.
 
 - **Scope:** `Lutar/Uniqueness/` (additive, EXPERIMENTAL; NOT in the locked
-  v11 baseline 749 / 14 / 163 @ `c7c0ba17`; locked-proven stays EXACTLY 5
+  v11 baseline 749 / 14 / 163 @ `c7c0ba17`; locked-proven stays EXACTLY 8
   {F1,F11,F12,F18,F19}).
 - **Status of Λ:** the unconditional uniqueness statement
   (`Conjecture1_LambdaUnique`) ships **statement-only** and is **machine-checked

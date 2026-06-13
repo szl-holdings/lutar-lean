@@ -21,7 +21,7 @@ declaration *names + type signatures* are taken from source (deterministic), so
 the emitted Markdown is byte-stable across runs at a fixed SHA — which is what the
 drift gate (`check_verified_theorems_drift.py`) relies on.
 
-Honesty doctrine v11: locked-proven set stays exactly 5; Conjecture 1
+Honesty doctrine v11: locked-proven set stays exactly 8; Conjecture 1
 (unconditional Λ uniqueness) is machine-checked FALSE under A1–A5
 (`Lutar.Round13.maxAgg_ne_Lambda`) and therefore can NEVER appear here. When the
 Theorem U kernel task lands under `Lutar/Uniqueness/`, its sorry-free theorems are
@@ -310,7 +310,7 @@ HEADER = """# Verified Theorems
 > `{propext, Classical.choice, Quot.sound}` plus the already-declared, cited repo
 > axioms in `.github/data/lean_numbers.json`.
 >
-> **Honesty doctrine v11.** The locked-proven set stays exactly 5. Conjecture 1
+> **Honesty doctrine v11.** The locked-proven set stays exactly 8. Conjecture 1
 > (unconditional Λ uniqueness, `∀ Φ, LutarAxioms Φ → Φ = Λ k`) is machine-checked
 > **FALSE** under A1–A5 — `Lutar.Round13.maxAgg_ne_Lambda` exhibits the max
 > aggregator as an A1–A5 counterexample — so it can never appear here. Only the
