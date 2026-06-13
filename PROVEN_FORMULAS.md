@@ -7,7 +7,7 @@
 
 # Proven Formulas — the honest showcase
 
-> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly eight formulas** `{F1,F4,F7,F11,F12,F18,F19,F22}` — a fact itself machine-enforced by `Lutar.Wave8.AxiomDisclosure.locked_count_eight` (depends on **no** axioms). (It was 5 until 2026-06-10, when F4 and F7 were upgraded from vacuous placeholders to genuine non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO order-preservation — joining the already-genuine F22; see `team/LEAN_F4F7_PROOFS_REPORT.md`.) On top of that locked floor, **~36 experimental theorems** are kernel-verified and **CI-green on `main` @ `7885fd9`** (waves 5/6/7/8 + agentic P1–P6 + airtight Λ + coder). Everything newer than the locked 5 is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
+> **One rule governs this page:** we list only what the Lean kernel checks, with the exact maturity of each result and a link to its proof. The **locked proven set is exactly eight formulas** `{F1,F4,F7,F11,F12,F18,F19,F22}` — a fact itself machine-enforced by `Lutar.Wave8.AxiomDisclosure.locked_count_eight` (depends on **no** axioms). (It was 5 until 2026-06-10, when F4 and F7 were upgraded from vacuous placeholders to genuine non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO order-preservation — joining the already-genuine F22; see `team/LEAN_F4F7_PROOFS_REPORT.md`.) On top of that locked floor, **~36 experimental theorems** are kernel-verified and **CI-green on `main` @ `7885fd9`** (waves 5/6/7/8 + agentic P1–P6 + airtight Λ + coder). Everything newer than the locked 8 is **experimental / CI-green** and is *never* folded into the locked count. **Λ-uniqueness is Conjecture 1** — proven only conditionally, machine-checked *false* unconditionally.
 
 **Locked-kernel toolchain:** Lean `v4.13.0` · Mathlib pinned `d7317655` (`v4.13.0`)
 **Locked kernel:** `c7c0ba17` · **749** declarations / **14** unique axioms / **163** tracked sorries · `lake build` clean
@@ -35,9 +35,9 @@ These eight are the only formulas counted as **proven** in the locked Doctrine-v
 
 ---
 
-## 2. Experimental, kernel-verified (CI-green) — labeled experimental, NOT in the locked 5
+## 2. Experimental, kernel-verified (CI-green) — labeled experimental, NOT in the locked 8
 
-Every campaign below is kernel-checked by lutar-lean CI but lives in the **experimental scope** — it does **not** move the locked count of 5 and does **not** change Λ's Conjecture-1 status. Cite the PR for the green head SHA and `#print axioms` cleanliness.
+Every campaign below is kernel-checked by lutar-lean CI but lives in the **experimental scope** — it does **not** move the locked count of 8 and does **not** change Λ's Conjecture-1 status. Cite the PR for the green head SHA and `#print axioms` cleanliness.
 
 | Campaign | PR | CI-green head | Count | Axiom posture |
 |---|---|---|---|---|
@@ -63,7 +63,7 @@ Every campaign below is kernel-checked by lutar-lean CI but lives in the **exper
 
 ### 2.2 Wave-8 (10 theorems, `main` @ `7885fd9`) — with benefit + `#print axioms`
 
-All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimental** and do **not** move the locked count of 5. Core axioms are `[propext, Classical.choice, Quot.sound]` unless noted; `0 sorryAx` across the set.
+All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimental** and do **not** move the locked count of 8. Core axioms are `[propext, Classical.choice, Quot.sound]` unless noted; `0 sorryAx` across the set.
 
 | ID | Theorem | Benefit | `#print axioms` |
 |---|---|---|---|
@@ -116,7 +116,7 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 | strict `=` (`TheoremU_LambdaUnique_eq`, `lambda_equiv_to_eq_of_anchored`) | `≈Λ` collapses to `=` **only** under `Anchored` / `Normalized` | **REAL · CONDITIONAL** |
 | **Conjecture 1** (`Conjecture1_LambdaUnique`) | unconditional uniqueness under bare A1–A5 | **OPEN — non-claim**: statement-only, machine-checked **FALSE** as stated; bounty [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) |
 
-> Theorem U is **EXPERIMENTAL · additive** — it does **not** move the locked count of 5 and does **not** change Λ's Conjecture-1 status. The `≈Λ` relation is genuinely non-trivial: the proven A1–A5 counterexample `maxAgg` is `≉Λ` to `Λ 2` (`lambdaEquiv_nondegenerate`), so "uniqueness modulo `≈Λ`" excludes the impostor.
+> Theorem U is **EXPERIMENTAL · additive** — it does **not** move the locked count of 8 and does **not** change Λ's Conjecture-1 status. The `≈Λ` relation is genuinely non-trivial: the proven A1–A5 counterexample `maxAgg` is `≉Λ` to `Λ 2` (`lambdaEquiv_nondegenerate`), so "uniqueness modulo `≈Λ`" excludes the impostor.
 
 ### What we do **not** claim
 
@@ -153,7 +153,7 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 
 ## 6. Putnam 2025 — honest current verdict (additive)
 
-The honest, doctrine-v11 per-problem verdict for the canonical **Putnam 2025** set (86th William Lowell Putnam Mathematical Competition, Dec 6 2025: A1–A6, B1–B6), computed from the Lean kernel on `lutar-lean` main @ `b7c3e38`. This section is additive — the locked-5 `{F1, F11, F12, F18, F19}` @ `c7c0ba17` and the Λ = Conjecture 1 line above are unchanged.
+The honest, doctrine-v11 per-problem verdict for the canonical **Putnam 2025** set (86th William Lowell Putnam Mathematical Competition, Dec 6 2025: A1–A6, B1–B6), computed from the Lean kernel on `lutar-lean` main @ `b7c3e38`. This section is additive — the locked-8 `{F1, F4, F7, F11, F12, F18, F19, F22}` @ `c7c0ba17` and the Λ = Conjecture 1 line above are unchanged.
 
 > We are not doing "drones solve Putnam." We are doing: Intelligence → Structure → Conjecture → Certificate. killinchu supplies intelligence (tracking, fusion, ROE decisions, signed receipts). We extract mathematical structure (graphs, constraints, optimization instances). We pose Putnam-grade + SZL-native problems. We ship certificates (Lean-verified REAL theorems, reproducible benchmarks, provenance).
 
