@@ -12,9 +12,9 @@ on:
         required: false
         default: "1"
       model:
-        description: "Anthropic model"
+        description: "Model id (Groq free tier by default)"
         required: false
-        default: "claude-sonnet-4-5-20250929"
+        default: "qwen/qwen3-32b"
 
 permissions:
   contents: write
@@ -22,12 +22,17 @@ permissions:
 jobs:
   propose:
     runs-on: ubuntu-latest
+    # Free provider: Groq free tier (OpenAI-compatible, publicly reachable from CI).
+    # No paid Anthropic balance required. Swap LLM_BASE_URL/LLM_API_KEY to use another.
+    env:
+      LLM_PROVIDER: openai
+      LLM_BASE_URL: https://api.groq.com/openai/v1
+      LLM_API_KEY: ${{ secrets.GROQ_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - name: Propose candidate proofs (UNVERIFIED)
+      - name: Propose candidate proofs (UNVERIFIED, free provider)
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           IN_FILE: ${{ inputs.file }}
           IN_MAX: ${{ inputs.max }}
           IN_MODEL: ${{ inputs.model }}
@@ -56,5 +61,5 @@ jobs:
               echo "Branch \`$br\` — open a PR: ${{ github.server_url }}/${{ github.repository }}/compare/main...$br"
             } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No proposals produced (see logs — typically Anthropic credit balance)." >> "$GITHUB_STEP_SUMMARY"
+            echo "No proposals produced (see logs)." >> "$GITHUB_STEP_SUMMARY"
           fi
