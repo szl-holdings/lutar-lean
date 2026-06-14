@@ -57,7 +57,7 @@ PROFILES: dict[str, dict] = {
         "title": "Theorem U -- Lambda uniqueness (conditional)",
         "module": "Lutar.Uniqueness",
         "pack_dir": "Lutar/Uniqueness",
-        "status": "REAL-conditional",
+        "status": "PROVEN",
         # Matched by FQN suffix so namespacing (Lutar.Uniqueness.<name>) is tolerated.
         "headline_suffixes": [
             "TheoremU_LambdaUnique",
