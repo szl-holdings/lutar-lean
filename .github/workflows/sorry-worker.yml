@@ -1,0 +1,60 @@
+name: sorry-worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Specific .lean file (blank = N shortest sorry files)"
+        required: false
+        default: ""
+      max:
+        description: "How many files to attempt when no file given"
+        required: false
+        default: "1"
+      model:
+        description: "Anthropic model"
+        required: false
+        default: "claude-sonnet-4-5-20250929"
+
+permissions:
+  contents: write
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Propose candidate proofs (UNVERIFIED)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IN_FILE: ${{ inputs.file }}
+          IN_MAX: ${{ inputs.max }}
+          IN_MODEL: ${{ inputs.model }}
+        run: |
+          if [ -n "$IN_FILE" ]; then
+            python3 propose_proof.py --file "$IN_FILE" --model "$IN_MODEL"
+          else
+            python3 propose_proof.py --max "$IN_MAX" --model "$IN_MODEL"
+          fi
+      - name: Push proposals branch (no auto-merge)
+        if: always()
+        run: |
+          if [ -d proposals ] && [ -n "$(ls -A proposals 2>/dev/null)" ]; then
+            br="forge/sorry-proposals-${{ github.run_id }}"
+            git config user.name "sorry-worker"
+            git config user.email "actions@github.com"
+            git checkout -b "$br"
+            git add proposals
+            git commit -m "chore(sorry-worker): UNVERIFIED candidate proofs (run ${{ github.run_id }})"
+            git push origin "$br"
+            {
+              echo "### sorry-worker proposals (UNVERIFIED — PhD review + lake build required)"
+              echo ""
+              cat proposals/INDEX.md
+              echo ""
+              echo "Branch \`$br\` — open a PR: ${{ github.server_url }}/${{ github.repository }}/compare/main...$br"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No proposals produced (see logs — typically Anthropic credit balance)." >> "$GITHUB_STEP_SUMMARY"
+          fi
