@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
-"""Sorry-discharge worker: ask Anthropic for a candidate Lean proof for each
+"""Sorry-discharge worker: ask an LLM for a candidate Lean proof for each
 `sorry`, writing UNVERIFIED candidates under proposals/ for PhD review.
 
-These candidates are NOT verified to compile — the sorry-gate + Code Owner
-(PhD) review + `lake build` are the verification step. This tool only proposes.
+Provider-agnostic. Configure via env:
+  LLM_PROVIDER  "openai" (default) or "anthropic"
+  LLM_BASE_URL  e.g. https://api.groq.com/openai/v1  (openai-compatible)
+  LLM_API_KEY   the API key
+  LLM_MODEL     model id (or pass --model)
 
-Usage: python3 propose_proof.py [--file PATH] [--max N] [--model M]
-Env:   ANTHROPIC_API_KEY (required)
+Candidates are NOT verified to compile — the sorry-gate + Code Owner (PhD)
+review + `lake build` are the verification step. This tool only proposes.
 """
 import argparse, json, os, re, sys, urllib.request, urllib.error
 
 TOKEN = re.compile(r"\bsorry\b")
-DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
+UA = "forge-sorry-worker/1.0"
 
 
-def _strip(text):
-    text = re.sub(r"/-.*?-/", " ", text, flags=re.S)
-    return "\n".join(l.split("--")[0] for l in text.splitlines())
+def _strip(t):
+    t = re.sub(r"/-.*?-/", " ", t, flags=re.S)
+    return "\n".join(l.split("--")[0] for l in t.splitlines())
 
 
 def sorry_files(root="."):
@@ -36,34 +39,50 @@ def sorry_files(root="."):
     return out
 
 
-def ask(model, source, path):
-    key = os.environ["ANTHROPIC_API_KEY"]
-    sys_prompt = (
-        "You are an expert Lean 4 / Mathlib proof engineer. You are given a Lean source "
-        "file that contains `sorry`. Replace every `sorry` with a complete, compiling Lean 4 "
-        "proof using Mathlib where appropriate. Do NOT change statements, names, or imports "
-        "except to add imports strictly required by your proof. If you genuinely cannot prove "
-        "a goal, leave that `sorry` in place and explain why. Return your answer as exactly one "
-        "```lean fenced code block containing the FULL revised file, followed by a one-paragraph "
-        "rationale outside the block."
-    )
-    body = {
-        "model": model,
-        "max_tokens": 8000,
-        "system": sys_prompt,
-        "messages": [{"role": "user", "content": f"File: {path}\n\n```lean\n{source}\n```"}],
-    }
-    req = urllib.request.Request("https://api.anthropic.com/v1/messages",
-        data=json.dumps(body).encode(), method="POST")
-    req.add_header("x-api-key", key)
-    req.add_header("anthropic-version", "2023-06-01")
-    req.add_header("content-type", "application/json")
+SYS = ("You are an expert Lean 4 / Mathlib proof engineer. You are given a Lean source file "
+       "that contains `sorry`. Replace every `sorry` with a complete, compiling Lean 4 proof using "
+       "Mathlib where appropriate. Do NOT change statements, names, or imports except to add imports "
+       "strictly required by your proof. If you genuinely cannot prove a goal, leave that `sorry` and "
+       "explain why. Return exactly one ```lean fenced code block with the FULL revised file, then a "
+       "one-paragraph rationale outside the block.")
+
+
+def _post(url, headers, body, timeout=180):
+    r = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST")
+    r.add_header("User-Agent", UA); r.add_header("content-type", "application/json")
+    for k, v in headers.items():
+        r.add_header(k, v)
     try:
-        with urllib.request.urlopen(req, timeout=180) as r:
-            data = json.loads(r.read().decode())
+        with urllib.request.urlopen(r, timeout=timeout) as x:
+            return 200, json.loads(x.read().decode())
     except urllib.error.HTTPError as e:
-        return None, f"HTTP {e.code}: {e.read().decode()[:300]}"
-    text = "".join(b.get("text", "") for b in data.get("content", []))
+        return e.code, e.read().decode()[:300]
+
+
+def ask(model, source, path):
+    provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+    base = os.environ.get("LLM_BASE_URL", "").rstrip("/")
+    key = os.environ.get("LLM_API_KEY", "")
+    user = f"File: {path}\n\n```lean\n{source}\n```"
+    if provider == "anthropic":
+        base = base or "https://api.anthropic.com"
+        st, d = _post(base + "/v1/messages",
+                      {"x-api-key": key, "anthropic-version": "2023-06-01"},
+                      {"model": model, "max_tokens": 8000, "system": SYS,
+                       "messages": [{"role": "user", "content": user}]})
+        if st != 200:
+            return None, f"HTTP {st}: {d}"
+        text = "".join(b.get("text", "") for b in d.get("content", []))
+    else:
+        base = base or "https://api.openai.com/v1"
+        st, d = _post(base + "/chat/completions",
+                      {"Authorization": f"Bearer {key}"},
+                      {"model": model, "max_tokens": 8000,
+                       "messages": [{"role": "system", "content": SYS},
+                                    {"role": "user", "content": user}]})
+        if st != 200:
+            return None, f"HTTP {st}: {d}"
+        text = d["choices"][0]["message"]["content"]
     m = re.search(r"```lean\n(.*?)```", text, flags=re.S)
     return (m.group(1) if m else None), text
 
@@ -72,38 +91,31 @@ def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--file")
     ap.add_argument("--max", type=int, default=1)
-    ap.add_argument("--model", default=DEFAULT_MODEL)
+    ap.add_argument("--model", default=os.environ.get("LLM_MODEL", "claude-sonnet-4-5-20250929"))
     ap.add_argument("--out", default="proposals")
     a = ap.parse_args(argv[1:])
-
-    if a.file:
-        targets = [a.file]
-    else:
-        files = sorry_files(".")
-        targets = sorted(files, key=lambda p: len(open(p, encoding="utf-8", errors="replace").read().splitlines()))[:a.max]
-
+    targets = [a.file] if a.file else sorted(
+        sorry_files("."),
+        key=lambda p: len(open(p, encoding="utf-8", errors="replace").read().splitlines()))[:a.max]
     os.makedirs(a.out, exist_ok=True)
-    index = ["# Candidate proof proposals (UNVERIFIED)\n",
-             f"_Generated by propose_proof.py using `{a.model}`. NOT compiled/verified — for PhD review only._\n"]
+    idx = ["# Candidate proof proposals (UNVERIFIED)\n",
+           f"_Generated by propose_proof.py using `{a.model}`. NOT compiled/verified — for PhD review only._\n"]
     ok = 0
     for path in targets:
         src = open(path, encoding="utf-8", errors="replace").read()
-        revised, raw = ask(a.model, src, path)
+        rev, raw = ask(a.model, src, path)
         rel = path[2:] if path.startswith("." + os.sep) else path
-        if revised is None:
-            index.append(f"- ❌ `{rel}` — model did not return a proof ({raw[:120]})")
-            print(f"[fail] {rel}: {raw[:120]}", file=sys.stderr)
-            continue
-        still = len(TOKEN.findall(_strip(revised)))
-        outp = os.path.join(a.out, rel)
-        os.makedirs(os.path.dirname(outp), exist_ok=True)
-        open(outp, "w", encoding="utf-8").write(revised)
-        status = "✅ candidate (0 sorry left)" if still == 0 else f"⚠️ partial ({still} sorry left)"
-        index.append(f"- {status} `{rel}` → `{outp}`")
-        print(f"[ok] {rel} -> {outp} ({status})")
-        ok += 1
-    open(os.path.join(a.out, "INDEX.md"), "w", encoding="utf-8").write("\n".join(index) + "\n")
-    print(f"\nwrote {ok}/{len(targets)} proposals to {a.out}/")
+        if rev is None:
+            idx.append(f"- ❌ `{rel}` — no proof returned ({raw[:120]})")
+            print(f"[fail] {rel}: {raw[:120]}", file=sys.stderr); continue
+        still = len(TOKEN.findall(_strip(rev)))
+        outp = os.path.join(a.out, rel); os.makedirs(os.path.dirname(outp), exist_ok=True)
+        open(outp, "w", encoding="utf-8").write(rev)
+        tag = "✅ candidate (0 sorry left)" if still == 0 else f"⚠️ partial ({still} sorry left)"
+        idx.append(f"- {tag} `{rel}` → `{outp}`")
+        print(f"[ok] {rel} ({tag})"); ok += 1
+    open(os.path.join(a.out, "INDEX.md"), "w", encoding="utf-8").write("\n".join(idx) + "\n")
+    print(f"\nwrote {ok}/{len(targets)} proposals")
     return 0
 
 
