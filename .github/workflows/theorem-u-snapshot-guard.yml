@@ -39,10 +39,11 @@ on:
   workflow_run:
     workflows: ["Lake build (gate + numbers)"]
     types: [completed]
+  # Runs on EVERY pull_request (no paths filter): the `pr-gate` job below is a
+  # REQUIRED status check on main, so it must report on every PR or it would
+  # permanently block merges (the phantom-required-check trap). It is Lean-free
+  # (~1 min), so gating every PR is cheap.
   pull_request:
-    paths:
-      - ".github/workflows/theorem-u-snapshot-guard.yml"
-      - ".github/scripts/check_theorem_u_snapshot.py"
   push:
     branches: [main]
     paths:
@@ -63,12 +64,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ---- REQUIRED MERGE GATE (runs on every PR) ----
+  # The post-merge `audit` job below can only inspect the artifact AFTER a green
+  # main lake-build, so it cannot block a merge. This job is the PR-time
+  # equivalent: it rebuilds the snapshot from THIS PR's own code (Lean-free, via
+  # the canonical test_anchor_and_snapshot.py harness which feeds kernel-clean
+  # fixtures through build_proof_snapshot.py and then through the guard's OWN
+  # validator) and proves the validator itself still rejects dishonest snapshots.
+  # So a PR that regresses the build script, drops/empties the snapshot, or flips
+  # the honesty block (status overclaim, locked-set drift, "Conjecture 1 closed")
+  # produces a red check here and cannot merge once this context is required on
+  # main. It is promoted to a REQUIRED status check on main (cf. the overclaim
+  # guard); it must therefore report on EVERY PR (no paths filter on the trigger)
+  # or it would phantom-block all merges.
+  pr-gate:
+    name: Theorem-U snapshot honesty (PR merge gate)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Prove the validator still rejects missing/empty/malformed/dishonest snapshots
+        run: python .github/scripts/check_theorem_u_snapshot.py --selftest
+      - name: Build the snapshot from THIS PR's code and assert it stays honest
+        run: python .github/scripts/test_anchor_and_snapshot.py
+
   # Prove the validator still rejects missing / empty / malformed / dishonest
   # snapshots (i.e. is not silently passing) before the audit job trusts it. Runs
-  # on PR/push that touch the guard or its validator, and on manual dispatch.
+  # on push that touches the guard or its validator, and on manual dispatch. PRs
+  # are covered by pr-gate above (which runs this same self-test).
   self-test:
     name: Self-test the snapshot validator (fixtures)
-    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
