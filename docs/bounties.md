@@ -20,7 +20,7 @@ kernel-checked, zero `sorry`, in-policy axioms.
 | [`conjecture-1-lambda-uniqueness`](../bounties/conjecture-1-lambda-uniqueness.yaml) | Λ **unconditional** uniqueness — **Conjecture 1**, NOT a theorem. The conditional CUT-2 result is already proven; the unconditional gap (missing bisymmetry / continuity assumption — the candidate **A6 bisymmetry** strengthening) is open. Unconditional uniqueness under the bare axioms is machine-checked **FALSE** (the `min`/`maxAgg` counterexample). |
 | [`conjecture-2-khipu-bft-safety`](../bounties/conjecture-2-khipu-bft-safety.yaml) | Khipu Byzantine quorum safety — **Conjecture 2**. The conditional (honest-non-equivocation) form is proven; the unconditional obligation `ubuntu_quorum_safety` is open. |
 
-Nothing already proved is listed. The conditional/locked results (the 5 LOCKED
+Nothing already proved is listed. The conditional/locked results (the 8 LOCKED
 formulas, the CUT-2 conditional Λ result, the Wave 23 conditional BFT result) are
 **not** bounties — see [`PROVEN_FORMULAS.md`](../PROVEN_FORMULAS.md).
 
