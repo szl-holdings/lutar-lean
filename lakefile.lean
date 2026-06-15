@@ -48,6 +48,17 @@ lean_lib «LandauerShowcase» where
   roots := #[`LandauerFloorWitness]
 
 @[default_target]
+lean_lib «AgenticBodyShowcase» where
+  -- Anatomy-shell agentic-body witness (Showcase/Frontier/). Mathlib-free, core
+  -- Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its OWN
+  -- lean_lib (separate roots line) so it composes cleanly alongside the other
+  -- Frontier libs without colliding with the open #239/#240 branches. Lives
+  -- outside Lutar/ so it is NOT counted by .github/scripts/lean_numbers.py and
+  -- does not touch the locked Doctrine-v11 baseline. Built by `lake build`.
+  srcDir := "Showcase/Frontier"
+  roots := #[`AgenticBodyWitness]
+
+@[default_target]
 lean_exe «check» where
   root := `Main
 
