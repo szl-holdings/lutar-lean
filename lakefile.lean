@@ -37,6 +37,17 @@ lean_lib «FrontierShowcase» where
   roots := #[`CelestialIRTriangle, `QuantumInfoWitness, `TopoInfoWitness, `RelationalMeshWitness, `EnergyBudgetWitness]
 
 @[default_target]
+lean_lib «LandauerShowcase» where
+  -- Landauer energy-floor frontier witness (Showcase/Frontier/). Mathlib-free,
+  -- core Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its
+  -- own lean_lib (separate roots line) so it composes cleanly alongside the
+  -- FrontierShowcase lib without colliding. Lives outside Lutar/ so it is NOT
+  -- counted by .github/scripts/lean_numbers.py and does not touch the locked
+  -- Doctrine-v11 baseline. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`LandauerFloorWitness]
+
+@[default_target]
 lean_exe «check» where
   root := `Main
 
