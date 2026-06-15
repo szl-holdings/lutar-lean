@@ -59,6 +59,17 @@ lean_lib «AgenticBodyShowcase» where
   roots := #[`AgenticBodyWitness]
 
 @[default_target]
+lean_lib «HarvestBudgetShowcase» where
+  -- Harvest-budget bound frontier witness (Showcase/Frontier/). Mathlib-free,
+  -- core Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its
+  -- own lean_lib (separate roots line) so it composes cleanly alongside the other
+  -- Frontier libs without colliding. Lives outside Lutar/ so it is NOT counted by
+  -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
+  -- baseline. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`HarvestBudgetWitness]
+
+@[default_target]
 lean_exe «check» where
   root := `Main
 
