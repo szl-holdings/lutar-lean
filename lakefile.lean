@@ -34,7 +34,40 @@ lean_lib «FrontierShowcase» where
   -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
   -- baseline. Built by `lake build` (default).
   srcDir := "Showcase/Frontier"
-  roots := #[`CelestialIRTriangle, `QuantumInfoWitness, `TopoInfoWitness, `RelationalMeshWitness, `HarvestBudgetWitness]
+  roots := #[`CelestialIRTriangle, `QuantumInfoWitness, `TopoInfoWitness, `RelationalMeshWitness, `EnergyBudgetWitness]
+
+@[default_target]
+lean_lib «LandauerShowcase» where
+  -- Landauer energy-floor frontier witness (Showcase/Frontier/). Mathlib-free,
+  -- core Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its
+  -- own lean_lib (separate roots line) so it composes cleanly alongside the
+  -- FrontierShowcase lib without colliding. Lives outside Lutar/ so it is NOT
+  -- counted by .github/scripts/lean_numbers.py and does not touch the locked
+  -- Doctrine-v11 baseline. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`LandauerFloorWitness]
+
+@[default_target]
+lean_lib «AgenticBodyShowcase» where
+  -- Anatomy-shell agentic-body witness (Showcase/Frontier/). Mathlib-free, core
+  -- Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its OWN
+  -- lean_lib (separate roots line) so it composes cleanly alongside the other
+  -- Frontier libs without colliding with the open #239/#240 branches. Lives
+  -- outside Lutar/ so it is NOT counted by .github/scripts/lean_numbers.py and
+  -- does not touch the locked Doctrine-v11 baseline. Built by `lake build`.
+  srcDir := "Showcase/Frontier"
+  roots := #[`AgenticBodyWitness]
+
+@[default_target]
+lean_lib «HarvestBudgetShowcase» where
+  -- Harvest-budget bound frontier witness (Showcase/Frontier/). Mathlib-free,
+  -- core Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`). Declared as its
+  -- own lean_lib (separate roots line) so it composes cleanly alongside the other
+  -- Frontier libs without colliding. Lives outside Lutar/ so it is NOT counted by
+  -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
+  -- baseline. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`HarvestBudgetWitness]
 
 @[default_target]
 lean_exe «check» where

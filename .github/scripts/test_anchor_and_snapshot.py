@@ -20,6 +20,11 @@ contracts are easy to break in a future edit and nothing else in CI guards them:
   (2) HONESTY DOCTRINE — the build must REFUSE (exit non-zero) any `--kind` that
       has no per-snapshot honesty block. A milestone may never be anchored without
       stating its own truthful status; supplying an honesty block lets it proceed.
+      This is asserted both generically (an unregistered kind) and PER PRODUCTION
+      KIND: for every milestone actually anchored to szl-lake we both pin its
+      expected shape/status/headline/honesty AND prove that stripping its honesty
+      block makes the build refuse — so a future edit can't quietly weaken or drop
+      a different milestone's honesty label.
 
   (3) ANCHOR CHAIN MATH + IDEMPOTENCY — `anchor_szl_lake.py` must keep
       chain_index = len(existing)+1, prev_hash = the previous tail receipt_id
@@ -43,6 +48,7 @@ BUILD = SCRIPTS_DIR / "build_proof_snapshot.py"
 # Import the sibling scripts as modules for in-process assertions.
 sys.path.insert(0, str(SCRIPTS_DIR))
 import anchor_szl_lake as A  # noqa: E402
+import build_proof_snapshot as B  # noqa: E402
 import check_theorem_u_snapshot as G  # noqa: E402
 
 # The Theorem-U headline pack the default profile must always emit.
@@ -56,14 +62,79 @@ THEOREM_U_HEADLINE = sorted([
 ])
 EXPECTED_LOCKED_SET = {"F1", "F11", "F12", "F18", "F19"}
 
+# The locked-proven baseline (Doctrine v11) meta-invariant headline pack.
+LOCKED_BASELINE_HEADLINE = sorted([
+    "locked_count_eight",
+    "theoremU_excluded_from_locked",
+    "theoremU_axiom_sets_kernel_only",
+    "conjecture1_still_open",
+])
+LOCKED_BASELINE_LOCKED_SET = {"F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"}
+
+
+def _check_theorem_u_honesty(h: dict) -> None:
+    """Pin the Theorem-U honesty block: conditional theorem, OPEN conjecture 1."""
+    assert h.get("locked_five_unchanged") is True, h.get("locked_five_unchanged")
+    assert set(h.get("locked_set", [])) == EXPECTED_LOCKED_SET, h.get("locked_set")
+    assert "REAL-conditional" in (h.get("theorem_u") or ""), h.get("theorem_u")
+    conj = h.get("conjecture_1") or ""
+    assert "OPEN" in conj and "FALSE" in conj, conj
+
+
+def _check_locked_baseline_honesty(h: dict) -> None:
+    """Pin the locked-baseline honesty block: invariant assertion, NOT a re-proof."""
+    assert h.get("doctrine") == "v11", h.get("doctrine")
+    assert set(h.get("locked_set", [])) == LOCKED_BASELINE_LOCKED_SET, h.get("locked_set")
+    lb = h.get("locked_baseline") or ""
+    assert "REAL-invariant" in lb, lb
+    # The baseline asserts what is locked; it must NOT claim to re-prove the formulas.
+    assert "do NOT" in lb or "do not" in lb, lb
+    tu = h.get("theorem_u") or ""
+    assert "EXCLUDED" in tu and "conditional" in tu, tu
+    conj = h.get("conjecture_1") or ""
+    assert "OPEN" in conj and "FALSE" in conj, conj
+
+
+# Every milestone KIND actually anchored to szl-lake in production (each is built
+# + uploaded as a snapshot artifact by lake-build.yml). For each we pin the
+# expected status, headline-decl pack, and honesty block so a future edit can't
+# silently change one milestone's shape or weaken its honesty label. Adding a new
+# production-anchored kind without registering it here will leave it unguarded —
+# add it to this table when you wire a new kind into lake-build.yml.
+PRODUCTION_KINDS: dict[str, dict] = {
+    "theorem-u": {
+        "status": "REAL-conditional",
+        "headline": THEOREM_U_HEADLINE,
+        "check_honesty": _check_theorem_u_honesty,
+        # theorem-u additionally has a standalone published-snapshot validator.
+        "validator": G.validate_snapshot_file,
+    },
+    "locked-baseline": {
+        "status": "REAL-invariant",
+        "headline": LOCKED_BASELINE_HEADLINE,
+        "check_honesty": _check_locked_baseline_honesty,
+    },
+}
+
 
 def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _fixtures(tmp: Path):
-    """Build kernel-clean inputs covering the Theorem-U headline pack."""
-    decls = ["Lutar.Uniqueness." + s for s in THEOREM_U_HEADLINE]
+def _decls_for(kind: str) -> list[str]:
+    """FQN decls for a production kind's headline pack (from its live profile)."""
+    prof = B.PROFILES[kind]
+    module = prof.get("module") or ""
+    return [f"{module}.{s}" for s in prof["headline_suffixes"]]
+
+
+def _fixtures(tmp: Path, decls: list[str] | None = None):
+    """Build kernel-clean inputs covering a milestone's headline pack.
+
+    Defaults to the Theorem-U pack so the existing back-compat tests are unchanged.
+    """
+    if decls is None:
+        decls = ["Lutar.Uniqueness." + s for s in THEOREM_U_HEADLINE]
     # #print axioms shape; only Lean/Mathlib trust-base axioms so kernel_only holds.
     lines = [f"'{d}' depends on axioms: [propext, Classical.choice]" for d in decls]
     ax = tmp / "axiomcheck.out"
@@ -81,8 +152,8 @@ def _fixtures(tmp: Path):
     return ax, numbers, refvec, packdir
 
 
-def _run_build(tmp: Path, extra_args: list[str]):
-    ax, numbers, refvec, packdir = _fixtures(tmp)
+def _run_build(tmp: Path, extra_args: list[str], decls: list[str] | None = None):
+    ax, numbers, refvec, packdir = _fixtures(tmp, decls)
     out = tmp / "snapshot.json"
     cmd = [
         sys.executable, str(BUILD),
@@ -171,6 +242,62 @@ def test_kind_with_honesty_is_allowed() -> None:
 
 
 # --------------------------------------------------------------------------- #
+# (2b) per-production-kind: pinned shape + honesty, and honesty-required refusal.
+#      Every milestone actually anchored to szl-lake gets its own assertion so a
+#      future edit can't quietly change one kind's shape or weaken its honesty.
+# --------------------------------------------------------------------------- #
+def test_production_kind_shapes() -> None:
+    for kind, exp in PRODUCTION_KINDS.items():
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            proc, out = _run_build(tmp, ["--kind", kind], decls=_decls_for(kind))
+            assert proc.returncode == 0, (
+                f"{kind} build must succeed; rc={proc.returncode}\n{proc.stderr}"
+            )
+            assert out.exists(), f"{kind} build produced no snapshot file"
+            snap = json.loads(out.read_text(encoding="utf-8"))
+
+            assert snap.get("schema") == "szl.proof.snapshot/v1", (kind, snap.get("schema"))
+            assert snap.get("kind") == kind, (kind, snap.get("kind"))
+
+            m = snap.get("milestone", {})
+            assert m.get("status") == exp["status"], (kind, m.get("status"))
+            assert m.get("kernel_only") is True, (kind, m.get("kernel_only"))
+            assert m.get("headline_decls") == exp["headline"], (kind, m.get("headline_decls"))
+
+            h = snap.get("honesty", {})
+            assert h, f"{kind} snapshot is missing its honesty block"
+            exp["check_honesty"](h)
+
+            validator = exp.get("validator")
+            if validator is not None:
+                problems = validator(out)
+                assert not problems, f"{kind} snapshot guard rejected the build: {problems}"
+
+
+def test_production_kind_without_honesty_is_refused() -> None:
+    """Per kind: stripping the honesty block makes that kind's build refuse."""
+    for kind in PRODUCTION_KINDS:
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            # Override the built-in profile so the honesty block is removed; the
+            # profile file is merged over the registered profile in _load_profile.
+            strip = tmp / "strip_honesty.json"
+            _write(strip, json.dumps({"honesty": None}))
+            proc, out = _run_build(
+                tmp, ["--kind", kind, "--profile", str(strip)], decls=_decls_for(kind)
+            )
+            assert proc.returncode != 0, (
+                f"{kind} build with its honesty block stripped must exit non-zero"
+            )
+            blob = (proc.stderr or "") + (proc.stdout or "")
+            assert "honesty block" in blob, (
+                f"{kind}: expected an honesty-block refusal, got:\n{blob}"
+            )
+            assert not out.exists(), f"{kind} refused build must not write a snapshot file"
+
+
+# --------------------------------------------------------------------------- #
 # (3) anchor chain math + idempotency tuple.
 # --------------------------------------------------------------------------- #
 def test_chain_position_genesis_and_advance() -> None:
@@ -250,6 +377,8 @@ TESTS = [
     ("default theorem-u snapshot shape (back-compat)", test_default_theorem_u_shape),
     ("kind without honesty block is refused", test_kind_without_honesty_is_refused),
     ("kind with honesty block is allowed", test_kind_with_honesty_is_allowed),
+    ("production milestone kind shapes + honesty", test_production_kind_shapes),
+    ("production milestone kind refused without honesty", test_production_kind_without_honesty_is_refused),
     ("anchor chain_position genesis + advance", test_chain_position_genesis_and_advance),
     ("anchor idempotency tuple", test_idempotency_tuple),
     ("canonical_hash order independence", test_canonical_hash_order_independent),
@@ -277,8 +406,9 @@ def main() -> int:
         return 1
     print(
         "[snapshot-anchor-selftest] all invariants hold: default build reproduces the "
-        "Theorem-U snapshot shape, a kind with no honesty block is refused, and the "
-        "anchor chain math + idempotency tuple are intact."
+        "Theorem-U snapshot shape, every production-anchored milestone kind keeps its "
+        "pinned shape + honesty block (and is refused with it stripped), a kind with no "
+        "honesty block is refused, and the anchor chain math + idempotency tuple are intact."
     )
     return 0
 

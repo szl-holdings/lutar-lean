@@ -1,0 +1,65 @@
+name: sorry-worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Specific .lean file (blank = N shortest sorry files)"
+        required: false
+        default: ""
+      max:
+        description: "How many files to attempt when no file given"
+        required: false
+        default: "1"
+      model:
+        description: "Model id (Groq free tier by default)"
+        required: false
+        default: "qwen/qwen3-32b"
+
+permissions:
+  contents: write
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    # Free provider: Groq free tier (OpenAI-compatible, publicly reachable from CI).
+    # No paid Anthropic balance required. Swap LLM_BASE_URL/LLM_API_KEY to use another.
+    env:
+      LLM_PROVIDER: openai
+      LLM_BASE_URL: https://api.groq.com/openai/v1
+      LLM_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Propose candidate proofs (UNVERIFIED, free provider)
+        env:
+          IN_FILE: ${{ inputs.file }}
+          IN_MAX: ${{ inputs.max }}
+          IN_MODEL: ${{ inputs.model }}
+        run: |
+          if [ -n "$IN_FILE" ]; then
+            python3 propose_proof.py --file "$IN_FILE" --model "$IN_MODEL"
+          else
+            python3 propose_proof.py --max "$IN_MAX" --model "$IN_MODEL"
+          fi
+      - name: Push proposals branch (no auto-merge)
+        if: always()
+        run: |
+          if [ -d proposals ] && [ -n "$(ls -A proposals 2>/dev/null)" ]; then
+            br="forge/sorry-proposals-${{ github.run_id }}"
+            git config user.name "sorry-worker"
+            git config user.email "actions@github.com"
+            git checkout -b "$br"
+            git add proposals
+            git commit -m "chore(sorry-worker): UNVERIFIED candidate proofs (run ${{ github.run_id }})"
+            git push origin "$br"
+            {
+              echo "### sorry-worker proposals (UNVERIFIED — PhD review + lake build required)"
+              echo ""
+              cat proposals/INDEX.md
+              echo ""
+              echo "Branch \`$br\` — open a PR: ${{ github.server_url }}/${{ github.repository }}/compare/main...$br"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No proposals produced (see logs)." >> "$GITHUB_STEP_SUMMARY"
+          fi

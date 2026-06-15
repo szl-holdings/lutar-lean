@@ -1,0 +1,23 @@
+name: sorry-gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sorry-no-increase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Sorry no-increase gate (baseline 65, measured 2026-06-14)
+        run: python3 count_sorries.py . 65
+      - name: Update scoreboard (report only)
+        if: always()
+        run: |
+          python3 scoreboard.py . || true
+          cat SORRIES.md || true
