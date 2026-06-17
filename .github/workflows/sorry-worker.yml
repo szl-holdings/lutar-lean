@@ -16,12 +16,16 @@ on:
         required: false
         default: "qwen/qwen3-32b"
 
+# Least privilege: read-only by default; the propose job needs contents:write
+# to push an UNVERIFIED proposals branch (never auto-merged). (Scorecard Token-Permissions)
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   propose:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # push proposals/* branch (no auto-merge)
     # Free provider: Groq free tier (OpenAI-compatible, publicly reachable from CI).
     # No paid Anthropic balance required. Swap LLM_BASE_URL/LLM_API_KEY to use another.
     env:

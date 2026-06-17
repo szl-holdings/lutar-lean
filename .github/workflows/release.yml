@@ -3,14 +3,20 @@ on:
   release:
     types: [created, published]
   workflow_dispatch:
+# Least privilege: default to read-only at the workflow top level; the single
+# job that actually needs write scopes (release asset upload + OIDC attestation)
+# declares them at job level. (Scorecard Token-Permissions)
 permissions:
-  id-token: write
-  contents: write
-  packages: write
-  attestations: write
+  contents: read
 jobs:
   attest:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write       # OIDC keyless signing / attestation
+      contents: write       # upload release assets (softprops/action-gh-release)
+      packages: write       # registry push for attestation subjects
+      attestations: write   # actions/attest-* write attestations
+
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:

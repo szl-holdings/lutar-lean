@@ -64,9 +64,11 @@ on:
         required: false
         default: ""
 
+# Least privilege: read-only by default at the top level. The single close job
+# declares the writes it needs (signed commit on auto/* branch + PR open).
+# (Scorecard Token-Permissions; defense-in-depth for this privileged workflow.)
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: close-bounty
@@ -76,6 +78,9 @@ jobs:
   close:
     name: Propose bounty close
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # createCommitOnBranch on auto/close-* branch
+      pull-requests: write   # open the close PR
     # For the workflow_run trigger only act on a GREEN run that built main; the
     # other triggers always proceed (the dispatcher already gated eligibility).
     if: >-
@@ -83,12 +88,29 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
     steps:
-      - name: Checkout
+      # SECURITY: This is a PRIVILEGED workflow (workflow_run / repository_dispatch
+      # run with contents:write, pull-requests:write and the BOUNTY_BOARD_TOKEN
+      # secret in scope). It MUST NOT check out or execute untrusted code.
+      #
+      # Previously this checked out `github.event.workflow_run.head_sha`, which on a
+      # fork PR is attacker-controlled — and the steps below then EXECUTE repo
+      # scripts (scripts/close_bounty.py, scripts/check_bounties.py) from that
+      # checkout. That is the classic "pwn request" pattern
+      # (https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)
+      # and was flagged by CodeQL actions/untrusted-checkout/critical + Scorecard
+      # DangerousWorkflow.
+      #
+      # The close pipeline only ever operates on this repo's OWN trusted files
+      # (the bounties/ board and the theorem obligation file), and the job already
+      # gates the workflow_run path on conclusion==success && head_branch=='main'
+      # (so the proof commit is already on main / trusted). The triggering run's
+      # head_sha is still available as a value via the github.event context and is
+      # only recorded as provenance metadata — it is NOT needed as a checkout ref.
+      # Therefore we always check out the trusted default ref (main HEAD), never
+      # the untrusted head_sha.
+      - name: Checkout (trusted main HEAD only — never untrusted PR code)
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          # For workflow_run, check out the exact verified commit; otherwise the
-          # default ref (main HEAD) is used.
-          ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
 
       - name: Set up Python
