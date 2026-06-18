@@ -20,7 +20,7 @@
 - **Mathlib alignment** — periodic Mathlib upgrades may require proof adjustments
 - **Theorem U (`Lutar/Uniqueness/`)** — a CONDITIONAL Λ-uniqueness reframing, additive and
   EXPERIMENTAL (NOT folded into the locked 749/14/163 @ c7c0ba17 baseline; locked-proven stays
-  EXACTLY 5 {F1,F11,F12,F18,F19}). Introduces the audit-invariant equivalence `≈Λ` (`LambdaEquiv`:
+  EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17). Introduces the audit-invariant equivalence `≈Λ` (`LambdaEquiv`:
   a genuine `Equivalence` + `Decidable` + the `lambdaEquiv_nondegenerate` anti-vacuity guard — the
   proven A1–A5 counterexample `maxAgg` is `≉Λ` to `Λ 2`, so "uniqueness modulo `≈Λ`" is non-trivial),
   the `IdentifiabilityAssumptions` (IA) bundle with `FactorAssumptions`/`SeparableAssumptions`
