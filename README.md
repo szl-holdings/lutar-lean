@@ -149,3 +149,9 @@ Mathematical patterns trace to durable, scholarly-documented sources (Rhind Papy
 S. P. Lutar Jr., "lutar-lean — Lean 4 Formal Proofs for the SZL Governance Substrate,"
 Zenodo, DOI 10.5281/zenodo.20434308, 2026.
 ```
+
+
+## Live Λ playground
+
+The Λ advisory aggregator (whose uniqueness is Conjecture 1 here) can be driven live:
+https://huggingface.co/spaces/SZLHOLDINGS/lambda-aggregator-live
