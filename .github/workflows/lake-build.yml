@@ -163,7 +163,7 @@ jobs:
       # Inlined equivalent: restore .lake cache + lake exe cache get + save, using only
       # github-owned actions/cache (allowed). Drift gate logic is unchanged.
       - name: Restore Lake build cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
@@ -198,7 +198,7 @@ jobs:
 
       - name: Save Lake build cache
         if: success()
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
