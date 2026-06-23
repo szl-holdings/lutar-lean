@@ -17,31 +17,6 @@ updates:
         patterns:
           - "*"
 
-  # Python pip dependencies
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "08:00"
-      timezone: "America/New_York"
-    labels:
-      - "dependencies"
-    open-pull-requests-limit: 5
-    groups:
-      python-deps:
-        patterns:
-          - "*"
-
-  # Docker dependencies
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "08:00"
-      timezone: "America/New_York"
-    labels:
-      - "dependencies"
-      - "security"
-    open-pull-requests-limit: 3
+  # pip and docker ecosystems removed 2026-06-23: no Dockerfile or pip manifest
+  # exists at "/" so Dependabot updater errored (update runs #1428697021 and
+  # #1428700310). Re-add if a Dockerfile or requirements.txt is introduced.
