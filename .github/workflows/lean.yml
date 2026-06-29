@@ -61,7 +61,7 @@ jobs:
       # patterns_allowed=[]) blocks it — causing startup_failure before any runner is allocated.
       # Inlined equivalent using only github-owned actions/cache (allowed) + shell commands.
       - name: Restore Lake build cache
-        uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
@@ -93,7 +93,7 @@ jobs:
 
       - name: Save Lake build cache
         if: success()
-        uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
