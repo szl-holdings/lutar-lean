@@ -86,6 +86,12 @@ import Lutar.Innovations.round5.OuroLoopInputLipschitz
 -- Wave12 CF-17: floating-point summation forward-error bound (γ_{n-1}·Σ|xᵢ|; Higham 2002,
 -- rounding model as explicit HYPOTHESIS not axiom; kernel-clean, no sorry, no new axiom).
 import Lutar.Khipu.NumericStability
+-- EXPERIMENTAL (NOT in the locked-8): Merkle Functor Kernel Theorem — compositional
+-- closure of Khipu receipt chains (Theorem 9 blueprint impl, port of Lochbihler
+-- FMBC 2020 Thm 5 composition half). Sorry-free, no new `axiom` (the hash is an
+-- `opaque` constant); kernel depends only on `propext`. The locked-proven count
+-- STAYS 8 {F1,F4,F7,F11,F12,F18,F19,F22} until a human deliberately promotes it.
+import Lutar.Khipu.MerkleFunctor
 -- PURIQ proved-formula pack (zero sorry, Mathlib-free): F1/F11/F12/F18/F19
 -- (original sprint) + F4/F7/F22 (append-only/DAG/FIFO sprint 2026-06-04). Wiring
 -- this into `lake build` makes CI kernel-check every PROVED PURIQ formula. The 15
