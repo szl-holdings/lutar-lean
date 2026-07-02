@@ -426,7 +426,7 @@ def _self_test() -> int:
     assert statuses.get("f1_real") == "verified", statuses
     assert statuses.get("f99_does_not_exist") == "unbacked", statuses
 
-    # (b) Λ tagged proven (as a theorem) must be caught.
+    # (b) a Λ-uniqueness entry falsely tagged proven must be caught (it stays Conjecture 1).
     bad_index = dict(fake_index)
     bad_index["proof_bare"] = fake_index["proof_bare"] | {"Conjecture1_LambdaUnique"}
     viol = lambda_violations(bad_index, md_unbacked)
