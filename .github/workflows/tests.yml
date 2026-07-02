@@ -14,7 +14,19 @@ jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: Test stub
-        run: echo "Tests OK"
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: python3 -m pip install --quiet pytest
+      - name: PROVEN_FORMULAS guard — self-test (negative fixtures)
+        run: python3 .github/scripts/check_proven_formulas.py --self-test
+      - name: PROVEN_FORMULAS guard — source-of-truth registry (JSON)
+        run: python3 .github/scripts/check_proven_formulas.py --repo-path . --json
+      - name: Run pytest
+        run: python3 -m pytest tests/ -q
