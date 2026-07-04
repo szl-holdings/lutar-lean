@@ -3,6 +3,8 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "SZL Holdings — lutar-lean"
 version: "1.0.0"
+commit: "c7c0ba17"
+doi: "10.5281/zenodo.20434308"
 date-released: "2026-06-09"
 license: Apache-2.0
 repository-code: "https://github.com/szl-holdings/lutar-lean"
