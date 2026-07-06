@@ -10,13 +10,13 @@
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
 [![DCO](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
-[![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-2C2C54.svg?style=flat-square)](https://leanprover.github.io/)
+[![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
 [![SLSA L1 honest · L2 roadmap](https://img.shields.io/badge/SLSA-L1_honest_%C2%B7_L2_roadmap-c9b787.svg?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
-[![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-B79BD6.svg?style=flat-square)](./BOUNTY.md)
-[![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-B79BD6.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
+[![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-8a6bff.svg?style=flat-square)](./BOUNTY.md)
+[![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-8a6bff.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
 
-[a11oy.net](https://a11oy.net) · [Org](https://github.com/szl-holdings) · [Thesis (szl-papers)](https://github.com/szl-holdings/szl-papers) · [Λ bounty](./BOUNTY.md) · [🤗 SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS)
+[a-11-oy.com](https://a-11-oy.com) · [Org](https://github.com/szl-holdings) · [Thesis (szl-papers)](https://github.com/szl-holdings/szl-papers) · [Λ bounty](./BOUNTY.md) · [🤗 SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS)
 
 `receipts.in ≡ receipts.out`
 
