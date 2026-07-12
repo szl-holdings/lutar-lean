@@ -17,6 +17,16 @@ lean_lib «RefVectors» where
   roots := #[`RefVectors]
 
 @[default_target]
+lean_lib «LedgerIdentities» where
+  -- Additive, EXPERIMENTAL: machine-checked CHECKED/SYMBOLIC-class identities
+  -- lifted from the szl-formula-ledger corpus (formulas/corpus.json). Lives
+  -- OUTSIDE Lutar/ so it is NOT counted by .github/scripts/lean_numbers.py and
+  -- does NOT touch the locked Doctrine-v11 baseline nor the locked-proven set
+  -- {F1,F4,F7,F11,F12,F18,F19,F22}. Every theorem is sorry-free and
+  -- Mathlib-lemma-backed; built (and kernel-checked) by `lake build` (default).
+  roots := #[`LedgerIdentities]
+
+@[default_target]
 lean_lib «PutnamShowcase» where
   -- Putnam formalization showcase (Showcase/PutnamLean/). Mathlib-free, core
   -- Lean only; each module is honestly labeled REAL (kernel-checked, zero
