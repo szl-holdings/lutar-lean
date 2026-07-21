@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- diagnostics/workflow-secret-names.txt; then
+          if [[ -z "$(git status --porcelain -- diagnostics/workflow-secret-names.txt)" ]]; then
             echo 'Audit result unchanged.'
             exit 0
           fi
