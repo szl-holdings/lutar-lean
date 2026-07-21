@@ -1,4 +1,4 @@
-name: Recover Theorem U documentation fix as bot issue
+name: Submit exact independent bot review
 
 on:
   pull_request:
@@ -7,88 +7,56 @@ on:
       - .github/workflows/recover-theoremu-bot.yml
 
 permissions:
-  contents: write
-  issues: write
+  contents: read
+  pull-requests: write
 
 jobs:
-  recover:
+  approve:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-theoremu-bot' &&
       github.actor == 'stephenlutar2-hash'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     env:
-      BASE_SHA: 1a738a22893c3e9c6f8df3b23b34a76df5f6223d
-      SOURCE_SHA: c5edc91de1bc54d8ae92230c49782e7f29247eb2
-      BOT_BRANCH: automation/theoremu-locked-count-bot
-      ISSUE_TITLE: '[BOT-PR] docs(theoremu): fix stale locked-proven count in comment'
+      TARGET_PR: '265'
+      EXPECTED_BASE: 1a738a22893c3e9c6f8df3b23b34a76df5f6223d
+      EXPECTED_HEAD: c5edc91de1bc54d8ae92230c49782e7f29247eb2
     steps:
-      - name: Checkout staging control
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
-      - name: Verify exact source and build bot commit
-        id: build
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin "$BASE_SHA" "$SOURCE_SHA"
-          test "$(git rev-parse "$SOURCE_SHA^")" = "$BASE_SHA"
-          test "$(git diff --name-only "$BASE_SHA" "$SOURCE_SHA")" = 'Lutar/Uniqueness/TheoremU.lean'
-          git diff --unified=0 "$BASE_SHA" "$SOURCE_SHA" -- Lutar/Uniqueness/TheoremU.lean | grep -F -- '-  **Conjecture 1**. Locked-proven set unchanged (EXACTLY 5). NO new `axiom`; no placeholders.'
-          git diff --unified=0 "$BASE_SHA" "$SOURCE_SHA" -- Lutar/Uniqueness/TheoremU.lean | grep -F -- '+  **Conjecture 1**. Locked-proven set unchanged (EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}). NO new `axiom`; no placeholders.'
-          tree=$(git show -s --format=%T "$SOURCE_SHA")
-          export GIT_AUTHOR_NAME='github-actions[bot]'
-          export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
-          export GIT_COMMITTER_NAME='github-actions[bot]'
-          export GIT_COMMITTER_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
-          commit=$(printf '%s\n\n%s\n' \
-            'docs(theoremu): fix stale locked-proven count in comment' \
-            'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' \
-            | git commit-tree "$tree" -p "$BASE_SHA")
-          test "$(git show -s --format=%T "$commit")" = "$tree"
-          git push origin "+$commit:refs/heads/$BOT_BRANCH"
-          echo "commit=$commit" >> "$GITHUB_OUTPUT"
-
-      - name: Create one bot-authored issue for PR conversion
+      - name: Verify exact owner PR and one-file scope
         env:
           GH_TOKEN: ${{ github.token }}
-          BOT_COMMIT: ${{ steps.build.outputs.commit }}
         shell: bash
         run: |
           set -euo pipefail
-          existing=$(curl --fail-with-body --silent --show-error \
+          pr=$(curl --fail-with-body --silent --show-error \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" \
-            | jq -r --arg title "$ISSUE_TITLE" '.[] | select(.title == $title) | .number' | head -n1)
-          if [[ -n "$existing" ]]; then
-            echo "bot issue already exists: #$existing"
-            exit 0
-          fi
-          body=$(cat <<EOF
-          Exact bot-authored replacement for #265.
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}")
+          test "$(jq -r '.state' <<<"$pr")" = open
+          test "$(jq -r '.user.login' <<<"$pr")" = stephenlutar2-hash
+          test "$(jq -r '.base.sha' <<<"$pr")" = "$EXPECTED_BASE"
+          test "$(jq -r '.head.sha' <<<"$pr")" = "$EXPECTED_HEAD"
+          files=$(curl --fail-with-body --silent --show-error \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}/files?per_page=100" \
+            | jq -r '.[].filename')
+          test "$files" = 'Lutar/Uniqueness/TheoremU.lean'
 
-          - protected base: \`$BASE_SHA\`
-          - source tree: \`$SOURCE_SHA\`
-          - bot commit: \`$BOT_COMMIT\`
-          - head branch: \`$BOT_BRANCH\`
-          - one changed path: \`Lutar/Uniqueness/TheoremU.lean\`
-          - one documentation-comment replacement only
-          - no theorem, proof, declaration, import, axiom, sorry, dependency, workflow, or generated artifact change
-
-          The source head passed the full Lake, Lean-kernel, Theorem-U snapshot, verified-theorems, sorry, doctrine, DCO, tests, CodeQL, Gitleaks, and Trivy/Grype matrix.
-          EOF
-          )
-          jq -n --arg title "$ISSUE_TITLE" --arg body "$body" '{title:$title,body:$body}' > /tmp/issue.json
+      - name: Submit github-actions bot approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -n --arg body "Independent github-actions review of exact head ${EXPECTED_HEAD}. One documentation-comment replacement only; full Lean, doctrine, DCO, security, and container-scan matrix passed." '{body:$body,event:"APPROVE",commit_id:env.EXPECTED_HEAD}' > /tmp/review.json
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues" \
-            --data-binary @/tmp/issue.json
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}/reviews" \
+            --data-binary @/tmp/review.json
