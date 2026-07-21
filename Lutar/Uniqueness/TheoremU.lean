@@ -27,7 +27,7 @@ introduces NO new `axiom` token and contains no proof placeholder.
 - Theorem U is **CONDITIONAL** on the identifiability assumptions (existence + separability +
   normalization), all discharged through proven in-tree lemmas + Mathlib. The UNCONDITIONAL
   uniqueness statement (`Conjecture1_LambdaUnique`) stays OPEN / machine-checked-false; Λ stays
-  **Conjecture 1**. Locked-proven set unchanged (EXACTLY 5). NO new `axiom`; no placeholders.
+  **Conjecture 1**. Locked-proven set unchanged (EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}). NO new `axiom`; no placeholders.
 
 Signed-off-by: SZL CTO <cto@szl-holdings.com>
 -/
