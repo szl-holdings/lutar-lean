@@ -1,14 +1,8 @@
-name: SLSA provenance (L1 honest; L2 via Wire D in-flight; L3 roadmap post-Warhacker)
+name: SLSA provenance (L1 honest; L2 attested; L3 roadmap post-Warhacker)
 
-# Generates SLSA L1 build provenance (honest) for release artifacts.
-# Uses slsa-framework/slsa-github-generator — a GitHub-hosted build.
-# SLSA L1 (honest): source + build provenance documented. L2 via Wire D in-flight; L3 roadmap post-Warhacker (hardened isolated CI required).
-#
-# lutar-lean: Lean 4 theorem-proving library.
-# Artifacts: Lean lake build outputs (compiled .olean files or source tarballs).
-#
-# Version: slsa-github-generator v2.1.0 @ f7dd8c5 (2025-02-24)
-# Doctrine v6: verifiable workflow reference, no echo stubs.
+# Generates a GitHub artifact attestation with SLSA v1 Build Level 2 provenance.
+# The build, attestation, and release-write trust zones are separate jobs.
+# No SLSA Build Level 3 claim is made.
 
 on:
   workflow_dispatch:
@@ -18,10 +12,9 @@ on:
 permissions: read-all
 
 jobs:
-  # Build step — emit the artifact(s) to be attested
   build:
     outputs:
-      hashes: ${{ steps.hash.outputs.hashes }}
+      tarball: ${{ steps.package.outputs.tarball }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -56,23 +49,75 @@ jobs:
           mv "$TEMP_TARBALL" "$TARBALL"
           echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
 
-      - name: Generate artifact hashes
-        id: hash
+      - name: Generate artifact hash
         run: |
           set -euo pipefail
-          TARBALL="${{ steps.package.outputs.tarball }}"
-          echo "hashes=$(sha256sum "$TARBALL" | base64 -w0)" >> "$GITHUB_OUTPUT"
+          sha256sum "${{ steps.package.outputs.tarball }}"
 
-  # SLSA build provenance generation (SLSA L2 attested — hosted GitHub builder).
-  # Doctrine v11: claim SLSA L2 (verifiable via slsa-verifier), NEVER L3.
-  # Runs on GitHub-hosted infrastructure; attestation is signed by Sigstore Fulcio.
+      - name: Upload release tarball
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-tarball
+          path: ${{ steps.package.outputs.tarball }}
+          if-no-files-found: error
+          retention-days: 7
+
   provenance:
     needs: [build]
     permissions:
-      actions: read
-      id-token: write       # Required for OIDC token → Sigstore signing
-      contents: write       # Required to upload provenance to the release
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
-    with:
-      base64-subjects: "${{ needs.build.outputs.hashes }}"
-      upload-assets: ${{ github.event_name == 'release' }}
+      attestations: write
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-tarball
+          path: dist
+
+      - name: Generate SLSA build provenance attestation
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: dist/${{ needs.build.outputs.tarball }}
+
+      - name: Preserve attestation bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: provenance-bundle
+          path: ${{ steps.attest.outputs.bundle-path }}
+          if-no-files-found: error
+          retention-days: 7
+
+  release-assets:
+    if: github.event_name == 'release'
+    needs: [build, provenance]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-tarball
+          path: release-assets
+
+      - name: Download attestation bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: provenance-bundle
+          path: release-assets
+
+      - name: Attach tarball and provenance to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          assets=(release-assets/*)
+          if (( ${#assets[@]} == 0 )); then
+            echo "No release assets found" >&2
+            exit 1
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${assets[@]}"
