@@ -120,4 +120,6 @@ jobs:
             echo "No release assets found" >&2
             exit 1
           fi
-          gh release upload "$GITHUB_REF_NAME" "${assets[@]}"
+          gh release upload "$GITHUB_REF_NAME" "${assets[@]}" \
+            --repo "${{ github.repository }}" \
+            --clobber
