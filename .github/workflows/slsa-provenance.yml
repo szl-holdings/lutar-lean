@@ -39,7 +39,11 @@ jobs:
       - name: Build with lake
         run: |
           set -euo pipefail
-          lake build || echo "No lakefile — skipping lake build"
+          if [[ -f lakefile.lean || -f lakefile.toml ]]; then
+            lake build
+          else
+            echo "No lakefile - skipping lake build"
+          fi
 
       - name: Package release tarball
         id: package
@@ -47,7 +51,9 @@ jobs:
           set -euo pipefail
           VERSION="${GITHUB_REF_NAME:-dev}"
           TARBALL="lutar-lean-${VERSION}.tar.gz"
-          tar -czf "$TARBALL" --exclude='.git' --exclude='.lake/packages' .
+          TEMP_TARBALL="$RUNNER_TEMP/$TARBALL"
+          tar -czf "$TEMP_TARBALL" --exclude='.git' --exclude='.lake/packages' .
+          mv "$TEMP_TARBALL" "$TARBALL"
           echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
 
       - name: Generate artifact hashes
@@ -69,4 +75,4 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
-      upload-assets: true   # Attaches .intoto.jsonl to the GitHub Release
+      upload-assets: ${{ github.event_name == 'release' }}
