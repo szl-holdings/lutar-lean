@@ -2,7 +2,8 @@
 
 > Doctrine v11 LOCKED `749/14/163` · Kernel commit `c7c0ba17` · locked-proven = 8
 > `{F1,F4,F7,F11,F12,F18,F19,F22}` · Λ = **Conjecture 1** (conditional Theorem U,
-> NOT a closed theorem) · SLSA L1 honest · L2 roadmap.
+> NOT a closed theorem) · SLSA v1 Build Level 2 for the verified exact-main
+> built-tree tarball path · release-event asset attachment untested · no L3 claim.
 
 `lutar-lean` is the Lean 4 + Mathlib formalization that formally underwrites SZL's
 governance math. It is the **single source of truth** for every "proven" claim made
