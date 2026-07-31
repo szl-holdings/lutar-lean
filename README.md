@@ -141,7 +141,7 @@ Mathematical patterns trace to durable, scholarly-documented sources (Rhind Papy
 
 [Apache-2.0](./LICENSE) — SZL Holdings. ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173).
 
-> **SLSA note (verified scope):** this Lean proof library has **SLSA v1 Build Level 2** provenance for its exact-main source tarball, independently verified from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) through GitHub artifact attestations and Sigstore keyless signing. The release-event asset attachment path is implemented but was not exercised by that manual run. No SLSA Build Level 3 claim is made.
+> **SLSA note (verified scope):** this Lean proof library has **SLSA v1 Build Level 2** provenance for its exact-main built-tree tarball (source plus Lean build outputs, excluding `.git` and `.lake/packages`), independently verified from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) through GitHub artifact attestations and Sigstore keyless signing. The release-event asset attachment path is implemented but was not exercised by that manual run. No SLSA Build Level 3 claim is made.
 
 > Not affiliated with Defense Unicorns. SZL mark USPTO Serial 99831122. No production ATO claimed.
 
