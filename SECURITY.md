@@ -31,7 +31,7 @@ We follow a **90-day responsible disclosure** policy. After 90 days from initial
 
 ## Supply-Chain Security
 
-- **SLSA Build Level 1** — build provenance generated per release (honest; not L2/L3)
+- **SLSA v1 Build Level 2 (verified scope)** — the exact-main source tarball from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) has independently verified GitHub/Sigstore build provenance; release-event asset attachment is implemented but not yet exercised, and L3 is not claimed
 - **DCO required** — all commits carry `Signed-off-by:` trailers per [Linux Foundation DCO](https://developercertificate.org/)
 - **Cosign keyless signing** — containers signed via Sigstore OIDC keyless mode; verify with `cosign verify ghcr.io/szl-holdings/<repo>:<tag>`
 - **SBOM** — CycloneDX SBOM attached to each GitHub Release

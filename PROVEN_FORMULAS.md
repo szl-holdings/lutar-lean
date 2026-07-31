@@ -136,7 +136,7 @@ All Wave-8 theorems are kernel-verified and **CI-green**; they are **experimenta
 | Experimental scope (current `main`) | `7885fd9` · Lean `v4.18.0` · `1304` declarations / `22` unique axioms · CI-green |
 | Experimental kernel-verified (CI-green) — **~36 theorems** | wave-5 (11), wave-6 (11), wave-7 (10), wave-8 (10), agentic-loop (28), airtight Λ Set α+δ (22 results) — **never in the locked count** |
 | Λ-uniqueness | **Conjecture 1** — conditional within strengthened classes (CI-green); unconditional uniqueness machine-checked **false** |
-| Supply chain | SLSA L1 honest today (cosign signing + `slsa.dev/provenance/v0.2` wired). SLSA L2 is roadmap — build-provenance attestation not yet earned on deployed images. L3 is out of scope. FedRAMP, Iron Bank, and CMMC are not pursued and not claimed. |
+| Supply chain | SLSA v1 Build Level 2 for the exact-main source-tarball path, independently verified from run `30592077509` with GitHub artifact attestations and Sigstore keyless signing. Release-event asset attachment is implemented but was not exercised by that manual run. L3 is out of scope. FedRAMP, Iron Bank, and CMMC are not pursued and not claimed. |
 
 ---
 

@@ -1,9 +1,9 @@
-name: SLSA provenance (L1 honest; L2 via Wire D in-flight; L3 roadmap post-Warhacker)
+name: SLSA provenance (L2 exact-main tarball verified; L3 roadmap)
 
-# Generates a GitHub artifact attestation for exact-main validation.
+# Generates a GitHub artifact attestation for the exact-main source tarball.
 # The build, attestation, and release-write trust zones are separate jobs.
-# Canonical repository posture remains L1 until the attestation is produced,
-# independently verified, and synchronized across repository documentation.
+# Run 30592077509 independently verified the Build Level 2 attestation path.
+# Release-event asset attachment remains untested; no Build Level 3 claim.
 
 on:
   workflow_dispatch:

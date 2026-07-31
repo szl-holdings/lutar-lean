@@ -11,7 +11,7 @@
 [![DCO](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
-[![SLSA L1 honest · L2 roadmap](https://img.shields.io/badge/SLSA-L1_honest_%C2%B7_L2_roadmap-c9b787.svg?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
+[![SLSA L2 verified](https://img.shields.io/badge/SLSA-L2_verified-2f855a.svg?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
 [![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-8a6bff.svg?style=flat-square)](./BOUNTY.md)
 [![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-8a6bff.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
@@ -141,7 +141,7 @@ Mathematical patterns trace to durable, scholarly-documented sources (Rhind Papy
 
 [Apache-2.0](./LICENSE) — SZL Holdings. ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173).
 
-> **SLSA note (honest):** this is a Lean proof library, not a built product image — its supply-chain posture is **SLSA L1 honest · L2 roadmap**. The org's shipping product images (a11oy, killinchu) are **SLSA L1 honest · L2 build-attested** (container provenance via attest-build-provenance, Sigstore keyless) · L3 roadmap.
+> **SLSA note (verified scope):** this Lean proof library has **SLSA v1 Build Level 2** provenance for its exact-main source tarball, independently verified from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) through GitHub artifact attestations and Sigstore keyless signing. The release-event asset attachment path is implemented but was not exercised by that manual run. No SLSA Build Level 3 claim is made.
 
 > Not affiliated with Defense Unicorns. SZL mark USPTO Serial 99831122. No production ATO claimed.
 
