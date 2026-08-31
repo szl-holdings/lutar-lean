@@ -2,8 +2,9 @@ name: Legacy required-context compatibility
 
 # Compatibility only: classic branch protection still expects the historical
 # context name below. This workflow does not enforce DCO trailers, commit
-# signatures, or contributor ceremony. It validates only immutable event
-# identity from GitHub and never checks out or executes candidate code.
+# signatures, or contributor ceremony. It supports pull requests and merge
+# queue commits by validating only immutable event identity from GitHub, and it
+# never checks out or executes candidate code.
 # Delete this workflow after the legacy context is removed in repository settings.
 on:
   pull_request:
