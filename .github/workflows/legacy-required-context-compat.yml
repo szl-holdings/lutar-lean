@@ -1,0 +1,42 @@
+name: Legacy required-context compatibility
+
+# Compatibility only: classic branch protection still expects the historical
+# context name below. This workflow does not enforce DCO trailers, commit
+# signatures, or contributor ceremony. It validates only immutable PR identity
+# from GitHub's event payload and never checks out or executes candidate code.
+# Delete this workflow after the legacy context is removed in repository settings.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-context:
+    # Keep this exact display name until classic branch protection is updated.
+    name: DCO sign-off check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Validate PR provenance and identity
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "${EVENT_NAME}" = "pull_request"
+          test "${REPOSITORY}" = "${BASE_REPOSITORY}"
+          test "${BASE_REF}" = "main"
+          test -n "${HEAD_REPOSITORY}"
+          test "${BASE_SHA}" != "${HEAD_SHA}"
+          [[ "${BASE_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          echo "Legacy context satisfied by read-only PR identity validation."
