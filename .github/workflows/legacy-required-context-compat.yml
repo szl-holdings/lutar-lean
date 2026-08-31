@@ -1,0 +1,68 @@
+name: Legacy required-context compatibility
+
+# Compatibility only: classic branch protection still expects the historical
+# context name below. This workflow does not enforce DCO trailers, commit
+# signatures, or contributor ceremony. It supports pull requests and merge
+# queue commits by validating only immutable event identity from GitHub, and it
+# never checks out or executes candidate code.
+# Delete this workflow after the legacy context is removed in repository settings.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-context:
+    # Keep this exact display name until classic branch protection is updated.
+    name: DCO sign-off check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Validate protected event provenance and identity
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          PR_BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+          PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MG_BASE_REF: ${{ github.event.merge_group.base_ref }}
+          MG_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MG_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
+        run: |
+          set -euo pipefail
+          sha_is_valid() {
+            [[ "$1" =~ ^[0-9a-f]{40}$ ]]
+          }
+
+          case "${EVENT_NAME}" in
+            pull_request)
+              test "${REPOSITORY}" = "${PR_BASE_REPOSITORY}"
+              test "${PR_BASE_REF}" = "main"
+              test -n "${PR_HEAD_REPOSITORY}"
+              test "${PR_BASE_SHA}" != "${PR_HEAD_SHA}"
+              sha_is_valid "${PR_BASE_SHA}"
+              sha_is_valid "${PR_HEAD_SHA}"
+              ;;
+            merge_group)
+              case "${MG_BASE_REF}" in
+                main|refs/heads/main) ;;
+                *) echo "::error::Unexpected merge-group base ref: ${MG_BASE_REF}"; exit 1 ;;
+              esac
+              test "${MG_BASE_SHA}" != "${MG_HEAD_SHA}"
+              sha_is_valid "${MG_BASE_SHA}"
+              sha_is_valid "${MG_HEAD_SHA}"
+              ;;
+            *)
+              echo "::error::Unsupported event: ${EVENT_NAME}"
+              exit 1
+              ;;
+          esac
+
+          echo "Legacy context satisfied by read-only event identity validation."

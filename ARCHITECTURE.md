@@ -47,7 +47,7 @@ asserted as a closed theorem.
 
 ## CI gates (required on `main`)
 
-`DCO` · `lake build + numbers` · `overclaim / Governed surfaces are honest (Theorem U
+`lake build + numbers` · `overclaim / Governed surfaces are honest (Theorem U
 citation rule)` · `Theorem-U snapshot honesty (PR merge gate)`. The canonical counts
 `749/14/163` are machine-enforced; a divergent count fails the build.
 

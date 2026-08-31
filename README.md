@@ -8,7 +8,6 @@
 
 [![Lake build](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
-[![DCO](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/dco.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
 [![SLSA L2 verified](https://img.shields.io/badge/SLSA-L2_verified-2f855a.svg?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
@@ -44,7 +43,7 @@ They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Qu
 
 ### Tier 2 — EXPERIMENTAL · CI-green (kernel-verified, labeled, never in the locked count)
 
-> The experimental library on `main` type-checks at **1323 declarations / 23 axioms (22 unique), CI-green** on Lean `v4.18.0` (`lake build + numbers` ✅, DCO ✅).
+> The experimental library on `main` type-checks at **1323 declarations / 23 axioms (22 unique), CI-green** on Lean `v4.18.0` (`lake build + numbers` ✅).
 
 These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-8.
 
