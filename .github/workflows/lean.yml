@@ -56,18 +56,10 @@ jobs:
       - name: Generate lake-manifest.json (lake update)
         run: lake update -R
 
-      # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
-      # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,
-      # patterns_allowed=[]) blocks it — causing startup_failure before any runner is allocated.
-      # Inlined equivalent using only github-owned actions/cache (allowed) + shell commands.
-      - name: Restore Lake build cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .lake
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2
-
+      # Do not restore the former multi-gigabyte .lake Actions cache here.
+      # Repeated exact-head runs were canceled while extracting that cache.
+      # The pinned package graph plus `lake exe cache get` below remains the
+      # authoritative binary-cache path before the full kernel build.
 
       - name: Repair Mathlib package git state
         run: |
@@ -90,13 +82,6 @@ jobs:
 
       - name: Build (kernel-check the whole library)
         run: lake build
-
-      - name: Save Lake build cache
-        if: success()
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .lake
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-v2-${{ github.sha }}
 
       - name: Count remaining sorrys
         run: |
