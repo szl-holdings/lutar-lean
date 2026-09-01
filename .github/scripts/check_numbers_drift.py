@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 
 # Counts that constitute a public claim and must not drift silently.
 GUARDED_KEYS = ("declarations", "axioms_raw", "axioms_unique", "sorries_raw")

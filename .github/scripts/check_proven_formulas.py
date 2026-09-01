@@ -40,7 +40,6 @@ import argparse
 import json
 import os
 import re
-import sys
 
 # The locked-kernel proven set is EXACTLY these eight formula IDs. This mirrors
 # the doc's own machine-enforced invariant (`locked_count_eight`, no axioms).

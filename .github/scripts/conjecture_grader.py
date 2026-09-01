@@ -100,7 +100,10 @@ def solver_exhaustive(mod, budget: int) -> dict:
             witness = {"point": _jsonable(x), "error": str(exc)}
             return _solver_result("exhaustive", "REFUTED", checked, budget,
                                   t0, witness, note="holds() raised")
-    elapsed = time.perf_counter() - t0
+        if not ok:  # a clean False is a found counterexample, not a skip
+            witness = {"point": _jsonable(x)}
+            return _solver_result("exhaustive", "REFUTED", checked, budget,
+                                  t0, witness, note="holds() returned False")
     if witness is not None:
         return _solver_result("exhaustive", "REFUTED", checked, budget, t0, witness)
     if finite and exhausted:
