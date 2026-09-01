@@ -19,7 +19,6 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import sys
 
 SORRY_RE = re.compile(r"\bsorry\b")
 COMMENT_LINE_RE = re.compile(r"^\s*--")
