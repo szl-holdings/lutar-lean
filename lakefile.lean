@@ -80,6 +80,14 @@ lean_lib «HarvestBudgetShowcase» where
   roots := #[`HarvestBudgetWitness]
 
 @[default_target]
+lean_lib «CredoVerdictShowcase» where
+  -- Credo Agent Governor → SZL verdict witness (Showcase/Frontier/).
+  -- Mathlib-free, core Lean only; EXPERIMENTAL, kernel-checked (zero `sorry`).
+  -- Lives outside Lutar/ so lean_numbers.py does not count it and Conjecture 1
+  -- is not touched. Built by `lake build` (default).
+  srcDir := "Showcase/Frontier"
+  roots := #[`CredoVerdictWitness]
+
 lean_exe «check» where
   root := `Main
 
