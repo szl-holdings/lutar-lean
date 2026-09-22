@@ -3,3 +3,7 @@
 /.cache
 *.olean
 .DS_Store
+
+# Python helper/test artifacts are generated locally and must never be source.
+__pycache__/
+*.py[cod]
