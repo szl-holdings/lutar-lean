@@ -15,7 +15,19 @@ updates:
     groups:
       actions:
         patterns:
-          - "*"
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 3
 
   # pip and docker ecosystems removed 2026-06-23: no Dockerfile or pip manifest
   # exists at "/" so Dependabot updater errored (update runs #1428697021 and
