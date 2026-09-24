@@ -2,19 +2,25 @@ name: Bounty Board
 
 on:
   push:
-    branches: [main]
+    branches:
+    - main
     paths:
-      - "bounties/**"
-      - "scripts/check_bounties.py"
-      - ".github/workflows/bounties.yml"
+    - bounties/**
+    - scripts/check_bounties.py
+    - .github/workflows/bounties.yml
   pull_request:
-    branches: [main]
+    branches:
+    - main
     paths:
-      - "bounties/**"
-      - "scripts/check_bounties.py"
-      - ".github/workflows/bounties.yml"
-  workflow_dispatch:
-
+    - bounties/**
+    - scripts/check_bounties.py
+    - .github/workflows/bounties.yml
+  workflow_dispatch: null
+  merge_group:
+    types:
+    - checks_requested
+    branches:
+    - main
 permissions:
   contents: read
 
