@@ -201,6 +201,21 @@ theorem replayRoot_unique_in_list (candidates : List Xoshiro256State)
     s = t := by
   sorry
 
+/-- **Counterexample (proved): `replayRoot_unique_in_list` is FALSE as stated.**
+    `xoshiroOutput` reads only `s1`, so two states that differ only in `s0` produce the same
+    first output. With a one-element `expected` both are replay-roots, yet they differ. Uniqueness
+    therefore needs a prefix long enough to pin all 256 state bits; it cannot hold for every
+    non-empty `expected`. The statement above is kept as the tracked obligation (to be restated),
+    and `prng_replay_root_deterministic` inherits the same defect. -/
+theorem replayRoot_unique_fails_for_one_output :
+    Exists fun s : Xoshiro256State => Exists fun t : Xoshiro256State =>
+      Not (s = t) /\ IsReplayRoot s [xoshiroOutput s] = true /\
+        IsReplayRoot t [xoshiroOutput s] = true := by
+  refine Exists.intro (Xoshiro256State.mk 0 0 0 0)
+    (Exists.intro (Xoshiro256State.mk 1 0 0 0)
+      (And.intro (fun h => absurd (congrArg Xoshiro256State.s0 h) (by decide)) (And.intro ?_ ?_)))
+  all_goals first | rfl | decide | simp [IsReplayRoot, generateOutputs, xoshiroOutput]
+
 /-- Legacy name expected by `rosie/src/replay/receipt_replay.py` binding.
     The cited `@lean_theorem Lutar.PRNG.K10v2ReplayRoot.prng_replay_root_deterministic`
     in `rosie/src/replay/receipt_replay.py` should update `@lean_status` to
