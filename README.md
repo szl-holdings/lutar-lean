@@ -21,7 +21,7 @@ Proof: [a11oy.net](https://a11oy.net)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
-[![SLSA L2 verified](https://img.shields.io/badge/SLSA-L2_verified-2f855a.svg?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
+[![SLSA L2 verified](https://img.shields.io/badge/SLSA-L2_verified-2f855a.svg?style=flat-square)](https://github.com/szl-holdings/lutar-lean/attestations/38094242)
 [![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-8a6bff.svg?style=flat-square)](./BOUNTY.md)
 [![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-8a6bff.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
@@ -54,7 +54,7 @@ They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Qu
 
 ### Tier 2 — EXPERIMENTAL · CI-green (kernel-verified, labeled, never in the locked count)
 
-> The experimental library on `main` type-checks at **1323 declarations / 23 axioms (22 unique), CI-green** on Lean `v4.18.0` (`lake build + numbers` ✅).
+> The experimental library on `main` type-checks **CI-green** on Lean `v4.18.0` at [`75a4a311`](https://github.com/szl-holdings/lutar-lean/commit/75a4a3112287d3d4776d7d6da85a432f185f3914) (committed 2026-09-25; [`lake build + numbers`](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969701) ✅, [Lean kernel check](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969746) ✅); CI-green covers the modules that `lake build` compiles (the lakefile targets and their imports). Measured at that SHA on 2026-09-25 with the canonical org counter ([`lean_numbers.py`](https://github.com/szl-holdings/.github/blob/907eb1f356c3d666131e74e476194ef1b4998ad4/.github/scripts/lean_numbers.py): line regexes over every `Lutar/**/*.lean` file + `Main.lean`, whole corpus): **2119 declarations / 34 axioms (33 unique) / 430 `sorry` tokens (378 non-comment)**. This is a text count, not a count of kernel-checked declarations: it includes `Lutar/` files that `lake build` does not compile, and it differs from the narrower in-repo counter that the linked Lake run prints. *Historical:* the figure previously shown here, 1323 declarations / 23 axioms (22 unique), was written on 2026-06-07 (`2038fd33`) and is superseded.
 
 These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-8.
 
@@ -151,7 +151,7 @@ Mathematical patterns trace to durable, scholarly-documented sources (Rhind Papy
 
 [Apache-2.0](./LICENSE) — SZL Holdings. ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173).
 
-> **SLSA note (verified scope):** this Lean proof library has **SLSA v1 Build Level 2** provenance for its exact-main built-tree tarball (source plus Lean build outputs, excluding `.git` and `.lake/packages`), independently verified from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) through GitHub artifact attestations and Sigstore keyless signing. The release-event asset attachment path is implemented but was not exercised by that manual run. No SLSA Build Level 3 claim is made.
+> **SLSA note (verified scope):** this Lean proof library has **SLSA v1 Build Level 2** provenance for its exact-main built-tree tarball at commit `7f20416e` (source plus Lean build outputs, excluding `.git` and `.lake/packages`), independently verified from [run 30592077509](https://github.com/szl-holdings/lutar-lean/actions/runs/30592077509) ([attestation 38094242](https://github.com/szl-holdings/lutar-lean/attestations/38094242), Rekor log index 2298443595, 2026-07-31 UTC) through GitHub artifact attestations and Sigstore keyless signing. The release-event asset attachment path is implemented but was not exercised by that manual run. No SLSA Build Level 3 claim is made.
 
 > Not affiliated with Defense Unicorns. SZL mark USPTO Serial 99831122. No production ATO claimed.
 
