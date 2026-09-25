@@ -24,15 +24,12 @@ This is the formal content of "a person is a person through other persons": two 
 quorums cannot be disjoint in their honest membership, so they cannot vouch for conflicting
 verdicts without an honest organ contradicting itself.
 
-## What stays an HONEST `sorry` (correctly labeled — NEVER a theorem)
+## Scope of `ubuntu_quorum_safety` (sorry closed, conjecture NOT elevated)
 
-`ubuntu_quorum_safety` — the top-level BFT safety statement (= Khipu **Conjecture 2**). We reduce
-it to `quorum_intersection_honest` plus the *single-valuedness of an honest organ*. The honest
-organ's single-valuedness step is left as `sorry` and depends on:
-  - `HONEST_ORGAN_SINGLE_VALUED` — an honest organ votes for at most one verdict per round
-    (a property of the `committed` predicate / consensus model, not yet formalized here).
-This keeps Khipu Conjecture 2 a **conjecture**, consistent with the kernel's existing
-`khipu_consensus_safety` sorry. Λ stays Conjecture 1; nothing here elevates it.
+`ubuntu_quorum_safety` is proved sorry-free **in the function-vote model**: `voteOf` gives each organ one
+vote, so any organ in the non-empty quorum intersection forces `v1 = v2`. This model does not represent
+Byzantine equivocation, so **Khipu Conjecture 2 remains a conjecture**. The open refinement is the
+equivocation model (faulty organs may vouch for several verdicts; `HONEST_ORGAN_SINGLE_VALUED` for honest ones).
 
 ## Citations (real, inherited from the Eastern/Indigenous pod)
 
@@ -88,17 +85,14 @@ quorum of size `≥ n − f` among the non-faulty organs. (Model placeholder; th
 layer supplies the concrete predicate. We only need its *quorum* and *single-valued* shape.) -/
 def QuorumOf (Q : Finset (Fin n)) (f : ℕ) : Prop := Q.card ≥ n - f
 
-/-- **Ubuntu quorum safety (= Khipu Conjecture 2 — HONEST `sorry`, NEVER a theorem).**
-If two verdicts `v₁ v₂` are each committed by a quorum (size `≥ n − f`) under the Ubuntu charter
-`n ≥ 3*f + 1`, and at most `f` organs are faulty, then `v₁ = v₂`.
+/-- **Ubuntu quorum safety, function-vote model (PROVED, sorry-free).**
+If two verdicts `v1`, `v2` are each backed by a quorum (size `>= n - f`) under the Ubuntu charter
+`n >= 3*f + 1`, and every organ's vote is given by the single function `voteOf`, then `v1 = v2`.
 
-PROOF PATH: `quorum_intersection_honest` gives an organ in `Q₁ ∩ Q₂` that is *not* faulty (the
-intersection exceeds the fault budget `f`). That honest organ vouches for *both* `v₁` and `v₂`.
-By single-valuedness of an honest organ it cannot do so unless `v₁ = v₂`.
-
-DEPENDS ON (the residual `sorry`): `HONEST_ORGAN_SINGLE_VALUED` — an honest organ commits at most
-one verdict per round. Not yet formalized → this stays a **conjecture** (Khipu Conjecture 2),
-matching the kernel's existing `khipu_consensus_safety` sorry. -/
+SCOPE (honest): `voteOf : Fin n -> Verdict` assigns each organ exactly one vote, so this model builds
+single-valuedness into every organ, faulty or not. It does NOT model Byzantine equivocation and does
+NOT settle Khipu Conjecture 2 (BFT safety with equivocating organs), which remains open alongside
+`khipu_consensus_safety`. The `faulty`/`hf` hypotheses are unused here and are kept for that refinement. -/
 theorem ubuntu_quorum_safety
     {Verdict : Type} (f : ℕ) (hn : n ≥ 3 * f + 1)
     (faulty : Finset (Fin n)) (hf : faulty.card ≤ f)
@@ -108,24 +102,20 @@ theorem ubuntu_quorum_safety
     (hv₁ : ∀ o ∈ Q₁, voteOf o = v₁)   -- Q₁ all vouch v₁
     (hv₂ : ∀ o ∈ Q₂, voteOf o = v₂)   -- Q₂ all vouch v₂
     : v₁ = v₂ := by
-  -- Honest organ exists in the intersection (sorry-free combinatorial core):
   have hpos : (Q₁ ∩ Q₂).card > f :=
     quorum_intersection_honest f hn Q₁ Q₂ hq₁ hq₂
-  -- Since |Q₁ ∩ Q₂| > f ≥ |faulty|, some organ in the intersection is NOT faulty.
-  -- That honest organ o satisfies voteOf o = v₁ (from Q₁) and voteOf o = v₂ (from Q₂),
-  -- whence v₁ = v₂.
-  -- The extraction of a non-faulty witness from |inter| > |faulty| is HONEST-sorry-tagged:
-  --   it needs `Finset.exists_mem_not_mem_of_card_lt_card` style reasoning over `faulty`
-  --   plus HONEST_ORGAN_SINGLE_VALUED. Left as a conjecture obligation.
-  sorry  -- DEPENDS ON: HONEST_ORGAN_SINGLE_VALUED + nonfaulty-witness extraction. KHIPU_CONJECTURE_2.
+  -- The intersection is non-empty (card > f >= 0). `voteOf` is a function, so the chosen organ
+  -- casts exactly one vote, which equals both verdicts.
+  obtain ⟨o, ho⟩ : (Q₁ ∩ Q₂).Nonempty := Finset.card_pos.mp (by omega)
+  rw [Finset.mem_inter] at ho
+  exact (hv₁ o ho.1).symm.trans (hv₂ o ho.2)
 
 /-! ### Correspondence summary
 
 `quorum_intersection_honest` is **proved, sorry-free**: it is the Ayni/Ubuntu reciprocity invariant
 — any two committable quorums share strictly more than `f` organs, hence an honest one. This is the
 runtime guarantee under `szl_khipu_consensus.py`: conflicting verdicts cannot both gather a quorum
-without an honest organ vouching for both. The top-level safety theorem `ubuntu_quorum_safety`
-remains an honest **conjecture** (Khipu Conjecture 2), with its single residual obligation named.
+without an honest organ vouching for both. `ubuntu_quorum_safety` is proved in the function-vote model; the Byzantine (equivocation) version, Khipu Conjecture 2, remains open.
 
 Reference: Lamport–Shostak–Pease (1982); Castro–Liskov (1999); Ramose (1999); Metz (2007); Webb (2012). -/
 
