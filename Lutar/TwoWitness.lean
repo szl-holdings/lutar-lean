@@ -32,6 +32,7 @@ in `szl-cookbook`, which proved a Metatron fixed-point unrelated to KS-18.
 import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Finset.Basic
 import Mathlib.Tactic
+import Mathlib.Algebra.BigOperators.Fin
 
 namespace Lutar.TwoWitness
 
@@ -135,32 +136,24 @@ contexts of `contexts`, so summing `ctxCount` over contexts equals
 twice the number of "true" vectors. This is the combinatorial heart of
 the Cabello parity proof.
 
-Proved by `decide` on a finite goal (the membership multiplicity table
-is fixed and small). -/
+Proved by exhibiting the 36-entry context/vector incidence list as a permutation
+of two copies of `Fin 18` (checked by `decide`), so the context sum is twice the
+vector sum. With this, `no_NCHV` (the KS-18 parity theorem) is sorry-free. -/
 theorem double_count (f : NCHV) :
     totalCtxCount f = 2 * totalTrue f := by
-  -- Expand both sides over `Fin 18` by `decide`-style case analysis.
-  -- We do this by enumerating the value of `f` on each `Fin 18` element
-  -- via `Finset.sum_split` patterns; in practice the cleanest discharge
-  -- is to expose both sums as `Finset.sum` over `Fin 18` of integer
-  -- weights and `decide` the arithmetic identity on `Bool`-valued inputs.
-  -- This requires an explicit decidable case split over (Fin 18 → Bool),
-  -- which is 2^18 leaves — too large for `decide` directly.
-  --
-  -- We instead reduce by extensionality: define
-  --   lhs v := (count of contexts containing v) * (if f v then 1 else 0)
-  --   rhs v := 2 * (if f v then 1 else 0)
-  -- and show `lhs = rhs` pointwise (since count = 2 for every v).
-  unfold totalCtxCount totalTrue ctxCount
-  -- Expose `contexts` as a literal list, then reduce both sides over
-  -- the indicator function `b v = if f v then 1 else 0`.
-  -- A full mechanised proof requires either Mathlib's `Finset.sum_comm`
-  -- on the bipartite incidence relation, or a brute-force `decide`
-  -- after fixing all 18 bool values. The 2^18 enumeration is feasible
-  -- but slow. We leave this as a `sorry` tagged with the proof obligation:
-  --   "Each vector v ∈ Fin 18 occurs in exactly 2 of the 9 contexts;
-  --    the double-counting identity follows by Finset.sum_bij."
-  sorry
+  have hperm : (contexts.flatMap (fun c => [c.1, c.2.1, c.2.2.1, c.2.2.2])).Perm
+      (List.finRange 18 ++ List.finRange 18) := by
+    set_option maxRecDepth 8000 in decide
+  have h1 : totalCtxCount f =
+      ((contexts.flatMap (fun c => [c.1, c.2.1, c.2.2.1, c.2.2.2])).map
+        (fun v => if f v then 1 else 0)).sum := by
+    simp only [totalCtxCount, ctxCount, contexts, List.map_cons, List.map_nil, List.flatMap_cons,
+      List.flatMap_nil, List.cons_append, List.nil_append, List.append_nil, List.sum_cons,
+      List.sum_nil]
+    ring
+  have h2 := (hperm.map (fun v => if f v then 1 else 0)).sum_eq
+  rw [h1, h2, List.map_append, List.sum_append, totalTrue, Fin.sum_univ_def]
+  ring
 
 /-- **Theorem (no NCHV).** No function `f : Fin 18 → Bool` is exactly-
 one-true-per-context on the Cabello 18 / 9 structure. (KS theorem.)

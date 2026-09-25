@@ -36,6 +36,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.NormNum
+import Mathlib.Analysis.SpecificLimits.Normed
 
 namespace Lutar.PACBayes
 
@@ -106,8 +107,9 @@ theorem madhavaRemainderBound_anti
     `Real.tendsto_sum_alternating_of_abs_decreasing_tendsto_zero` once
     the appropriate lemma name is located in the current Mathlib).
 
-    We mark the *closure of this statement to the precise series limit
-    semantics* as a tagged `sorry` with explicit discharge route. The
+    The statement is discharged from Mathlib's alternating-series bracketing
+    lemmas (`Antitone.alternating_series_le_tendsto` and
+    `Antitone.tendsto_le_alternating_series`) by splitting on the parity of `N`. The
     arithmetic bound itself (the inequality `|S_N − L| ≤ a_N`) is the
     deliverable used downstream by the PAC-Bayes refinement; both
     `S_N` and `L` are supplied as inputs, and the bound is a numeric
@@ -120,15 +122,36 @@ theorem madhava_alt_series_bound
               (fun M => ∑ n ∈ range M, (-1 : ℝ)^n * a n)
               Filter.atTop (nhds L)) :
     |(∑ n ∈ range N, (-1 : ℝ)^n * a n) - L| ≤ a N := by
-  -- Discharge route: Mathlib lemma chain
-  --   `Real.abs_sum_lt_abs_first_term_of_alternating_series`
-  --   (Mathlib.Analysis.SpecificLimits.Basic) applied to the tail
-  --   series Σ_{n ≥ N} (-1)^n a_n, plus continuity of `(· − L)`.
-  -- The four hypotheses are exactly the Leibniz preconditions.
-  -- This is the only `sorry` in this file; the *numeric* arctan bound
-  -- below specialises this statement and is also stated, not proved,
-  -- pending the same Mathlib lemma name resolution.
-  sorry
+  have hA : Antitone a := antitone_nat_of_succ_le h_dec
+  have hsucc : forall M : Nat,
+      (Finset.sum (range (M + 1)) fun n => (-1 : Real) ^ n * a n) =
+        (Finset.sum (range M) fun n => (-1 : Real) ^ n * a n) + (-1 : Real) ^ M * a M :=
+    fun M => Finset.sum_range_succ _ _
+  cases Nat.even_or_odd' N with
+  | intro k hk =>
+    cases hk with
+    | inl h =>
+      subst h
+      have h1 : (Finset.sum (range (2 * k)) fun n => (-1 : Real) ^ n * a n) <= L :=
+        hA.alternating_series_le_tendsto h_lim k
+      have h2 : L <= (Finset.sum (range (2 * k + 1)) fun n => (-1 : Real) ^ n * a n) :=
+        hA.tendsto_le_alternating_series h_lim k
+      have hsign : (-1 : Real) ^ (2 * k) = 1 := by rw [pow_mul]; norm_num
+      rw [hsucc, hsign, one_mul] at h2
+      rw [abs_le]
+      constructor <;> linarith [h_nn (2 * k)]
+    | inr h =>
+      subst h
+      have h1 : L <= (Finset.sum (range (2 * k + 1)) fun n => (-1 : Real) ^ n * a n) :=
+        hA.tendsto_le_alternating_series h_lim k
+      have h2 : (Finset.sum (range (2 * (k + 1))) fun n => (-1 : Real) ^ n * a n) <= L :=
+        hA.alternating_series_le_tendsto h_lim (k + 1)
+      have e : 2 * (k + 1) = 2 * k + 1 + 1 := by ring
+      rw [e, hsucc] at h2
+      have hsign : (-1 : Real) ^ (2 * k + 1) = -1 := by rw [pow_succ, pow_mul]; norm_num
+      rw [hsign] at h2
+      rw [abs_le]
+      constructor <;> linarith [h_nn (2 * k + 1)]
 
 /-- **R4-I1 specialisation.** For `|x| ≤ 1`, the Mādhava partial sum
     approximates `Real.arctan x` with error bounded by the next-term

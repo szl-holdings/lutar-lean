@@ -63,8 +63,9 @@ def applyOp {n m : ℕ} (op : ReceiptOp n m) (d : ValidDist n) : ValidDist m whe
 /-! ## 3. Entropy Non-Increase Under Markov Kernels (DPI) -/
 
 /-- **DPI Lemma** (Cover-Thomas 2006, §2.8)
-    We axiomatise the DPI as a definitional fact: applying a Markov kernel
-    cannot increase entropy.
+    Entropy non-increase is NOT assumed globally: it holds for deterministic
+    kernels but FAILS for general Markov kernels (mixing toward uniform raises
+    entropy). It is therefore taken as a per-kernel hypothesis.
 
     In a full machine-checked proof this would follow from the log-sum
     inequality (Jensen's inequality for the convex function t ↦ t log t).
@@ -85,18 +86,19 @@ abbrev ReceiptChain (n : ℕ) := List (ReceiptOp n n)
 def applyChain {n : ℕ} (chain : ReceiptChain n) (d : ValidDist n) : ValidDist n :=
   chain.foldl (fun acc op => applyOp op acc) d
 
-/-! ## 5. DPI Receipt Chain Entropy Bound (honest open obligation)
+/-! ## 5. DPI Receipt Chain Entropy Bound (proved, conditional on the per-kernel hypothesis)
 
 The statement below is the *real* DPI receipt-chain entropy bound, no longer a
 `:= True` shell. It says: if every operation in the chain satisfies the
 per-kernel DPI hypothesis (entropy non-increase under that Markov kernel), then
 the entropy of the chain output is bounded by the entropy of the initial input.
 
-This is genuine information theory (Cover-Thomas 2006, Thm 2.8.1) and is **not
-yet machine-checked** — discharging it requires the log-sum / Jensen inequality
-for `t ↦ t log t` via Mathlib `MeasureTheory`/convexity, which is a multi-hour
-proof. We therefore state it honestly and leave a named `sorry` so it is counted
-in the sorry total and can be tracked, rather than asserting a vacuous `True`.
+Proved by induction on the chain: each step is bounded by that operation's
+`DPI_hypothesis`, and the bounds chain transitively. Scope (honest): Shannon
+entropy is NOT monotone under every Markov kernel (mixing toward uniform raises
+it); it is non-increasing under deterministic kernels. So the per-kernel
+hypothesis is a genuine assumption, and this conditional theorem is the correct
+statement. An unconditional version for arbitrary kernels would be false.
 -/
 
 /-- **DPI receipt-chain entropy bound.** If every receipt operation in `chain`
@@ -112,8 +114,11 @@ theorem dpi_receipt_chain_entropy_bound {n : ℕ}
     (d : ValidDist n)
     (h_dpi : ∀ op ∈ chain, DPI_hypothesis op) :
     shannonEntropy (applyChain chain d).prob ≤ shannonEntropy d.prob := by
-  sorry -- TODO: prove receipt-chain entropy bound (Cover-Thomas Thm 2.8.1);
-        -- needs log-sum / Jensen for t ↦ t·log t via Mathlib convexity.
-        -- Tracking: szl-holdings/lutar-lean honesty-shell burndown (TH6 DPI).
+  induction chain generalizing d with
+  | nil => exact le_rfl
+  | cons op rest ih =>
+    have hop : DPI_hypothesis op := h_dpi op (by simp)
+    show shannonEntropy (applyChain rest (applyOp op d)).prob <= shannonEntropy d.prob
+    exact le_trans (ih (applyOp op d) (fun o ho => h_dpi o (by simp [ho]))) (hop d)
 
 end Lutar.DPI
