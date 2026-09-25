@@ -242,8 +242,8 @@ axiom MomentSubGaussian {n : ℕ} (hn : 0 < n)
     ≤ Real.exp (t ^ 2 / (8 * (n : ℝ)))
 
 /-- Chernoff tail bound (conditional on MomentSubGaussian).
-    Residual sorrys BoundedIntegrability + ChernoffOptimisation:
-    pure Mathlib arithmetic, no new axioms. -/
+    BoundedIntegrability and ChernoffOptimisation are proved; the only remaining
+    dependency is the named axiom MomentSubGaussian (no new axioms). -/
 theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
     (D : Measure Z) [IsProbabilityMeasure D]
     (empiricalRisk : (Fin n → Z) → ℝ)
@@ -267,7 +267,13 @@ theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
       (measure_mono (fun S hS => show ε ≤ expectedRisk - empiricalRisk S from le_of_lt hS))
   have h_int : Integrable (fun S : Fin n → Z =>
       Real.exp (t * (expectedRisk - empiricalRisk S))) μ := by
-    sorry -- BoundedIntegrability: Mathlib.MeasureTheory.Function.Integrable (v4.13.0)
+    have hm : Measurable (fun S : Fin n -> Z => Real.exp (t * (expectedRisk - empiricalRisk S))) :=
+      Real.measurable_exp.comp ((h_meas.const_sub expectedRisk).const_mul t)
+    refine Integrable.mono' (integrable_const (Real.exp t)) hm.aestronglyMeasurable
+      (ae_of_all _ (fun S => ?_))
+    rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    exact Real.exp_le_exp.mpr
+      (mul_le_of_le_one_right ht_nn ((le_abs_self _).trans (h_bounded S)))
   have hchernoff :
       (μ {S | ε ≤ expectedRisk - empiricalRisk S}).toReal ≤
       Real.exp (-t * ε) * mgf (fun S => expectedRisk - empiricalRisk S) μ t :=
@@ -283,7 +289,35 @@ theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
       ((mul_le_mul_of_nonneg_left hmgf (Real.exp_nonneg _)).trans_eq
         (Real.exp_add (-t * ε) _).symm)
   have hexp_le_delta : Real.exp (-t * ε + t ^ 2 / (8 * (n : ℝ))) ≤ δ := by
-    sorry -- ChernoffOptimisation: Mathlib.Analysis.SpecialFunctions.Log.Basic (v4.13.0)
+    have hε_def : ε = slack kl n δ := rfl
+    have ht_def : t = 4 * (n : Real) * ε := rfl
+    have hn_pos : (0 : Real) < (n : Real) := by exact_mod_cast hn
+    have hn0 := hn_pos.ne'
+    have hn1 : (1 : Real) <= (n : Real) := by exact_mod_cast hn
+    have hsqrt1 : (1 : Real) <= Real.sqrt (n : Real) := by
+      have h := Real.sqrt_le_sqrt hn1
+      rwa [Real.sqrt_one] at h
+    have h2s_pos : (0 : Real) < 2 * Real.sqrt (n : Real) := by linarith
+    have hsplit : Real.log (2 * Real.sqrt (n : Real) / δ) =
+        Real.log (2 * Real.sqrt (n : Real)) - Real.log δ :=
+      Real.log_div h2s_pos.ne' hδ_pos.ne'
+    have h2s : 0 <= Real.log (2 * Real.sqrt (n : Real)) := Real.log_nonneg (by linarith)
+    have hlogD : Real.log δ < 0 := Real.log_neg hδ_pos hδ_lt1
+    have hA_nn : 0 <= kl + Real.log (2 * Real.sqrt (n : Real) / δ) := by linarith
+    have hε2 : ε ^ 2 = (kl + Real.log (2 * Real.sqrt (n : Real) / δ)) / (2 * (n : Real)) := by
+      rw [hε_def, slack, Real.sq_sqrt (div_nonneg hA_nn (by positivity))]
+    have hexp_eq : -t * ε + t ^ 2 / (8 * (n : Real)) =
+        -(kl + Real.log (2 * Real.sqrt (n : Real) / δ)) := by
+      rw [ht_def]
+      have h1 : -(4 * (n : Real) * ε) * ε + (4 * (n : Real) * ε) ^ 2 / (8 * (n : Real))
+          = -(2 * (n : Real)) * ε ^ 2 := by
+        first | (field_simp; ring) | field_simp
+      rw [h1, hε2]
+      first | (field_simp; ring) | field_simp
+    rw [hexp_eq]
+    calc Real.exp (-(kl + Real.log (2 * Real.sqrt (n : Real) / δ)))
+        <= Real.exp (Real.log δ) := Real.exp_le_exp.mpr (by linarith)
+      _ = δ := Real.exp_log hδ_pos
   linarith [hbad_le_ge, hge_le_exp, hexp_le_delta]
 
 /-- **TH13 -- Governance Head PAC-Bayes Bound**
@@ -292,7 +326,7 @@ theorem chernoff_bad_event_le_delta {n : ℕ} (hn : 0 < n)
     Pr_{S ~ D^n}[ R(Q) <= Rhat_S(Q) + slack kl n delta ] >= 1 - delta.
 
     Axiom: MomentSubGaussian (discharge: Hoeffding + iIndepFun.mgf_sum).
-    Sorrys: BoundedIntegrability, ChernoffOptimisation (pure arithmetic).
+    BoundedIntegrability, ChernoffOptimisation: proved (no sorry).
     Sources: McAllester (2003) ML 51(1); Catoni (2007) IMS LN 56.
 -/
 theorem th13_pacBayes_probabilistic_wrapper {n : ℕ} (hn : 0 < n)
