@@ -1,0 +1,40 @@
+name: sorry-closer
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/sorry-closer.yml"
+      - "tools/sorry_closer.py"
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          fetch-depth: 0
+      - name: Install elan (toolchain from lean-toolchain)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Fetch mathlib cache (if used) and build library
+        run: |
+          lake exe cache get || true
+          lake build
+      - name: Try bounded automation on each CI-reported sorry
+        run: python3 tools/sorry_closer.py
+      - name: Upload receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: sorry-closer-receipt
+          path: artifacts/
+      - name: Open proof PR and post results to #287
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/sorry_closer.py --publish
