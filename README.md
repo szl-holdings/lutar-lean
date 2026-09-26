@@ -21,7 +21,7 @@ Proof: [a11oy.net](https://a11oy.net)
 [![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
-[![SLSA L2 verified](https://img.shields.io/badge/SLSA-L2_verified-2f855a.svg?style=flat-square)](https://github.com/szl-holdings/lutar-lean/attestations/38094242)
+[![SLSA L2 verified @ 7f20416e](https://img.shields.io/badge/SLSA-L2_verified_%40_7f20416e-2f855a.svg?style=flat-square)](https://github.com/szl-holdings/lutar-lean/attestations/38094242)
 [![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-8a6bff.svg?style=flat-square)](./BOUNTY.md)
 [![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-8a6bff.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
@@ -50,27 +50,27 @@ SZL runs a strict **two-tier** honesty doctrine. The two tiers never blend.
 
 > **Exactly 8 formulas are locked-proven: `F1, F4, F7, F11, F12, F18, F19, F22`.**
 
-They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Quot.sound]`, and the fact that there are **exactly 8** is *itself* a Lean theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_eight`, which depends on **no** axioms). The locked set cannot silently grow. **It grew from 5 to 8 on 2026-06-10** when F4 and F7 were upgraded from vacuous placeholders (`t<k → t<k ∧ k≠t`; `msgs = msgs`) to GENUINE, non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO reception-order = send-order — joining the already-genuine F22, with the count moved in lockstep across `Wave8/9/10/11/AxiomDisclosure.lean` and `Uniqueness/AxiomCheck.lean`. (Final kernel `#print axioms` verification by the founder Lean-runner is PENDING before the served surfaces flip.)
+They are zero-`sorry`, use only Lean-core axioms `[propext, Classical.choice, Quot.sound]`, and the fact that there are **exactly 8** is *itself* a Lean theorem (`Lutar.Wave8.AxiomDisclosure.locked_count_eight`, which depends on **no** axioms). That theorem checks only the length of the hand-written list `lockedDisclosed` in `Wave8/AxiomDisclosure.lean`; it is not linked to the proofs themselves. **The locked set grew from 5 to 8 on 2026-06-10** when F4 and F7 were upgraded from vacuous placeholders (`t<k → t<k ∧ k≠t`; `msgs = msgs`) to GENUINE, non-vacuous proofs — Khipu-DAG acyclicity preservation and Chaski FIFO reception-order = send-order — joining the already-genuine F22, with the count moved in lockstep across `Wave8/9/10/11/AxiomDisclosure.lean` and `Uniqueness/AxiomCheck.lean` (CI does not build the Wave 11 copy). The other five locked statements are elementary one-liners (in the built `ProvedFormulas.lean`, e.g. F1 is `f x = f x` and F18 is `(10 - 6 : Nat) = 4`). (Final kernel `#print axioms` verification by the founder Lean-runner is PENDING before the served surfaces flip.)
 
-### Tier 2 — EXPERIMENTAL · CI-green (kernel-verified, labeled, never in the locked count)
+### Tier 2 — EXPERIMENTAL · CI-green (kernel-verified where `lake build` compiles the module, labeled, never in the locked count)
 
-> The experimental library on `main` type-checks **CI-green** on Lean `v4.18.0` at [`75a4a311`](https://github.com/szl-holdings/lutar-lean/commit/75a4a3112287d3d4776d7d6da85a432f185f3914) (committed 2026-09-25; [`lake build + numbers`](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969701) ✅, [Lean kernel check](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969746) ✅); CI-green covers the modules that `lake build` compiles (the lakefile targets and their imports). Measured at that SHA on 2026-09-25 with the canonical org counter ([`lean_numbers.py`](https://github.com/szl-holdings/.github/blob/907eb1f356c3d666131e74e476194ef1b4998ad4/.github/scripts/lean_numbers.py): line regexes over every `Lutar/**/*.lean` file + `Main.lean`, whole corpus): **2119 declarations / 34 axioms (33 unique) / 430 `sorry` tokens (378 non-comment)**. This is a text count, not a count of kernel-checked declarations: it includes `Lutar/` files that `lake build` does not compile, and it differs from the narrower in-repo counter that the linked Lake run prints. *Historical:* the figure previously shown here, 1323 declarations / 23 axioms (22 unique), was written on 2026-06-07 (`2038fd33`) and is superseded.
+> The experimental library on `main` type-checks **CI-green** on Lean `v4.18.0` at [`75a4a311`](https://github.com/szl-holdings/lutar-lean/commit/75a4a3112287d3d4776d7d6da85a432f185f3914) (committed 2026-09-25; [`lake build + numbers`](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969701) ✅, [Lean kernel check](https://github.com/szl-holdings/lutar-lean/actions/runs/36142969746) ✅); CI-green covers the modules that `lake build` compiles (the lakefile targets and their imports). Measured at that SHA on 2026-09-25 with the canonical org counter ([`lean_numbers.py`](https://github.com/szl-holdings/.github/blob/907eb1f356c3d666131e74e476194ef1b4998ad4/.github/scripts/lean_numbers.py): line regexes over every `Lutar/**/*.lean` file + `Main.lean`, whole corpus): **2119 declaration-line matches / 34 `axiom`-line matches (33 unique names; two of them, `is` and `token`, are prose inside block comments, so 32 real axiom declarations / 31 unique) / 430 `sorry` word matches (378 on lines not starting with `--`, ignoring indentation; `/- … -/` block and doc comments are not excluded)**. This is a text count, not a count of kernel-checked declarations: it includes `Lutar/` files that `lake build` does not compile, and it differs from the narrower in-repo counter that the linked Lake run prints. *Historical:* the figure previously shown here, 1323 declarations / 23 axioms (22 unique), was written on 2026-06-07 (`2038fd33`); it came from the narrower in-repo counter, which excludes the experimental scopes, so it is not comparable with the figures above (the org counter gives 1769 declaration-line matches / 30 `axiom`-line matches (29 unique names, one of them the prose match `is`) at `2038fd33`). It is superseded.
 
-These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — but they are an explicitly separate **EXPERIMENTAL · CI-green** tier and are **never** folded into the locked-8.
+These are the experimental results — waves 5/6/7/8, the agentic loop P1–P6, the airtight-Λ conditional results, and the **frontier theorem families Waves 11–17** — an explicitly separate **EXPERIMENTAL · CI-green** tier that is **never** folded into the locked-8. "Kernel-verified" and "CI-green" apply only to results in modules that `lake build` compiles; the agentic loop P1–P6 and Wave 11 CF-2/CF-3/CF-5 are in modules CI does not build (see below).
 
-**Frontier families (Waves 11–17, all `#print axioms` ⊆ `[propext, Classical.choice, Quot.sound]`, no new axiom, no `sorry`):**
+**Frontier families (Waves 11–17, all `#print axioms` ⊆ `[propext, Classical.choice, Quot.sound]`, no new axiom, no `sorry`; this does not cover Wave 11 CF-2/CF-3/CF-5, which CI does not build, see below):**
 
 | Wave | Headline results |
 |------|------------------|
-| **11** | CF-1 graph-automorphism distance invariance · CF-2 Ouro KV-cache slots · CF-3 Ouro early-exit soundness · CF-5 immune Neyman–Pearson optimality |
+| **11** | CF-1 graph-automorphism distance invariance · CF-2 Ouro KV-cache slots · CF-3 Ouro early-exit soundness · CF-5 immune Neyman–Pearson optimality (CF-2/CF-3/CF-5 not built by CI) |
 | **12** | **CUT-2 `lambda_unique_of_separable`** (axiom-free conditional Λ uniqueness — Λ *off bare conjecture*) · CF-13 DEQ input-Lipschitz well-posedness · CF-17 floating-point summation error bound |
 | **13** | replay-root completeness · non-Byzantine quorum shadow · Hardy–Littlewood–Pólya HM-bottleneck |
-| **14** | CF-18 Leibniz/Mādhava alternating-series remainder · CF-19 Reed–Solomon MDS distance · CF-20 VCG efficiency + truthfulness core · CF-21 Cover–Thomas log-sum + Gibbs |
-| **15** | **CF-22 `dpo_klDivergence_nonneg_on_simplex`** (KL ≥ 0 on the simplex — conditionally repairs the false-as-stated DPO axiom) · CF-24 axiom-free bisymmetry→CUT-2 bridge |
+| **14** | CF-18 Leibniz/Mādhava alternating-series remainder · CF-19 Reed–Solomon MDS distance lower bound · CF-20 VCG efficiency + truthfulness core · CF-21 Cover–Thomas log-sum + Gibbs |
+| **15** | **CF-22 `dpo_klDivergence_nonneg_on_simplex`** (KL ≥ 0 on the simplex — a correctly stated conditional replacement; the false-as-stated DPO axiom `klDivergence_nonneg` stays in place, see Honest disclosures) · CF-24 axiom-free bisymmetry→CUT-2 bridge |
 | **16** | CF-23 binary-KL convexity crux · CF-24 `geoBin` satisfies the **full Aczél quasi-arithmetic axioms** (idempotent/symmetric/homogeneous/monotone — the last analytic step before CUT-1) · CF-25 Λ scale-invariance · CF-26 abacus place-value |
 | **17** | **CF-23 `binary_pinsker`** (full binary Pinsker `2(p−q)² ≤ KL`) · **CF-23-FULL `multiclass_pinsker`** (k-bin Pinsker via the binary data-processing reduction; axiom-free, conditional on a non-degenerate partition) · CF-27 monotone-DEQ unique equilibrium · CF-28 recurrent-depth `Kʳ`-Lipschitz |
 
-~100 kernel-clean theorems across these waves; every one is drift-gate-checked and CI-green on `main`. None changes the locked count of 8; Λ stays **Conjecture 1**.
+CF numbers follow the module headers and name work items that span waves, so CF-24 appears in Waves 15 and 16 and CF-23 in Waves 16 and 17. ~100 theorems across these waves; those in modules that `lake build` compiles are CI-green on `main`. Wave 11 CF-2/CF-3/CF-5 (`Lutar/Wave11/OuroKVCacheSlots.lean`, `OuroLoopEarlyExit.lean`, `ImmuneNeymanPearsonOpt.lean`) and the agentic loop P1–P6 (`Lutar/Agentic/Pipeline.lean`) are not imported by any default `lake build` target and are not built by CI. None changes the locked count of 8; Λ stays **Conjecture 1**.
 
 ### The Λ line — Conjecture 1 (do not misquote this)
 
@@ -89,7 +89,7 @@ These are real, kernel-verified theorems — waves 5/6/7/8, the agentic loop P1�
 
 > **Bottom line:** Λ is **Conjecture 1**. We have a *proven, axiom-free conditional* core — **Theorem U** (uniqueness modulo `≈Λ` under IA, strict `=` only under `Anchored`/`Normalized`) plus CUT-2 and the Set α / Set δ variants — but **never** an unconditional uniqueness theorem, because that statement is false. Open prize: [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty) · [BOUNTY.md](./BOUNTY.md).
 
-Full proof table with verbatim `#print axioms`, run IDs, and per-result maturity → **[PROVEN_FORMULAS.md](./PROVEN_FORMULAS.md)**.
+Full proof table with verbatim `#print axioms`, run IDs, and per-result maturity → **[PROVEN_FORMULAS.md](./PROVEN_FORMULAS.md)**. (It lists the agentic loop P1–P6 as CI-green (PR #188 @ `2ede47a2`) within its experimental scope pinned to `main` @ `7885fd9`; as noted above, CI does not build `Lutar/Agentic/Pipeline.lean`.)
 
 ---
 
@@ -100,14 +100,14 @@ Lutar/
 ├── Axioms.lean              -- LutarAxioms A1–A5 (monotone, 1-homogeneous,
 │                               diagonal-normalized, bounded-by-max, symmetric)
 ├── Puriq/Formulas/
-│   └── PuriqFormulaLean.lean -- locked formula theorems (proved subset wired via ProvedFormulas.lean)
+│   └── PuriqFormulaLean.lean -- PURIQ formulas incl. the open F23 `sorry` (not built; ProvedFormulas.lean restates the locked subset and is built)
 ├── Round13/                 -- Λ-uniqueness machinery (Cauchy/Aczél, CUT-2 conditional)
 │   ├── CauchyND_Closure.lean   -- monotone+additive ⇒ linear (rational squeeze, 0 sorry)
 │   └── Lambda_Uniqueness.lean  -- maxAgg_ne_Lambda counterexample (Conjecture-1 anchor)
 ├── Wave8/AxiomDisclosure.lean  -- locked_count_eight (no-axiom theorem: exactly 8 locked)
 ├── Wave13/Sweep.lean        -- experimental: quorum shadow + HM bottleneck (CI-green)
 ├── Khipu/                   -- receipt summation invariants, hash-chain tamper-evidence
-├── Innovations/round*/      -- experimental frontier formulas (labeled, gated)
+├── Innovations/round*/      -- experimental frontier formulas (labeled; 66 of 68 files not built by lake build)
 └── Putnam/                  -- hard analysis obligations (honest sorries, references intact)
 ```
 
@@ -121,16 +121,16 @@ Lutar/
 git clone https://github.com/szl-holdings/lutar-lean
 cd lutar-lean
 lake exe cache get      # fetch the Mathlib olean cache
-lake build              # type-checks the whole library (CI-green on main)
+lake build              # type-checks the default lakefile targets and their imports (CI-green on main)
 ```
 
 Inspect the honest proof posture of any declaration:
 
 ```bash
 # the locked count is itself a no-axiom theorem
-echo '#print axioms Lutar.Wave8.AxiomDisclosure.locked_count_eight' | lake env lean --stdin
+printf 'import Lutar.Wave8.AxiomDisclosure\n#print axioms Lutar.Wave8.AxiomDisclosure.locked_count_eight\n' | lake env lean --stdin
 # the Conjecture-1 counterexample
-echo '#print axioms Lutar.Round13.maxAgg_ne_Lambda' | lake env lean --stdin
+printf 'import Lutar.Round13.Lambda_Uniqueness\n#print axioms Lutar.Round13.maxAgg_ne_Lambda\n' | lake env lean --stdin
 ```
 
 ---
@@ -138,8 +138,12 @@ echo '#print axioms Lutar.Round13.maxAgg_ne_Lambda' | lake env lean --stdin
 ## Honest disclosures
 
 - **Open `sorry`s are tracked, not hidden.** Putnam analysis, the xoshiro period bound (GF(2)²⁵⁶ companion-matrix primitivity), Hoeffding–Azuma assembly, Reed–Solomon Singleton, and the Brouwer/cohomology obligations are genuinely hard (multi-day to multi-week or need Mathlib facts absent at v4.18.0). They stay honest `sorry`s with their references intact.
-- **Declared axioms are honest assumptions**, not proofs: cryptographic-hardness axioms (SHA-256 collision-resistance, domain separation), the Λ-family bridge axioms, and deep-math axioms (Gleason, Reidemeister, Liu-Hui) are disclosed and isolated. `#print axioms` is the source of truth.
-- **No fabricated metrics. No inflated proof counts.** The locked count is exactly 8 and machine-enforced (was 5 until the 2026-06-10 genuine F4/F7 proofs); the experimental count is reported separately and CI-measured.
+- **Declared axioms are assumptions, not proofs, and some are false as stated.** They include cryptographic-hardness axioms (SHA-256 collision-resistance, domain separation), the Λ-family bridge axioms, and deep-math axioms (Gleason, Reidemeister, Liu-Hui). 21 of the 32 real `axiom` declarations counted above are in modules that the default `Lutar` target compiles. The following are false as stated (the list may be incomplete). All except the two marked unbuilt are compiled by the default `Lutar` target, and every theorem whose `#print axioms` output (the source of truth) lists one of them is affected:
+  - `Lutar.DPOFeasibility.klDivergence_nonneg` and `Lutar.DPOFeasibility.pinsker` range over all real vectors, not just probability distributions. One axis with μ = 1, ν = 2 gives KL = log ½ < 0, which refutes `klDivergence_nonneg`; for the same pair TV = ½ > 0 = `Real.sqrt (KL / 2)` (Mathlib's `Real.sqrt` of a negative number is 0), which refutes `pinsker`.
+  - `Lutar.Wave4.BlockConsistency.A6'_block_consistent` has no block-consistency hypothesis: it says every A1–A5 aggregator is a power product, so `lambda_unique_under_block` concludes the unconditional uniqueness that `Round13.maxAgg_ne_Lambda` refutes. For `maxAgg` = x₀ ⊔ x₁, the points (1,0) and (0,1) force both exponents to 0, and then (2,2) gives 2 = 1. The unbuilt `Lutar.Puriq.F23.A6_bisymmetric` (`Lutar/Puriq/Formulas/F23_Uniqueness.lean`) has the same statement.
+  - `Lutar.PACBayes.MomentSubGaussian` has no mean-zero or independence hypothesis: with n = 1, a Dirac measure, empirical risk ≡ 0, expected risk 1 and t = 1 it asserts e ≤ e^(1/8). An unbuilt copy sits in `Lutar/PACBayes/PACBayes.lean`.
+  - `Lutar.Feynman.audit_reidemeister_invariance` and `Lutar.Feynman.lambda_stationary_unique` require equal `execLambda` for any two executions with the same axiomatized `canonicalReceipt : Execution → ℕ`. Constant-score executions take every Λ value in [0, 1], so `canonicalReceipt` would have to map [0, 1] injectively into ℕ, which is impossible.
+- **No fabricated metrics. No inflated proof counts.** The locked count is exactly 8 and machine-enforced (was 5 until the 2026-06-10 genuine F4/F7 proofs); the experimental count is reported separately, measured at a pinned SHA with the canonical org counter (not by CI; the CI `lake build + numbers` run prints a narrower in-repo count).
 
 ---
 
