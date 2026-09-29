@@ -59,8 +59,12 @@ on:
 
 permissions: {}
 
+# Both szl-lake appenders in this repo (anchor-szl-lake.yml and
+# conjecture-factory.yml) read-modify-write the same Khipu ledger
+# (khipu/lutar_lean_receipts.ndjson, chain_index +1), so they share one
+# per-asset lock (HF plan D3) instead of one group per workflow.
 concurrency:
-  group: anchor-szl-lake
+  group: hf-write/dataset/SZLHOLDINGS/szl-lake
   cancel-in-progress: false
 
 jobs:
@@ -203,7 +207,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install anchor deps
-        run: python3 -m pip install --quiet huggingface_hub cryptography
+        run: python3 -m pip install --quiet huggingface_hub==2.0.0 cryptography
 
       - name: Anchor into szl-lake (HF + GitHub front-door)
         env:
