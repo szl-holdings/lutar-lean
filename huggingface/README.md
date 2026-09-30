@@ -23,5 +23,9 @@ No workflow in this repository publishes these two datasets. Two things are miss
 2. a decision on the payload, because the Hub trees are older snapshots of this
    repository (for example, `lean-proofs-v1` holds a `Lutar/` tree of 53 files).
 
-This repository's other Hub writers (`anchor-szl-lake.yml` and `conjecture-factory.yml`)
-write only `SZLHOLDINGS/szl-lake`, under the lock `hf-write/dataset/SZLHOLDINGS/szl-lake`.
+This repository writes no Hub repository. `anchor-szl-lake.yml` and
+`conjecture-factory.yml` append receipts to the Khipu ledger in GitHub
+`szl-holdings/szl-lake` (`data/khipu/lutar_lean_receipts.ndjson`), under the ledger
+lock `szl-lake-ledger/lutar-lean`. szl-lake's own `hf-sync.yml` is the only writer
+of `SZLHOLDINGS/szl-lake` (HF plan D1); the anchor waits for that mirror and checks
+it byte for byte at an immutable Hub revision.

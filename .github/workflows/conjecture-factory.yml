@@ -16,7 +16,10 @@ name: Conjecture Factory (generate -> timestamp -> grade -> anchor)
 #                   the SAME Sigstore mechanism as anchor-szl-lake.yml. No new key.
 #   6. verify     : verify-blob-attestation in-CI before publishing.
 #   7. anchor     : append a DSSE Khipu receipt to szl-lake via the GENERIC
-#                   anchor_szl_lake.py (predicate-type conjecture-disclosure/v1).
+#                   anchor_szl_lake.py (predicate-type conjecture-disclosure/v1):
+#                   one signed commit to GitHub szl-holdings/szl-lake (the
+#                   ledger's source of truth), then wait for szl-lake's own
+#                   hf-sync.yml to mirror it to the Hub. No Hub credential here.
 #
 # Honesty (doctrine v11): the disclosure is an OPEN problem with a cryptographic
 # timestamp. The signature attests the TIMESTAMP + CONTENT, never the truth of the
@@ -52,10 +55,12 @@ permissions: {}
 
 # Both szl-lake appenders in this repo (anchor-szl-lake.yml and
 # conjecture-factory.yml) read-modify-write the same Khipu ledger
-# (khipu/lutar_lean_receipts.ndjson, chain_index +1), so they share one
-# per-asset lock (HF plan D3) instead of one group per workflow.
+# (data/khipu/lutar_lean_receipts.ndjson, chain_index +1), so they share one
+# ledger lock instead of one group per workflow. It is not an hf-write/* lock:
+# neither job writes the Hub. The commit's expected-head check also rejects a
+# concurrent writer from any other repo.
 concurrency:
-  group: hf-write/dataset/SZLHOLDINGS/szl-lake
+  group: szl-lake-ledger/lutar-lean
   cancel-in-progress: false
 
 env:
@@ -69,7 +74,8 @@ jobs:
   factory:
     name: Generate -> screen -> grade -> sign -> anchor (conjecture disclosure)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Includes up to 20 minutes waiting for szl-lake hf-sync to mirror the commit.
+    timeout-minutes: 50
     permissions:
       contents: read
       id-token: write   # keyless OIDC signing
@@ -213,16 +219,31 @@ jobs:
             "$SNAPSHOT_FILE"
           echo "cosign verify-blob-attestation OK"
 
-      - name: Install anchor deps
-        run: python3 -m pip install --quiet huggingface_hub==2.0.0 cryptography
+      # The ledger's source of truth. The anchor appends to this checkout, lets
+      # szl-lake's own publisher re-render data/lake_index.json, and commits
+      # against exactly this head (a moved main rejects the commit).
+      - name: Check out szl-lake (ledger source of truth)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: szl-holdings/szl-lake
+          ref: main
+          path: szl-lake
+          persist-credentials: false
+          fetch-depth: 1
 
-      - name: Anchor disclosure into szl-lake (HF + GitHub front-door)
+      # huggingface_hub and pyarrow are only imported by szl-lake's publisher to
+      # render its checked index (same pins as szl-lake's own workflows); no Hub
+      # credential is present in this job.
+      - name: Install anchor deps
+        run: python3 -m pip install --quiet huggingface_hub==2.0.0 "pyarrow>=16,<22" cryptography
+
+      - name: Anchor disclosure into szl-lake (GitHub source of truth; Hub via szl-lake hf-sync)
         env:
           SZL_LAKE_TOKEN: ${{ secrets.SZL_LAKE_TOKEN }}
-          HF_LAKE_TOKEN: ${{ secrets.HF_LAKE_TOKEN }}
         run: |
           set -euo pipefail
           python3 .github/scripts/anchor_szl_lake.py \
+            --lake-checkout szl-lake \
             --snapshot "$SNAPSHOT_FILE" \
             --bundle snapshot.cosign.bundle \
             --predicate-type "$PREDICATE_TYPE" \
