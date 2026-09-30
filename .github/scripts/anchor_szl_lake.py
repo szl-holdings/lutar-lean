@@ -15,16 +15,26 @@ downloaded from a GREEN build run and signed with `cosign attest-blob`
   3. chain_index advances by exactly one over the existing lutar-lean chain
      (genesis count 0 -> first receipt chain_index 1, prev_hash null). Idempotent:
      if this (kind, kernel_commit, snapshot) is already anchored, it is a no-op.
-  4. Appends the receipt to BOTH surfaces:
-       * HF dataset SZLHOLDINGS/szl-lake : khipu/lutar_lean_receipts.ndjson (canonical)
-       * GitHub szl-holdings/szl-lake     : data/khipu/lutar_lean_receipts.ndjson
-         + updates the front-door lake_index.json (per-kind `anchors` pointer +
-           `latest_anchor`; the legacy `theorem_u_anchor` pointer is preserved and
-           only refreshed when kind == theorem-u)
-     The GitHub commit is GitHub-signed via GraphQL createCommitOnBranch with a
-     DCO Signed-off-by trailer (main requires signed commits + DCO).
-  5. Re-reads the HF NDJSON and asserts the new receipt is present and the chain
-     advanced by exactly one.
+  4. Appends the receipt to the ledger's source of truth, GitHub
+     szl-holdings/szl-lake, in ONE GitHub-signed commit (GraphQL
+     createCommitOnBranch with a DCO Signed-off-by trailer; main requires signed
+     commits + DCO) made against exactly the szl-lake head this run read:
+       * data/khipu/lutar_lean_receipts.ndjson (the ledger, byte-preserving append)
+       * data/lake_index.json (szl-lake's checked source index, re-rendered by
+         szl-lake's own scripts/publish_hf_dataset.py --write-index)
+       * the front-door lake_index.json (per-kind `anchors` pointer +
+         `latest_anchor`; the legacy `theorem_u_anchor` pointer is preserved and
+         only refreshed when kind == theorem-u)
+       * the append-only verify-anchor-receipts floor, and the per-theorem
+         manifest under data/attestations/innovations/theorems/ when present.
+  5. Reads the commit back from GitHub, then waits for szl-lake's own
+     hf-sync.yml to mirror data/** to the Hub dataset SZLHOLDINGS/szl-lake and
+     asserts, at an immutable Hub revision, that khipu/lutar_lean_receipts.ndjson
+     is byte-identical to the committed ledger (chain advanced by exactly one).
+
+This script never writes the Hub and holds no Hugging Face credential. szl-lake's
+hf-sync.yml is the only writer of SZLHOLDINGS/szl-lake from this pipeline (HF plan
+D1: one asset, one committed writer); data/<path> on GitHub is <path> on the Hub.
 
 Originally Theorem-U-specific; now generalized so ANY green proof milestone can be
 anchored on the same append-only chain. The honesty labeling is carried verbatim,
@@ -38,14 +48,30 @@ import datetime as _dt
 import hashlib
 import json
 import os
+import re
+import subprocess
+import sys
+import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 HF_REPO = "SZLHOLDINGS/szl-lake"
 GH_REPO = "szl-holdings/szl-lake"
+# szl-lake's hf-sync.yml publishes data/** at the dataset root, so every Hub path
+# below is the GitHub path with GH_DATA_PREFIX removed.
+GH_DATA_PREFIX = "data/"
 HF_NDJSON = "khipu/lutar_lean_receipts.ndjson"
-GH_NDJSON = "data/khipu/lutar_lean_receipts.ndjson"
+GH_NDJSON = GH_DATA_PREFIX + HF_NDJSON
 GH_INDEX = "lake_index.json"
+# szl-lake's checked source index. Its hf-dataset-contract.yml (--check-index) and
+# hf-sync.yml refuse a data/** change that does not re-render it.
+GH_CHECKED_INDEX = GH_DATA_PREFIX + "lake_index.json"
+LAKE_PUBLISHER = "scripts/publish_hf_dataset.py"
+HF_API_REVISION = f"https://huggingface.co/api/datasets/{HF_REPO}/revision/main"
+HF_RESOLVE = f"https://huggingface.co/datasets/{HF_REPO}/resolve"
+FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
+HUB_MIRROR_WRITER = f"{GH_REPO} .github/workflows/hf-sync.yml"
 # Append-only floor read by szl-lake's verify-anchor-receipts.yml. Bumped to the
 # new chain length in the SAME signed commit that appends a receipt (see
 # bump_baseline_floor + main); never lowered.
@@ -58,8 +84,8 @@ BASELINE_COMMENT = (
     "this to the new chain length in the SAME signed commit that appends a receipt "
     "(chain_index N => min_receipts N); never lowered."
 )
-# Per-theorem anchor manifests land at the SAME relative path on both surfaces so
-# the GitHub and HF copies are byte-identical.
+# Per-theorem anchor manifests: Hub path THEOREMS_DIR/<commit>.json, committed on
+# GitHub at GH_DATA_PREFIX + that path so hf-sync mirrors the same bytes.
 THEOREMS_DIR = "attestations/innovations/theorems"
 
 THEOREM_ANCHOR_SCHEMA = "szl.lake.theorem-anchors/v1"
@@ -73,7 +99,7 @@ DEFAULT_PREDICATE_TYPE = "https://szl-holdings/theorem-u-anchor/v1"
 COMMIT_NAME = os.environ.get("ANCHOR_COMMIT_NAME", "Lutar, Stephen P.")
 COMMIT_EMAIL = os.environ.get("ANCHOR_COMMIT_EMAIL", "stephenlutar2@gmail.com")
 
-UA = "szl-lake-anchor/2.0"
+UA = "szl-lake-anchor/3.0"
 
 
 def _utcnow() -> str:
@@ -255,52 +281,114 @@ def _cert_identity(der: bytes):
 
 
 # --------------------------------------------------------------------------- #
-# HF dataset I/O
+# Hub reads (anonymous; SZLHOLDINGS/szl-lake is public). No Hub writes here.
 # --------------------------------------------------------------------------- #
-def hf_read_ndjson(token: str) -> list[dict]:
-    url = f"https://huggingface.co/datasets/{HF_REPO}/raw/main/{HF_NDJSON}"
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": UA})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            body = r.read().decode("utf-8")
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return []
-        raise
+def parse_ndjson(body: str) -> list[dict]:
     return [json.loads(l) for l in body.splitlines() if l.strip()]
 
 
-def hf_upload(token: str, content: str, commit_msg: str) -> None:
-    from huggingface_hub import HfApi
-    import tempfile
-    api = HfApi(token=token)
-    with tempfile.NamedTemporaryFile("w", suffix=".ndjson", delete=False, encoding="utf-8") as tf:
-        tf.write(content)
-        tmp = tf.name
-    api.upload_file(
-        path_or_fileobj=tmp,
-        path_in_repo=HF_NDJSON,
-        repo_id=HF_REPO,
-        repo_type="dataset",
-        commit_message=commit_msg,
-    )
+def _http_get(url: str):
+    """GET without credentials. Returns bytes, or None on 404."""
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read()
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
 
 
-def hf_upload_file(token: str, path_in_repo: str, content: str, commit_msg: str) -> None:
-    """Upload an arbitrary text file to the HF dataset (used for theorem manifests)."""
-    from huggingface_hub import HfApi
-    import tempfile
-    api = HfApi(token=token)
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
-        tf.write(content)
-        tmp = tf.name
-    api.upload_file(
-        path_or_fileobj=tmp,
-        path_in_repo=path_in_repo,
-        repo_id=HF_REPO,
-        repo_type="dataset",
-        commit_message=commit_msg,
-    )
+def hf_main_revision(get=_http_get) -> str:
+    """Resolve the Hub dataset's current main to an immutable 40-hex revision."""
+    raw = get(HF_API_REVISION)
+    sha = json.loads(raw or b"{}").get("sha", "")
+    if not FULL_SHA.match(sha or ""):
+        raise SystemExit(f"::error::Hub revision of {HF_REPO} is not a 40-hex sha: {sha!r}")
+    return sha
+
+
+def hf_read_at(path: str, revision: str, get=_http_get):
+    """Bytes of `path` at an immutable Hub revision, or None when absent."""
+    if not FULL_SHA.match(revision):
+        raise SystemExit(f"::error::refusing a mutable Hub revision: {revision!r}")
+    return get(f"{HF_RESOLVE}/{revision}/{path}")
+
+
+def require_surfaces_agree(github_bytes: bytes, hub_bytes) -> None:
+    """Fail closed unless the Hub ledger equals the GitHub ledger byte for byte.
+
+    GitHub is the source of truth and szl-lake's hf-sync mirrors it. Appending
+    while the two differ would fork the chain, so the owner must converge them
+    first (normally: one green szl-lake hf-sync run).
+    """
+    hub = hub_bytes or b""
+    if hub != github_bytes:
+        raise SystemExit(
+            "::error::ledger surfaces diverge before append: GitHub "
+            f"{GH_NDJSON} sha256={_sha256_bytes(github_bytes)} "
+            f"({len(parse_ndjson(github_bytes.decode('utf-8')))} receipts) vs Hub "
+            f"{HF_NDJSON} sha256={_sha256_bytes(hub)} "
+            f"({len(parse_ndjson(hub.decode('utf-8')))} receipts). Converge them "
+            "with a green szl-lake hf-sync run before anchoring.")
+
+
+def wait_for_hub_mirror(expected: bytes, timeout_s: int, interval_s: int = 30,
+                        get=_http_get, sleep=time.sleep, clock=time.monotonic):
+    """Poll the Hub until khipu/lutar_lean_receipts.ndjson equals `expected` at an
+    immutable revision. Returns that revision, or None when the timeout expires."""
+    deadline = clock() + timeout_s
+    while True:
+        try:
+            revision = hf_main_revision(get)
+            if hf_read_at(HF_NDJSON, revision, get) == expected:
+                return revision
+        except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+            print(f"::warning::Hub read failed while waiting for the mirror: {exc}")
+        if clock() >= deadline:
+            return None
+        sleep(interval_s)
+
+
+# --------------------------------------------------------------------------- #
+# szl-lake checkout staging (the ledger's source of truth)
+# --------------------------------------------------------------------------- #
+def lake_head(lake_root: Path) -> str:
+    """The exact szl-lake commit the checkout holds; the commit is made against it."""
+    out = subprocess.run(["git", "-C", str(lake_root), "rev-parse", "HEAD"],
+                         check=True, capture_output=True, text=True).stdout.strip()
+    if not FULL_SHA.match(out):
+        raise SystemExit(f"::error::szl-lake checkout HEAD is not a 40-hex sha: {out!r}")
+    return out
+
+
+def read_lake_file(lake_root: Path, rel: str):
+    path = lake_root / rel
+    return path.read_bytes().decode("utf-8") if path.is_file() else None
+
+
+def stage_lake_changes(lake_root: Path, changes: dict, python: str = sys.executable) -> dict:
+    """Write `changes` ({repo path: text}) into the szl-lake checkout, re-render
+    szl-lake's checked source index with szl-lake's own publisher, and return
+    every path the commit must carry ({repo path: text}), index included.
+
+    The index is never rendered here: szl-lake's scripts/publish_hf_dataset.py is
+    the only definition of it, so the commit passes szl-lake's --check-index.
+    """
+    publisher = lake_root / LAKE_PUBLISHER
+    if not publisher.is_file():
+        raise SystemExit(f"::error::szl-lake checkout has no {LAKE_PUBLISHER}")
+    for rel, text in changes.items():
+        if rel == GH_CHECKED_INDEX or ".." in Path(rel).parts or rel.startswith("/"):
+            raise SystemExit(f"::error::refusing to stage {rel!r}")
+        path = lake_root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(text.encode("utf-8"))
+    for mode in ("--write-index", "--check-index"):
+        subprocess.run([python, str(publisher), mode], check=True, cwd=str(lake_root))
+    staged = dict(changes)
+    staged[GH_CHECKED_INDEX] = read_lake_file(lake_root, GH_CHECKED_INDEX)
+    return staged
 
 
 # --------------------------------------------------------------------------- #
@@ -311,15 +399,17 @@ def build_theorem_manifest(snapshot: dict, snapshot_sha: str, kind: str,
                            verify_cmd: str):
     """Build the deterministic per-theorem anchor manifest from the snapshot.
 
-    Returns (relpath, manifest_str) or (None, None) when the snapshot carries no
-    verified_theorems block. The manifest carries NO timestamp so its bytes depend
-    only on the (idempotent) snapshot + chain position -- making the GitHub and HF
-    copies byte-identical and a re-anchor of the same milestone reproducible.
+    Returns (hub_relpath, manifest_str) or (None, None) when the snapshot carries
+    no verified_theorems block. The manifest carries NO timestamp so its bytes
+    depend only on the (idempotent) snapshot + chain position -- making the GitHub
+    copy (GH_DATA_PREFIX + hub_relpath) and its Hub mirror byte-identical and a
+    re-anchor of the same milestone reproducible.
     """
     vt = snapshot.get("verified_theorems") or {}
     theorems = vt.get("theorems") or []
     if not theorems:
         return None, None
+    # `rel` is the Hub path; GitHub holds the same bytes under GH_DATA_PREFIX.
     rel = f"{THEOREMS_DIR}/{kernel_commit or snapshot_sha}.json"
     manifest = {
         "schema": THEOREM_ANCHOR_SCHEMA,
@@ -337,7 +427,7 @@ def build_theorem_manifest(snapshot: dict, snapshot_sha: str, kind: str,
         "count": vt.get("count", len(theorems)),
         "honesty": snapshot.get("honesty", {}),
         "theorems": theorems,
-        "github_path": rel,
+        "github_path": GH_DATA_PREFIX + rel,
         "hf_path": rel,
         "verify_cmd": verify_cmd,
     }
@@ -348,21 +438,6 @@ def build_theorem_manifest(snapshot: dict, snapshot_sha: str, kind: str,
 # --------------------------------------------------------------------------- #
 # GitHub szl-lake I/O (signed commit via GraphQL)
 # --------------------------------------------------------------------------- #
-def gh_api(token: str, method: str, path: str, body=None):
-    url = f"https://api.github.com{path}"
-    data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={
-        "Authorization": f"Bearer {token}", "User-Agent": UA,
-        "Accept": "application/vnd.github+json",
-        "Content-Type": "application/json",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return r.status, json.loads(r.read().decode())
-    except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read().decode() or "{}")
-
-
 def gh_get_raw(token: str, path: str, ref: str = "main"):
     url = f"https://api.github.com/repos/{GH_REPO}/contents/{path}?ref={ref}"
     req = urllib.request.Request(url, headers={
@@ -390,12 +465,18 @@ def gh_graphql(token: str, query: str, variables: dict):
         return json.loads(r.read().decode())
 
 
-def gh_signed_commit(token: str, additions: list[dict], message: str) -> str:
-    """Create a GitHub-signed commit on szl-lake main with file additions."""
-    st, ref = gh_api(token, "GET", f"/repos/{GH_REPO}/git/ref/heads/main")
-    if st != 200:
-        raise SystemExit(f"::error::cannot read szl-lake main ref: {st} {ref}")
-    head_oid = ref["object"]["sha"]
+def gh_signed_commit(token: str, additions: list[dict], message: str,
+                     expected_head_oid: str, graphql=None):
+    """Create a GitHub-signed commit on szl-lake main with file additions.
+
+    `expected_head_oid` is the szl-lake commit the ledger was read from. GitHub
+    rejects the commit when main has moved since, so a concurrent writer can
+    never be overwritten (optimistic concurrency; re-run the anchor to retry).
+    Returns (oid, url).
+    """
+    if not FULL_SHA.match(expected_head_oid or ""):
+        raise SystemExit(f"::error::expected szl-lake head is not a 40-hex sha: {expected_head_oid!r}")
+    graphql = graphql or gh_graphql
     q = """
     mutation($input: CreateCommitOnBranchInput!) {
       createCommitOnBranch(input: $input) { commit { oid url } }
@@ -405,12 +486,15 @@ def gh_signed_commit(token: str, additions: list[dict], message: str) -> str:
         "message": {"headline": message.split("\n")[0],
                     "body": "\n".join(message.split("\n")[1:]).strip()},
         "fileChanges": {"additions": additions},
-        "expectedHeadOid": head_oid,
+        "expectedHeadOid": expected_head_oid,
     }}
-    res = gh_graphql(token, q, variables)
+    res = graphql(token, q, variables)
     if res.get("errors"):
         raise SystemExit(f"::error::createCommitOnBranch failed: {res['errors']}")
-    return res["data"]["createCommitOnBranch"]["commit"]["url"]
+    commit = res["data"]["createCommitOnBranch"]["commit"]
+    if not FULL_SHA.match(commit.get("oid") or ""):
+        raise SystemExit(f"::error::createCommitOnBranch returned no commit oid: {commit}")
+    return commit["oid"], commit["url"]
 
 
 # --------------------------------------------------------------------------- #
@@ -454,7 +538,8 @@ def _self_test() -> int:
     chk(obj["schema"] == THEOREM_ANCHOR_SCHEMA, "schema")
     chk(obj["count"] == 2 and len(obj["theorems"]) == 2, "theorem count")
     chk(obj["receipt_id"] == "rid123", "receipt_id link")
-    chk(obj["github_path"] == obj["hf_path"] == rel1, "github/hf paths must match (byte-identical)")
+    chk(obj["hf_path"] == rel1 and obj["github_path"] == GH_DATA_PREFIX + rel1,
+        "GitHub path must be the Hub path under data/ (hf-sync mirrors the same bytes)")
     chk("timestamp" not in obj and "anchored_at_utc" not in obj,
         "manifest must carry NO timestamp (deterministic/byte-identical)")
     rel0, m0 = build_theorem_manifest({"verified_theorems": {"theorems": []}},
@@ -475,19 +560,25 @@ def main() -> int:
     ap.add_argument("--source-workflow", default="Lake build (gate + numbers)")
     ap.add_argument("--predicate-type", default=DEFAULT_PREDICATE_TYPE,
                     help="cosign attestation predicate type used to sign the snapshot")
+    ap.add_argument("--lake-checkout", default=None,
+                    help="checkout of szl-holdings/szl-lake main (the ledger's source of truth)")
+    ap.add_argument("--hub-mirror-timeout", type=int, default=1200,
+                    help="seconds to wait for szl-lake hf-sync to mirror the commit to the Hub")
     ap.add_argument("--self-test", action="store_true",
                     help="run offline manifest self-tests (no network/cosign/build) and exit")
     args = ap.parse_args()
 
     if args.self_test:
         return _self_test()
-    missing = [f"--{n.replace('_', '-')}" for n in ("snapshot", "bundle", "source_run_id")
+    missing = [f"--{n.replace('_', '-')}"
+               for n in ("snapshot", "bundle", "source_run_id", "lake_checkout")
                if not getattr(args, n)]
     if missing:
         ap.error("the following arguments are required: " + ", ".join(missing))
 
     gh_token = os.environ["SZL_LAKE_TOKEN"]
-    hf_token = os.environ["HF_LAKE_TOKEN"]
+    lake = Path(args.lake_checkout).resolve()
+    base_oid = lake_head(lake)
 
     with open(args.snapshot, "rb") as fh:
         snap_bytes = fh.read()
@@ -514,12 +605,20 @@ def main() -> int:
     numbers = snapshot.get("lean_numbers", {}).get("numbers", {})
 
     # ---- chain state + idempotency -------------------------------------- #
-    existing = hf_read_ndjson(hf_token)
+    # GitHub szl-lake at base_oid is the source of truth; the Hub mirror must
+    # agree with it byte for byte before anything is appended.
+    gh_existing = read_lake_file(lake, GH_NDJSON) or ""
+    hub_revision_before = hf_main_revision()
+    require_surfaces_agree(gh_existing.encode("utf-8"),
+                           hf_read_at(HF_NDJSON, hub_revision_before))
+    existing = parse_ndjson(gh_existing)
+    print(f"ledger read: szl-lake@{base_oid} {GH_NDJSON} == Hub@{hub_revision_before} "
+          f"{HF_NDJSON} ({len(existing)} receipts)")
     already = find_existing_anchor(existing, receipt_kind, kernel_commit, snapshot_sha)
     if already is not None:
         print(f"already anchored: kind={kind} kernel_commit={kernel_commit} "
               f"chain_index={already.get('chain_index')} receipt_id={already.get('receipt_id')}")
-        print(f"::notice::idempotent no-op (HF chain length stays {len(existing)})")
+        print(f"::notice::idempotent no-op (chain length stays {len(existing)})")
         return 0
     prev_count = len(existing)
     chain_index, prev_hash = chain_position(existing)
@@ -574,29 +673,16 @@ def main() -> int:
         receipt["receipt_id"], chain_index, signing["verify_cmd"])
     vt_count = (snapshot.get("verified_theorems") or {}).get("count", 0)
 
-    # ---- append to HF (canonical) --------------------------------------- #
-    hf_content = ("\n".join(json.dumps(r, sort_keys=True, ensure_ascii=False)
-                            for r in existing) + ("\n" if existing else "") + line + "\n")
-    hf_upload(hf_token, hf_content,
-              f"anchor: {kind} snapshot {kernel_commit[:12]} (chain_index {chain_index})")
-    print(f"HF appended: kind={kind} chain_index={chain_index} receipt_id={receipt['receipt_id']}")
-    if manifest_str is not None:
-        hf_upload_file(hf_token, manifest_rel, manifest_str,
-                       f"anchor: {kind} verified-theorems manifest "
-                       f"{kernel_commit[:12]} ({vt_count} theorems)")
-        print(f"HF manifest written: {manifest_rel} ({vt_count} theorems)")
-
-    # ---- append to GitHub front-door (signed commit) -------------------- #
-    gh_existing = gh_get_raw(gh_token, GH_NDJSON) or ""
+    # ---- append to the ledger (byte-preserving) -------------------------- #
     gh_new = (gh_existing + ("" if gh_existing.endswith("\n") or not gh_existing else "\n")
               + line + "\n")
 
     # Preserve the EXISTING front-door schema verbatim; ADD only per-kind anchor
     # pointers. Idempotent (set, not increment) so a re-run never double-counts. We
     # deliberately do NOT invent a `szl.lake.index/v1`/khipu_receipt_counts shape
-    # here -- that lives in data/lake_index.json and is maintained by the
-    # HF->GitHub sync, not us.
-    idx_raw = gh_get_raw(gh_token, GH_INDEX)
+    # here -- data/lake_index.json is szl-lake's checked source index, rendered
+    # only by szl-lake's own publisher (stage_lake_changes below).
+    idx_raw = read_lake_file(lake, GH_INDEX)
     index = json.loads(idx_raw) if idx_raw else {
         "canonical_source": f"https://huggingface.co/datasets/{HF_REPO}",
         "doctrine": "v11",
@@ -665,19 +751,15 @@ def main() -> int:
             "snapshot_sha256": snapshot_sha,
             "doctrine": snapshot.get("honesty", {}).get("doctrine", "v11"),
             "source_sha256": (snapshot.get("verified_theorems") or {}).get("source_sha256"),
-            "manifest_github": manifest_rel,
+            "manifest_github": GH_DATA_PREFIX + manifest_rel,
             "manifest_hf": f"datasets/{HF_REPO} :: {manifest_rel}",
             "anchored_at_utc": pointer["anchored_at_utc"],
         }
     index_str = json.dumps(index, indent=2, ensure_ascii=False) + "\n"
 
-    additions = [
-        {"path": GH_NDJSON, "contents": base64.b64encode(gh_new.encode()).decode()},
-        {"path": GH_INDEX, "contents": base64.b64encode(index_str.encode()).decode()},
-    ]
+    changes = {GH_NDJSON: gh_new, GH_INDEX: index_str}
     if manifest_str is not None:
-        additions.append({"path": manifest_rel,
-                          "contents": base64.b64encode(manifest_str.encode()).decode()})
+        changes[GH_DATA_PREFIX + manifest_rel] = manifest_str
 
     # ---- bump the verify-anchor-receipts append-only floor (atomic) ------ #
     # The floor lives in szl-lake but the in-CI GITHUB_TOKEN there cannot write
@@ -686,13 +768,12 @@ def main() -> int:
     # so we raise the floor to the new chain length in the SAME signed commit that
     # appends the receipt -- there is never a window where the receipt exists but
     # the floor lags. Append-only: bump_baseline_floor never lowers it.
-    baseline_raw = gh_get_raw(gh_token, GH_BASELINE)
+    baseline_raw = read_lake_file(lake, GH_BASELINE)
     baseline_prev = baseline_floor(baseline_raw)
     baseline_str = bump_baseline_floor(baseline_raw, chain_index)
     baseline_bumped = baseline_str is not None
     if baseline_bumped:
-        additions.append({"path": GH_BASELINE,
-                          "contents": base64.b64encode(baseline_str.encode()).decode()})
+        changes[GH_BASELINE] = baseline_str
         print(f"baseline floor bump: min_receipts {baseline_prev} -> {chain_index}")
     else:
         print(f"::notice::baseline floor already >= chain_index "
@@ -717,27 +798,46 @@ def main() -> int:
            f"Milestone status: {milestone_status or 'n/a'} (per-snapshot honesty carried verbatim).\n"
            f"{baseline_msg_line}"
            f"receipt_id={receipt['receipt_id']}\n"
-           f"snapshot_sha256={snapshot_sha}\n\n"
+           f"snapshot_sha256={snapshot_sha}\n"
+           f"Hub mirror: {HUB_MIRROR_WRITER} publishes data/** (this commit does not "
+           f"write the Hub).\n\n"
            f"Signed-off-by: {COMMIT_NAME} <{COMMIT_EMAIL}>")
-    commit_url = gh_signed_commit(gh_token, additions, msg)
-    print(f"GitHub front-door committed: {commit_url}")
 
-    # ---- verify HF chain advanced by exactly one ------------------------ #
-    after = hf_read_ndjson(hf_token)
-    if len(after) != prev_count + 1:
-        raise SystemExit(f"::error::HF chain length {len(after)} != expected {prev_count + 1}")
+    # ---- one signed commit against the head the ledger was read from ----- #
+    staged = stage_lake_changes(lake, changes)
+    additions = [{"path": rel, "contents": base64.b64encode(text.encode("utf-8")).decode()}
+                 for rel, text in sorted(staged.items())]
+    commit_oid, commit_url = gh_signed_commit(gh_token, additions, msg, base_oid)
+    print(f"szl-lake committed: {commit_url} (parent {base_oid})")
+
+    # ---- read the commit back from GitHub -------------------------------- #
+    for rel, text in sorted(staged.items()):
+        if gh_get_raw(gh_token, rel, ref=commit_oid) != text:
+            raise SystemExit(f"::error::szl-lake@{commit_oid} {rel} does not match the staged bytes")
+    print(f"GitHub readback: {len(staged)} files match at szl-lake@{commit_oid}")
+
+    # ---- wait for szl-lake hf-sync to mirror it; verify at a fixed revision - #
+    hub_revision = wait_for_hub_mirror(gh_new.encode("utf-8"), args.hub_mirror_timeout)
+    hub_mirror = {
+        "writer": HUB_MIRROR_WRITER,
+        "status": "VERIFIED" if hub_revision else "NOT_OBSERVED_WITHIN_TIMEOUT",
+        "revision": hub_revision,
+        "timeout_s": args.hub_mirror_timeout,
+    }
+    after = parse_ndjson(gh_new)
     last = after[-1]
-    if last.get("receipt_id") != receipt["receipt_id"] or last.get("chain_index") != chain_index:
-        raise SystemExit("::error::HF tail receipt does not match the anchored receipt")
-    print(f"::notice::VERIFIED: HF chain {prev_count} -> {len(after)} "
-          f"(chain_index advanced by 1 to {chain_index})")
+    if (len(after) != prev_count + 1 or last.get("receipt_id") != receipt["receipt_id"]
+            or last.get("chain_index") != chain_index):
+        raise SystemExit("::error::committed ledger tail does not match the anchored receipt")
 
     # Emit machine-readable summary for the workflow step.
     with open("anchor_result.json", "w", encoding="utf-8") as fh:
         json.dump({
             "kind": kind, "kernel_commit": kernel_commit, "chain_index": chain_index,
             "receipt_id": receipt["receipt_id"], "snapshot_sha256": snapshot_sha,
-            "hf_chain_length": len(after), "github_commit": commit_url,
+            "chain_length": len(after), "github_commit": commit_url,
+            "github_commit_oid": commit_oid, "github_parent_oid": base_oid,
+            "hub_mirror": hub_mirror,
             "fulcio_identity": signing["fulcio_identity"],
             "rekor_log_index": signing["rekor_log_index"],
             "verified_theorems_count": vt_count,
@@ -750,6 +850,13 @@ def main() -> int:
             "baseline_min_receipts": baseline_now,
             "baseline_bumped": baseline_bumped,
         }, fh, indent=2)
+    if not hub_revision:
+        raise SystemExit(
+            f"::error::receipt committed at szl-lake@{commit_oid}, but the Hub ledger did "
+            f"not match it within {args.hub_mirror_timeout}s. Check the szl-lake hf-sync "
+            "run for that commit; the Hub is written only by that workflow.")
+    print(f"::notice::VERIFIED: chain {prev_count} -> {len(after)} (chain_index "
+          f"{chain_index}) at szl-lake@{commit_oid} and Hub@{hub_revision}")
     return 0
 
 
