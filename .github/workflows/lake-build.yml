@@ -237,6 +237,28 @@ jobs:
           fi
           echo "axiom-hygiene gate OK: Theorem-U pack is axiom-clean + placeholder-free"
 
+      - name: Locked-8 axiom guard (kernel-emitted, fail-closed)
+        run: |
+          set -euo pipefail
+          # The eight locked formulas {F1,F4,F7,F11,F12,F18,F19,F22} are carried by 24
+          # theorems in Lutar/Puriq/Formulas/ProvedFormulas.lean. tools/lean/LockedGuard.lean
+          # asks the KERNEL (collectAxioms) for the axioms behind each proof term and makes
+          # `lean` exit nonzero if any lies outside {propext, Classical.choice, Quot.sound}
+          # (so sorryAx, Lean.ofReduceBool / native_decide and user axioms are refused).
+          # The count is asserted exactly: adding or removing a locked-set theorem without
+          # updating the guard file fails here instead of silently shrinking the surface.
+          EXPECTED=24
+          lake env lean tools/lean/LockedGuard.lean 2>&1 | tee locked_guard.out
+          OK=$(grep -c '"allowed":true' locked_guard.out || true)
+          BAD=$(grep -c '"allowed":false' locked_guard.out || true)
+          if [ "$BAD" != "0" ]; then
+            echo "::error::locked-set theorem depends on an axiom outside the trust base"; exit 1
+          fi
+          if [ "$OK" != "$EXPECTED" ]; then
+            echo "::error::expected $EXPECTED allowed guard lines, got $OK"; exit 1
+          fi
+          echo "locked-8 axiom guard OK: $OK/$EXPECTED theorems inside {propext, Classical.choice, Quot.sound}"
+
       - name: Set up Python (for canonical numbers)
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
