@@ -67,9 +67,7 @@ on:
 # Least privilege: read-only by default at the top level. The single close job
 # declares the writes it needs (signed commit on auto/* branch + PR open).
 # (Scorecard Token-Permissions; defense-in-depth for this privileged workflow.)
-permissions:
-  contents: read
-
+permissions: read-all
 concurrency:
   group: close-bounty
   cancel-in-progress: false

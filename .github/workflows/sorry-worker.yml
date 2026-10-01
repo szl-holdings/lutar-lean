@@ -18,9 +18,7 @@ on:
 
 # Least privilege: read-only by default; the propose job needs contents:write
 # to push an UNVERIFIED proposals branch (never auto-merged). (Scorecard Token-Permissions)
-permissions:
-  contents: read
-
+permissions: read-all
 jobs:
   propose:
     runs-on: ubuntu-latest
