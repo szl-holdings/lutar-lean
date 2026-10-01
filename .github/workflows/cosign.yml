@@ -9,9 +9,7 @@ on:
 
 # Least privilege: read-only by default at the top level; the signing job
 # declares the write scopes it needs. (Scorecard Token-Permissions)
-permissions:
-  contents: read
-
+permissions: read-all
 jobs:
   sign:
     name: Sign container image (keyless OIDC)

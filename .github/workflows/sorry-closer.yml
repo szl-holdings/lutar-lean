@@ -5,12 +5,13 @@ on:
     paths:
       - ".github/workflows/sorry-closer.yml"
       - "tools/sorry_closer.py"
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: read-all
 jobs:
   close:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     runs-on: ubuntu-latest
     timeout-minutes: 330
     steps:

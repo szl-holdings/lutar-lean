@@ -11,9 +11,7 @@ on:
 
 # Least privilege: read-only by default; the sbom job needs contents:write to
 # upload release assets and id-token:write for attestation. (Scorecard Token-Permissions)
-permissions:
-  contents: read
-
+permissions: read-all
 jobs:
   sbom:
     name: Generate SBOM

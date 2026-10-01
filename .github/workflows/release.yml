@@ -6,8 +6,7 @@ on:
 # Least privilege: default to read-only at the workflow top level; the single
 # job that actually needs write scopes (release asset upload + OIDC attestation)
 # declares them at job level. (Scorecard Token-Permissions)
-permissions:
-  contents: read
+permissions: read-all
 jobs:
   attest:
     runs-on: ubuntu-latest
