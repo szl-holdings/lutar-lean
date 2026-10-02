@@ -13,6 +13,12 @@ The honest contract, per the szl-holdings doctrine:
     must resolve to a real Lean ``theorem``/``lemma``/``def`` DECLARATION that
     exists in the tree. Any named theorem that is absent is an *unbacked
     overclaim* — caught here, reported honestly, never listed as proven.
+  * Locked-section names must also resolve on the *compiled* surface:
+    ``Lutar/Puriq/Formulas/ProvedFormulas.lean`` plus the 24 ``#geh_guard``
+    carriers in ``tools/lean/LockedGuard.lean``. A theorem that exists only in
+    unbuilt ``PuriqFormulaLean.lean`` is not locked-proven.
+  * ``claims/locked-formulas.v1.json`` must list exactly those 24 carriers
+    under the eight stable IDs {F1,F4,F7,F11,F12,F18,F19,F22}.
   * EXPERIMENTAL entries (section 2, CI-green waves) are labelled ``experimental``
     — reported, but never counted as proven and never a hard failure here.
   * Λ-uniqueness stays **Conjecture 1**, NEVER a theorem. The guard FAILS if the
@@ -44,6 +50,12 @@ import re
 # The locked-kernel proven set is EXACTLY these eight formula IDs. This mirrors
 # the doc's own machine-enforced invariant (`locked_count_eight`, no axioms).
 LOCKED_PROVEN_IDS = {"F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"}
+LOCKED_ID_ORDER = ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"]
+LOCKED_COMPILED_PATH = "Lutar/Puriq/Formulas/ProvedFormulas.lean"
+LOCKED_GUARD_PATH = "tools/lean/LockedGuard.lean"
+LOCKED_CLAIM_MAP_PATH = "claims/locked-formulas.v1.json"
+LOCKED_GUARD_EXPECTED = 24
+GEH_GUARD_RE = re.compile(r"^#geh_guard\s+Puriq\.Formula\.Proved\.(?P<name>\S+)\s*$")
 
 # Λ-uniqueness is Conjecture 1: stated only as a `Prop`, machine-checked FALSE
 # as-stated by this counterexample. Both anchors must hold for Λ to stay honest.
@@ -352,6 +364,183 @@ def lambda_violations(index: dict, md_text: str) -> list[str]:
     return violations
 
 
+def parse_locked_guard(repo_root: str) -> list[str]:
+    """Return the 24 compiled carrier names from LockedGuard.lean."""
+    path = os.path.join(repo_root, LOCKED_GUARD_PATH)
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    names: list[str] = []
+    seen: set[str] = set()
+    for line in text.splitlines():
+        m = GEH_GUARD_RE.match(line.strip())
+        if not m:
+            continue
+        name = m.group("name")
+        if name in seen:
+            raise ValueError(f"duplicate LockedGuard carrier {name}")
+        seen.add(name)
+        names.append(name)
+    return names
+
+
+def parse_claim_map(repo_root: str) -> dict:
+    path = os.path.join(repo_root, LOCKED_CLAIM_MAP_PATH)
+    with open(path, "r", encoding="utf-8") as fh:
+        raw = fh.read()
+    data = json.loads(raw, object_pairs_hook=_unique_object)
+    if not isinstance(data, dict):
+        raise ValueError("claim map root must be an object")
+    return data
+
+
+def _unique_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate JSON key {key!r}")
+        out[key] = value
+    return out
+
+
+def compiled_locked_index(repo_root: str) -> dict:
+    """Index only the lake-build locked module, not unbuilt PuriqFormulaLean."""
+    path = os.path.join(repo_root, LOCKED_COMPILED_PATH)
+    parent = os.path.dirname(path)
+    filename = os.path.basename(path)
+    # Reuse the full walker on a one-file tree by indexing just that file.
+    fake_root = parent
+    index = {
+        "proof_bare": set(),
+        "proof_qualified": set(),
+        "def_bare": set(),
+        "all_bare": set(),
+        "all_qualified": set(),
+    }
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    ns_stack: list[str] = []
+    for raw in text.splitlines():
+        ns_m = NS_RE.match(raw)
+        if ns_m:
+            ns_stack.append(ns_m.group(1))
+            continue
+        end_m = END_RE.match(raw)
+        if end_m and ns_stack:
+            seg = end_m.group(1)
+            if ns_stack and ns_stack[-1].endswith(seg):
+                ns_stack.pop()
+            continue
+        m = DECL_RE.match(raw)
+        if not m:
+            continue
+        name = m.group("name").strip(".")
+        if not name:
+            continue
+        prefix = ".".join(ns_stack)
+        qualified = f"{prefix}.{name}" if prefix else name
+        index["all_bare"].add(name)
+        index["all_qualified"].add(qualified)
+        if m.group("kw") in ("theorem", "lemma"):
+            index["proof_bare"].add(name)
+            index["proof_qualified"].add(qualified)
+        else:
+            index["def_bare"].add(name)
+    index["_compiled_path"] = path
+    index["_filename"] = filename
+    index["_fake_root"] = fake_root
+    return index
+
+
+def compiled_name_violations(md_text: str, compiled_index: dict, guard_names: list[str]) -> list[str]:
+    """Locked showcase names must be exact compiled carriers, never unbuilt aliases."""
+    violations: list[str] = []
+    guard_set = set(guard_names)
+    compiled_proofs = compiled_index["proof_bare"]
+    for entry in parse_locked_entries(md_text):
+        for name in entry["names"]:
+            if name.endswith("*"):
+                violations.append(
+                    f"{entry['formula_id']} uses wildcard '{name}' — locked names "
+                    "must be exact compiled carriers, not family globs that match unbuilt files."
+                )
+                continue
+            if name not in compiled_proofs:
+                violations.append(
+                    f"{entry['formula_id']} names '{name}' which is absent from "
+                    f"{LOCKED_COMPILED_PATH} — unbuilt PuriqFormulaLean declarations "
+                    "are not locked-proven."
+                )
+            elif name not in guard_set:
+                violations.append(
+                    f"{entry['formula_id']} names '{name}' which is not a LockedGuard carrier."
+                )
+    return violations
+
+
+def claim_map_violations(claim_map: dict, guard_names: list[str]) -> list[str]:
+    violations: list[str] = []
+    ids = claim_map.get("locked_ids")
+    if list(ids or []) != LOCKED_ID_ORDER:
+        violations.append(f"claim map locked_ids must be exactly {LOCKED_ID_ORDER}")
+    if claim_map.get("carrier_theorem_count") != LOCKED_GUARD_EXPECTED:
+        violations.append(
+            f"claim map carrier_theorem_count must be {LOCKED_GUARD_EXPECTED}"
+        )
+    if claim_map.get("compiled_path") != LOCKED_COMPILED_PATH:
+        violations.append("claim map compiled_path must be Lutar/Puriq/Formulas/ProvedFormulas.lean")
+    lambda_row = claim_map.get("lambda") or {}
+    if lambda_row.get("locked_proven") is not False:
+        violations.append("claim map must keep Lambda locked_proven=false")
+    if "CONJECTURE_1" not in str(lambda_row.get("status") or ""):
+        violations.append("claim map must keep Lambda as Conjecture 1")
+    claims = claim_map.get("claims")
+    if not isinstance(claims, list):
+        violations.append("claim map claims must be a list")
+        return violations
+    found_ids = []
+    found_decls: list[str] = []
+    required_fields = (
+        "claim_id",
+        "exact_mathematical_statement",
+        "hypotheses",
+        "theorem_declarations",
+        "runtime_implementation_symbol",
+        "supported_input_domain",
+        "refinement_gap",
+        "test_vectors",
+        "counterexamples",
+        "public_wording",
+    )
+    for row in claims:
+        if not isinstance(row, dict):
+            violations.append("claim map row is not an object")
+            continue
+        missing = [f for f in required_fields if f not in row]
+        if missing:
+            violations.append(f"{row.get('claim_id')} missing fields {missing}")
+        cid = row.get("claim_id")
+        found_ids.append(cid)
+        decls = row.get("theorem_declarations") or []
+        if not isinstance(decls, list) or not decls:
+            violations.append(f"{cid} theorem_declarations must be a non-empty list")
+            continue
+        found_decls.extend(decls)
+        statement = str(row.get("exact_mathematical_statement") or "")
+        wording = str(row.get("public_wording") or "").lower()
+        if cid == "F1" and ("f x = f x" not in statement) and ("reflexive" not in wording):
+            violations.append("F1 must record reflexive equality as the compiled statement")
+        if cid == "F18" and "10 - 6" not in statement and "(10 - 6" not in statement:
+            violations.append("F18 must record parity-count arithmetic, not a codec")
+    if found_ids != LOCKED_ID_ORDER:
+        violations.append(f"claim map claim_id order mismatch: {found_ids}")
+    if set(found_decls) != set(guard_names) or len(found_decls) != len(guard_names):
+        violations.append(
+            "claim map theorem_declarations must match LockedGuard membership: "
+            f"map={sorted(found_decls)} guard={sorted(guard_names)}"
+        )
+    return violations
+
+
 def locked_id_violations(md_text: str) -> list[str]:
     """The locked-proven set must be exactly the eight canonical formula IDs."""
     found = {e["formula_id"] for e in parse_locked_entries(md_text)}
@@ -378,6 +567,9 @@ def evaluate(repo_root: str) -> dict:
     index = index_lean_decls(repo_root)
     registry = build_registry(index, md_text)
     unbacked = [r for r in registry if r["status"] == "unbacked"]
+    guard_names = parse_locked_guard(repo_root)
+    compiled_index = compiled_locked_index(repo_root)
+    claim_map = parse_claim_map(repo_root)
     result = {
         "registry": registry,
         "counts": {
@@ -390,11 +582,29 @@ def evaluate(repo_root: str) -> dict:
         "unbacked": unbacked,
         "lambda_violations": lambda_violations(index, md_text),
         "locked_id_violations": locked_id_violations(md_text),
+        "compiled_name_violations": compiled_name_violations(
+            md_text, compiled_index, guard_names
+        ),
+        "claim_map_violations": claim_map_violations(claim_map, guard_names),
+        "locked_guard_count": len(guard_names),
+        "compiled_carrier_count": len(compiled_index["proof_bare"]),
     }
+    if len(guard_names) != LOCKED_GUARD_EXPECTED:
+        result["compiled_name_violations"].append(
+            f"LockedGuard has {len(guard_names)} carriers, expected {LOCKED_GUARD_EXPECTED}"
+        )
+    missing_compiled = set(guard_names) - compiled_index["proof_bare"]
+    if missing_compiled:
+        result["compiled_name_violations"].append(
+            "LockedGuard carriers missing from ProvedFormulas: "
+            + ", ".join(sorted(missing_compiled))
+        )
     result["ok"] = (
         not unbacked
         and not result["lambda_violations"]
         and not result["locked_id_violations"]
+        and not result["compiled_name_violations"]
+        and not result["claim_map_violations"]
     )
     return result
 
@@ -453,6 +663,39 @@ def _self_test() -> int:
     assert _resolves("Round13.maxAgg_ne_Lambda", {"maxAgg_ne_Lambda"}, set())
     assert not _resolves("nope_*", {"f1_a"}, set())
 
+    # (f) Original defect: unbuilt PuriqFormulaLean names must not count as locked.
+    compiled_only = {
+        "proof_bare": {"f1_replay_hash_determinism", "f1_replay_trace_stable"},
+        "proof_qualified": set(),
+        "def_bare": set(),
+        "all_bare": {"f1_replay_hash_determinism", "f1_replay_trace_stable"},
+        "all_qualified": set(),
+    }
+    md_unbuilt = (
+        "## 1. Locked kernel — proven, sorry-free\n"
+        "| ID | Theorem | What | Maturity | ax |\n"
+        "|---|---|---|---|---|\n"
+        "| **F1** | Replay (`f1_replay_fold_deterministic`, `f1_replay_fold_eq_trace_last`) "
+        "| bit-identical trace | **PROVEN** | core |\n"
+    )
+    unbuilt_viol = compiled_name_violations(
+        md_unbuilt,
+        compiled_only,
+        ["f1_replay_hash_determinism", "f1_replay_trace_stable"],
+    )
+    assert any("f1_replay_fold_deterministic" in v for v in unbuilt_viol), unbuilt_viol
+    assert any("f1_replay_fold_eq_trace_last" in v for v in unbuilt_viol), unbuilt_viol
+
+    # (g) Family globs in the locked table must fail.
+    md_glob = (
+        "## 1. Locked kernel — proven, sorry-free\n"
+        "| ID | Theorem | What | Maturity | ax |\n"
+        "|---|---|---|---|---|\n"
+        "| **F18** | RS (`f18_*`) | recoverable iff 6 of 10 | **PROVEN** | core |\n"
+    )
+    glob_viol = compiled_name_violations(md_glob, compiled_only, [])
+    assert any("wildcard" in v for v in glob_viol), glob_viol
+
     print("self-test OK")
     return 0
 
@@ -493,6 +736,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  LOCKED-SET VIOLATION: {v}")
         for v in result["lambda_violations"]:
             print(f"  Λ VIOLATION: {v}")
+        for v in result.get("compiled_name_violations") or []:
+            print(f"  COMPILED-SURFACE VIOLATION: {v}")
+        for v in result.get("claim_map_violations") or []:
+            print(f"  CLAIM-MAP VIOLATION: {v}")
         print("VERDICT:", "OK" if result["ok"] else "FAIL")
 
     return 0 if result["ok"] else 1
