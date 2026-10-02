@@ -91,6 +91,19 @@ def test_overall_verdict_ok():
     assert RESULT["ok"], RESULT
 
 
+def test_locked_guard_has_exactly_twenty_four_carriers():
+    assert RESULT["locked_guard_count"] == 24, RESULT["locked_guard_count"]
+    assert RESULT["compiled_carrier_count"] >= 24, RESULT["compiled_carrier_count"]
+
+
+def test_compiled_surface_rejects_unbuilt_names():
+    assert not RESULT["compiled_name_violations"], RESULT["compiled_name_violations"]
+
+
+def test_claim_map_matches_locked_guard():
+    assert not RESULT["claim_map_violations"], RESULT["claim_map_violations"]
+
+
 if __name__ == "__main__":
     failures = 0
     for name, fn in sorted(globals().items()):
