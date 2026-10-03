@@ -50,13 +50,17 @@ jobs:
           ref: ${{ env.TAG }}
           persist-credentials: false
 
-      - name: Install elan (SHA-pinned)
+      - name: Install elan (SHA-pinned, v4.2.3)
         run: |
-          ELAN_SHA=3d5138e1526a569a23901b8ee559032793cf445e
-          EXPECTED=4bacca9502cb89736fe63d2685abc2947cfbf34dc87673504f1bb4c43eda9264
-          curl -sSfL "https://raw.githubusercontent.com/leanprover/elan/$ELAN_SHA/elan-init.sh" -o /tmp/elan-init.sh
-          echo "$EXPECTED  /tmp/elan-init.sh" | sha256sum -c
-          sh /tmp/elan-init.sh -y --default-toolchain none
+          set -euo pipefail
+          ELAN_VER=v4.2.3
+          ELAN_TARBALL=elan-x86_64-unknown-linux-gnu.tar.gz
+          EXPECTED=df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2
+          curl -sSfL "https://github.com/leanprover/elan/releases/download/$ELAN_VER/$ELAN_TARBALL" -o /tmp/elan.tar.gz
+          echo "$EXPECTED  /tmp/elan.tar.gz" | sha256sum -c
+          mkdir -p /tmp/elan-init
+          tar xzf /tmp/elan.tar.gz -C /tmp/elan-init
+          /tmp/elan-init/elan-init -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Set up Python
@@ -125,7 +129,15 @@ jobs:
           \`\`\`bash
           git clone https://github.com/szl-holdings/lutar-lean.git
           cd lutar-lean && git checkout $TAG
-          curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- -y
+          ELAN_VER=v4.2.3
+          ELAN_TARBALL=elan-x86_64-unknown-linux-gnu.tar.gz
+          EXPECTED=df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2
+          curl -sSfL "https://github.com/leanprover/elan/releases/download/\$ELAN_VER/\$ELAN_TARBALL" -o /tmp/elan.tar.gz
+          echo "\$EXPECTED  /tmp/elan.tar.gz" | sha256sum -c
+          mkdir -p /tmp/elan-init
+          tar xzf /tmp/elan.tar.gz -C /tmp/elan-init
+          /tmp/elan-init/elan-init -y --default-toolchain none
+          export PATH="\$HOME/.elan/bin:\$PATH"
           lake update -R
           lake build            # kernel-checks the whole library
           lake exe check
