@@ -18,9 +18,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Install elan (toolchain from lean-toolchain)
         run: |
-          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          set -euo pipefail
+          ELAN_VER=v4.2.3
+          ELAN_TARBALL=elan-x86_64-unknown-linux-gnu.tar.gz
+          EXPECTED=df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2
+          curl -sSfL "https://github.com/leanprover/elan/releases/download/$ELAN_VER/$ELAN_TARBALL" -o /tmp/elan.tar.gz
+          echo "$EXPECTED  /tmp/elan.tar.gz" | sha256sum -c
+          mkdir -p /tmp/elan-init
+          tar xzf /tmp/elan.tar.gz -C /tmp/elan-init
+          /tmp/elan-init/elan-init -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Fetch mathlib cache (if used) and build library
         run: |
@@ -35,7 +44,9 @@ jobs:
           name: sorry-closer-receipt
           path: artifacts/
       - name: Open proof PR and post results to #287
-        if: always()
+        if: always() && github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 tools/sorry_closer.py --publish
+        run: |
+          gh auth setup-git
+          python3 tools/sorry_closer.py --publish
