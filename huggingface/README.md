@@ -1,9 +1,10 @@
 # Hugging Face dataset cards sourced from this repository
 
 HF upgrade plan P18 makes this repository the GitHub source for two Hugging Face
-datasets. Each `datasets/<id>/README.md` is a **verbatim import** of the current Hub
-card (read-only fetch; nothing was written to the Hub), so GitHub holds the card
-before any mirror publishes it.
+datasets. Initially, each `datasets/<id>/README.md` was a **verbatim import** of
+the then-current Hub card (read-only fetch; nothing was written to the Hub). The
+table below records those historical import bindings; later source-only edits
+are documented separately so an import digest is not mistaken for a release digest.
 
 | Hub dataset | Card imported from Hub revision | sha256 of the imported card |
 |---|---|---|
@@ -29,3 +30,29 @@ This repository writes no Hub repository. `anchor-szl-lake.yml` and
 lock `szl-lake-ledger/lutar-lean`. szl-lake's own `hf-sync.yml` is the only writer
 of `SZLHOLDINGS/szl-lake` (HF plan D1); the anchor waits for that mirror and checks
 it byte for byte at an immutable Hub revision.
+
+## Source-only dataset configuration repair (October 5, 2026 UTC)
+
+The `lean-theorem-tree` card now declares one `default/train` JSON source,
+`data/lean_theorem_tree.json`, with `field: declarations`. This excludes
+`SZL_ESTATE_MANAGED.json` from automatic split discovery. The management receipt
+remains in the Hub repository; it is not dataset content.
+
+The six configuration lines are the only change to that imported card: all
+other metadata, prose, historical counts and links are preserved. The row-shape
+contract changes from the historical nested `{meta, declarations}` object to
+one row per declaration. No data file, theorem, license, locked count or
+publication workflow changes. The raw data still preserves its `meta` object.
+
+Run `python -m unittest discover -s tests -p 'test_hf_theorem_dataset_config.py' -v`
+for the offline source/preservation contract. It is not a datasets-server test.
+The original import digest above describes the pre-repair card, not these
+updated candidate bytes.
+
+HF discussion #2 was reviewed against main
+`8283cc8b75a54142016c8ac7fac5695903a9e6ba`. Its older PR head also contains
+obsolete badges, counts and links that current main removed. Do not merge that
+whole old card as a shortcut. Promote only the source-admitted configuration
+through a separately qualified source-owned publication path, then verify the
+Hub revision and actual viewer. The missing publisher/payload decision above
+remains unresolved; this source change performs no Hub write.

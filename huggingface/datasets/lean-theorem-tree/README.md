@@ -22,6 +22,12 @@ size_categories:
 task_categories:
 - other
 ecosystem-stage: generated-mirror
+configs:
+- config_name: default
+  data_files:
+  - split: train
+    path: data/lean_theorem_tree.json
+  field: declarations
 ---
 
 <!-- SZL-ESTATE-CARD:v2:START -->
