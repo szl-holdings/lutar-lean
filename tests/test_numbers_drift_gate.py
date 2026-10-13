@@ -112,6 +112,17 @@ def test_lake_build_workflow_runs_the_gate():
     )
 
 
+def test_numbers_comment_precedes_the_drift_gate():
+    # GitHub skips later steps after a failing gate, including event-only ifs.
+    with open(WORKFLOW, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    measured = text.index("- name: Recompute canonical Lean numbers")
+    uploaded = text.index("- name: Upload numbers + build provenance as artifact")
+    comment = text.index("- name: Post numbers as PR comment")
+    gate = text.index("- name: Numbers drift gate")
+    assert measured < uploaded < comment < gate
+
+
 def test_committed_baseline_matches_the_tree():
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "measured.json")
