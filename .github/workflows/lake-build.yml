@@ -281,6 +281,51 @@ jobs:
             lake-manifest.json
           if-no-files-found: error
 
+      - name: Post numbers as PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('lean_numbers.measured.json','utf8')).numbers;
+            const b = JSON.parse(fs.readFileSync('.github/data/lean_numbers.json','utf8')).numbers;
+            const row = (k) => `| ${k} | ${b[k]} | ${m[k]} | ${b[k]===m[k] ? 'OK' : 'CHANGED'} |`;
+            const body = [
+              '## Lean corpus numbers (canonical counter)',
+              '',
+              '| metric | baseline | this PR | status |',
+              '|---|---|---|---|',
+              row('declarations'),
+              row('axioms_raw'),
+              row('axioms_unique'),
+              row('sorries_raw'),
+              row('sorries_noncomment'),
+              '',
+              '`lake build` + `lake exe check` + `lake exe ref_vectors` all ran in this job.',
+              'Baseline source of truth: `.github/data/lean_numbers.json`. To change numbers, update that file in this PR.',
+            ].join('\n');
+            const {owner, repo} = context.repo;
+            const issue_number = context.issue.number;
+            const marker = '<!-- lean-numbers-comment -->';
+            const comments = await github.rest.issues.listComments({owner, repo, issue_number});
+            const existing = comments.data.find(c => c.body && c.body.includes(marker));
+            const full = marker + '\n' + body;
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body: full});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number, body: full});
+            }
+
+      # Step 5 of the header contract. Before this step existed the drift script
+      # was never called, so a changed declaration/axiom/sorry count or a new
+      # axiom name could land without touching the committed baseline. It runs
+      # after the upload and PR comment so drift evidence survives gate failure.
+      - name: Numbers drift gate (measured vs .github/data/lean_numbers.json)
+        run: |
+          python3 .github/scripts/check_numbers_drift.py \
+            --baseline .github/data/lean_numbers.json \
+            --measured lean_numbers.measured.json
+
       # ---- Putnam showcase REAL/DEMO label honesty gate ----
       # The showcase (Showcase/PutnamLean/*.lean) lives OUTSIDE Lutar/, so the
       # canonical numbers/drift gate above does not cover it. This gate keeps each
@@ -383,38 +428,3 @@ jobs:
           name: locked-baseline-snapshot-${{ github.sha }}
           path: locked_baseline_snapshot.json
           if-no-files-found: error
-
-      - name: Post numbers as PR comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const fs = require('fs');
-            const m = JSON.parse(fs.readFileSync('lean_numbers.measured.json','utf8')).numbers;
-            const b = JSON.parse(fs.readFileSync('.github/data/lean_numbers.json','utf8')).numbers;
-            const row = (k) => `| ${k} | ${b[k]} | ${m[k]} | ${b[k]===m[k] ? 'OK' : 'CHANGED'} |`;
-            const body = [
-              '## Lean corpus numbers (canonical counter)',
-              '',
-              '| metric | baseline | this PR | status |',
-              '|---|---|---|---|',
-              row('declarations'),
-              row('axioms_raw'),
-              row('axioms_unique'),
-              row('sorries_raw'),
-              row('sorries_noncomment'),
-              '',
-              '`lake build` + `lake exe check` + `lake exe ref_vectors` all ran in this job.',
-              'Baseline source of truth: `.github/data/lean_numbers.json`. To change numbers, update that file in this PR.',
-            ].join('\n');
-            const {owner, repo} = context.repo;
-            const issue_number = context.issue.number;
-            const marker = '<!-- lean-numbers-comment -->';
-            const comments = await github.rest.issues.listComments({owner, repo, issue_number});
-            const existing = comments.data.find(c => c.body && c.body.includes(marker));
-            const full = marker + '\n' + body;
-            if (existing) {
-              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body: full});
-            } else {
-              await github.rest.issues.createComment({owner, repo, issue_number, body: full});
-            }
