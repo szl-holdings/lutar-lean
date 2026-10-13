@@ -83,7 +83,7 @@ theorem log_sum_inequality (s : Finset ι) (a b : ι → ℝ)
       calc a i * Real.log ((b i * A) / (a i * B))
           ≤ a i * ((b i * A) / (a i * B) - 1) :=
             mul_le_mul_of_nonneg_left hlog (le_of_lt hai)
-        _ = (b i * A) / B - a i := by field_simp; ring
+        _ = (b i * A) / B - a i := by field_simp
     have hsum_bound :
         ∑ i ∈ s, a i * Real.log ((b i * A) / (a i * B))
           ≤ ∑ i ∈ s, ((b i * A) / B - a i) := Finset.sum_le_sum hbound

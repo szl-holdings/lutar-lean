@@ -52,7 +52,7 @@ No proof placeholders, NO new axiom. `#print axioms ⊆ {propext, Classical.choi
 import Mathlib.Topology.Order.Basic
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.Topology.Order.LeftRightLim
-import Mathlib.Data.Real.Cardinality
+import Mathlib.Analysis.Real.Cardinality
 import Mathlib.Order.Monotone.Basic
 
 open Set Function Filter Topology

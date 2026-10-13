@@ -68,11 +68,14 @@ theorem hasDerivAt_gapBin (q p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
   have hlp : HasDerivAt (fun x => x * (Real.log x - Real.log q))
       (Real.log p - Real.log q + 1) p := by
     have := (hasDerivAt_id p).mul ((Real.hasDerivAt_log (ne_of_gt hp)).sub_const (Real.log q))
-    convert this using 1; field_simp
+    convert this using 1
+    · funext x
+      rfl
+    · simp [ne_of_gt hp]
   have hrp : HasDerivAt (fun x => (1 - x) * (Real.log (1 - x) - Real.log (1 - q)))
       (-(Real.log (1 - p) - Real.log (1 - q) + 1)) p := by
     have hin : HasDerivAt (fun x : ℝ => 1 - x) (-1) p := by
-      simpa using (hasDerivAt_const p (1 : ℝ)).sub (hasDerivAt_id p)
+      simpa only [id_eq] using! (hasDerivAt_id p).const_sub (1 : ℝ)
     have hlog : HasDerivAt (fun x => Real.log (1 - x) - Real.log (1 - q)) ((1 - p)⁻¹ * (-1)) p :=
       ((Real.hasDerivAt_log (ne_of_gt h1p)).comp p hin).sub_const (Real.log (1 - q))
     have := hin.mul hlog
@@ -91,7 +94,7 @@ theorem hasDerivAt_gapBinDeriv (q p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
   have h1p : (0 : ℝ) < 1 - p := by linarith
   have hlog1 : HasDerivAt (fun x => Real.log x) p⁻¹ p := Real.hasDerivAt_log (ne_of_gt hp)
   have hin : HasDerivAt (fun x : ℝ => 1 - x) (-1) p := by
-    simpa using (hasDerivAt_const p (1 : ℝ)).sub (hasDerivAt_id p)
+    simpa only [id_eq] using! (hasDerivAt_id p).const_sub (1 : ℝ)
   have hlog2 : HasDerivAt (fun x => Real.log (1 - x)) ((1 - p)⁻¹ * (-1)) p :=
     (Real.hasDerivAt_log (ne_of_gt h1p)).comp p hin
   have hquad : HasDerivAt (fun x : ℝ => 4 * (x - q)) 4 p := by

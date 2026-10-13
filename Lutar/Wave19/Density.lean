@@ -36,7 +36,7 @@ NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choi
 import Lutar.Wave19.DisjointOpens
 import Mathlib.Topology.Order.Basic
 import Mathlib.Topology.MetricSpace.Basic
-import Mathlib.Data.Real.Cardinality
+import Mathlib.Analysis.Real.Cardinality
 
 open Set Function
 

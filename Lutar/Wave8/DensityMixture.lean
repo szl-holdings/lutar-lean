@@ -37,6 +37,7 @@ probability-distribution representation: the gate cannot emit nonsense.
 
 Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 -/
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.Trace
 
@@ -49,15 +50,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 /-- A nonnegative real scalar multiple of a PSD real matrix is PSD. -/
 theorem posSemidef_smul {A : Matrix n n ℝ} (hA : A.PosSemidef) {c : ℝ} (hc : 0 ≤ c) :
     (c • A).PosSemidef := by
-  refine ⟨?_, ?_⟩
-  · -- Hermitian (= symmetric over ℝ) is preserved by scalar multiplication.
-    have hH : Aᴴ = A := hA.1
-    show (c • A)ᴴ = c • A
-    rw [conjTranspose_smul, hH, star_trivial]
-  · intro x
-    -- (c • A) *ᵥ x = c • (A *ᵥ x); dotProduct pulls the scalar out.
-    rw [smul_mulVec_assoc, dotProduct_smul]
-    exact smul_nonneg hc (hA.2 x)
+  exact Matrix.PosSemidef.smul hA hc
 
 /-- A finite sum of PSD real matrices is PSD. -/
 theorem posSemidef_sum {ι : Type*} (s : Finset ι) (M : ι → Matrix n n ℝ)

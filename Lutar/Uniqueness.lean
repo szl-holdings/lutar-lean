@@ -65,7 +65,7 @@ theorem lambda_isMonotone {k : Nat} (hk : 0 < k) :
   intro x y hxy
   simp only [Λ, hk.ne', dite_false]
   apply NNReal.rpow_le_rpow
-  · exact Finset.prod_le_prod (fun i _ => zero_le _) (fun i _ => hxy i)
+  · exact Finset.prod_le_prod₀ (fun i _ => zero_le) (fun i _ => hxy i)
   · positivity
 
 /-- A2 (1-homogeneous). -/

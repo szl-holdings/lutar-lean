@@ -42,7 +42,7 @@ No proof placeholders, NO new axiom. `#print axioms ⊆ {propext, Classical.choi
   `StrictMono.injective`, `Function.Injective.countable`, `exists_rat_btwn`.
 -/
 import Lutar.Wave19.Density
-import Mathlib.Data.Real.Cardinality
+import Mathlib.Analysis.Real.Cardinality
 import Mathlib.Data.Rat.Encodable
 
 open Set Function Cardinal

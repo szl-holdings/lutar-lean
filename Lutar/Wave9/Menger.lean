@@ -49,7 +49,7 @@ theorem, so we do not fabricate it.
 
 Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 -/
-import Mathlib.Combinatorics.SimpleGraph.Path
+import Mathlib.Combinatorics.SimpleGraph.Paths
 import Mathlib.Combinatorics.SimpleGraph.Finite
 
 open SimpleGraph

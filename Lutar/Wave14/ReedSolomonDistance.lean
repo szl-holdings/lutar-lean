@@ -46,7 +46,7 @@ Signed-off-by: SZL CTO <cto@szl-holdings.com>
 Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 -/
 import Mathlib.Algebra.Polynomial.Roots
-import Mathlib.Algebra.Polynomial.Degree.Definitions
+import Mathlib.Algebra.Polynomial.Degree.Defs
 import Mathlib.Data.Finset.Card
 
 namespace Lutar.Wave14
@@ -112,7 +112,7 @@ theorem rs_distance_lower_bound
   have hpart :
       (Finset.univ.filter (fun i : Fin n => p.eval (pts i) = q.eval (pts i))).card
         + (Finset.univ.filter (fun i : Fin n => p.eval (pts i) ≠ q.eval (pts i))).card = n := by
-    rw [Finset.filter_card_add_filter_neg_card_eq_card]
+    rw [Finset.card_filter_add_card_filter_not]
     simp
   -- bound on the agreeing indices: they inject into the agreeing POINTS.
   have hagree_lt :

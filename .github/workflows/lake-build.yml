@@ -4,7 +4,7 @@ name: Lake build (gate + numbers)
 #
 # Why this exists (audit 2026-05-31): multiple crews gave conflicting signals on
 # whether `lake build` was green. This workflow makes the answer click-and-run:
-#   1. Pin the exact toolchain from ./lean-toolchain (v4.18.0 as of the wave-6 bump).
+#   1. Pin the exact toolchain from ./lean-toolchain (v4.34.1 for the reviewed migration).
 #   2. Restore the Mathlib build cache, then `lake build` the whole library.
 #   3. Recompute the canonical declaration/axiom/sorry numbers and upload them as
 #      a build artifact.
@@ -112,14 +112,14 @@ jobs:
           /tmp/elan-init/elan-init -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Resolve toolchain from lean-toolchain (must be v4.18.0)
+      - name: Resolve toolchain from lean-toolchain (must be v4.34.1)
         run: |
           set -euo pipefail
           PIN=$(cat lean-toolchain)
           echo "lean-toolchain pin: $PIN"
           case "$PIN" in
-            *v4.18.0) echo "toolchain pin OK" ;;
-            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.18.0"; exit 1 ;;
+            leanprover/lean4:v4.34.1) echo "toolchain pin OK" ;;
+            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.34.1"; exit 1 ;;
           esac
           # With elan v4.2.3 the self-update check is NON-FATAL during
           # toolchain install (leanprover/elan eec8851: a failed
@@ -131,11 +131,11 @@ jobs:
           # ('already installed'); that case is benign (e.g. a warm runner
           # image), so we tolerate it with `|| true` and rely on the
           # `elan toolchain list | grep -q` check below as the REAL gate --
-          # if the v4.18.0 toolchain is genuinely absent this step hard-fails.
-          elan toolchain install "leanprover/lean4:v4.18.0" || true
-          elan default "leanprover/lean4:v4.18.0"
-          elan toolchain list | grep -q "leanprover/lean4:v4.18.0" \
-            || { echo "::error::v4.18.0 toolchain not installed"; exit 1; }
+          # if the v4.34.1 toolchain is genuinely absent this step hard-fails.
+          elan toolchain install "leanprover/lean4:v4.34.1" || true
+          elan default "leanprover/lean4:v4.34.1"
+          elan toolchain list | grep -q "leanprover/lean4:v4.34.1" \
+            || { echo "::error::v4.34.1 toolchain not installed"; exit 1; }
           # Prove the toolchain is actually usable end-to-end.
           lake --version
 
@@ -147,15 +147,30 @@ jobs:
           # (batteries/aesop/Qq/... tracked on main/master in the transitive
           # graph), pulling revisions that require a newer Lean than the pinned
           # toolchain — Mathlib + deps no longer agreed and the build broke.
-          # The committed lake-manifest.json already pins the exact known-good
-          # revisions for v4.18.0 (Mathlib aa936c36 @ v4.18.0). Build against
+          # The committed lake-manifest.json pins the exact reviewed upstream
+          # revisions for v4.34.1 (Mathlib d13f23b7 @ v4.34.1). Build against
           # the committed manifest; do NOT re-resolve it.
           test -f lake-manifest.json || { echo "::error::lake-manifest.json missing"; exit 1; }
-          MROW=$(grep -A4 '"name": "mathlib"' lake-manifest.json | grep -o 'v4\.18\.0' | head -1 || true)
-          if [ "$MROW" != "v4.18.0" ]; then
-            echo "::error::mathlib manifest pin is not v4.18.0 (got '$MROW')"; exit 1
-          fi
-          echo "manifest pins mathlib @ v4.18.0 — OK"
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path("lake-manifest.json").read_text())
+          rows = [row for row in manifest["packages"] if row.get("name") == "mathlib"]
+          expected = {
+              "type": "git",
+              "url": "https://github.com/leanprover-community/mathlib4.git",
+              "rev": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+              "inputRev": "v4.34.1",
+              "inherited": False,
+              "subDir": None,
+              "scope": "",
+              "manifestFile": "lake-manifest.json",
+              "configFile": "lakefile.lean",
+          }
+          if len(rows) != 1 or any(rows[0].get(key) != value for key, value in expected.items()):
+              raise SystemExit("mathlib manifest must bind the exact reviewed v4.34.1 commit")
+          print("manifest pins mathlib v4.34.1 @ d13f23b723b8a846827a245b89c10fc7d3f11612 — OK")
+          PYTHON
 
       # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
       # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,

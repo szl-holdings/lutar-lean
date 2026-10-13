@@ -102,7 +102,7 @@ theorem Λ_graph_le_one (e : GraphExecution) :
       fun v _ => vertexLambda_le_one e v
     have h1 : (Finset.univ : Finset e.V).prod (vertexLambda e)
             ≤ (Finset.univ : Finset e.V).prod (fun _ => (1 : NNReal)) :=
-      Finset.prod_le_prod (fun _ _ => zero_le _) h_each
+      Finset.prod_le_prod₀ (fun _ _ => zero_le) h_each
     simpa [Finset.prod_const_one] using h1
   -- (·)^(1/n) is monotone on NNReal
   have hinv_pos : (0 : ℝ) < 1 / (n : ℝ) := by

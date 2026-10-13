@@ -3,7 +3,7 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.List.Basic
 import Mathlib.Combinatorics.SimpleGraph.Basic
 import Mathlib.Combinatorics.SimpleGraph.Connectivity.Subgraph
-import Mathlib.Combinatorics.SimpleGraph.Walk
+import Mathlib.Combinatorics.SimpleGraph.Walk.Basic
 import Mathlib.Tactic
 
 /-!
@@ -48,8 +48,8 @@ structure PointCloud (n : ℕ) where
 /-- The *Rips graph* at threshold Λ connects points with distance ≤ Λ. -/
 def RipsGraph {n : ℕ} (P : PointCloud n) (Λ : ℝ) : SimpleGraph (Fin n) where
   Adj i j := i ≠ j ∧ P.dist i j ≤ Λ
-  symm := fun i j ⟨hne, hd⟩ => ⟨hne.symm, P.dist_sym j i ▸ hd⟩
-  loopless := fun i ⟨hne, _⟩ => hne rfl
+  symm := ⟨fun i j ⟨hne, hd⟩ => ⟨hne.symm, P.dist_sym j i ▸ hd⟩⟩
+  loopless := ⟨fun i ⟨hne, _⟩ => hne rfl⟩
 
 /-! ## 3. Connected Components via Union-Find (Abstract) -/
 

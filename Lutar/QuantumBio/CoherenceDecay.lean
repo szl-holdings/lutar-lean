@@ -60,9 +60,9 @@ theorem coh_strictAnti (C0 γ : ℝ) (hC : 0 < C0) (hγ : 0 < γ) :
   -- exp is strictly monotone; -(γ * ·) is strictly antitone since γ > 0
   have hexp : Real.exp (-(γ * b)) < Real.exp (-(γ * a)) := by
     apply Real.exp_lt_exp.mpr
-    have : γ * a < γ * b := by exact (mul_lt_mul_left hγ).mpr hab
+    have : γ * a < γ * b := by exact mul_lt_mul_of_pos_left hab hγ
     linarith
-  exact (mul_lt_mul_left hC).mpr hexp
+  exact mul_lt_mul_of_pos_left hexp hC
 
 /-- Coherence is always nonnegative when the initial coherence is nonnegative. -/
 theorem coh_nonneg (C0 γ t : ℝ) (hC : 0 ≤ C0) : 0 ≤ coh C0 γ t := by
@@ -103,7 +103,7 @@ theorem lambda_single_crossing
   refine ⟨(1 / γ) * Real.log (q * C0 / lamMin), ?_, ?_⟩
   · -- t⋆ > 0 since the log of a quantity > 1 is positive and 1/γ > 0
     have hratio : 1 < q * C0 / lamMin := by
-      rw [lt_div_iff hlo]; linarith
+      rw [lt_div_iff₀ hlo]; linarith
     have hlogpos : 0 < Real.log (q * C0 / lamMin) := Real.log_pos hratio
     positivity
   · -- evaluate q · C₀ · exp(−γ · t⋆) = lamMin
@@ -123,6 +123,5 @@ theorem lambda_single_crossing
     have hq0 : q ≠ 0 := ne_of_gt hq
     have hC0' : C0 ≠ 0 := ne_of_gt hC
     field_simp
-    ring
 
 end Lutar.QuantumBio.CoherenceDecay

@@ -88,7 +88,7 @@ theorem madhavaRemainderBound_anti
   -- (or similar; use calc).
   calc |x|^(2*(N+1)+1) / (2 * ((N : ℝ) + 1) + 1)
       ≤ |x|^(2*N+1) / (2 * ((N : ℝ) + 1) + 1) := by
-          exact (div_le_div_right hden_pos2).mpr hnum_le
+          exact (div_le_div_iff_of_pos_right hden_pos2).mpr hnum_le
     _ ≤ |x|^(2*N+1) / (2 * (N : ℝ) + 1) := by
           -- Mathlib v4.13.0: div_le_div_of_nonneg_left replaces div_le_div_of_le_left
           apply div_le_div_of_nonneg_left (pow_nonneg habs_nn _) hden_pos1 hden_le

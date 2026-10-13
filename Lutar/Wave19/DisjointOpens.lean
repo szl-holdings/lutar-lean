@@ -29,7 +29,7 @@ NO placeholder tactic, NO new axiom. `#print axioms ⊆ {propext, Classical.choi
 -/
 import Mathlib.Topology.Order.Basic
 import Mathlib.Topology.Bases
-import Mathlib.Data.Real.Cardinality
+import Mathlib.Analysis.Real.Cardinality
 import Mathlib.Data.Set.Pairwise.Basic
 
 open Set Function

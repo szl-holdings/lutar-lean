@@ -79,7 +79,7 @@ theorem w5_4_collision_of_image_dup {α β : Type _} (h : α → β) :
     by_cases hx : h x ∈ xs.map h
     · rw [List.mem_map] at hx
       obtain ⟨b, hb, hfb⟩ := hx
-      refine ⟨x, List.mem_cons_self x xs, b, List.mem_cons_of_mem x hb, ?_, hfb.symm⟩
+      refine ⟨x, List.mem_cons_self, b, List.mem_cons_of_mem x hb, ?_, hfb.symm⟩
       intro hxb; exact hnd.1 (hxb ▸ hb)
     · have hnn : ¬ (xs.map h).Nodup := fun hn => hmap ⟨hx, hn⟩
       obtain ⟨a, ha, b, hb, hab, hfab⟩ := ih hnd.2 hnn

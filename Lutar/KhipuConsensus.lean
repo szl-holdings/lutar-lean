@@ -142,13 +142,13 @@ opaque canonicalHistory : ActionHash → Prop
 and `length_finRange`. -/
 theorem validCount_le_n (c : Consensus n) : validCount c ≤ n := by
   unfold validCount
-  have h := List.countP_le_length (fun i => consents c i) (l := List.finRange n)
+  have h := List.countP_le_length (p := fun i => consents c i) (l := List.finRange n)
   simpa [List.length_finRange] using h
 
 /-- `faultyCount` never exceeds the number of organs. -/
 theorem faultyCount_le_n (c : Consensus n) : faultyCount c ≤ n := by
   unfold faultyCount
-  have h := List.countP_le_length (fun i => isFaulty c i) (l := List.finRange n)
+  have h := List.countP_le_length (p := fun i => isFaulty c i) (l := List.finRange n)
   simpa [List.length_finRange] using h
 
 /-- Canonicity is exactly threshold attainment (definitional unfolding). This ties
