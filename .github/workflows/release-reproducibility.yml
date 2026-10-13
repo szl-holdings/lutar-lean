@@ -105,17 +105,17 @@ jobs:
 
       - name: SHA-256 of lake-manifest.json (dependency pin)
         run: |
-          if [ -f lake-manifest.json ]; then
-            sha256sum lake-manifest.json | tee lake-manifest.sha256
-          else
-            echo "no lake-manifest.json committed at this tag" | tee lake-manifest.sha256
-          fi
+          test -f lake-manifest.json
+          git ls-files --error-unmatch lake-manifest.json
+          git diff --exit-code HEAD -- lake-manifest.json
+          sha256sum lake-manifest.json | tee lake-manifest.sha256
 
       - name: Build the library and capture the full log
         run: |
           set -o pipefail
           lake --version
-          lake update -R
+          lake exe cache get
+          git diff --exit-code HEAD -- lake-manifest.json
           lake build 2>&1 | tee build.log
           echo "exit=$?" | tee -a build.log
 
@@ -138,7 +138,11 @@ jobs:
           tar xzf /tmp/elan.tar.gz -C /tmp/elan-init
           /tmp/elan-init/elan-init -y --default-toolchain none
           export PATH="\$HOME/.elan/bin:\$PATH"
-          lake update -R
+          test -f lake-manifest.json
+          git ls-files --error-unmatch lake-manifest.json
+          git diff --exit-code HEAD -- lake-manifest.json
+          lake exe cache get
+          git diff --exit-code HEAD -- lake-manifest.json
           lake build            # kernel-checks the whole library
           lake exe check
           \`\`\`

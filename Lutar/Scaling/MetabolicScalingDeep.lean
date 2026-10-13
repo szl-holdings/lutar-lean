@@ -113,7 +113,7 @@ theorem lossCurve_strictConvexOn {L0 α : ℝ} (hL0 : 0 < L0) (hα : 0 < α) :
     have hnegmul : -α * a ^ (-α - 1) < -α * b ^ (-α - 1) := by
       have hnα : -α < 0 := by linarith
       nlinarith [hpow, hnα]
-    exact (mul_lt_mul_left hL0).mpr hnegmul
+    exact mul_lt_mul_of_pos_left hnegmul hL0
   exact hmono.strictConvexOn_of_deriv hconv hcont
 
 /-! ## 2. Asymptotic limits of the loss curve
@@ -265,11 +265,11 @@ theorem szlPhi_strictMono_mass {Φ0 β c Δp τc τ0 : ℝ}
   have hA : 0 < (τc / τ0) ^ ((1 : ℝ) / 4) := Real.rpow_pos_of_pos hratio _
   -- M^β strictly increases since β > 0.
   have hpow : M1 ^ β < M2 ^ β := Real.rpow_lt_rpow hM1.le hlt hβ
-  have h1 : Φ0 * M1 ^ β < Φ0 * M2 ^ β := (mul_lt_mul_left hΦ0).mpr hpow
+  have h1 : Φ0 * M1 ^ β < Φ0 * M2 ^ β := mul_lt_mul_of_pos_left hpow hΦ0
   have h2 : Φ0 * M1 ^ β * Real.exp (c * Δp)
           < Φ0 * M2 ^ β * Real.exp (c * Δp) :=
-    (mul_lt_mul_right hexp).mpr h1
-  exact (mul_lt_mul_right hA).mpr h2
+    mul_lt_mul_of_pos_right h1 hexp
+  exact mul_lt_mul_of_pos_right h2 hA
 
 open Lutar.Scaling in
 /-- **SZL-Φ continuity in body mass.**  On the positive domain `(0,∞)`, the map

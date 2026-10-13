@@ -52,6 +52,7 @@ fabricate the inversion-monotonicity step.
 
 Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 -/
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.LinearAlgebra.Matrix.PosDef
 
 open Matrix

@@ -269,7 +269,7 @@ theorem diagLog_continuous (F : (Fin n → ℝ) → ℝ)
     intro t _; intro i; exact Real.exp_pos t
   -- F ∘ e is continuous on ℝ (= univ): A4 is ContinuousOn F {Pos}, precompose.
   have hFe : Continuous (fun t : ℝ => F (fun _ : Fin n => Real.exp t)) := by
-    rw [continuous_iff_continuousOn_univ]
+    rw [← continuousOn_univ]
     have h := (hCont.comp hembed.continuousOn hmaps)
     -- h : ContinuousOn (F ∘ embed) univ ; unfold the composition to the lambda form.
     simpa [Function.comp] using h
@@ -278,7 +278,8 @@ theorem diagLog_continuous (F : (Fin n → ℝ) → ℝ)
     intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
   have hlog : Continuous (Real.log ∘ (fun t : ℝ => F (fun _ : Fin n => Real.exp t))) :=
     Real.continuousOn_log.comp_continuous hFe hmem
-  simpa [diagLog, Function.comp] using hlog
+  unfold diagLog
+  exact hlog
 
 /-- **`diagPin`** (AXIOM-FREE). Full diagonal pin: for a Set α aggregator,
     `diagLog F t = t` for all `t`, i.e. `F(eᵗ,…,eᵗ) = eᵗ`.  Uses additivity
@@ -395,14 +396,15 @@ theorem mvLog_continuous (F : (Fin n → ℝ) → ℝ)
       Set.univ {x | Pos x} := by
     intro t _; intro i; exact Real.exp_pos (t i)
   have hFe : Continuous (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i))) := by
-    rw [continuous_iff_continuousOn_univ]
+    rw [← continuousOn_univ]
     have h := (hCont.comp hembed.continuousOn hmaps)
     simpa [Function.comp] using h
   have hmem : ∀ t : Fin n → ℝ, F (fun i : Fin n => Real.exp (t i)) ∈ ({0}ᶜ : Set ℝ) := by
     intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
   have hlog : Continuous (Real.log ∘ (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i)))) :=
     Real.continuousOn_log.comp_continuous hFe hmem
-  simpa [mvLog, Function.comp] using hlog
+  unfold mvLog
+  exact hlog
 
 /-- **`mvLog_linear_combo`** (AXIOM-FREE). The Cauchy core: a continuous additive
     `mvLog F` is ℝ-linear, so it equals the linear combination of its values on
@@ -422,8 +424,8 @@ theorem mvLog_linear_combo (F : (Fin n → ℝ) → ℝ)
   have hGcont : Continuous (fun x => G x) := by simpa [hG] using hcont
   -- Canonical-basis decomposition of `t`.
   have hdecomp : t = ∑ i, t i • stdBasis i := by
-    have := pi_eq_sum_univ t
-    simpa [stdBasis] using this
+    unfold stdBasis
+    exact pi_eq_sum_univ t
   -- Apply G, push through the sum and the scalars.
   calc mvLog F t
       = G t := (hG t).symm
@@ -550,7 +552,7 @@ theorem lambda_unique_setAlpha_discharged (hn : 0 < n)
   have hloggm : Real.log (geomMean x) = c * ∑ i, Real.log (x i) := by
     have hlg : Real.log (geomMean x) = (1 / (n : ℝ)) * ∑ i, Real.log (x i) := by
       unfold geomMean
-      rw [Real.log_rpow hprodpos, Real.log_prod _ _ (fun i _ => (hx i).ne')]
+      rw [Real.log_rpow hprodpos, Real.log_prod (fun i _ => (hx i).ne')]
     rw [hlg, hc_val]
   -- Both F x and geomMean x are positive with equal logs ⇒ equal.
   have hgmpos : 0 < geomMean x := geomMean_pos hx

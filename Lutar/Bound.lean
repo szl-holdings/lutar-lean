@@ -45,7 +45,7 @@ theorem Λ_le_max {k : ℕ} (hk : 0 < k) (x : Axes k) :
   have h_prod_le : (Finset.univ : Finset (Fin k)).prod x ≤ M ^ k := by
     have h1 : (Finset.univ : Finset (Fin k)).prod x
             ≤ (Finset.univ : Finset (Fin k)).prod (fun _ => M) :=
-      Finset.prod_le_prod₀ (fun i _ => zero_le _) h_le
+      Finset.prod_le_prod₀ (fun i _ => zero_le) h_le
     -- Finset.prod_const: ∏_{i ∈ univ} M = M ^ card(univ) = M ^ k
     simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h1
     exact h1
@@ -87,7 +87,7 @@ theorem min_le_Λ {k : ℕ} (hk : 0 < k) (x : Axes k) :
   have h_prod_ge : m ^ k ≤ (Finset.univ : Finset (Fin k)).prod x := by
     have h1 : (Finset.univ : Finset (Fin k)).prod (fun _ => m)
             ≤ (Finset.univ : Finset (Fin k)).prod x :=
-      Finset.prod_le_prod₀ (fun _ _ => zero_le _) h_ge
+      Finset.prod_le_prod₀ (fun _ _ => zero_le) h_ge
     -- Finset.prod_const: ∏_{i ∈ univ} m = m ^ k
     simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h1
     exact h1
