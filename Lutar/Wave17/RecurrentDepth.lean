@@ -77,13 +77,13 @@ theorem recurrentDepthEdistBound [PseudoEMetricSpace X] {K : NNReal} {f : X → 
     more recurrence steps never loosen the coupling. -/
 theorem recurrentDepthConst_antitone {K : NNReal} (hK : K ≤ 1) :
     Antitone (fun r : ℕ => K ^ r) :=
-  fun _ _ hmn => pow_le_pow_of_le_one (zero_le K) hK hmn
+  fun _ _ hmn => pow_le_pow_right_of_le_one' hK hmn
 
 /-- For a **strict** contraction `K < 1` and at least one recurrence step (`1 ≤ r`),
     the depth-`r` constant satisfies `Kʳ < 1` — deeper recurrence preserves strict contractivity. -/
 theorem recurrentDepthConst_lt_of_lt {K : NNReal} (hK : K < 1) {r : ℕ} (hr : 1 ≤ r) :
     K ^ r < 1 := by
-  calc K ^ r ≤ K ^ 1 := pow_le_pow_of_le_one (zero_le K) (le_of_lt hK) hr
+  calc K ^ r ≤ K ^ 1 := pow_le_pow_right_of_le_one' (le_of_lt hK) hr
     _ = K := pow_one K
     _ < 1 := hK
 

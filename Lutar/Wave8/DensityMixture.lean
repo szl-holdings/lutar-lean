@@ -56,7 +56,7 @@ theorem posSemidef_smul {A : Matrix n n ℝ} (hA : A.PosSemidef) {c : ℝ} (hc :
     rw [conjTranspose_smul, hH, star_trivial]
   · intro x
     -- (c • A) *ᵥ x = c • (A *ᵥ x); dotProduct pulls the scalar out.
-    rw [smul_mulVec_assoc, dotProduct_smul]
+    rw [smul_mulVec, dotProduct_smul]
     exact smul_nonneg hc (hA.2 x)
 
 /-- A finite sum of PSD real matrices is PSD. -/

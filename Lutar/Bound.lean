@@ -10,7 +10,7 @@ This is the substrate guarantee that the Λ-gate is *interpretable*: a passing
 
 ## Status (V14-T2 closed)
 Both statements below are now machine-checked theorems via Mathlib4
-geometric-mean reasoning: Finset.prod_le_prod + NNReal.rpow monotonicity.
+geometric-mean reasoning: Finset.prod_le_prod₀ + NNReal.rpow monotonicity.
 The kernel-postulation note is removed; this is the substrate guarantee
 for v14+ Λ-gate interpretability, fully discharged.
 -/
@@ -30,7 +30,7 @@ namespace Lutar
 open NNReal Finset
 
 /-- **Bound, upper (V14-T2-upper).** Λ never exceeds the max axis.
-Proof chain: each x i ≤ sup x, so ∏ x ≤ (sup x)^k via Finset.prod_le_prod
+Proof chain: each x i ≤ sup x, so ∏ x ≤ (sup x)^k via Finset.prod_le_prod₀
 + Finset.prod_const; then take the (1/k)-power via NNReal.rpow_le_rpow,
 and simplify (sup x)^(k·(1/k)) = sup x via NNReal.rpow_natCast + NNReal.rpow_mul. -/
 theorem Λ_le_max {k : ℕ} (hk : 0 < k) (x : Axes k) :
@@ -41,11 +41,11 @@ theorem Λ_le_max {k : ℕ} (hk : 0 < k) (x : Axes k) :
   -- Step 2: every component x i ≤ M (Finset.le_sup')
   have h_le : ∀ i ∈ (Finset.univ : Finset (Fin k)), x i ≤ M := fun i _ =>
     Finset.le_sup' x (Finset.mem_univ i)
-  -- Step 3: ∏ x ≤ M^k via Finset.prod_le_prod (all terms nonneg, each ≤ M)
+  -- Step 3: ∏ x ≤ M^k via Finset.prod_le_prod₀ (all terms nonneg, each ≤ M)
   have h_prod_le : (Finset.univ : Finset (Fin k)).prod x ≤ M ^ k := by
     have h1 : (Finset.univ : Finset (Fin k)).prod x
             ≤ (Finset.univ : Finset (Fin k)).prod (fun _ => M) :=
-      Finset.prod_le_prod (fun i _ => zero_le _) h_le
+      Finset.prod_le_prod₀ (fun i _ => zero_le _) h_le
     -- Finset.prod_const: ∏_{i ∈ univ} M = M ^ card(univ) = M ^ k
     simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h1
     exact h1
@@ -72,7 +72,7 @@ theorem Λ_le_max {k : ℕ} (hk : 0 < k) (x : Axes k) :
     _ = M := h_simp
 
 /-- **Bound, lower (V14-T2-lower).** Λ is at least the min axis.
-Proof chain: each x i ≥ inf x, so (inf x)^k ≤ ∏ x via Finset.prod_le_prod
+Proof chain: each x i ≥ inf x, so (inf x)^k ≤ ∏ x via Finset.prod_le_prod₀
 + Finset.prod_const (dual); then take the (1/k)-power via NNReal.rpow_le_rpow,
 and simplify (inf x)^(k·(1/k)) = inf x via NNReal.rpow_natCast + NNReal.rpow_mul. -/
 theorem min_le_Λ {k : ℕ} (hk : 0 < k) (x : Axes k) :
@@ -83,11 +83,11 @@ theorem min_le_Λ {k : ℕ} (hk : 0 < k) (x : Axes k) :
   -- Step 2: every component x i ≥ m (Finset.inf'_le)
   have h_ge : ∀ i ∈ (Finset.univ : Finset (Fin k)), m ≤ x i := fun i _ =>
     Finset.inf'_le x (Finset.mem_univ i)
-  -- Step 3: m^k ≤ ∏ x via Finset.prod_le_prod (all terms nonneg, each ≥ m)
+  -- Step 3: m^k ≤ ∏ x via Finset.prod_le_prod₀ (all terms nonneg, each ≥ m)
   have h_prod_ge : m ^ k ≤ (Finset.univ : Finset (Fin k)).prod x := by
     have h1 : (Finset.univ : Finset (Fin k)).prod (fun _ => m)
             ≤ (Finset.univ : Finset (Fin k)).prod x :=
-      Finset.prod_le_prod (fun _ _ => zero_le _) h_ge
+      Finset.prod_le_prod₀ (fun _ _ => zero_le _) h_ge
     -- Finset.prod_const: ∏_{i ∈ univ} m = m ^ k
     simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h1
     exact h1

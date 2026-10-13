@@ -47,7 +47,7 @@ theorem relay_chain_bounded_latency
   induction chain with
   | nil => simp [totalLatency]
   | cons h tl ih =>
-    have h_head : h.latency ≤ cap := h_each h (List.mem_cons_self _ _)
+    have h_head : h.latency ≤ cap := h_each h (List.mem_cons_self)
     have h_tail : ∀ x ∈ tl, x.latency ≤ cap := fun x hx =>
       h_each x (List.mem_cons_of_mem _ hx)
     have ih' := ih h_tail

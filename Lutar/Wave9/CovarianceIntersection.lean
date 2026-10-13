@@ -64,14 +64,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 semidefinite and `c ≥ 0`, then `c • A` is positive semidefinite. -/
 theorem PosSemidef.nonneg_smul {A : Matrix n n ℝ} (hA : A.PosSemidef)
     {c : ℝ} (hc : 0 ≤ c) : (c • A).PosSemidef := by
-  refine ⟨?_, fun x => ?_⟩
-  · -- (c • A)ᴴ = c • Aᴴ = c • A   (over ℝ, star c = c)
-    show (c • A).conjTranspose = c • A
-    rw [conjTranspose_smul, hA.1, star_trivial]
-  · -- xᴴ (c • A) x = c * (xᴴ A x) ≥ 0
-    have hquad : 0 ≤ dotProduct (star x) (A *ᵥ x) := hA.2 x
-    rw [smul_mulVec_assoc, dotProduct_smul]
-    exact smul_nonneg hc hquad
+  exact Matrix.PosSemidef.smul hA hc
 
 /-- **OE-2 core — PSD convex closure.** If `A` and `B` are positive semidefinite
 and `ω ∈ [0,1]`, then the convex combination `ω • A + (1-ω) • B` is positive

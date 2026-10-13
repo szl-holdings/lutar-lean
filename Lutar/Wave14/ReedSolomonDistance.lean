@@ -46,7 +46,7 @@ Signed-off-by: SZL CTO <cto@szl-holdings.com>
 Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 -/
 import Mathlib.Algebra.Polynomial.Roots
-import Mathlib.Algebra.Polynomial.Degree.Definitions
+import Mathlib.Algebra.Polynomial.Degree.Defs
 import Mathlib.Data.Finset.Card
 
 namespace Lutar.Wave14

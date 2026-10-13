@@ -54,7 +54,8 @@ variable {R : Type*}
     over ℝ (the "local hidden-variable" / independent-prior agent model), their
     Bell-CHSH agreement score is ≤ 2. Direct instantiation of `CHSH_inequality_of_comm`. -/
 theorem c2_lutar_omega_classical_ceiling
-    [OrderedCommRing R] [StarRing R] [StarOrderedRing R] [Algebra ℝ R] [OrderedSMul ℝ R]
+    [CommRing R] [PartialOrder R] [IsOrderedRing R]
+    [StarRing R] [StarOrderedRing R] [Algebra ℝ R] [IsOrderedModule ℝ R]
     (A₀ A₁ B₀ B₁ : R) (T : IsCHSHTuple A₀ A₁ B₀ B₁) :
     A₀ * B₀ + A₀ * B₁ + A₁ * B₀ - A₁ * B₁ ≤ 2 :=
   CHSH_inequality_of_comm A₀ A₁ B₀ B₁ T
@@ -66,7 +67,8 @@ theorem c2_lutar_omega_classical_ceiling
     a governed-AI agreement score exceeding 2 cannot arise from independent
     (commuting/local) agent priors. -/
 theorem c1_lutar_omega_tsirelson_ceiling
-    [OrderedRing R] [StarRing R] [StarOrderedRing R] [Algebra ℝ R] [OrderedSMul ℝ R]
+    [Ring R] [PartialOrder R] [IsOrderedRing R]
+    [StarRing R] [StarOrderedRing R] [Algebra ℝ R] [IsOrderedModule ℝ R]
     [StarModule ℝ R]
     (A₀ A₁ B₀ B₁ : R) (T : IsCHSHTuple A₀ A₁ B₀ B₁) :
     A₀ * B₀ + A₀ * B₁ + A₁ * B₀ - A₁ * B₁ ≤ √2 ^ 3 • (1 : R) :=

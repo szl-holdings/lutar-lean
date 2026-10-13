@@ -172,7 +172,7 @@ theorem harvest_floor_respected (q : Nat) (pairs : List (Nat × Nat))
   | cons p rest ih =>
       simp only [List.foldr, List.map]
       rw [energyFloor_add, foldl_cons_zero]
-      have hp : energyFloor p.1 q ≤ p.2 := h p (List.mem_cons_self p rest)
+      have hp : energyFloor p.1 q ≤ p.2 := h p (List.mem_cons_self)
       have hrest : energyFloor (rest.foldr (fun p acc => p.1 + acc) 0) q
                   ≤ List.foldl (· + ·) 0 (rest.map Prod.snd) := by
         apply ih; intro x hx; exact h x (List.mem_cons.mpr (Or.inr hx))

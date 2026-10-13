@@ -48,8 +48,13 @@ asserted as a closed theorem.
 ## CI gates (required on `main`)
 
 `lake build + numbers` · `overclaim / Governed surfaces are honest (Theorem U
-citation rule)` · `Theorem-U snapshot honesty (PR merge gate)`. The canonical counts
-`749/14/163` are machine-enforced; a divergent count fails the build.
+citation rule)` · `Theorem-U snapshot honesty (PR merge gate)`. Inside
+`lake build + numbers`, `.github/scripts/check_numbers_drift.py` compares the counts
+measured by `.github/scripts/lean_numbers.py` (declarations, raw and unique axioms,
+raw sorries, and the axiom-name set) with the committed baseline in
+`.github/data/lean_numbers.json`; any difference fails the build until that file is
+updated in the same PR. The frozen Doctrine v11 figures `749/14/163` @ `c7c0ba17`
+come from a different counter and are not enforced by this gate.
 
 ## Downstream consumers
 

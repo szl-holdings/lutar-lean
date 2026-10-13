@@ -69,7 +69,7 @@ theorem powerLaw_strictMono {B0 β M1 M2 : ℝ} (hB0 : 0 < B0) (hβ : 0 < β)
     (hM1 : 0 < M1) (hlt : M1 < M2) :
     B0 * M1 ^ β < B0 * M2 ^ β := by
   have hpow : M1 ^ β < M2 ^ β := Real.rpow_lt_rpow hM1.le hlt hβ
-  exact (mul_lt_mul_left hB0).mpr hpow
+  exact mul_lt_mul_of_pos_left hpow hB0
 
 #print axioms powerLaw_strictMono
 
@@ -141,7 +141,7 @@ theorem computeLoss_strictAnti {L0 α : ℝ} (hL0 : 0 < L0) (hα : 0 < α)
   have hinv : N2 ^ (-α) < N1 ^ (-α) := by
     rw [Real.rpow_neg hN1.le, Real.rpow_neg hN2.le]
     exact inv_strictAnti₀ hpos1 hposlt
-  exact (mul_lt_mul_left hL0).mpr hinv
+  exact mul_lt_mul_of_pos_left hinv hL0
 
 #print axioms computeLoss_pos
 #print axioms computeLoss_strictAnti
@@ -208,13 +208,13 @@ theorem szlPhi_strictMono_pmf {Φ0 β M c τc τ0 : ℝ}
   have hratio : 0 < τc / τ0 := div_pos hτc hτ0
   have hA : 0 < (τc / τ0) ^ ((1 : ℝ) / 4) := Real.rpow_pos_of_pos hratio _
   -- exp is strictly monotone, and c > 0 so c*Δp is strictly monotone in Δp.
-  have hargs : c * Δp1 < c * Δp2 := (mul_lt_mul_left hc).mpr hΔp
+  have hargs : c * Δp1 < c * Δp2 := mul_lt_mul_of_pos_left hΔp hc
   have hexp : Real.exp (c * Δp1) < Real.exp (c * Δp2) := Real.exp_lt_exp.mpr hargs
   -- Multiply through by the positive prefactor, then by the positive suffix.
   have step1 : Φ0 * M ^ β * Real.exp (c * Δp1)
              < Φ0 * M ^ β * Real.exp (c * Δp2) :=
-    (mul_lt_mul_left hpre).mpr hexp
-  exact (mul_lt_mul_right hA).mpr step1
+    mul_lt_mul_of_pos_left hexp hpre
+  exact mul_lt_mul_of_pos_right step1 hA
 
 #print axioms szlPhi_pos
 #print axioms szlPhi_strictMono_pmf

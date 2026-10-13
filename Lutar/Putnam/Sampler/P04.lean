@@ -13,15 +13,15 @@ factor; not all its prime factors can be `≡ 1 (mod 4)` (their product would be
 some prime factor is `≡ 3 (mod 4)`, and it is not in the finite list — contradiction.
 
 **Status: CLOSED — KERNEL-VERIFIED (no `sorry`).** Discharged from Mathlib's Dirichlet
-machinery: `Nat.setOf_prime_and_eq_mod_infinite` gives infinitude of primes in the residue
+machinery: `Nat.infinite_setOfPred_prime_and_eq_mod` gives infinitude of primes in the residue
 class `a` modulo `q` whenever `a` is a unit of `ZMod q`; here `q = 4`, `a = 3` (a unit since
 `3 · 3 = 1` in `ZMod 4`). A short `ZMod.natCast_eq_natCast_iff'` bridge identifies the
 congruence `(p : ZMod 4) = 3` with `p % 4 = 3`. No new declared axiom token.
 -/
 
 theorem p04 : {p : ℕ | p.Prime ∧ p % 4 = 3}.Infinite := by
-  have hu : IsUnit (3 : ZMod 4) := isUnit_of_mul_eq_one 3 3 (by decide)
-  have h := Nat.setOf_prime_and_eq_mod_infinite (q := 4) (a := (3 : ZMod 4)) hu
+  have hu : IsUnit (3 : ZMod 4) := isUnit_iff_exists.mpr ⟨3, by decide, by decide⟩
+  have h := Nat.infinite_setOfPred_prime_and_eq_mod (q := 4) (a := (3 : ZMod 4)) hu
   have hset :
       {p : ℕ | p.Prime ∧ (p : ZMod 4) = 3} = {p : ℕ | p.Prime ∧ p % 4 = 3} := by
     ext p

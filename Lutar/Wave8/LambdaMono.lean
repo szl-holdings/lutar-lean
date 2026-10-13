@@ -23,7 +23,7 @@
     governance layer relies on for incentive-compatibility.
 
   References:
-    * `Finset.prod_lt_prod` (strict product monotonicity over positive reals):
+    * `Finset.prod_lt_prod₀` (strict product monotonicity over positive reals):
       https://leanprover-community.github.io/mathlib4_docs/Mathlib/Algebra/Order/BigOperators/Ring/Finset.html
     * `Real.rpow_lt_rpow` (strict monotonicity of `x ↦ x^z` in the base):
       https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Pow/Real.html
@@ -50,7 +50,7 @@ theorem prod_strict_mono (w w' : ι → ℝ)
     (hpos : ∀ i, 0 < w i)
     (hle : ∀ i, w i ≤ w' i) (k : ι) (hk : w k < w' k) :
     (∏ i, w i) < (∏ i, w' i) :=
-  Finset.prod_lt_prod (fun i _ => hpos i) (fun i _ => hle i)
+  Finset.prod_lt_prod₀ (fun i _ => hpos i) (fun i _ => hle i)
     ⟨k, Finset.mem_univ k, hk⟩
 
 /-- The product of positive components is positive. -/
@@ -79,7 +79,7 @@ theorem gmean_mono (w w' : ι → ℝ) (hpos : ∀ i, 0 < w i) (hle : ∀ i, w i
   unfold gmean
   have hexp : (0 : ℝ) ≤ (Fintype.card ι : ℝ)⁻¹ := by positivity
   have hbase : (0 : ℝ) ≤ ∏ i, w i := (prod_pos w hpos).le
-  exact Real.rpow_le_rpow hbase (Finset.prod_le_prod (fun i _ => (hpos i).le)
+  exact Real.rpow_le_rpow hbase (Finset.prod_le_prod₀ (fun i _ => (hpos i).le)
     (fun i _ => hle i)) hexp
 
 end Lutar.Wave8.LambdaMono

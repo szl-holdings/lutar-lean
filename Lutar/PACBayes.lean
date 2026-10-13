@@ -351,7 +351,7 @@ theorem th13_pacBayes_probabilistic_wrapper {n : ℕ} (hn : 0 < n)
   rw [ENNReal.ofReal_le_iff_le_toReal (ENNReal.sub_ne_top ENNReal.one_ne_top)]
   rw [ENNReal.toReal_sub_of_le
     prob_le_one ENNReal.one_ne_top]
-  simp only [ENNReal.one_toReal]
+  simp only [ENNReal.toReal_one]
   linarith
 
 /-! ## v16 Innovations: New corollary theorems (zero sorry, zero new axioms) -/

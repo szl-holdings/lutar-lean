@@ -253,11 +253,7 @@ theorem findReplayRoot_sound (candidates : List Xoshiro256State)
     IsReplayRoot s expected = true := by
   unfold findReplayRoot at h
   -- After unfolding: h : candidates.find? (fun st => IsReplayRoot st expected) = some s
-  -- obtain the predicate value directly
-  obtain ⟨hp, _⟩ := List.find?_eq_some.mp h
-  -- hp : (fun st => IsReplayRoot st expected) s, beta-reduced: IsReplayRoot s expected
-  -- As Bool used as Prop in And.left, this means = true
-  exact hp
+  exact List.find?_some h
 
 /-- **Path B — obligation-tracked.**
     Completeness of `findReplayRoot`: if `s` is in the candidate list and

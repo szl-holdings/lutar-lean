@@ -54,7 +54,7 @@ theorem totalOverhead_le_len_mul_max
   induction systems with
   | nil => simp [totalOverhead]
   | cons h t ih =>
-    have hh : h.cost ≤ C := hbound h (List.mem_cons_self h t)
+    have hh : h.cost ≤ C := hbound h (List.mem_cons_self)
     have ht : ∀ s ∈ t, s.cost ≤ C := fun s hs => hbound s (List.mem_cons_of_mem h hs)
     have ih' := ih ht
     simp [totalOverhead]

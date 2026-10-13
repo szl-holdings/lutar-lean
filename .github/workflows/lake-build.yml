@@ -4,7 +4,7 @@ name: Lake build (gate + numbers)
 #
 # Why this exists (audit 2026-05-31): multiple crews gave conflicting signals on
 # whether `lake build` was green. This workflow makes the answer click-and-run:
-#   1. Pin the exact toolchain from ./lean-toolchain (v4.18.0 as of the wave-6 bump).
+#   1. Pin the exact toolchain from ./lean-toolchain (v4.34.1 for the reviewed migration).
 #   2. Restore the Mathlib build cache, then `lake build` the whole library.
 #   3. Recompute the canonical declaration/axiom/sorry numbers and upload them as
 #      a build artifact.
@@ -47,7 +47,7 @@ jobs:
       contents: read
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: audit
 
@@ -73,7 +73,7 @@ jobs:
       pull-requests: write   # for the numbers PR comment
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: audit
 
@@ -112,14 +112,14 @@ jobs:
           /tmp/elan-init/elan-init -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Resolve toolchain from lean-toolchain (must be v4.18.0)
+      - name: Resolve toolchain from lean-toolchain (must be v4.34.1)
         run: |
           set -euo pipefail
           PIN=$(cat lean-toolchain)
           echo "lean-toolchain pin: $PIN"
           case "$PIN" in
-            *v4.18.0) echo "toolchain pin OK" ;;
-            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.18.0"; exit 1 ;;
+            leanprover/lean4:v4.34.1) echo "toolchain pin OK" ;;
+            *) echo "::error::lean-toolchain is '$PIN', expected leanprover/lean4:v4.34.1"; exit 1 ;;
           esac
           # With elan v4.2.3 the self-update check is NON-FATAL during
           # toolchain install (leanprover/elan eec8851: a failed
@@ -131,11 +131,11 @@ jobs:
           # ('already installed'); that case is benign (e.g. a warm runner
           # image), so we tolerate it with `|| true` and rely on the
           # `elan toolchain list | grep -q` check below as the REAL gate --
-          # if the v4.18.0 toolchain is genuinely absent this step hard-fails.
-          elan toolchain install "leanprover/lean4:v4.18.0" || true
-          elan default "leanprover/lean4:v4.18.0"
-          elan toolchain list | grep -q "leanprover/lean4:v4.18.0" \
-            || { echo "::error::v4.18.0 toolchain not installed"; exit 1; }
+          # if the v4.34.1 toolchain is genuinely absent this step hard-fails.
+          elan toolchain install "leanprover/lean4:v4.34.1" || true
+          elan default "leanprover/lean4:v4.34.1"
+          elan toolchain list | grep -q "leanprover/lean4:v4.34.1" \
+            || { echo "::error::v4.34.1 toolchain not installed"; exit 1; }
           # Prove the toolchain is actually usable end-to-end.
           lake --version
 
@@ -147,15 +147,30 @@ jobs:
           # (batteries/aesop/Qq/... tracked on main/master in the transitive
           # graph), pulling revisions that require a newer Lean than the pinned
           # toolchain — Mathlib + deps no longer agreed and the build broke.
-          # The committed lake-manifest.json already pins the exact known-good
-          # revisions for v4.18.0 (Mathlib aa936c36 @ v4.18.0). Build against
+          # The committed lake-manifest.json pins the exact reviewed upstream
+          # revisions for v4.34.1 (Mathlib d13f23b7 @ v4.34.1). Build against
           # the committed manifest; do NOT re-resolve it.
           test -f lake-manifest.json || { echo "::error::lake-manifest.json missing"; exit 1; }
-          MROW=$(grep -A4 '"name": "mathlib"' lake-manifest.json | grep -o 'v4\.18\.0' | head -1 || true)
-          if [ "$MROW" != "v4.18.0" ]; then
-            echo "::error::mathlib manifest pin is not v4.18.0 (got '$MROW')"; exit 1
-          fi
-          echo "manifest pins mathlib @ v4.18.0 — OK"
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path("lake-manifest.json").read_text())
+          rows = [row for row in manifest["packages"] if row.get("name") == "mathlib"]
+          expected = {
+              "type": "git",
+              "url": "https://github.com/leanprover-community/mathlib4.git",
+              "rev": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+              "inputRev": "v4.34.1",
+              "inherited": False,
+              "subDir": None,
+              "scope": "",
+              "manifestFile": "lake-manifest.json",
+              "configFile": "lakefile.lean",
+          }
+          if len(rows) != 1 or any(rows[0].get(key) != value for key, value in expected.items()):
+              raise SystemExit("mathlib manifest must bind the exact reviewed v4.34.1 commit")
+          print("manifest pins mathlib v4.34.1 @ d13f23b723b8a846827a245b89c10fc7d3f11612 — OK")
+          PYTHON
 
       # leanprover/lean-action removed: leanprover org is not a GitHub-verified creator
       # and the szl-holdings org policy (allowed_actions=selected, github_owned+verified only,
@@ -272,7 +287,7 @@ jobs:
           cat lean_numbers.measured.json
 
       - name: Upload numbers + build provenance as artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lean-numbers-${{ github.sha }}
           path: |
@@ -280,6 +295,51 @@ jobs:
             .github/data/lean_numbers.json
             lake-manifest.json
           if-no-files-found: error
+
+      - name: Post numbers as PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('lean_numbers.measured.json','utf8')).numbers;
+            const b = JSON.parse(fs.readFileSync('.github/data/lean_numbers.json','utf8')).numbers;
+            const row = (k) => `| ${k} | ${b[k]} | ${m[k]} | ${b[k]===m[k] ? 'OK' : 'CHANGED'} |`;
+            const body = [
+              '## Lean corpus numbers (canonical counter)',
+              '',
+              '| metric | baseline | this PR | status |',
+              '|---|---|---|---|',
+              row('declarations'),
+              row('axioms_raw'),
+              row('axioms_unique'),
+              row('sorries_raw'),
+              row('sorries_noncomment'),
+              '',
+              '`lake build` + `lake exe check` + `lake exe ref_vectors` all ran in this job.',
+              'Baseline source of truth: `.github/data/lean_numbers.json`. To change numbers, update that file in this PR.',
+            ].join('\n');
+            const {owner, repo} = context.repo;
+            const issue_number = context.issue.number;
+            const marker = '<!-- lean-numbers-comment -->';
+            const comments = await github.rest.issues.listComments({owner, repo, issue_number});
+            const existing = comments.data.find(c => c.body && c.body.includes(marker));
+            const full = marker + '\n' + body;
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body: full});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number, body: full});
+            }
+
+      # Step 5 of the header contract. Before this step existed the drift script
+      # was never called, so a changed declaration/axiom/sorry count or a new
+      # axiom name could land without touching the committed baseline. It runs
+      # after the upload and PR comment so drift evidence survives gate failure.
+      - name: Numbers drift gate (measured vs .github/data/lean_numbers.json)
+        run: |
+          python3 .github/scripts/check_numbers_drift.py \
+            --baseline .github/data/lean_numbers.json \
+            --measured lean_numbers.measured.json
 
       # ---- Putnam showcase REAL/DEMO label honesty gate ----
       # The showcase (Showcase/PutnamLean/*.lean) lives OUTSIDE Lutar/, so the
@@ -321,7 +381,7 @@ jobs:
           cat VERIFIED_THEOREMS.generated.md
 
       - name: Upload VERIFIED_THEOREMS artifact (for bootstrap / review)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: verified-theorems-${{ github.sha }}
           path: VERIFIED_THEOREMS.generated.md
@@ -350,7 +410,7 @@ jobs:
           head -c 1200 theorem_u_snapshot.json; echo
 
       - name: Upload Theorem-U snapshot artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: theorem-u-snapshot-${{ github.sha }}
           path: theorem_u_snapshot.json
@@ -378,43 +438,8 @@ jobs:
           head -c 1200 locked_baseline_snapshot.json; echo
 
       - name: Upload locked-baseline snapshot artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: locked-baseline-snapshot-${{ github.sha }}
           path: locked_baseline_snapshot.json
           if-no-files-found: error
-
-      - name: Post numbers as PR comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const fs = require('fs');
-            const m = JSON.parse(fs.readFileSync('lean_numbers.measured.json','utf8')).numbers;
-            const b = JSON.parse(fs.readFileSync('.github/data/lean_numbers.json','utf8')).numbers;
-            const row = (k) => `| ${k} | ${b[k]} | ${m[k]} | ${b[k]===m[k] ? 'OK' : 'CHANGED'} |`;
-            const body = [
-              '## Lean corpus numbers (canonical counter)',
-              '',
-              '| metric | baseline | this PR | status |',
-              '|---|---|---|---|',
-              row('declarations'),
-              row('axioms_raw'),
-              row('axioms_unique'),
-              row('sorries_raw'),
-              row('sorries_noncomment'),
-              '',
-              '`lake build` + `lake exe check` + `lake exe ref_vectors` all ran in this job.',
-              'Baseline source of truth: `.github/data/lean_numbers.json`. To change numbers, update that file in this PR.',
-            ].join('\n');
-            const {owner, repo} = context.repo;
-            const issue_number = context.issue.number;
-            const marker = '<!-- lean-numbers-comment -->';
-            const comments = await github.rest.issues.listComments({owner, repo, issue_number});
-            const existing = comments.data.find(c => c.body && c.body.includes(marker));
-            const full = marker + '\n' + body;
-            if (existing) {
-              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body: full});
-            } else {
-              await github.rest.issues.createComment({owner, repo, issue_number, body: full});
-            }

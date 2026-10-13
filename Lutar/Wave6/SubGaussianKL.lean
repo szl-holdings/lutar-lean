@@ -96,7 +96,7 @@ theorem c4_azuma_hoeffding_sum_ge_le
   -- AFTER `end HasSubgaussianMGF`), NOT under the `HasSubgaussianMGF` namespace —
   -- unlike the C3 Hoeffding lemma. So it is referenced WITHOUT the `HasSubgaussianMGF.`
   -- prefix (we `open ProbabilityTheory`).
-  measure_sum_ge_le_of_HasCondSubgaussianMGF h_adapted h0 n h_subG hε
+  measure_sum_ge_le_of_hasCondSubgaussianMGF h_adapted.stronglyAdapted h0 n h_subG hε
 
 /-! ## C5 — Gibbs' inequality: the Kullback–Leibler divergence is nonnegative. -/
 

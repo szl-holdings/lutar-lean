@@ -551,7 +551,7 @@ theorem ck6_min_encoding (lengths : CodeLengths)
   | nil => simp [encodedLen]
   | cons x xs ih =>
     simp only [encodedLen, List.length_cons]
-    have hx : 1 ≤ x := hpos x (List.mem_cons_self x xs)
+    have hx : 1 ≤ x := hpos x (List.mem_cons_self)
     have ihx : xs.length ≤ encodedLen xs :=
       ih (fun ℓ hℓ => hpos ℓ (List.mem_cons_of_mem x hℓ))
     omega
@@ -566,7 +566,7 @@ theorem ck6_tight_case (lengths : CodeLengths)
   | nil => simp [encodedLen]
   | cons x xs ih =>
     simp only [encodedLen, List.length_cons]
-    have hx : x = 1 := hone x (List.mem_cons_self x xs)
+    have hx : x = 1 := hone x (List.mem_cons_self)
     have ihx : encodedLen xs = xs.length :=
       ih (fun ℓ hℓ => hone ℓ (List.mem_cons_of_mem x hℓ))
     omega

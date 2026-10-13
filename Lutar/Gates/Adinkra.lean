@@ -108,7 +108,6 @@ structure Adinkra (n : ℕ) (d : ℕ) where
       Every boson has exactly one edge of each color, reaching a unique fermion.
       [Doran et al. 2011, Def. 2.1: k-regular bipartite graph] -/
   action_bijective : ∀ i : Fin n, Function.Bijective (action i)
-  deriving Repr
 
 /-! ## Vertex and edge count -/
 

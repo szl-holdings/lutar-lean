@@ -91,7 +91,7 @@ theorem abs_sum_le (xs : List ℝ) : |xs.sum| ≤ absSum xs := by
   | nil => simp
   | cons a xs ih =>
     simp only [List.sum_cons, absSum_cons]
-    calc |a + xs.sum| ≤ |a| + |xs.sum| := abs_add a xs.sum
+    calc |a + xs.sum| ≤ |a| + |xs.sum| := abs_add_le a xs.sum
       _ ≤ |a| + absSum xs := by linarith [ih]
 
 /-- **Naive recursive summation under a rounding stream `δ`.**
@@ -173,7 +173,7 @@ theorem recSum_error_le (u : ℝ) (hu : 0 ≤ u) :
       have habs_t_nonneg : 0 ≤ absSum t := absSum_nonneg t
       have hSt_bound : |St| ≤ (1 + u) ^ (t.length - 1) * absSum t := by
         have h1 : |St| ≤ |St - Tt| + |Tt| := by
-          have := abs_add (St - Tt) Tt
+          have := abs_add_le (St - Tt) Tt
           simpa using this
         have h2 : |St - Tt| + |Tt|
             ≤ ((1 + u) ^ (t.length - 1) - 1) * absSum t + absSum t := by
@@ -191,7 +191,7 @@ theorem recSum_error_le (u : ℝ) (hu : 0 ≤ u) :
       have hδ0 : |δ 0| ≤ u := hδ 0
       have hterm1 : |δ 0 * (a + St)| ≤ u * (|a| + |St|) := by
         rw [abs_mul]
-        have hax : |a + St| ≤ |a| + |St| := abs_add a St
+        have hax : |a + St| ≤ |a| + |St| := abs_add_le a St
         have hnn : 0 ≤ |a + St| := abs_nonneg _
         calc |δ 0| * |a + St| ≤ u * |a + St| :=
               mul_le_mul_of_nonneg_right hδ0 hnn
@@ -201,7 +201,7 @@ theorem recSum_error_le (u : ℝ) (hu : 0 ≤ u) :
           ≤ u * (|a| + |St|) + |St - Tt| := by
         rw [hdecomp]
         calc |δ 0 * (a + St) + (St - Tt)|
-            ≤ |δ 0 * (a + St)| + |St - Tt| := abs_add _ _
+            ≤ |δ 0 * (a + St)| + |St - Tt| := abs_add_le _ _
           _ ≤ u * (|a| + |St|) + |St - Tt| := by
                 have := hterm1; linarith
       -- bound the tail error by the IH (htail is already in St/Tt form after `set`)

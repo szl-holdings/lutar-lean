@@ -102,7 +102,7 @@ theorem monotone_additive_linear (g : ℝ → ℝ)
   have hg0 : g 0 = 0 := by
     have h := hg_add 0 0
     rw [add_zero] at h          -- h : g 0 = g 0 + g 0
-    exact (self_eq_add_right.mp h)
+    linarith
   -- c := g 1 ≥ 0 from monotonicity (0 ≤ 1) and g 0 = 0.
   set c : ℝ := g 1 with hc
   have hc0 : 0 ≤ c := by
@@ -129,14 +129,14 @@ theorem monotone_additive_linear (g : ℝ → ℝ)
       exact absurd this (not_le.mpr hgt0)
     · -- c > 0:  t < g t / c, pick rational q in (t, g t / c); then g t ≤ c*q < g t.
       have ht_lt : t < g t / c := by
-        rw [lt_div_iff hc_pos]; rw [mul_comm]; exact hlt
+        rw [lt_div_iff₀ hc_pos]; rw [mul_comm]; exact hlt
       rcases exists_rat_btwn ht_lt with ⟨q, hq_lo, hq_hi⟩
       have hmono : g t ≤ g (q : ℝ) := hg_mono hq_lo.le
       have hval : g (q : ℝ) = c * (q : ℝ) := hg_rat q
       have hle : g t ≤ c * (q : ℝ) := hval ▸ hmono
       -- c * q < g t  from  q < g t / c.
       have hcq_lt : c * (q : ℝ) < g t := by
-        have := (lt_div_iff' hc_pos).mp hq_hi  -- c * q < g t
+        have := (lt_div_iff₀' hc_pos).mp hq_hi  -- c * q < g t
         exact this
       exact absurd hle (not_le.mpr hcq_lt)
   -- Lower bound: c * t ≤ g t.
@@ -158,14 +158,14 @@ theorem monotone_additive_linear (g : ℝ → ℝ)
       exact absurd hzero_le (not_le.mpr hgt_neg)
     · -- c > 0:  g t / c < t, pick rational q in (g t / c, t); g q ≤ g t but g q = c*q > g t.
       have ht_gt : g t / c < t := by
-        rw [div_lt_iff hc_pos]; rw [mul_comm]; exact hlt
+        rw [div_lt_iff₀ hc_pos]; rw [mul_comm]; exact hlt
       rcases exists_rat_btwn ht_gt with ⟨q, hq_lo, hq_hi⟩
       have hmono : g (q : ℝ) ≤ g t := hg_mono hq_hi.le
       have hval : g (q : ℝ) = c * (q : ℝ) := hg_rat q
       have hle : c * (q : ℝ) ≤ g t := hval ▸ hmono
       -- g t < c * q  from  g t / c < q.
       have hgt_lt : g t < c * (q : ℝ) := by
-        have := (div_lt_iff' hc_pos).mp hq_lo  -- g t < c * q
+        have := (div_lt_iff₀' hc_pos).mp hq_lo  -- g t < c * q
         exact this
       exact absurd hle (not_le.mpr hgt_lt)
   exact le_antisymm hupper hlower

@@ -54,7 +54,7 @@ fabricate the supremum step.
 Signed-off-by: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
 -/
 import Mathlib.Probability.Martingale.Basic
-import Mathlib.MeasureTheory.Integral.Bochner
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 open MeasureTheory ProbabilityTheory
 open scoped ENNReal

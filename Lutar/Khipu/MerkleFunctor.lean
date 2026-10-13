@@ -133,7 +133,7 @@ Stated before the functor since `map_comp` is definitionally this fact. -/
 /-- `List.map` distributes over append, specialised to receipt chains. -/
 lemma receipt_map_append (f : KhipuReceipt → KhipuReceipt) (c₁ c₂ : KhipuChain) :
     List.map f (c₁ ++ c₂) = List.map f c₁ ++ List.map f c₂ :=
-  List.map_append f c₁ c₂
+  List.map_append
 
 /-! ## §2.5 — The `KhipuReceiptFunctor`, with Lemmas 1.4 and 1.6 inline -/
 
@@ -150,7 +150,7 @@ def KhipuReceiptFunctor : KhipuReceiptCat ⥤ KhipuReceiptCat where
   map_comp f g := by
     change List.map rehash (List.append f g)
       = List.append (List.map rehash f) (List.map rehash g)
-    exact List.map_append rehash f g
+    exact List.map_append
 
 /-- Lemma 1.4 — identity preservation, restated. -/
 lemma khipuFunctor_map_id (h : KhipuReceiptCat) :
