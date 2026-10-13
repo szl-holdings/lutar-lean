@@ -281,6 +281,16 @@ jobs:
             lake-manifest.json
           if-no-files-found: error
 
+      # Step 5 of the header contract. Before this step existed the drift script
+      # was never called, so a changed declaration/axiom/sorry count or a new
+      # axiom name could land without touching the committed baseline. It runs
+      # after the upload so the measured numbers stay downloadable on failure.
+      - name: Numbers drift gate (measured vs .github/data/lean_numbers.json)
+        run: |
+          python3 .github/scripts/check_numbers_drift.py \
+            --baseline .github/data/lean_numbers.json \
+            --measured lean_numbers.measured.json
+
       # ---- Putnam showcase REAL/DEMO label honesty gate ----
       # The showcase (Showcase/PutnamLean/*.lean) lives OUTSIDE Lutar/, so the
       # canonical numbers/drift gate above does not cover it. This gate keeps each
