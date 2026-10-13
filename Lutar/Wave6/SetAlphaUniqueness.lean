@@ -272,7 +272,8 @@ theorem diagLog_continuous (F : (Fin n → ℝ) → ℝ)
     rw [← continuousOn_univ]
     have h := (hCont.comp hembed.continuousOn hmaps)
     -- h : ContinuousOn (F ∘ embed) univ ; unfold the composition to the lambda form.
-    simpa [Function.comp] using h
+    unfold Function.comp at h
+    exact h
   -- log is continuous on {0}ᶜ; F(exp t,…) > 0 ⇒ ≠ 0, so the composite is continuous.
   have hmem : ∀ t : ℝ, F (fun _ : Fin n => Real.exp t) ∈ ({0}ᶜ : Set ℝ) := by
     intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
@@ -398,7 +399,8 @@ theorem mvLog_continuous (F : (Fin n → ℝ) → ℝ)
   have hFe : Continuous (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i))) := by
     rw [← continuousOn_univ]
     have h := (hCont.comp hembed.continuousOn hmaps)
-    simpa [Function.comp] using h
+    unfold Function.comp at h
+    exact h
   have hmem : ∀ t : Fin n → ℝ, F (fun i : Fin n => Real.exp (t i)) ∈ ({0}ᶜ : Set ℝ) := by
     intro t; simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; exact (hFpos t).ne'
   have hlog : Continuous (Real.log ∘ (fun t : Fin n → ℝ => F (fun i : Fin n => Real.exp (t i)))) :=

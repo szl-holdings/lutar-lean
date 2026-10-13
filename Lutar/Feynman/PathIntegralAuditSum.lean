@@ -208,7 +208,7 @@ has modulus ≤ 1 in the Euclidean (imaginary-time) setting.
 /-- **Theorem A-1 (Z_Λ Non-negativity):** Z_Λ ≥ 0.
     Immediate from NNReal non-negativity. -/
 theorem z_lambda_nonneg (fiber : Finset Execution) :
-    0 ≤ Z_Λ fiber := zero_le _
+    0 ≤ Z_Λ fiber := zero_le
 
 /-- **Theorem A-2 (Z_Λ Upper Bound):** Z_Λ(fiber) ≤ 1 for any non-empty fiber.
     Proof: each Λ(exec) ≤ 1, so the mean ≤ 1.
@@ -218,7 +218,7 @@ theorem z_lambda_nonneg (fiber : Finset Execution) :
     Estimated effort: 4h Lean sprint. -/
 theorem z_lambda_le_one (fiber : Finset Execution) (hne : 0 < fiber.card) :
     Z_Λ fiber ≤ 1 := by
-  have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
+  have hne' : fiber.card ≠ 0 := ne_of_gt hne
   simp [Z_Λ, hne']
   -- Need: (∑ exec ∈ fiber, execLambda exec) / fiber.card ≤ 1
   -- i.e.  ∑ exec ∈ fiber, execLambda exec ≤ fiber.card
@@ -308,7 +308,7 @@ theorem fiber_collapse
     (exec_rep : Execution)
     (h_rep : exec_rep ∈ fiber) :
     Z_Λ fiber = execLambda exec_rep := by
-  have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
+  have hne' : fiber.card ≠ 0 := ne_of_gt hne
   simp only [Z_Λ, hne', dite_false]
   -- All summands equal execLambda exec_rep by h_inv
   have h_const : ∀ exec ∈ fiber, execLambda exec = execLambda exec_rep :=
@@ -362,14 +362,14 @@ theorem z_lambda_insert_mono
     (hne : 0 < fiber.card)
     (h_above_avg : Z_Λ fiber < execLambda exec_new) :
     Z_Λ fiber < Z_Λ (insert exec_new fiber) := by
-  have hne' : fiber.card ≠ 0 := Nat.not_eq_zero_of_lt hne
+  have hne' : fiber.card ≠ 0 := ne_of_gt hne
   have hins_card : (insert exec_new fiber).card = fiber.card + 1 :=
-    Finset.card_insert_of_not_mem h_new_not_in
+    Finset.card_insert_of_notMem h_new_not_in
   have hins_card_ne : (insert exec_new fiber).card ≠ 0 := by rw [hins_card]; omega
   -- NNReal positivity facts
   have hn_nn : (0 : NNReal) < (fiber.card : NNReal) := by exact_mod_cast hne
   have hn1_nn : (0 : NNReal) < (fiber.card : NNReal) + 1 := by
-    exact lt_of_lt_of_le hn_nn (le_add_of_nonneg_right (zero_le 1))
+    exact lt_of_lt_of_le hn_nn (le_add_of_nonneg_right zero_le)
   -- Unfold Z_Λ fiber in h_above_avg (in NNReal)
   simp only [Z_Λ, hne', dite_false] at h_above_avg
   -- h_above_avg : (∑ exec ∈ fiber, execLambda exec) / ↑fiber.card < execLambda exec_new
@@ -392,7 +392,7 @@ theorem z_lambda_insert_mono
     rw [hins_card]; push_cast; ring
   rw [hsum_ins, hcard_ins]
   -- Goal: S / n < (L + S) / (n + 1)
-  rw [div_lt_div_iff hn_nn hn1_nn]
+  rw [div_lt_div_iff₀ hn_nn hn1_nn]
   -- Goal: S * (n + 1) < (L + S) * n
   -- i.e. S*n + S < L*n + S*n, i.e. ∑ < n * L, which is hmul_nn
   have key : S * n + S < S * n + n * L := by

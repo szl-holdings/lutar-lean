@@ -69,7 +69,7 @@ theorem lambda_satisfiesAxioms_round13 {k : ℕ} (hk : 0 < k) :
       intro x y hxy
       simp only [Λ, hk.ne', dite_false]
       apply NNReal.rpow_le_rpow
-      · exact Finset.prod_le_prod (fun i _ => zero_le _) (fun i _ => hxy i)
+      · exact Finset.prod_le_prod₀ (fun i _ => zero_le) (fun i _ => hxy i)
       · positivity
     A2 := by
       intro c x
@@ -189,7 +189,6 @@ theorem maxAgg_ne_Lambda : maxAgg ≠ Λ 2 := by
   intro h
   -- evaluate both sides at the vector (4, 1)
   have hx := congrArg (fun F => F (![4, 1] : Axes 2)) h
-  simp only at hx
   -- LHS = 4 ⊔ 1 = 4
   have hL : maxAgg (![4, 1] : Axes 2) = 4 := by
     simp [maxAgg]
