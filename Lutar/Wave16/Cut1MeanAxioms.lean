@@ -86,6 +86,6 @@ theorem geoBin_mono_left {a a' : NNReal} (b : NNReal) (h : a ≤ a') :
     Lutar.Wave15.geoBin a b ≤ Lutar.Wave15.geoBin a' b := by
   unfold Lutar.Wave15.geoBin
   apply NNReal.rpow_le_rpow _ (by norm_num)
-  exact mul_le_mul_right' h b
+  exact mul_le_mul_of_nonneg_right h (zero_le : (0 : NNReal) ≤ b)
 
 end Lutar.Wave16

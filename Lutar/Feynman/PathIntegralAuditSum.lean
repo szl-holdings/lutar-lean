@@ -396,7 +396,8 @@ theorem z_lambda_insert_mono
   -- Goal: S * (n + 1) < (L + S) * n
   -- i.e. S*n + S < L*n + S*n, i.e. ∑ < n * L, which is hmul_nn
   have key : S * n + S < S * n + n * L := by
-    exact add_lt_add_left hmul_nn (S * n)
+    simpa only [add_comm S (S * n), add_comm (n * L) (S * n)] using
+      add_lt_add_left hmul_nn (S * n)
   calc S * (n + 1)
       = S * n + S * 1 := by ring
     _ = S * n + S := by ring
