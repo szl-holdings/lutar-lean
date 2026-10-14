@@ -352,9 +352,9 @@ def f3_genome_valid_decidable (g : Genome) : Decidable (genomeValid g = true) :=
 *backward*: `dst < src` (a node may only cite already-inserted nodes). Under
 this invariant the strict order `<` on insertion indices witnesses acyclicity —
 `<` is irreflexive and transitive, so no chain of backward edges can return to
-its start. Appending a fresh node `k` (the new maximum index) with edges only to
-existing nodes (all `< k`) introduces no self-loop and no forward edge, so the
-DAG stays acyclic. Proved over `Nat` (Mathlib-free) via `Nat.lt_irrefl` /
+its start. Appending edges from a node `k` with every target `< k` (`k` need
+not be fresh or the maximum index) introduces no self-loop and no forward edge,
+so the DAG stays acyclic. Proved over `Nat` (Mathlib-free) via `Nat.lt_irrefl` /
 `Nat.lt_trans` — the well-founded-order route flagged in the original docstring. -/
 
 /-- F4a — No self-loop: under the backward-edge invariant (`dst < src`), an edge
@@ -374,9 +374,9 @@ theorem f4_khipu_reach_strictly_smaller (src mid dst : Nat)
     (e1 : mid < src) (e2 : dst < mid) : dst < src :=
   Nat.lt_trans e2 e1
 
-/-- F4 — Append preserves acyclicity: appending node `k` (the new largest index)
-    with every new edge target `t < k` adds no self-loop and no edge that could
-    close a cycle into the existing DAG. The append-only DAG stays acyclic. -/
+/-- F4 — Append preserves acyclicity: an edge from `k` (not necessarily fresh or
+    largest) to a target `t < k` is no self-loop and no edge that could close a
+    cycle into the existing DAG. The append-only DAG stays acyclic. -/
 theorem f4_khipu_dag_acyclic (k t : Nat) (h : t < k) : t < k ∧ k ≠ t :=
   ⟨h, fun heq => Nat.lt_irrefl _ (heq ▸ h)⟩
 
