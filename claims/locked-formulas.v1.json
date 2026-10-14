@@ -37,7 +37,7 @@
     "public_wording": "Lambda uniqueness is Conjecture 1. Unconditional uniqueness under bare A1-A5 is machine-checked false. Conditional uniqueness is experimental, outside the locked eight."
   },
   "khipu_distinctions": {
-    "f4_proves": "Acyclicity of a Nat-indexed edge list under the backward-edge invariant dst < src, including append of a fresh max node.",
+    "f4_proves": "Acyclicity of a Nat-indexed edge list under the backward-edge invariant dst < src, including appending edges from a node k whose targets are all < k (k need not be fresh or maximal).",
     "f4_does_not_prove": [
       "Byzantine agreement",
       "quorum safety under equivocation",
@@ -75,7 +75,7 @@
     {
       "claim_id": "F4",
       "name": "Khipu DAG acyclicity under backward edges",
-      "exact_mathematical_statement": "If every edge (src, dst) satisfies dst < src, reachability strictly decreases the node index, so no node reaches itself; appending edges from a fresh max node k to targets < k preserves the invariant and acyclicity.",
+      "exact_mathematical_statement": "If every edge (src, dst) satisfies dst < src, reachability strictly decreases the node index, so no node reaches itself; appending edges from a node k whose targets are all < k (k need not be fresh or maximal) preserves the invariant and acyclicity.",
       "hypotheses": ["KhipuBackwardInvariant es", "new edges have source k and target < k"],
       "theorem_declarations": [
         "f4_khipu_no_self_loop",
@@ -95,7 +95,7 @@
       "counterexamples": [
         {"input": "edge (0,1) violating dst < src", "shows": "a two-cycle (0,1),(1,0) is possible without the invariant"}
       ],
-      "public_wording": "Locked F4 proves acyclicity for the encoded backward-edge Nat DAG, including append of a fresh max node."
+      "public_wording": "Locked F4 proves acyclicity for the encoded backward-edge Nat DAG, including appending edges from a node k whose targets are all < k (k need not be fresh or maximal)."
     },
     {
       "claim_id": "F7",

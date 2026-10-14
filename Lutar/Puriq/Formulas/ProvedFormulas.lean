@@ -33,8 +33,8 @@
     • F4 now models the Khipu DAG as a `List (Nat × Nat)` edge set under the
       backward-edge invariant `dst < src`, defines reachability as the transitive
       closure, and PROVES (a) any path strictly decreases the node index, (b) NO
-      node reaches itself (acyclic), and (c) appending a fresh max node `k` with
-      only backward edges PRESERVES acyclicity.
+      node reaches itself (acyclic), and (c) appending edges from `k` to targets
+      `< k` (`k` need not be fresh or maximal) PRESERVES acyclicity.
     • F7 now models a FIFO channel (`enqueue` = append to back, `dequeue`/`drain`
       = serve from front) and PROVES the drained RECEPTION order EQUALS the SEND
       order (`drain (enqueueAll [] msgs) = msgs`), plus a positional witness
@@ -92,7 +92,8 @@ Model: a Khipu DAG is an edge set `Edges = List (Nat × Nat)` over nodes
 reachability as the (length ≥ 1) transitive closure of single edges and prove
 the substantive property: under the invariant the transitive closure is
 IRREFLEXIVE — no node reaches itself — i.e. the graph is ACYCLIC, and appending
-a fresh max node `k` (all targets `< k`) PRESERVES this. -/
+edges from `k` to targets `< k` (`k` need not be fresh or maximal) PRESERVES
+this. -/
 
 /-- A Khipu DAG edge set: a list of directed edges `(src, dst)`. -/
 abbrev KhipuEdges := List (Nat × Nat)
@@ -144,9 +145,9 @@ theorem f4_khipu_no_cycle
   intro r
   exact Nat.lt_irrefl a (f4_khipu_reach_decreases es inv r)
 
-/-- **F4 APPEND PRESERVES THE INVARIANT.** Appending edges from a fresh max node
-`k` (every new edge has source `k` and target `< k`) to an invariant-respecting
-edge set keeps the backward-edge invariant. -/
+/-- **F4 APPEND PRESERVES THE INVARIANT.** Appending edges from a node `k` (every
+new edge has source `k` and target `< k`; `k` need not be fresh or maximal) to
+an invariant-respecting edge set keeps the backward-edge invariant. -/
 theorem f4_khipu_append_preserves_invariant
     (es : KhipuEdges) (inv : KhipuBackwardInvariant es)
     (k : Nat) (newEdges : KhipuEdges)
@@ -158,10 +159,11 @@ theorem f4_khipu_append_preserves_invariant
   · have hk' := hk e h
     rw [hk'.1]; exact hk'.2
 
-/-- **F4 — Append preserves acyclicity (MAIN).** Appending a fresh node `k`
-that points ONLY to strictly-earlier nodes keeps the Khipu DAG ACYCLIC: the
-extended edge set still has no directed cycle. This is the genuine
-append-preserves-acyclicity property (NOT a repackaging of a hypothesis). -/
+/-- **F4 — Append preserves acyclicity (MAIN).** Appending edges from a node `k`
+whose targets are ALL `< k` (`k` need not be fresh or maximal) keeps the Khipu
+DAG ACYCLIC: the extended edge set still has no directed cycle. This is the
+genuine append-preserves-acyclicity property (NOT a repackaging of a
+hypothesis). -/
 theorem f4_khipu_dag_acyclic_preserved
     (es : KhipuEdges) (inv : KhipuBackwardInvariant es)
     (k : Nat) (newEdges : KhipuEdges)
