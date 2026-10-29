@@ -17,6 +17,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+from unittest import mock
 
 _TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(_TEST_DIR)
@@ -102,6 +103,28 @@ def test_compiled_surface_rejects_unbuilt_names():
 
 def test_claim_map_matches_locked_guard():
     assert not RESULT["claim_map_violations"], RESULT["claim_map_violations"]
+
+
+def test_claim_toolchain_matches_checkout_pin():
+    pin = "leanprover/lean4:v4.34.1"
+    with mock.patch("builtins.open", mock.mock_open(read_data=pin + "\n")):
+        assert not guard.claim_toolchain_violations({"lean_toolchain": pin}, ".")
+
+
+def test_claim_toolchain_rejects_stale_missing_and_invalid_metadata():
+    pin = "leanprover/lean4:v4.34.1"
+    for claim in ({}, {"lean_toolchain": "leanprover/lean4:v4.18.0"},
+                  {"lean_toolchain": None}, {"lean_toolchain": [pin]}):
+        with mock.patch("builtins.open", mock.mock_open(read_data=pin + "\n")):
+            assert guard.claim_toolchain_violations(claim, "."), claim
+
+
+def test_claim_toolchain_rejects_unavailable_checkout_pin():
+    claim = {"lean_toolchain": "leanprover/lean4:v4.34.1"}
+    with mock.patch("builtins.open", side_effect=FileNotFoundError("missing pin")):
+        assert guard.claim_toolchain_violations(claim, ".")
+    with mock.patch("builtins.open", mock.mock_open(read_data="\n")):
+        assert guard.claim_toolchain_violations(claim, ".")
 
 
 if __name__ == "__main__":

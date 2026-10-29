@@ -477,6 +477,18 @@ def compiled_name_violations(md_text: str, compiled_index: dict, guard_names: li
     return violations
 
 
+def claim_toolchain_violations(claim_map: dict, repo_root: str) -> list[str]:
+    """Bind claim metadata to the checkout pin; this does not replay Lean."""
+    try:
+        with open(os.path.join(repo_root, "lean-toolchain"), encoding="utf-8") as fh:
+            toolchain = fh.read().strip()
+    except OSError as exc:
+        return [f"cannot read lean-toolchain: {exc}"]
+    if not toolchain or claim_map.get("lean_toolchain") != toolchain:
+        return ["claim map lean_toolchain must match the non-empty lean-toolchain pin"]
+    return []
+
+
 def claim_map_violations(claim_map: dict, guard_names: list[str]) -> list[str]:
     violations: list[str] = []
     ids = claim_map.get("locked_ids")
@@ -585,7 +597,10 @@ def evaluate(repo_root: str) -> dict:
         "compiled_name_violations": compiled_name_violations(
             md_text, compiled_index, guard_names
         ),
-        "claim_map_violations": claim_map_violations(claim_map, guard_names),
+        "claim_map_violations": (
+            claim_map_violations(claim_map, guard_names)
+            + claim_toolchain_violations(claim_map, repo_root)
+        ),
         "locked_guard_count": len(guard_names),
         "compiled_carrier_count": len(compiled_index["proof_bare"]),
     }
