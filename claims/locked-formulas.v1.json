@@ -2,7 +2,7 @@
   "schema": "szl.lutar.locked-formula-claims/v1",
   "authority": "COMPILED_LOCKED_SURFACE",
   "repository": "szl-holdings/lutar-lean",
-  "lean_toolchain": "leanprover/lean4:v4.18.0",
+  "lean_toolchain": "leanprover/lean4:v4.34.1",
   "compiled_import_path": "Lutar.Puriq.Formulas.ProvedFormulas",
   "compiled_path": "Lutar/Puriq/Formulas/ProvedFormulas.lean",
   "guard_path": "tools/lean/LockedGuard.lean",
