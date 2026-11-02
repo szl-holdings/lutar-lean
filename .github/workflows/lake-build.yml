@@ -274,6 +274,17 @@ jobs:
           fi
           echo "locked-8 axiom guard OK: $OK/$EXPECTED theorems inside {propext, Classical.choice, Quot.sound}"
 
+      - name: Build revision-bound locked-8 evidence manifest
+        run: |
+          set -euo pipefail
+          # Convert the transient kernel log into a deterministic claim-to-
+          # declaration manifest. The builder fails on missing, duplicate,
+          # unexpected or disallowed records and binds every input by SHA-256.
+          python3 .github/scripts/build_locked_formula_evidence.py \
+            --repo-path . \
+            --guard-output locked_guard.out \
+            --output locked-formulas.evidence.json
+
       - name: Set up Python (for canonical numbers)
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -294,6 +305,11 @@ jobs:
             lean_numbers.measured.json
             .github/data/lean_numbers.json
             lake-manifest.json
+            locked_guard.out
+            locked-formulas.evidence.json
+            claims/locked-formulas.v1.json
+            tools/lean/LockedGuard.lean
+            Lutar/Puriq/Formulas/ProvedFormulas.lean
           if-no-files-found: error
 
       - name: Post numbers as PR comment

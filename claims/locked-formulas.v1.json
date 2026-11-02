@@ -12,6 +12,10 @@
   "trust_base": ["propext", "Classical.choice", "Quot.sound"],
   "axiom_evidence": {
     "method": "lake env lean tools/lean/LockedGuard.lean collectAxioms",
+    "manifest_schema": "szl.lutar.locked-formula-evidence/v1",
+    "manifest_builder": ".github/scripts/build_locked_formula_evidence.py",
+    "workflow_artifact_name_pattern": "lean-numbers-<github.sha>",
+    "workflow_artifact_member": "locked-formulas.evidence.json",
     "workflow": ".github/workflows/lake-build.yml",
     "step": "Locked-8 axiom guard (kernel-emitted, fail-closed)",
     "python_check": "DOES_NOT_REPLAY_KERNEL",
