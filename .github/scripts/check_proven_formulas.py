@@ -491,6 +491,20 @@ def claim_toolchain_violations(claim_map: dict, repo_root: str) -> list[str]:
 
 def claim_map_violations(claim_map: dict, guard_names: list[str]) -> list[str]:
     violations: list[str] = []
+    if claim_map.get("schema") != "szl.lutar.locked-formula-claims/v1":
+        violations.append("claim map schema must be szl.lutar.locked-formula-claims/v1")
+    evidence = claim_map.get("axiom_evidence") or {}
+    expected_evidence = {
+        "manifest_schema": "szl.lutar.locked-formula-evidence/v1",
+        "manifest_builder": ".github/scripts/build_locked_formula_evidence.py",
+        "workflow_artifact_name_pattern": "lean-numbers-<github.sha>",
+        "workflow_artifact_member": "locked-formulas.evidence.json",
+    }
+    for key, expected in expected_evidence.items():
+        if evidence.get(key) != expected:
+            violations.append(
+                f"claim map axiom_evidence.{key} must be {expected!r}"
+            )
     ids = claim_map.get("locked_ids")
     if list(ids or []) != LOCKED_ID_ORDER:
         violations.append(f"claim map locked_ids must be exactly {LOCKED_ID_ORDER}")

@@ -17,6 +17,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+from copy import deepcopy
 from unittest import mock
 
 _TEST_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -103,6 +104,21 @@ def test_compiled_surface_rejects_unbuilt_names():
 
 def test_claim_map_matches_locked_guard():
     assert not RESULT["claim_map_violations"], RESULT["claim_map_violations"]
+
+
+def test_claim_map_rejects_missing_or_stale_evidence_manifest_metadata():
+    claim_map = guard.parse_claim_map(REPO_ROOT)
+    guard_names = guard.parse_locked_guard(REPO_ROOT)
+    for key in (
+        "manifest_schema",
+        "manifest_builder",
+        "workflow_artifact_name_pattern",
+        "workflow_artifact_member",
+    ):
+        mutated = deepcopy(claim_map)
+        mutated["axiom_evidence"].pop(key)
+        violations = guard.claim_map_violations(mutated, guard_names)
+        assert any(f"axiom_evidence.{key}" in item for item in violations), violations
 
 
 def test_claim_toolchain_matches_checkout_pin():
