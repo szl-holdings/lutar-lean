@@ -16,15 +16,22 @@ name: Anchor verified snapshot into szl-lake
 #   3. cosign attest-blob (keyless OIDC, DSSE in-toto) over the snapshot. No new
 #      key is introduced -- this is the same keyless Sigstore mechanism as
 #      cosign.yml. Verify the attestation in-CI before publishing.
-#   4. Append a DSSE Khipu receipt, chain_index +1, idempotent, to the ledger's
-#      source of truth: one signed commit to GitHub szl-holdings/szl-lake main
-#      (data/khipu/lutar_lean_receipts.ndjson, szl-lake's re-rendered checked
-#      index, the front-door lake_index.json and the append-only floor), made
-#      against exactly the szl-lake head this run read.
-#   5. Read the commit back, then wait until szl-lake's own hf-sync.yml has
-#      mirrored it to the Hub dataset SZLHOLDINGS/szl-lake (byte-identical at an
-#      immutable revision). This workflow holds no Hugging Face credential and
-#      never writes the Hub: szl-lake's hf-sync is its only writer (HF plan D1).
+#   4. PROPOSE a DSSE Khipu receipt, chain_index +1, idempotent, for the
+#      ledger's source of truth as a pull request against szl-holdings/szl-lake
+#      main: a proposal branch (anchor/lutar-lean/...) created at exactly the
+#      szl-lake head this run read, carrying one signed commit with
+#      data/khipu/lutar_lean_receipts.ndjson, szl-lake's re-rendered checked
+#      index, the front-door lake_index.json and the append-only floor. This
+#      workflow never writes szl-lake main; the append lands only when the pull
+#      request passes szl-lake's own checks and is merged. At most one
+#      lutar-lean append is pending at a time (anchor_szl_lake.py fails closed
+#      otherwise, because both would claim the same chain_index).
+#   5. Read every proposed file back at the new commit before the pull request
+#      is opened. After merge, szl-lake's own hf-sync.yml mirrors it to the Hub
+#      dataset SZLHOLDINGS/szl-lake (immutable readback) and
+#      verify-anchor-receipts.yml re-verifies both surfaces. This workflow holds
+#      no Hugging Face credential and never writes the Hub: szl-lake's hf-sync is
+#      its only writer (HF plan D1).
 #
 # Honesty: the per-snapshot honesty block is carried verbatim into the receipt;
 # each milestone states its own truthful status (proven / conditional / open) and
@@ -70,8 +77,8 @@ permissions: {}
 # conjecture-factory.yml) read-modify-write the same Khipu ledger
 # (data/khipu/lutar_lean_receipts.ndjson, chain_index +1), so they share one
 # ledger lock instead of one group per workflow. It is not an hf-write/* lock:
-# neither job writes the Hub. The commit's expected-head check also rejects a
-# concurrent writer from any other repo.
+# neither job writes the Hub. A proposal that conflicts on the ledger after
+# another append merged cannot merge cleanly; close it and re-run.
 concurrency:
   group: szl-lake-ledger/lutar-lean
   cancel-in-progress: false
@@ -80,8 +87,7 @@ jobs:
   anchor:
     name: Anchor proof-milestone snapshot (cosign keyless -> szl-lake)
     runs-on: ubuntu-latest
-    # Includes up to 20 minutes waiting for szl-lake hf-sync to mirror the commit.
-    timeout-minutes: 45
+    timeout-minutes: 25
     permissions:
       contents: read
       id-token: write   # keyless OIDC signing
@@ -104,10 +110,18 @@ jobs:
       - name: Validate source run is GREEN
         id: src
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # Dispatch inputs reach the script as data, never as interpolated code.
+          SOURCE_RUN_ID: ${{ github.event.inputs.run_id }}
+          EXPECTED_WORKFLOW: ${{ github.event.inputs.source_workflow }}
         with:
           script: |
-            const run_id = Number('${{ github.event.inputs.run_id }}');
-            const expected = '${{ github.event.inputs.source_workflow }}';
+            const run_id = Number(process.env.SOURCE_RUN_ID);
+            if (!Number.isSafeInteger(run_id) || run_id <= 0) {
+              core.setFailed(`run_id must be a positive integer, got '${process.env.SOURCE_RUN_ID}'`);
+              return;
+            }
+            const expected = process.env.EXPECTED_WORKFLOW;
             const {owner, repo} = context.repo;
             const {data: run} = await github.rest.actions.getWorkflowRun({owner, repo, run_id});
             core.info(`source run: ${run.name} #${run.id} status=${run.status} conclusion=${run.conclusion} sha=${run.head_sha} branch=${run.head_branch}`);
@@ -235,9 +249,16 @@ jobs:
       - name: Install anchor deps (hash-locked)
         run: python3 -m pip install --disable-pip-version-check --quiet --require-hashes -r requirements/ci/anchor.txt
 
-      - name: Anchor into szl-lake (GitHub source of truth; Hub via szl-lake hf-sync)
+      - name: Propose the append to szl-lake (pull request; Hub via szl-lake hf-sync after merge)
         env:
+          # Needs contents:write + pull-requests:write on szl-holdings/szl-lake
+          # only. Owner action: replace the owner PAT behind this secret with a
+          # GitHub App installation token scoped to szl-lake with exactly those
+          # two permissions.
           SZL_LAKE_TOKEN: ${{ secrets.SZL_LAKE_TOKEN }}
+          SOURCE_RUN_ID: ${{ github.event.inputs.run_id }}
+          SOURCE_RUN_URL: ${{ steps.src.outputs.html_url }}
+          SOURCE_WORKFLOW: ${{ steps.src.outputs.name }}
         run: |
           set -euo pipefail
           python3 .github/scripts/anchor_szl_lake.py \
@@ -245,22 +266,28 @@ jobs:
             --snapshot "$SNAPSHOT_FILE" \
             --bundle snapshot.cosign.bundle \
             --predicate-type "$PREDICATE_TYPE" \
-            --source-run-id "${{ github.event.inputs.run_id }}" \
-            --source-run-url "${{ steps.src.outputs.html_url }}" \
-            --source-workflow "${{ steps.src.outputs.name }}"
+            --source-run-id "$SOURCE_RUN_ID" \
+            --source-run-url "$SOURCE_RUN_URL" \
+            --source-workflow "$SOURCE_WORKFLOW"
           echo "----- anchor_result.json -----"
-          cat anchor_result.json || echo "(idempotent no-op: nothing newly anchored, no anchor_result.json)"
+          if [ -f anchor_result.json ]; then
+            cat anchor_result.json
+          else
+            echo "(idempotent no-op: already on szl-lake main or already proposed; no anchor_result.json)"
+          fi
 
       # Positive confirmation to the shared a11oy-uptime ntfy topic so the team
-      # SEES a new proof receipt land (mirrors verify-anchor-receipts.yml's
-      # failure alert, but for the happy path). Fires ONLY when this run actually
-      # appended a new receipt -- on an idempotent no-op the script returns before
-      # writing anchor_result.json, so there is no file and no spurious ping.
-      # SLACK_WEBHOOK_URL points at the org's ntfy relay; soft-skip with a warning
-      # if it is unset (the anchor + floor bump still landed). Honesty: the
-      # per-snapshot status is carried verbatim, never inflated to a blanket
-      # "proven" (Theorem U is REAL-conditional; Conjecture 1 is OPEN / FALSE).
-      - name: Confirm new anchor to the team (a11oy-uptime ntfy)
+      # SEES a new proof receipt proposed for review (mirrors
+      # verify-anchor-receipts.yml's failure alert, but for the happy path).
+      # Fires ONLY when this run actually opened a proposal -- on an idempotent
+      # no-op the script returns before writing anchor_result.json, so there is
+      # no file and no spurious ping. SLACK_WEBHOOK_URL points at the org's ntfy
+      # relay; soft-skip with a warning if it is unset (the pull request is open
+      # either way). Honesty: the receipt is PROPOSED, not landed, until the
+      # szl-lake pull request merges, and the per-snapshot status is carried
+      # verbatim, never inflated to a blanket "proven" (Theorem U is
+      # REAL-conditional; Conjecture 1 is OPEN / FALSE).
+      - name: Confirm the proposed anchor to the team (a11oy-uptime ntfy)
         if: ${{ success() }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -272,7 +299,7 @@ jobs:
             exit 0
           fi
           if [ -z "${SLACK_WEBHOOK_URL}" ]; then
-            echo "::warning::SLACK_WEBHOOK_URL secret not configured — skipping the team confirmation. The anchor + verify-anchor-receipts floor bump still landed; see anchor_result.json."
+            echo "::warning::SLACK_WEBHOOK_URL secret not configured — skipping the team confirmation. The szl-lake pull request (receipt + verify-anchor-receipts floor bump) is open either way; see anchor_result.json."
             exit 0
           fi
           text=$(python3 - <<'PY'
@@ -282,33 +309,34 @@ jobs:
           run_url = os.environ.get("RUN_URL", "")
           bumped = r.get("baseline_bumped")
           floor = r.get("baseline_min_receipts")
-          floor_line = (f"verify-anchor-receipts floor auto-raised to min_receipts={floor}"
+          floor_line = (f"verify-anchor-receipts floor raised to min_receipts={floor} in the same pull request"
                         if bumped else f"verify-anchor-receipts floor unchanged (min_receipts={floor})")
+          pr = r.get("pull_request") or {}
           lines = [
-              f":white_check_mark: *New szl-lake proof anchor landed* — kind `{r.get('kind')}` "
-              f"chain_index {r.get('chain_index')} in szl-holdings/szl-lake.",
+              f":mag: *New szl-lake proof anchor proposed for review* — kind `{r.get('kind')}` "
+              f"chain_index {r.get('chain_index')}: {pr.get('url')} (lands on szl-lake main only when merged).",
               f"*Milestone:* {r.get('milestone_title')} — status {r.get('milestone_status') or 'n/a'}",
               f"*Honesty:* {r.get('honesty_note')}",
               f"*Floor:* {floor_line}",
               f"*Receipt:* {r.get('receipt_id')}",
               f"*Rekor log index:* {r.get('rekor_log_index')}",
-              f"*Commit:* {r.get('github_commit')}",
+              f"*Proposal commit:* {r.get('github_commit')}",
               f"*Anchor run:* {run_url}",
           ]
           print("\n".join(lines))
           PY
           )
           payload=$(jq -n --arg text "$text" '{text: $text}')
-          echo "Posting new-anchor confirmation to webhook..."
+          echo "Posting proposed-anchor confirmation to webhook..."
           code=$(curl -sS -o /tmp/confirm_resp.txt -w '%{http_code}' \
                    -X POST -H 'Content-Type: application/json' \
                    --max-time 20 --data "${payload}" "${SLACK_WEBHOOK_URL}")
           echo "Webhook responded HTTP ${code}."
           if [ "${code}" -lt 200 ] || [ "${code}" -ge 300 ]; then
-            echo "::error::New-anchor confirmation webhook POST failed (HTTP ${code}): $(cat /tmp/confirm_resp.txt)"
+            echo "::error::Proposed-anchor confirmation webhook POST failed (HTTP ${code}): $(cat /tmp/confirm_resp.txt)"
             exit 1
           fi
-          echo "New-anchor confirmation delivered."
+          echo "Proposed-anchor confirmation delivered."
 
       - name: Upload anchor receipt + bundle
         if: always()

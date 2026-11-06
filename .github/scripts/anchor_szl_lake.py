@@ -15,10 +15,12 @@ downloaded from a GREEN build run and signed with `cosign attest-blob`
   3. chain_index advances by exactly one over the existing lutar-lean chain
      (genesis count 0 -> first receipt chain_index 1, prev_hash null). Idempotent:
      if this (kind, kernel_commit, snapshot) is already anchored, it is a no-op.
-  4. Appends the receipt to the ledger's source of truth, GitHub
-     szl-holdings/szl-lake, in ONE GitHub-signed commit (GraphQL
-     createCommitOnBranch with a DCO Signed-off-by trailer; main requires signed
-     commits + DCO) made against exactly the szl-lake head this run read:
+  4. PROPOSES the append to the ledger's source of truth, GitHub
+     szl-holdings/szl-lake, as a pull request against szl-lake main. It never
+     writes szl-lake main itself. A proposal branch (anchor/lutar-lean/...) is
+     created at exactly the szl-lake head this run read, and ONE GitHub-signed
+     commit (GraphQL createCommitOnBranch with a DCO Signed-off-by trailer,
+     expectedHeadOid = that head) carries:
        * data/khipu/lutar_lean_receipts.ndjson (the ledger, byte-preserving append)
        * data/lake_index.json (szl-lake's checked source index, re-rendered by
          szl-lake's own scripts/publish_hf_dataset.py --write-index)
@@ -27,10 +29,23 @@ downloaded from a GREEN build run and signed with `cosign attest-blob`
          only refreshed when kind == theorem-u)
        * the append-only verify-anchor-receipts floor, and the per-theorem
          manifest under data/attestations/innovations/theorems/ when present.
-  5. Reads the commit back from GitHub, then waits for szl-lake's own
-     hf-sync.yml to mirror data/** to the Hub dataset SZLHOLDINGS/szl-lake and
-     asserts, at an immutable Hub revision, that khipu/lutar_lean_receipts.ndjson
-     is byte-identical to the committed ledger (chain advanced by exactly one).
+     The pull request is then reviewed and CI-checked by szl-lake's own gates
+     (hf-dataset-contract --check-index, hf-sync's offline contract) before it
+     can land. At most one lutar-lean append is pending at a time: an open
+     proposal for the same (kind, kernel_commit, snapshot) makes a re-run a
+     no-op, and an open proposal for anything else fails this run closed,
+     because both would claim the same chain_index.
+  5. Reads every proposed file back from GitHub at the new commit before the
+     pull request is opened. The Hub mirror happens only after the pull request
+     merges: szl-lake's hf-sync.yml publishes data/** and reads every byte back
+     at an immutable Hub revision, and szl-lake's verify-anchor-receipts.yml
+     re-verifies the chain on both surfaces. anchor_result.json records the
+     mirror as PENDING_MERGE, never as verified.
+
+Credential: SZL_LAKE_TOKEN needs contents:write and pull-requests:write on
+szl-holdings/szl-lake only. It is an owner PAT today; the intended credential
+is a GitHub App installation token scoped to that one repository with exactly
+those two permissions (owner action).
 
 This script never writes the Hub and holds no Hugging Face credential. szl-lake's
 hf-sync.yml is the only writer of SZLHOLDINGS/szl-lake from this pipeline (HF plan
@@ -51,13 +66,18 @@ import os
 import re
 import subprocess
 import sys
-import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 HF_REPO = "SZLHOLDINGS/szl-lake"
 GH_REPO = "szl-holdings/szl-lake"
+GH_API = "https://api.github.com"
+# The ledger lands on szl-lake main only through a reviewed pull request. Every
+# proposal branch lives under this prefix in szl-lake itself; at most one may be
+# open at a time (see check_pending_anchors).
+LAKE_BASE_BRANCH = "main"
+ANCHOR_BRANCH_PREFIX = "anchor/lutar-lean/"
 # szl-lake's hf-sync.yml publishes data/** at the dataset root, so every Hub path
 # below is the GitHub path with GH_DATA_PREFIX removed.
 GH_DATA_PREFIX = "data/"
@@ -333,23 +353,6 @@ def require_surfaces_agree(github_bytes: bytes, hub_bytes) -> None:
             "with a green szl-lake hf-sync run before anchoring.")
 
 
-def wait_for_hub_mirror(expected: bytes, timeout_s: int, interval_s: int = 30,
-                        get=_http_get, sleep=time.sleep, clock=time.monotonic):
-    """Poll the Hub until khipu/lutar_lean_receipts.ndjson equals `expected` at an
-    immutable revision. Returns that revision, or None when the timeout expires."""
-    deadline = clock() + timeout_s
-    while True:
-        try:
-            revision = hf_main_revision(get)
-            if hf_read_at(HF_NDJSON, revision, get) == expected:
-                return revision
-        except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-            print(f"::warning::Hub read failed while waiting for the mirror: {exc}")
-        if clock() >= deadline:
-            return None
-        sleep(interval_s)
-
-
 # --------------------------------------------------------------------------- #
 # szl-lake checkout staging (the ledger's source of truth)
 # --------------------------------------------------------------------------- #
@@ -436,8 +439,159 @@ def build_theorem_manifest(snapshot: dict, snapshot_sha: str, kind: str,
 
 
 # --------------------------------------------------------------------------- #
-# GitHub szl-lake I/O (signed commit via GraphQL)
+# Proposal identity + the one-pending-append rule (pure, unit-tested)
 # --------------------------------------------------------------------------- #
+_SLUG = re.compile(r"[^a-z0-9]+")
+SNAPSHOT_SHA = re.compile(r"^[0-9a-f]{64}$")
+
+
+def proposal_suffix(env=None) -> str:
+    """A per-attempt suffix for the proposal branch: this workflow run's id and
+    attempt in Actions, a UTC timestamp elsewhere. A closed, unmerged proposal
+    therefore never blocks a later attempt with a branch-name collision."""
+    env = os.environ if env is None else env
+    run_id = env.get("GITHUB_RUN_ID", "")
+    if run_id:
+        return f"run{run_id}-{env.get('GITHUB_RUN_ATTEMPT') or '1'}"
+    return "local" + _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def anchor_branch_name(kind: str, chain_index: int, snapshot_sha: str, suffix: str) -> str:
+    """The szl-lake branch that proposes one ledger append.
+
+    anchor/lutar-lean/<chain_index>-<kind>-<snapshot_sha[:12]>-<suffix>; every
+    component is reduced to [a-z0-9-], so the result is always a valid ref name.
+    """
+    if isinstance(chain_index, bool) or not isinstance(chain_index, int) or chain_index < 1:
+        raise SystemExit(f"::error::chain_index must be a positive integer: {chain_index!r}")
+    if not SNAPSHOT_SHA.match(snapshot_sha or ""):
+        raise SystemExit(f"::error::snapshot sha256 is not 64 lowercase hex: {snapshot_sha!r}")
+    slug = _SLUG.sub("-", (kind or "").lower()).strip("-") or "milestone"
+    tail = _SLUG.sub("-", (suffix or "").lower()).strip("-")
+    if not tail:
+        raise SystemExit("::error::empty proposal suffix")
+    return f"{ANCHOR_BRANCH_PREFIX}{chain_index}-{slug}-{snapshot_sha[:12]}-{tail}"
+
+
+def pending_anchor_prs(pulls) -> list:
+    """The open pull requests that propose a lutar-lean ledger append: base
+    szl-lake main and a head branch under ANCHOR_BRANCH_PREFIX in szl-lake
+    itself. A fork's branch with the same name is not a proposal from this
+    pipeline, so it can neither block nor satisfy an anchor run."""
+    out = []
+    for pr in pulls or []:
+        head = pr.get("head") or {}
+        if (pr.get("state") == "open"
+                and (head.get("repo") or {}).get("full_name") == GH_REPO
+                and str(head.get("ref") or "").startswith(ANCHOR_BRANCH_PREFIX)
+                and (pr.get("base") or {}).get("ref") == LAKE_BASE_BRANCH):
+            out.append(pr)
+    return out
+
+
+def check_pending_anchors(pending: list, read_ledger, receipt_kind: str,
+                          kernel_commit: str, snapshot_sha: str):
+    """Apply the one-pending-append rule.
+
+    Returns the open proposal that already appends this exact idempotency tuple
+    (kind, kernel_commit, snapshot) -- a re-run is then a no-op -- or None when
+    nothing is pending. Fails closed when a DIFFERENT append is pending: it
+    claims the same next chain_index, so proposing a second one would fork the
+    chain. `read_ledger(head_sha)` returns the ledger text at that commit.
+    """
+    for pr in pending:
+        ledger = read_ledger((pr.get("head") or {}).get("sha") or "")
+        if find_existing_anchor(parse_ndjson(ledger or ""), receipt_kind,
+                                kernel_commit, snapshot_sha) is not None:
+            return pr
+    if pending:
+        links = ", ".join(str(pr.get("html_url") or f"#{pr.get('number')}") for pr in pending)
+        raise SystemExit(
+            "::error::another lutar-lean ledger append is already pending review in "
+            f"{GH_REPO} ({links}). Merge or close it, then re-run: chain_index must "
+            "advance by exactly one over szl-lake main.")
+    return None
+
+
+def proposal_body(receipt: dict, *, base_oid: str, branch: str, run_url: str,
+                  baseline_line: str, honesty_note: str, verify_cmd: str) -> str:
+    """The pull-request description a szl-lake reviewer merges from."""
+    return "\n".join([
+        f"Proposed append to `{GH_NDJSON}` from lutar-lean "
+        f"(`{receipt.get('kind')}`, chain_index **{receipt.get('chain_index')}**).",
+        "",
+        "| Field | Value |",
+        "|---|---|",
+        f"| receipt_id | `{receipt.get('receipt_id')}` |",
+        f"| prev_hash | `{receipt.get('prev_hash')}` |",
+        f"| subject sha256 | `{(receipt.get('subject') or {}).get('sha256')}` |",
+        f"| kernel_commit | `{receipt.get('kernel_commit')}` |",
+        f"| source run | {(receipt.get('source_run') or {}).get('url') or 'n/a'} |",
+        f"| Rekor log index | `{(receipt.get('signing') or {}).get('rekor_log_index')}` |",
+        f"| proposal branch | `{branch}` (created at szl-lake `{base_oid}`) |",
+        "",
+        f"Honesty: {honesty_note}",
+        baseline_line.strip(),
+        "",
+        "Merge rule: the chain must advance by exactly one. Merge only while the "
+        f"ledger tail on `{LAKE_BASE_BRANCH}` is still `prev_hash` above. If this pull "
+        "request conflicts on the ledger, close it and re-run the lutar-lean anchor; "
+        "never edit the receipt by hand (its receipt_id is the hash of its body).",
+        "",
+        "After merge, `hf-sync.yml` mirrors `data/**` to the Hub dataset and reads it "
+        "back at an immutable revision; `verify-anchor-receipts.yml` re-verifies every "
+        "receipt on both surfaces.",
+        "",
+        f"Independent check of the signature: `{verify_cmd}`",
+        "",
+        f"Opened by {run_url or 'a local lutar-lean anchor run'}.",
+    ]) + "\n"
+
+
+# --------------------------------------------------------------------------- #
+# GitHub szl-lake I/O: REST reads/branch/PR, one signed commit via GraphQL
+# --------------------------------------------------------------------------- #
+class GitHubAPIError(RuntimeError):
+    """A GitHub REST call returned an HTTP error."""
+
+    def __init__(self, method: str, path: str, status: int, detail: str):
+        super().__init__(f"GitHub {method} {path} failed: HTTP {status} {detail}")
+        self.status = status
+
+
+def gh_rest(token: str, method: str, path: str, payload=None):
+    """One authenticated GitHub REST call; returns the decoded JSON (None when
+    the response has no body). HTTP errors raise GitHubAPIError."""
+    data = None if payload is None else json.dumps(payload).encode()
+    headers = {"Authorization": f"Bearer {token}", "User-Agent": UA,
+               "Accept": "application/vnd.github+json",
+               "X-GitHub-Api-Version": "2022-11-28"}
+    if data is not None:
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(GH_API + path, data=data, method=method, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            raw = r.read()
+    except urllib.error.HTTPError as e:
+        raise GitHubAPIError(method, path, e.code,
+                             e.read().decode("utf-8", "replace")[:500]) from e
+    return json.loads(raw) if raw else None
+
+
+def list_open_pulls(api) -> list:
+    """Every open pull request against szl-lake main (all pages)."""
+    pulls, page = [], 1
+    while True:
+        batch = api("GET", f"/repos/{GH_REPO}/pulls?state=open&base={LAKE_BASE_BRANCH}"
+                           f"&per_page=100&page={page}")
+        if not isinstance(batch, list):
+            raise SystemExit(f"::error::unexpected pull-request listing from {GH_REPO}: {batch!r}"[:500])
+        pulls.extend(batch)
+        if len(batch) < 100:
+            return pulls
+        page += 1
+
+
 def gh_get_raw(token: str, path: str, ref: str = "main"):
     url = f"https://api.github.com/repos/{GH_REPO}/contents/{path}?ref={ref}"
     req = urllib.request.Request(url, headers={
@@ -466,14 +620,19 @@ def gh_graphql(token: str, query: str, variables: dict):
 
 
 def gh_signed_commit(token: str, additions: list[dict], message: str,
-                     expected_head_oid: str, graphql=None):
-    """Create a GitHub-signed commit on szl-lake main with file additions.
+                     expected_head_oid: str, branch: str, graphql=None):
+    """Create one GitHub-signed commit with file additions on a szl-lake
+    proposal branch (never on szl-lake main).
 
-    `expected_head_oid` is the szl-lake commit the ledger was read from. GitHub
-    rejects the commit when main has moved since, so a concurrent writer can
-    never be overwritten (optimistic concurrency; re-run the anchor to retry).
-    Returns (oid, url).
+    `expected_head_oid` is the szl-lake commit the ledger was read from; the
+    proposal branch is created at exactly that commit, so the new commit's
+    parent is the head that was read. Returns (oid, url).
     """
+    if branch == LAKE_BASE_BRANCH or not str(branch or "").startswith(ANCHOR_BRANCH_PREFIX):
+        raise SystemExit(
+            f"::error::refusing to commit to szl-lake branch {branch!r}: ledger appends "
+            f"are proposed on an {ANCHOR_BRANCH_PREFIX}* branch and reach "
+            f"{LAKE_BASE_BRANCH} only through a reviewed pull request")
     if not FULL_SHA.match(expected_head_oid or ""):
         raise SystemExit(f"::error::expected szl-lake head is not a 40-hex sha: {expected_head_oid!r}")
     graphql = graphql or gh_graphql
@@ -482,7 +641,7 @@ def gh_signed_commit(token: str, additions: list[dict], message: str,
       createCommitOnBranch(input: $input) { commit { oid url } }
     }"""
     variables = {"input": {
-        "branch": {"repositoryNameWithOwner": GH_REPO, "branchName": "main"},
+        "branch": {"repositoryNameWithOwner": GH_REPO, "branchName": branch},
         "message": {"headline": message.split("\n")[0],
                     "body": "\n".join(message.split("\n")[1:]).strip()},
         "fileChanges": {"additions": additions},
@@ -495,6 +654,50 @@ def gh_signed_commit(token: str, additions: list[dict], message: str,
     if not FULL_SHA.match(commit.get("oid") or ""):
         raise SystemExit(f"::error::createCommitOnBranch returned no commit oid: {commit}")
     return commit["oid"], commit["url"]
+
+
+def propose_ledger_append(api, commit, read_back, staged: dict, message: str,
+                          base_oid: str, branch: str, title: str, body: str) -> dict:
+    """Propose the staged szl-lake files as ONE pull request against main.
+
+      1. create `branch` in szl-lake at exactly `base_oid` (the head the ledger
+         was read from);
+      2. `commit(additions, message, base_oid, branch)` -- one GitHub-signed
+         commit on that branch with every staged path;
+      3. `read_back(path, oid)` must return the staged bytes for every path;
+      4. open the pull request (head `branch`, base main).
+
+    `api(method, path, payload)` is the GitHub REST call. When any step after the
+    branch exists fails, the branch is deleted again (so a failed run leaves no
+    half-made proposal and the one-pending-append rule is not tripped by it) and
+    the original error propagates. Returns the commit and pull-request records.
+    """
+    additions = [{"path": rel, "contents": base64.b64encode(text.encode("utf-8")).decode()}
+                 for rel, text in sorted(staged.items())]
+    api("POST", f"/repos/{GH_REPO}/git/refs", {"ref": f"refs/heads/{branch}", "sha": base_oid})
+    try:
+        oid, url = commit(additions, message, base_oid, branch)
+        for rel, text in sorted(staged.items()):
+            if read_back(rel, oid) != text:
+                raise SystemExit(f"::error::szl-lake@{oid} {rel} does not match the staged bytes")
+        pr = api("POST", f"/repos/{GH_REPO}/pulls", {
+            "title": title, "head": branch, "base": LAKE_BASE_BRANCH, "body": body,
+            "maintainer_can_modify": False})
+        if (not isinstance(pr, dict) or isinstance(pr.get("number"), bool)
+                or not isinstance(pr.get("number"), int)
+                or (pr.get("head") or {}).get("ref") != branch
+                or (pr.get("base") or {}).get("ref") != LAKE_BASE_BRANCH):
+            raise SystemExit(f"::error::unexpected pull-request response: {pr!r}"[:500])
+    except BaseException:
+        # Clean up, then let the original failure propagate (never swallowed).
+        try:
+            api("DELETE", f"/repos/{GH_REPO}/git/refs/heads/{branch}")
+            print(f"::notice::deleted the unfinished proposal branch {branch}")
+        except Exception as cleanup_exc:
+            print(f"::warning::could not delete the unfinished proposal branch {branch} "
+                  f"in {GH_REPO} ({cleanup_exc}); delete it by hand")
+        raise
+    return {"commit_oid": oid, "commit_url": url, "pull_request": pr}
 
 
 # --------------------------------------------------------------------------- #
@@ -562,8 +765,6 @@ def main() -> int:
                     help="cosign attestation predicate type used to sign the snapshot")
     ap.add_argument("--lake-checkout", default=None,
                     help="checkout of szl-holdings/szl-lake main (the ledger's source of truth)")
-    ap.add_argument("--hub-mirror-timeout", type=int, default=1200,
-                    help="seconds to wait for szl-lake hf-sync to mirror the commit to the Hub")
     ap.add_argument("--self-test", action="store_true",
                     help="run offline manifest self-tests (no network/cosign/build) and exit")
     args = ap.parse_args()
@@ -577,6 +778,10 @@ def main() -> int:
         ap.error("the following arguments are required: " + ", ".join(missing))
 
     gh_token = os.environ["SZL_LAKE_TOKEN"]
+
+    def api(method, path, payload=None):
+        return gh_rest(gh_token, method, path, payload)
+
     lake = Path(args.lake_checkout).resolve()
     base_oid = lake_head(lake)
 
@@ -619,6 +824,17 @@ def main() -> int:
         print(f"already anchored: kind={kind} kernel_commit={kernel_commit} "
               f"chain_index={already.get('chain_index')} receipt_id={already.get('receipt_id')}")
         print(f"::notice::idempotent no-op (chain length stays {len(existing)})")
+        return 0
+    # One pending append at a time: the same tuple already proposed is a no-op;
+    # any other open proposal claims the same chain_index, so fail closed.
+    pending_pr = check_pending_anchors(
+        pending_anchor_prs(list_open_pulls(api)),
+        lambda head_sha: gh_get_raw(gh_token, GH_NDJSON, ref=head_sha),
+        receipt_kind, kernel_commit, snapshot_sha)
+    if pending_pr is not None:
+        print(f"already proposed: kind={kind} kernel_commit={kernel_commit} in "
+              f"{pending_pr.get('html_url')} (pending review)")
+        print(f"::notice::idempotent no-op (szl-lake main chain length stays {len(existing)})")
         return 0
     prev_count = len(existing)
     chain_index, prev_hash = chain_position(existing)
@@ -762,12 +978,10 @@ def main() -> int:
         changes[GH_DATA_PREFIX + manifest_rel] = manifest_str
 
     # ---- bump the verify-anchor-receipts append-only floor (atomic) ------ #
-    # The floor lives in szl-lake but the in-CI GITHUB_TOKEN there cannot write
-    # main (signed-commits ruleset) and the org blocks Actions from opening PRs.
-    # This anchor already writes szl-lake main with the org-owner SZL_LAKE_TOKEN,
-    # so we raise the floor to the new chain length in the SAME signed commit that
-    # appends the receipt -- there is never a window where the receipt exists but
-    # the floor lags. Append-only: bump_baseline_floor never lowers it.
+    # The floor lives in szl-lake. It is raised to the new chain length in the
+    # SAME signed commit (and therefore the same pull request) that appends the
+    # receipt, so there is never a window on szl-lake main where the receipt
+    # exists but the floor lags. Append-only: bump_baseline_floor never lowers it.
     baseline_raw = read_lake_file(lake, GH_BASELINE)
     baseline_prev = baseline_floor(baseline_raw)
     baseline_str = bump_baseline_floor(baseline_raw, chain_index)
@@ -799,36 +1013,47 @@ def main() -> int:
            f"{baseline_msg_line}"
            f"receipt_id={receipt['receipt_id']}\n"
            f"snapshot_sha256={snapshot_sha}\n"
-           f"Hub mirror: {HUB_MIRROR_WRITER} publishes data/** (this commit does not "
-           f"write the Hub).\n\n"
+           f"Hub mirror: after merge, {HUB_MIRROR_WRITER} publishes data/** (this "
+           f"commit does not write the Hub).\n\n"
            f"Signed-off-by: {COMMIT_NAME} <{COMMIT_EMAIL}>")
 
-    # ---- one signed commit against the head the ledger was read from ----- #
-    staged = stage_lake_changes(lake, changes)
-    additions = [{"path": rel, "contents": base64.b64encode(text.encode("utf-8")).decode()}
-                 for rel, text in sorted(staged.items())]
-    commit_oid, commit_url = gh_signed_commit(gh_token, additions, msg, base_oid)
-    print(f"szl-lake committed: {commit_url} (parent {base_oid})")
-
-    # ---- read the commit back from GitHub -------------------------------- #
-    for rel, text in sorted(staged.items()):
-        if gh_get_raw(gh_token, rel, ref=commit_oid) != text:
-            raise SystemExit(f"::error::szl-lake@{commit_oid} {rel} does not match the staged bytes")
-    print(f"GitHub readback: {len(staged)} files match at szl-lake@{commit_oid}")
-
-    # ---- wait for szl-lake hf-sync to mirror it; verify at a fixed revision - #
-    hub_revision = wait_for_hub_mirror(gh_new.encode("utf-8"), args.hub_mirror_timeout)
-    hub_mirror = {
-        "writer": HUB_MIRROR_WRITER,
-        "status": "VERIFIED" if hub_revision else "NOT_OBSERVED_WITHIN_TIMEOUT",
-        "revision": hub_revision,
-        "timeout_s": args.hub_mirror_timeout,
-    }
+    # The proposed ledger must end in exactly this receipt before anything is sent.
     after = parse_ndjson(gh_new)
     last = after[-1]
     if (len(after) != prev_count + 1 or last.get("receipt_id") != receipt["receipt_id"]
             or last.get("chain_index") != chain_index):
-        raise SystemExit("::error::committed ledger tail does not match the anchored receipt")
+        raise SystemExit("::error::proposed ledger tail does not match the anchored receipt")
+
+    # ---- propose: branch at the read head, one signed commit, readback, PR -- #
+    staged = stage_lake_changes(lake, changes)
+    branch = anchor_branch_name(kind, chain_index, snapshot_sha, proposal_suffix())
+    run_url = (f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
+               f"/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+               if os.environ.get("GITHUB_RUN_ID") and os.environ.get("GITHUB_SERVER_URL")
+               and os.environ.get("GITHUB_REPOSITORY") else "")
+    proposal = propose_ledger_append(
+        api,
+        lambda additions, message, head, ref: gh_signed_commit(
+            gh_token, additions, message, head, ref),
+        lambda rel, ref: gh_get_raw(gh_token, rel, ref=ref),
+        staged, msg, base_oid, branch,
+        title=msg.split("\n")[0],
+        body=proposal_body(receipt, base_oid=base_oid, branch=branch, run_url=run_url,
+                           baseline_line=baseline_msg_line, honesty_note=honesty_note,
+                           verify_cmd=signing["verify_cmd"]))
+    commit_oid, commit_url = proposal["commit_oid"], proposal["commit_url"]
+    pr = proposal["pull_request"]
+    print(f"GitHub readback: {len(staged)} files match at szl-lake@{commit_oid} "
+          f"(branch {branch}, parent {base_oid})")
+    print(f"szl-lake pull request opened: {pr.get('html_url')}")
+    hub_mirror = {
+        "writer": HUB_MIRROR_WRITER,
+        "status": "PENDING_MERGE",
+        "revision": None,
+        "after_merge": ("szl-lake hf-sync.yml publishes data/** and reads every byte back "
+                        "at an immutable Hub revision; verify-anchor-receipts.yml "
+                        "re-verifies the chain on both surfaces"),
+    }
 
     # Emit machine-readable summary for the workflow step.
     with open("anchor_result.json", "w", encoding="utf-8") as fh:
@@ -837,6 +1062,9 @@ def main() -> int:
             "receipt_id": receipt["receipt_id"], "snapshot_sha256": snapshot_sha,
             "chain_length": len(after), "github_commit": commit_url,
             "github_commit_oid": commit_oid, "github_parent_oid": base_oid,
+            "github_branch": branch,
+            "pull_request": {"number": pr.get("number"), "url": pr.get("html_url"),
+                             "base": LAKE_BASE_BRANCH, "state": "open"},
             "hub_mirror": hub_mirror,
             "fulcio_identity": signing["fulcio_identity"],
             "rekor_log_index": signing["rekor_log_index"],
@@ -850,13 +1078,9 @@ def main() -> int:
             "baseline_min_receipts": baseline_now,
             "baseline_bumped": baseline_bumped,
         }, fh, indent=2)
-    if not hub_revision:
-        raise SystemExit(
-            f"::error::receipt committed at szl-lake@{commit_oid}, but the Hub ledger did "
-            f"not match it within {args.hub_mirror_timeout}s. Check the szl-lake hf-sync "
-            "run for that commit; the Hub is written only by that workflow.")
-    print(f"::notice::VERIFIED: chain {prev_count} -> {len(after)} (chain_index "
-          f"{chain_index}) at szl-lake@{commit_oid} and Hub@{hub_revision}")
+    print(f"::notice::PROPOSED: chain {prev_count} -> {len(after)} (chain_index "
+          f"{chain_index}) in {pr.get('html_url')}; it reaches szl-lake main and the Hub "
+          "only when that pull request merges")
     return 0
 
 
