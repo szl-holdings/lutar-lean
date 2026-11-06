@@ -1,0 +1,6 @@
+# Hash-locked closure for .github/workflows/bounties.yml and close-bounty.yml
+# (Python 3.12): scripts/check_bounties.py and scripts/close_bounty.py parse the
+# bounty board with PyYAML. Recompile after editing this file:
+#   uv pip compile --generate-hashes --python-version 3.12 \
+#     requirements/ci/bounties.in -o requirements/ci/bounties.txt
+pyyaml

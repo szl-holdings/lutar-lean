@@ -3,7 +3,8 @@
 """Adversarial coverage for ``count_sorries.py`` — the sorry-gate honesty guard.
 
 ``count_sorries.py`` is the script the ``sorry-gate`` CI workflow runs
-(``python3 count_sorries.py . 67``) to enforce the no-increase ``sorry``
+(``python3 count_sorries.py . "$SORRY_BASELINE"``, pinned in sorry-gate.yml) to
+enforce the no-increase ``sorry``
 baseline that keeps the locked-proof posture honest. Before this module it had
 ZERO automated tests, so a regression in its comment-stripping, word-boundary
 matching, ``.lean``-only scoping, or ``proposals/`` exclusion could silently let

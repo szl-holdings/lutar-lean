@@ -16,11 +16,14 @@ on:
 permissions:
   contents: read
 
+# Placeholder context, not a check: this job runs nothing. It keeps the
+# historical "CI checks" status context alive for branch protection. The real
+# gates are Tests (tests.yml), Lake build (gate + numbers), Lean kernel check,
+# sorry-gate and the guards beside them; the README badge points at Tests.
 jobs:
   ci:
     name: CI checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: CI check
-        run: echo "CI OK"
+      - name: Placeholder context (no checks run here)
+        run: echo "Placeholder only - see Tests, Lake build and Lean kernel check for the real results."

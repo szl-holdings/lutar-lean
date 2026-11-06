@@ -1,14 +1,22 @@
 # Sorry Scoreboard
 
-_Updated 2026-06-16 (Materials frontier wave)_
+_Updated 2026-11-06 17:34 UTC_
 
-- Open `sorry` in the compiled corpus + tracked ROADMAP scaffolds (comment-stripped): **67**
-- Pinned baseline: **67** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **61**
+- Pinned baseline: **61** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **5** — disclosed, not gated (see proposals/INDEX.md)
 
+CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count above the pinned baseline. The `proposals/` mirror holds LLM candidate proofs staged for PhD review; its sorries are reported here but excluded from the gate because they duplicate corpus originals already inside the baseline.
+
 ## Baseline change log
 
+- **67 → 61** (2026-10-22, [#325](https://github.com/szl-holdings/lutar-lean/pull/325)):
+  the gate was ratcheted to the measured count. `count_sorries.py` reported
+  `TOTAL_SORRIES=61` outside `proposals/` at `0970b2f1` (2026-10-21), so the old
+  pin of 67 would have let six new `sorry` land unnoticed. The two
+  `Lutar/Materials/` ROADMAP scaffolds below still carry their tracked `sorry`
+  and are inside the 61.
 - **65 → 67** (Materials frontier wave): added two HONEST ROADMAP scaffolds under
   `Lutar/Materials/`, each carrying exactly one tracked `sorry`. These are
   **NOT folded into the locked-8** proven set {F1,F4,F7,F11,F12,F18,F19,F22} @
@@ -26,5 +34,3 @@ _Updated 2026-06-16 (Materials frontier wave)_
     OPEN (needs a sub-Gaussian/Hoeffding step absent from pinned Mathlib
     v4.18.0, cf. `Lutar/PACBayes.lean` `MomentSubGaussian`). The bound
     COMPUTATION is exact. Backs `/api/a11oy/v1/materials/certify`.
-
-CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus + tracked count above the pinned baseline. The `proposals/` mirror holds LLM candidate proofs staged for PhD review; its sorries are reported here but excluded from the gate because they duplicate corpus originals already inside the baseline.

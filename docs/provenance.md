@@ -87,12 +87,18 @@ Anchoring reuses the **generic** `anchor_szl_lake.py` and the **same** cosign
 keyless OIDC mechanism already used for proof-milestone anchors — **no new signing
 key is introduced and no signing happens off-CI**. The snapshot is signed with
 `cosign attest-blob` (DSSE in-toto, predicate type
-`https://szl-holdings/conjecture-disclosure/v1`), verified in-CI, then appended as
-an `szl.khipu.receipt/v1` record (`kind = conjecture-disclosure-anchor`) to both
-ledger surfaces (the Hugging Face NDJSON canonical chain and the GitHub
-front-door index). Each receipt advances `chain_index` by one, links to the
-previous receipt's id, and embeds the full snapshot. Anchoring is **idempotent**:
-re-anchoring the same snapshot at the same commit is a no-op.
+`https://szl-holdings/conjecture-disclosure/v1`), verified in-CI, then proposed as
+an `szl.khipu.receipt/v1` record (`kind = conjecture-disclosure-anchor`) for the
+ledger's source of truth, GitHub `szl-holdings/szl-lake`
+(`data/khipu/lutar_lean_receipts.ndjson`). The proposal is one signed commit on an
+`anchor/lutar-lean/…` branch and a pull request against szl-lake `main`; it lands
+only when that pull request passes szl-lake's own checks and is merged, and
+szl-lake's `hf-sync.yml` then mirrors it to the Hugging Face dataset. Each receipt
+advances `chain_index` by one, links to the previous receipt's id, and embeds the
+full snapshot. Anchoring is **idempotent**: re-anchoring the same snapshot at the
+same commit is a no-op, whether the receipt is already on szl-lake `main` or still
+pending in an open proposal; while any other lutar-lean proposal is open, a new
+anchor run fails closed rather than fork the chain.
 
 Because a conjecture disclosure is explicitly **not** kernel-only, the conjecture
 workflow does **not** apply the Theorem-U kernel-only gate.

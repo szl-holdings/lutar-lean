@@ -14,17 +14,24 @@ permissions:
 jobs:
   sorry-no-increase:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    env:
       # Baseline 61 = count_sorries.py TOTAL_SORRIES at 0970b2f1 (2026-10-21), proposals/ excluded. Ratcheted from 67.
       # Previous baseline 67 (2026-06-16) = compiled-corpus sorries (65 prior + 2 ROADMAP Lutar/Materials/ tracked-sorries: PDDInjective, PACBayesMaterials -- NOT in locked-8, NOT in lake build, disclosed in SORRIES.md) (same scope as the canonical
       # lean_numbers.py accounting). The UNVERIFIED proposals/ scratch mirror is
       # excluded but reported (EXCLUDED_PROPOSALS_SORRIES) so nothing is hidden.
+      # The one pin: the gate and scoreboard.py both read it (SORRIES.md states it).
+      SORRY_BASELINE: "61"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Sorry no-increase gate (compiled-corpus baseline 61, measured 2026-10-21 at 0970b2f1)
-        run: python3 count_sorries.py . 61
+        run: python3 count_sorries.py . "$SORRY_BASELINE"
+      # Report only (it never gates), but a broken scoreboard must show red
+      # rather than be hidden, so neither command has an error mask.
       - name: Update scoreboard (report only)
         if: always()
         run: |
-          python3 scoreboard.py . || true
-          cat SORRIES.md || true
+          python3 scoreboard.py . "$SORRY_BASELINE"
+          cat SORRIES.md

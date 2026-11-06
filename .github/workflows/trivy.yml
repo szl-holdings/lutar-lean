@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Trivy vulnerability scan (filesystem)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -40,7 +40,7 @@ jobs:
           exit-code: '0'  # Don't fail on scan (gate in grype job)
 
       - name: Upload Trivy SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         if: always()
         with:
           sarif_file: trivy-results.sarif
@@ -64,11 +64,13 @@ jobs:
           severity-cutoff: high
           output-format: sarif
 
+      # anchore/scan-action writes its report to a temp file and returns the path
+      # as the `sarif` output (see the action's README). The fixed path
+      # results.sarif used before never existed, so every upload failed and was
+      # hidden by continue-on-error. Upload whenever the scan produced a report,
+      # including when the gate itself failed on findings.
       - name: Upload Grype SARIF
-        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
-        if: always()
-        # anchore/scan-action only generates results.sarif when findings exist.
-        # When 0 findings, the file may not be created — guard with a check.
-        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        if: always() && steps.grype-scan.outputs.sarif != ''
         with:
-          sarif_file: results.sarif
+          sarif_file: ${{ steps.grype-scan.outputs.sarif }}

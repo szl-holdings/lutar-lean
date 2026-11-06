@@ -15,11 +15,13 @@ name: Conjecture Factory (generate -> timestamp -> grade -> anchor)
 #   5. cosign     : keyless OIDC attest-blob (DSSE in-toto) over the snapshot —
 #                   the SAME Sigstore mechanism as anchor-szl-lake.yml. No new key.
 #   6. verify     : verify-blob-attestation in-CI before publishing.
-#   7. anchor     : append a DSSE Khipu receipt to szl-lake via the GENERIC
+#   7. anchor     : propose a DSSE Khipu receipt to szl-lake via the GENERIC
 #                   anchor_szl_lake.py (predicate-type conjecture-disclosure/v1):
-#                   one signed commit to GitHub szl-holdings/szl-lake (the
-#                   ledger's source of truth), then wait for szl-lake's own
-#                   hf-sync.yml to mirror it to the Hub. No Hub credential here.
+#                   one signed commit on an anchor/lutar-lean/... branch of GitHub
+#                   szl-holdings/szl-lake (the ledger's source of truth) and a
+#                   pull request against its main. The append lands, and szl-lake's
+#                   own hf-sync.yml mirrors it to the Hub, only after that pull
+#                   request merges. No Hub credential here.
 #
 # Honesty (doctrine v11): the disclosure is an OPEN problem with a cryptographic
 # timestamp. The signature attests the TIMESTAMP + CONTENT, never the truth of the
@@ -57,8 +59,8 @@ permissions: {}
 # conjecture-factory.yml) read-modify-write the same Khipu ledger
 # (data/khipu/lutar_lean_receipts.ndjson, chain_index +1), so they share one
 # ledger lock instead of one group per workflow. It is not an hf-write/* lock:
-# neither job writes the Hub. The commit's expected-head check also rejects a
-# concurrent writer from any other repo.
+# neither job writes the Hub. A proposal that conflicts on the ledger after
+# another append merged cannot merge cleanly; close it and re-run.
 concurrency:
   group: szl-lake-ledger/lutar-lean
   cancel-in-progress: false
@@ -74,8 +76,7 @@ jobs:
   factory:
     name: Generate -> screen -> grade -> sign -> anchor (conjecture disclosure)
     runs-on: ubuntu-latest
-    # Includes up to 20 minutes waiting for szl-lake hf-sync to mirror the commit.
-    timeout-minutes: 50
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write   # keyless OIDC signing
@@ -104,10 +105,12 @@ jobs:
           cat candidate.json
 
       - name: Novelty screen
+        env:
+          ONLINE_NOVELTY: ${{ github.event.inputs.online_novelty }}
         run: |
           set -euo pipefail
           ONLINE=""
-          if [ "${{ github.event.inputs.online_novelty }}" = "true" ]; then ONLINE="--online"; fi
+          if [ "${ONLINE_NOVELTY}" = "true" ]; then ONLINE="--online"; fi
           python3 .github/scripts/conjecture_novelty.py \
             --candidate candidate.json --corpus conjectures/corpus $ONLINE \
             --out novelty.json
@@ -127,8 +130,8 @@ jobs:
             --candidate candidate.json \
             --novelty novelty.json \
             --grade grade.json \
-            --kernel-commit "${{ github.sha }}" \
-            --branch "${{ github.ref_name }}" \
+            --kernel-commit "$GITHUB_SHA" \
+            --branch "$GITHUB_REF_NAME" \
             --stage "$STAGE" \
             --out "$SNAPSHOT_FILE"
           cat "$SNAPSHOT_FILE"
@@ -232,13 +235,18 @@ jobs:
           fetch-depth: 1
 
       # huggingface_hub and pyarrow are only imported by szl-lake's publisher to
-      # render its checked index (same pins as szl-lake's own workflows); no Hub
-      # credential is present in this job.
-      - name: Install anchor deps
-        run: python3 -m pip install --quiet huggingface_hub==2.0.0 "pyarrow>=16,<22" cryptography
+      # render its checked index (same pins as szl-lake's own workflows), and
+      # cryptography parses the Fulcio certificate; no Hub credential is present
+      # in this job. Hash-locked in requirements/ci/anchor.txt.
+      - name: Install anchor deps (hash-locked)
+        run: python3 -m pip install --disable-pip-version-check --quiet --require-hashes -r requirements/ci/anchor.txt
 
-      - name: Anchor disclosure into szl-lake (GitHub source of truth; Hub via szl-lake hf-sync)
+      - name: Propose the disclosure to szl-lake (pull request; Hub via szl-lake hf-sync after merge)
         env:
+          # Needs contents:write + pull-requests:write on szl-holdings/szl-lake
+          # only. Owner action: replace the owner PAT behind this secret with a
+          # GitHub App installation token scoped to szl-lake with exactly those
+          # two permissions.
           SZL_LAKE_TOKEN: ${{ secrets.SZL_LAKE_TOKEN }}
         run: |
           set -euo pipefail
@@ -247,11 +255,15 @@ jobs:
             --snapshot "$SNAPSHOT_FILE" \
             --bundle snapshot.cosign.bundle \
             --predicate-type "$PREDICATE_TYPE" \
-            --source-run-id "${{ github.run_id }}" \
-            --source-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --source-run-id "$GITHUB_RUN_ID" \
+            --source-run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --source-workflow "Conjecture Factory (generate -> timestamp -> grade -> anchor)"
           echo "----- anchor_result.json -----"
-          cat anchor_result.json
+          if [ -f anchor_result.json ]; then
+            cat anchor_result.json
+          else
+            echo "(idempotent no-op: already on szl-lake main or already proposed; no anchor_result.json)"
+          fi
 
       - name: Upload disclosure receipt + bundle
         if: always()

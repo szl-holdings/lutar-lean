@@ -1,0 +1,6 @@
+# Hash-locked closure for .github/workflows/tests.yml (Python 3.12).
+# The guards and tests are standard-library only; pytest is the one tool.
+# Recompile after editing this file:
+#   uv pip compile --generate-hashes --python-version 3.12 \
+#     requirements/ci/tests.in -o requirements/ci/tests.txt
+pytest

@@ -1,0 +1,12 @@
+# Hash-locked closure for the two szl-lake appenders, anchor-szl-lake.yml and
+# conjecture-factory.yml (Python 3.12). huggingface_hub and pyarrow are imported
+# only by szl-lake's own scripts/publish_hf_dataset.py, which re-renders
+# szl-lake's checked index; keep them on szl-lake's pins (huggingface_hub==2.0.0,
+# pyarrow>=16,<22). cryptography parses the Fulcio certificate in
+# anchor_szl_lake.py. No Hugging Face credential is present in those jobs.
+# Recompile after editing this file:
+#   uv pip compile --generate-hashes --python-version 3.12 \
+#     requirements/ci/anchor.in -o requirements/ci/anchor.txt
+cryptography
+huggingface_hub==2.0.0
+pyarrow>=16,<22
