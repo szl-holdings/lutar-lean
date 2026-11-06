@@ -99,13 +99,18 @@ def test_appenders_are_dispatch_only() -> None:
 
 
 def test_appenders_pin_the_hub_client() -> None:
+    # Both appenders install exactly one hash-locked closure, and that closure
+    # keeps szl-lake's own client pins (huggingface_hub==2.0.0, pyarrow>=16,<22).
     for name in APPENDERS:
-        installs = [
-            line for line in _text(name).splitlines()
-            if "pip install" in line and "huggingface" in line
-        ]
-        assert len(installs) == 1, name
-        assert re.search(rf"(?<![\w-]){re.escape(HUB_PIN)}(?![\w.])", installs[0]), installs[0]
+        installs = [line for line in _text(name).splitlines() if "pip install" in line]
+        assert len(installs) == 1, (name, installs)
+        assert "--require-hashes -r requirements/ci/anchor.txt" in installs[0], installs[0]
+    source = (ROOT / "requirements" / "ci" / "anchor.in").read_text(encoding="utf-8")
+    assert re.search(rf"^{re.escape(HUB_PIN)}$", source, re.M), "anchor.in must pin " + HUB_PIN
+    lock = (ROOT / "requirements" / "ci" / "anchor.txt").read_text(encoding="utf-8")
+    assert re.search(r"^huggingface-hub==2\.0\.0 \\$", lock, re.M)
+    pyarrow = re.search(r"^pyarrow==(\d+)\.", lock, re.M)
+    assert pyarrow and 16 <= int(pyarrow.group(1)) < 22, "pyarrow must stay on szl-lake's >=16,<22"
 
 
 def test_appenders_check_out_szl_lake_and_hand_it_to_the_anchor() -> None:

@@ -29,6 +29,34 @@ updates:
     cooldown:
       default-days: 3
 
-  # pip and docker ecosystems removed 2026-06-23: no Dockerfile or pip manifest
-  # exists at "/" so Dependabot updater errored (update runs #1428697021 and
-  # #1428700310). Re-add if a Dockerfile or requirements.txt is introduced.
+  # Hash-locked CI closures (requirements/ci/*.txt, compiled from *.in with
+  # `uv pip compile --generate-hashes`; tests/test_ci_requirements.py keeps the
+  # sources, locks and workflows in step). There is still no pip manifest or
+  # Dockerfile at "/" (the 2026-06-23 removal of those entries stands: update
+  # runs #1428697021 and #1428700310 errored on the empty root).
+  - package-ecosystem: "pip"
+    directory: "/requirements/ci"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 5
+    groups:
+      ci-python:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+    ignore:
+      # szl-lake's publisher pins the Hub client; move it only together with
+      # szl-lake (tests/test_szl_lake_writer_contract.py enforces the pin).
+      - dependency-name: "huggingface-hub"
+      - dependency-name: "pyarrow"
+        versions: [">=22"]
+    cooldown:
+      default-days: 3

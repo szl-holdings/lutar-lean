@@ -229,10 +229,11 @@ jobs:
           fetch-depth: 1
 
       # huggingface_hub and pyarrow are only imported by szl-lake's publisher to
-      # render its checked index (same pins as szl-lake's own workflows); no Hub
-      # credential is present in this job.
-      - name: Install anchor deps
-        run: python3 -m pip install --quiet huggingface_hub==2.0.0 "pyarrow>=16,<22" cryptography
+      # render its checked index (same pins as szl-lake's own workflows), and
+      # cryptography parses the Fulcio certificate; no Hub credential is present
+      # in this job. Hash-locked in requirements/ci/anchor.txt.
+      - name: Install anchor deps (hash-locked)
+        run: python3 -m pip install --disable-pip-version-check --quiet --require-hashes -r requirements/ci/anchor.txt
 
       - name: Anchor into szl-lake (GitHub source of truth; Hub via szl-lake hf-sync)
         env:
