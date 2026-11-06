@@ -122,7 +122,7 @@ Concept DOI: [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 ---
 
 ### ◇ Explore the SZL Holdings estate
-[▶ a11oy console (a-11-oy.com)](https://a-11-oy.com) · [a11oy Space](https://huggingface.co/spaces/SZLHOLDINGS/a11oy) · [killinchu](https://huggingface.co/spaces/SZLHOLDINGS/killinchu) · [holographic (3D)](https://huggingface.co/spaces/SZLHOLDINGS/holographic) · [all datasets & models → SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS) · [GitHub org](https://github.com/szl-holdings) · [llm-router](https://szlholdings-llm-router-live.hf.space) · [receipt verifier](https://github.com/szl-holdings/governed-receipt-spec) · [receipt spec](https://github.com/szl-holdings/governed-receipt-spec)
+[▶ a11oy console (a-11-oy.com)](https://a-11-oy.com) · [a11oy Space](https://huggingface.co/spaces/SZLHOLDINGS/a11oy) · [killinchu](https://huggingface.co/spaces/SZLHOLDINGS/killinchu) · [holographic-unify (estate hologram)](https://huggingface.co/spaces/SZLHOLDINGS/holographic-unify) · [all datasets & models → SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS) · [GitHub org](https://github.com/szl-holdings) · [llm-router](https://szlholdings-llm-router-live.hf.space) · [receipt verifier](https://github.com/szl-holdings/governed-receipt-spec) · [receipt spec](https://github.com/szl-holdings/governed-receipt-spec)
 
 ---
 

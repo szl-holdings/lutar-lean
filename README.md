@@ -19,7 +19,7 @@
 **Machine-checked Lean 4 + Mathlib proofs for the Λ trust aggregator, the audit-fiber invariants, and the receipt/consensus theorems that every SZL runtime claim depends on.**
 
 [![Lake build](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/lake-build.yml)
-[![CI](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/ci.yml)
+[![Tests](https://github.com/szl-holdings/lutar-lean/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/szl-holdings/lutar-lean/actions/workflows/tests.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-0B1F3A.svg?style=flat-square&logo=apache&logoColor=white)](./LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4%20%2B%20Mathlib-0B1F3A.svg?style=flat-square)](https://leanprover.github.io/)
 [![SLSA L2 verified @ 7f20416e](https://img.shields.io/badge/SLSA-L2_verified_%40_7f20416e-2f855a.svg?style=flat-square)](https://github.com/szl-holdings/lutar-lean/attestations/38094242)
@@ -112,7 +112,7 @@ Lutar/
 └── Putnam/                  -- hard analysis obligations (honest sorries, references intact)
 ```
 
-**How it fits the ecosystem:** the proofs here are *enforced* at runtime by the receipt layer — the runtime emits DSSE-signed receipts over a SHA-256 hash chain, stored append-only in [`szl-lake`](https://github.com/szl-holdings/szl-lake), witnessed by [`khipu-consensus`](https://github.com/szl-holdings/khipu-consensus), and surfaced for offline verification in [`szl-trust`](https://github.com/szl-holdings/szl-trust). The bounded-recursion runtime that consumes them lives in [`ouroboros`](https://github.com/szl-holdings/ouroboros). The live kernel browser is [`lean-kernel`](https://github.com/szl-holdings/lean-kernel); the open prize for unconditional Λ is [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty).
+**How it fits the ecosystem:** the proofs here are *enforced* at runtime by the receipt layer — the runtime emits DSSE-signed receipts over a SHA-256 hash chain, stored append-only in [`szl-lake`](https://github.com/szl-holdings/szl-lake), witnessed by [`khipu-consensus`](https://github.com/szl-holdings/khipu-consensus), and surfaced for offline verification in [`szl-trust`](https://github.com/szl-holdings/szl-trust). The bounded-recursion runtime that consumed them lived in the now-archived [`ouroboros`](https://github.com/szl-holdings/ouroboros) repository; its successors are [`platform`](https://github.com/szl-holdings/platform) (agentic loops) and [`szl-ouroboros`](https://github.com/szl-holdings/szl-ouroboros) (bounded loop-tax accounting). There is no hosted kernel browser: the former [`lean-kernel`](https://github.com/szl-holdings/lean-kernel) repository is archived, so check any declaration locally with the commands in [Quickstart](#quickstart). The open prize for unconditional Λ is [`lambda-bounty`](https://github.com/szl-holdings/lambda-bounty).
 
 ---
 
@@ -132,6 +132,20 @@ Inspect the honest proof posture of any declaration:
 printf 'import Lutar.Wave8.AxiomDisclosure\n#print axioms Lutar.Wave8.AxiomDisclosure.locked_count_eight\n' | lake env lean --stdin
 # the Conjecture-1 counterexample
 printf 'import Lutar.Round13.Lambda_Uniqueness\n#print axioms Lutar.Round13.maxAgg_ne_Lambda\n' | lake env lean --stdin
+```
+
+### Verify the repository guards (Python, no Lean toolchain needed)
+
+The honesty guards (locked-formula registry, sorry no-increase gate, snapshot and
+szl-lake anchor contracts, CI pin checks) are standard-library Python plus pytest:
+
+```bash
+python3 -m venv .venv && . .venv/bin/activate
+python -m pip install --require-hashes -r requirements/ci/tests.txt
+python .github/scripts/check_proven_formulas.py --self-test
+python -m pytest tests/ -q
+python .github/scripts/test_anchor_and_snapshot.py
+python count_sorries.py . 61    # the sorry-gate baseline (SORRY_BASELINE in sorry-gate.yml)
 ```
 
 ---
@@ -168,5 +182,7 @@ Zenodo, DOI 10.5281/zenodo.20434308, 2026.
 
 ## Live Λ playground
 
-The Λ advisory aggregator (whose uniqueness is Conjecture 1 here) can be driven live:
-https://huggingface.co/spaces/SZLHOLDINGS/lambda-aggregator-live
+No live Λ playground is published at the moment. The Space this section used to
+link, `SZLHOLDINGS/lambda-aggregator-live`, does not exist on the Hugging Face Hub
+(checked 2026-11-06). The aggregator is defined and checked here in Lean; its
+uniqueness remains Conjecture 1.
