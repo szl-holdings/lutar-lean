@@ -166,7 +166,8 @@ Zenodo, DOI 10.5281/zenodo.20434308, 2026.
 ```
 
 
-## Live Λ playground
+## Λ playground (retired)
 
-The Λ advisory aggregator (whose uniqueness is Conjecture 1 here) can be driven live:
-https://huggingface.co/spaces/SZLHOLDINGS/lambda-aggregator-live
+The Λ advisory aggregator (whose uniqueness is Conjecture 1 here) used to have a live playground
+Space, `SZLHOLDINGS/lambda-aggregator-live`. That Space is no longer published on Hugging Face
+(404 as of 2026-11-12), so there is no live playground right now.
