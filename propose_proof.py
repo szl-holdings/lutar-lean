@@ -24,9 +24,11 @@ def _strip(t):
 
 def sorry_files(root="."):
     out = {}
-    for dp, _d, fs in os.walk(root):
-        if os.sep + ".git" in dp:
-            continue
+    for dp, dirs, fs in os.walk(root):
+        # Never inspect repository metadata or the worker's own unverified
+        # output mirror.  Without pruning proposals/, a default run can select
+        # an old scratch candidate instead of a tracked source file.
+        dirs[:] = [d for d in dirs if d not in {".git", "proposals"}]
         for f in fs:
             if f.endswith(".lean"):
                 p = os.path.join(dp, f)
