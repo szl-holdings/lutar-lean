@@ -1,14 +1,17 @@
-## Summary
+## What
 
-<!-- What does this PR change and why? -->
+<!-- What changed, and why. One paragraph, evidence-linked. -->
+
+## Receipts
+
+<!-- CI run links, test output, screenshots, audit artifacts.
+     UNKNOWN is never claimed as PASS. -->
 
 ## Checklist
 
-- [ ] CI is green (status checks pass)
-- [ ] Docs/README updated if behavior changed
-- [ ] Additive only — no force-push, no destructive rebase
-
-## Doctrine
-
-- [ ] Doctrine v11 LOCKED 749/14/163 unchanged
-- [ ] Sovereign-default preserved · no banned vendors
+- [ ] Control before action: the invariant (test / policy / assertion) landed before or with the behavior change
+- [ ] Evidence after: receipts updated and linked above
+- [ ] UNKNOWN is not claimed as PASS anywhere in this PR
+- [ ] No new a11oy.com references — the forbidden domain must never appear (gate: `forbidden-domain.yml`)
+- [ ] Docs updated (README / CHANGELOG) if behavior or surfaces changed
+- [ ] Commits are conventional and signed off (`Signed-off-by:`)
