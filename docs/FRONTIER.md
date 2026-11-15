@@ -166,12 +166,14 @@ lake env lean -e "#print axioms Lutar.Wave17.BinaryPinsker.binary_pinsker" 2>&1
 lake env lean -e "#eval Lutar.Wave8.AxiomDisclosure.locked_count_eight" 2>&1
 # → 8   ← immutable
 
-# 4. Live kernel browser (HF Space, no install)
-# https://huggingface.co/spaces/SZLHOLDINGS/lean-kernel
-#   /api/lean/check?decl=Lutar.Wave17.BinaryPinsker.binary_pinsker
 ```
 
-The HF Space [`SZLHOLDINGS/lean-kernel`](https://huggingface.co/spaces/SZLHOLDINGS/lean-kernel) serves `#check` and `#print axioms` queries over HTTP. Any result in this document is live-checkable there without a local Lean install.
+There is no hosted kernel browser. An earlier version of this page said that a
+`SZLHOLDINGS/lean-kernel` Hugging Face Space served `#check` / `#print axioms`
+over HTTP; no such Space exists on the Hub (checked 2026-11-06), and the
+`lean-kernel` GitHub repository is archived. Every result in this document is
+checkable only against a local build (`lake exe cache get && lake build`, then
+the commands above, or the `lake env lean --stdin` form in the README Quickstart).
 
 ---
 

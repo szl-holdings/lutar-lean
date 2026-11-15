@@ -1,0 +1,13 @@
+lutar-lean (https://github.com/szl-holdings/lutar-lean)
+Copyright 2026 SZL Holdings.
+
+Licensed under the Apache License, Version 2.0 (see LICENSE), except where a
+file states otherwise.
+
+Third-party software
+--------------------
+The Lean build depends on Mathlib (https://github.com/leanprover-community/mathlib4,
+Apache License 2.0) and the packages it pins, as recorded in lake-manifest.json.
+They are fetched at build time, are not redistributed in this repository, and
+retain their own licenses. The CI tooling's Python dependencies are listed in
+requirements/ci/*.txt and likewise retain their own licenses.

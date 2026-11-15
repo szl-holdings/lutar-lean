@@ -1,0 +1,8 @@
+# Hash-locked closure for .github/workflows/base-python-ci.yml (Python 3.11
+# and 3.12, one universal lock). lutar-lean is not a Python package: its Python
+# is CI tooling and tests (standard library only), so only the gate's tools are
+# installed. Recompile after editing this file:
+#   uv pip compile --generate-hashes --universal --python-version 3.11 \
+#     requirements/ci/base-python-ci.in -o requirements/ci/base-python-ci.txt
+pytest
+ruff

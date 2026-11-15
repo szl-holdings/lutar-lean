@@ -26,12 +26,29 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # GNU grep, not ripgrep: rg is not installed on ubuntu-latest, and the old
+      # `rg ... || true` turned "command not found" into "no hits", so this gate
+      # passed without scanning anything. grep exits 0 (match), 1 (no match) or
+      # >1 (error); only 1 means clean, an error fails the gate.
       - name: Scan for forbidden domain references
         shell: bash
         run: |
           set -euo pipefail
-          hits="$(rg -n --no-heading --hidden -P '(?<!-)a11oy\.com' --glob '!.git' . || true)"
-          violations="$(printf '%s' "$hits" | rg -v -i 'never|forbidden|not in|assertNotIn|does not appear|is not a surface|blocklist' || true)"
+          rc=0
+          hits="$(grep -rnIP --exclude-dir=.git '(?<!-)a11oy\.com' .)" || rc=$?
+          if [ "$rc" -gt 1 ]; then
+            echo "::error::forbidden-domain scan could not run (grep exit $rc)."
+            exit "$rc"
+          fi
+          violations=""
+          if [ -n "$hits" ]; then
+            rc=0
+            violations="$(printf '%s\n' "$hits" | grep -v -i -E 'never|forbidden|not in|assertNotIn|does not appear|is not a surface|blocklist')" || rc=$?
+            if [ "$rc" -gt 1 ]; then
+              echo "::error::forbidden-domain guard-context filter could not run (grep exit $rc)."
+              exit "$rc"
+            fi
+          fi
           if [ -n "$violations" ]; then
             echo "::error::Forbidden domain references found (release-blocking CRITICAL)."
             echo "::error::Replace with a-11-oy.com or remove; guard contexts must say so on the same line."

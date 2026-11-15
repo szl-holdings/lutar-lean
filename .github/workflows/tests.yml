@@ -28,8 +28,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Install pytest
-        run: python3 -m pip install --quiet pytest
+      - name: Install pytest (hash-locked)
+        run: python3 -m pip install --disable-pip-version-check --quiet --require-hashes -r requirements/ci/tests.txt
       - name: PROVEN_FORMULAS guard — self-test (negative fixtures)
         run: python3 .github/scripts/check_proven_formulas.py --self-test
       - name: PROVEN_FORMULAS guard — source-of-truth registry (JSON)

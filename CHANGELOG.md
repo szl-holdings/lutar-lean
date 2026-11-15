@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] — 2026-06-09
 
+> **Correction (2026-11-06).** This entry was copied from an estate-wide release
+> template and describes things this repository does not contain. lutar-lean is a
+> Lean 4 proof library with Python CI tooling: it has no server or `/api/health`
+> endpoint, no container image (so no container signing or container scan
+> target), no OpenTelemetry instrumentation, and no SLO or STRIDE threat-model
+> documents, and no Section 889 attestation file exists in it. No `v1.0.0` tag
+> exists; the repository's tags are
+> `v0.1.0` and `lutar-v18.0.0`. The entry is kept as written for the record.
+
 ### Added
 - Doctrine v11 compliance — kernel commit `c7c0ba17` (749 declarations / 14 axioms / 163 sorries)
 - SLSA Build Level 1 provenance — honest declaration, not overclaimed
@@ -44,5 +53,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes
 - Warhacker June 9, 2026 release
 
-[Unreleased]: https://github.com/szl-holdings/lutar-lean/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/szl-holdings/lutar-lean/releases/tag/v1.0.0
+[Unreleased]: https://github.com/szl-holdings/lutar-lean/compare/lutar-v18.0.0...HEAD
+[1.0.0]: https://github.com/szl-holdings/lutar-lean/blob/main/CITATION.cff

@@ -116,8 +116,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install PyYAML
-        run: pip install --no-cache-dir pyyaml
+      - name: Install PyYAML (hash-locked)
+        run: python3 -m pip install --disable-pip-version-check --no-cache-dir --require-hashes -r requirements/ci/bounties.txt
 
       - name: Resolve close parameters
         id: params
