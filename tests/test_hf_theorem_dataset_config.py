@@ -10,7 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CARD = ROOT / 'huggingface/datasets/lean-theorem-tree/README.md'
-IMPORT_SHA256 = '6a11e1311a2c09b49829d650e1a17fe8b66d3de7cea72b1759c5c430bd55c019'
+IMPORT_SHA256 = 'd2dd80b55d719bb6768472076dad7243b4ad4c933faeff1d3270acfa77d8151f'
 SELECTOR = (
     b'configs:\n- config_name: default\n  data_files:\n'
     b'  - split: train\n    path: data/lean_theorem_tree.json\n'
