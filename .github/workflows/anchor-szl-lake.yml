@@ -328,13 +328,21 @@ jobs:
           )
           payload=$(jq -n --arg text "$text" '{text: $text}')
           echo "Posting proposed-anchor confirmation to webhook..."
-          code=$(curl -sS -o /tmp/confirm_resp.txt -w '%{http_code}' \
-                   -X POST -H 'Content-Type: application/json' \
-                   --max-time 20 --data "${payload}" "${SLACK_WEBHOOK_URL}")
+          # Notification is advisory. A relay outage must never make a signed
+          # anchor run red after the receipt and pull request already exist.
+          if code=$(curl -sS -o /tmp/confirm_resp.txt -w '%{http_code}' \
+                        -X POST -H 'Content-Type: application/json' \
+                        --max-time 20 --data "${payload}" "${SLACK_WEBHOOK_URL}"); then
+            :
+          else
+            rc=$?
+            echo "::warning::Proposed-anchor confirmation webhook transport failed (curl exit ${rc}); the signed anchor and pull request remain valid."
+            exit 0
+          fi
           echo "Webhook responded HTTP ${code}."
           if [ "${code}" -lt 200 ] || [ "${code}" -ge 300 ]; then
-            echo "::error::Proposed-anchor confirmation webhook POST failed (HTTP ${code}): $(cat /tmp/confirm_resp.txt)"
-            exit 1
+            echo "::warning::Proposed-anchor confirmation webhook returned HTTP ${code}: $(cat /tmp/confirm_resp.txt); the signed anchor and pull request remain valid."
+            exit 0
           fi
           echo "Proposed-anchor confirmation delivered."
 
