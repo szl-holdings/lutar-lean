@@ -46,7 +46,7 @@ SYS = ("You are an expert Lean 4 / Mathlib proof engineer. You are given a Lean 
        "Mathlib where appropriate. Do NOT change statements, names, or imports except to add imports "
        "strictly required by your proof. If you genuinely cannot prove a goal, leave that `sorry` and "
        "explain why. Return exactly one ```lean fenced code block with the FULL revised file, then a "
-       "one-paragraph rationale outside the block.")
+       "brief one-paragraph rationale outside the block. Keep the proof and rationale concise so the fenced block is complete.")
 
 
 def _post(url, headers, body, timeout=180):
@@ -70,7 +70,7 @@ def ask(model, source, path):
         base = base or "https://api.anthropic.com"
         st, d = _post(base + "/v1/messages",
                       {"x-api-key": key, "anthropic-version": "2023-06-01"},
-                      {"model": model, "max_tokens": 8000, "system": SYS,
+                      {"model": model, "max_tokens": 16000, "system": SYS,
                        "messages": [{"role": "user", "content": user}]})
         if st != 200:
             return None, f"HTTP {st}: {d}"
@@ -79,7 +79,7 @@ def ask(model, source, path):
         base = base or "https://api.openai.com/v1"
         st, d = _post(base + "/chat/completions",
                       {"Authorization": f"Bearer {key}"},
-                      {"model": model, "max_tokens": 8000,
+                      {"model": model, "max_tokens": 16000,
                        "messages": [{"role": "system", "content": SYS},
                                     {"role": "user", "content": user}]})
         if st != 200:
