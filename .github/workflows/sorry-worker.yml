@@ -12,9 +12,9 @@ on:
         required: false
         default: "1"
       model:
-        description: "Model id (Groq free tier by default)"
+        description: "Groq model id (current production default: openai/gpt-oss-120b)"
         required: false
-        default: "qwen/qwen3-32b"
+        default: "openai/gpt-oss-120b"
 
 # Least privilege: read-only by default; the propose job needs contents:write
 # to push an UNVERIFIED proposals branch (never auto-merged). (Scorecard Token-Permissions)
@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write   # push proposals/* branch (no auto-merge)
-    # Free provider: Groq free tier (OpenAI-compatible, publicly reachable from CI).
-    # No paid Anthropic balance required. Swap LLM_BASE_URL/LLM_API_KEY to use another.
+    # Groq OpenAI-compatible endpoint (publicly reachable from CI).
+    # Billing and quotas follow the configured Groq account; swap the endpoint/key to use another provider.
     env:
       LLM_PROVIDER: openai
       LLM_BASE_URL: https://api.groq.com/openai/v1
@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Propose candidate proofs (UNVERIFIED, free provider)
+      - name: Propose candidate proofs (UNVERIFIED, Groq provider)
         env:
           IN_FILE: ${{ inputs.file }}
           IN_MAX: ${{ inputs.max }}
