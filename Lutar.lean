@@ -506,6 +506,18 @@ import Lutar.Neuroplasticity
 
 import Lutar.Scaling.MetabolicScaling
 import Lutar.Scaling.MetabolicScalingDeep
+-- Covenant v0.4 (spec 2.1): hard-deny ABSORBING-STATE core
+-- (feat/covenant-v04-deny-monotonic) - additive, EXPERIMENTAL scope
+-- Lutar/Covenant/ (registered under EXPERIMENTAL_SCOPES in
+-- .github/scripts/lean_numbers.py; NOT counted in the locked v11 baseline;
+-- .github/data/lean_numbers.json NOT bumped). Mathlib-FREE (Lean 4 core
+-- only), kernel-clean (every #print axioms reports NO axiom dependency), NO
+-- proof placeholder, NO new declared axiom. denyMonotonic: NO sequence of
+-- approvals lifts a hard deny (recon/foreignWrite/weaponize); benign lifts
+-- cleanly. The software gates (khipu-consensus v0.4 recall gate, fail-closed,
+-- UNKNOWN never PASS) remain the enforcement (spec 2.3). Lambda UNCONDITIONAL
+-- uniqueness STAYS Conjecture 1; locked-proven STAYS EXACTLY 8.
+import Lutar.Covenant.DenyMonotonic
 /-!
 # Lutar — root module
 
