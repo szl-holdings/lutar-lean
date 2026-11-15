@@ -25,7 +25,7 @@
 [![SLSA L2 verified @ 7f20416e](https://img.shields.io/badge/SLSA-L2_verified_%40_7f20416e-2f855a.svg?style=flat-square)](https://github.com/szl-holdings/lutar-lean/attestations/38094242)
 [![Λ = Conjecture 1](https://img.shields.io/badge/%CE%9B-Conjecture_1_(conditional_Theorem_U)-8a6bff.svg?style=flat-square)](./BOUNTY.md)
 [![Khipu = Conjecture 2](https://img.shields.io/badge/Khipu_BFT-Conjecture_2_(Wave23_conditional)-8a6bff.svg?style=flat-square)](https://github.com/szl-holdings/khipu-consensus)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434308.svg)](https://doi.org/10.5281/zenodo.20434308)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24239654.svg)](https://doi.org/10.5281/zenodo.24239654)
 
 [a-11-oy.com](https://a-11-oy.com) · [Org](https://github.com/szl-holdings) · [LLM Router](https://github.com/szl-holdings/szl-router) · [Thesis (szl-papers)](https://github.com/szl-holdings/szl-papers) · [Λ bounty](./BOUNTY.md) · [🤗 SZLHOLDINGS](https://huggingface.co/SZLHOLDINGS)
 
@@ -162,7 +162,7 @@ Mathematical patterns trace to durable, scholarly-documented sources (Rhind Papy
 
 ```
 S. P. Lutar Jr., "lutar-lean — Lean 4 Formal Proofs for the SZL Governance Substrate,"
-Zenodo, DOI 10.5281/zenodo.20434308, 2026.
+Zenodo, DOI 10.5281/zenodo.24239654, 2026.
 ```
 
 

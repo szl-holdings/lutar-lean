@@ -66,7 +66,7 @@ or honestly labeled a **conjecture**.
 ## Provenance
 
 Verified snapshots are anchored into `szl-lake` (DSSE receipts). DOI
-[10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308).
+[10.5281/zenodo.24239654](https://doi.org/10.5281/zenodo.24239654).
 
 ---
 
