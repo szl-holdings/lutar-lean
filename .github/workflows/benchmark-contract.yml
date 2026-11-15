@@ -1,0 +1,99 @@
+# Estate benchmark-pin contract — the lean-eval pattern applied to OUR kernel.
+#
+# benchmark/estate_pinned_v1.jsonl pins the estate's own statements VERBATIM
+# (sha256 per statement and per decl block). The check regenerates the corpus
+# from the repo at HEAD and hard-fails on any byte drift, then cross-gates the
+# sorry-row total against count_sorries.py's TOTAL_SORRIES (pinned baseline).
+#
+# A statement cannot change without this file changing, and this file cannot
+# claim a statement the repo does not contain. Every green run also emits the
+# kernel-derived estate-benchmark snapshot artifact
+# (estate-benchmark-snapshot-<head>) so the pinning itself can be anchored
+# into szl-lake via anchor-szl-lake.yml (kind=estate-benchmark; status
+# PINNED-BASELINE — pinned, never proven).
+name: benchmark-contract
+
+on:
+  pull_request: null
+  push:
+    branches: [main]
+    paths:
+      - "benchmark/**"
+      - "tools/build_estate_benchmark.py"
+      - "claims/locked-formulas.v1.json"
+      - "Lutar/**"
+      - "docs/ESTATE_LEAN_EVAL.md"
+      - ".github/workflows/benchmark-contract.yml"
+  workflow_dispatch: null
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify pinned estate benchmark corpus
+    runs-on: ubuntu-latest
+    steps:
+      # Org policy: every action is pinned to a full-length commit SHA.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Re-derive corpus and fail on drift
+        run: python3 tools/build_estate_benchmark.py --check
+
+      # Kernel-derived snapshot for the szl-lake anchor: counts + corpus
+      # sha256 + per-kind honesty, NOTHING else (kernel_only). Generated from
+      # the repo at HEAD, so its bytes bind exactly this commit's pinning.
+      - name: Emit estate-benchmark snapshot (kernel-derived)
+        run: |
+          python3 - <<'PY'
+          import json, os
+          sha = os.environ["GITHUB_SHA"]
+          manifest = json.load(open("benchmark/MANIFEST.json", encoding="utf-8"))
+          snapshot = {
+              "kind": "estate-benchmark",
+              "kernel_commit": sha,
+              "kernel_commit_short": sha[:12],
+              "branch": os.environ.get("GITHUB_REF_NAME", ""),
+              "milestone": {
+                  "id": "estate-lean-eval-v1",
+                  "title": "Estate pinned benchmark corpus v1 (lean-eval)",
+                  "status": "PINNED-BASELINE",
+                  "headline_decls": [],
+                  "headline_axiom_footprint": {},
+                  "kernel_only": True,
+                  "corpus_rows": manifest["corpus_rows"],
+                  "counts": manifest["counts"],
+              },
+              "lean_numbers": {
+                  "numbers": {
+                      "corpus_rows": manifest["corpus_rows"],
+                      "locked8_carriers": manifest["locked8_carriers"],
+                      "theorem_u_decls": manifest["theorem_u_decls"],
+                      "total_sorry_rows": manifest["total_sorry_rows"],
+                      "corpus_sha256": manifest["corpus_sha256"],
+                  },
+                  "replay_hash": manifest["corpus_sha256"],
+              },
+              "honesty": {
+                  "statement": "PINNED-BASELINE: statements pinned verbatim; no proof is claimed by this milestone",
+                  "locked8": "PROVEN only per claims/locked-formulas.v1.json COMPILED_LOCKED_SURFACE",
+                  "theorem_u": "REAL-CONDITIONAL; Conjecture 1 OPEN, machine-checked FALSE",
+                  "putnam": "sorry_free/sorry_open machine-derived only; PhD gate owns REAL/DEMO",
+                  "sorry_open": str(manifest["total_sorry_rows"]) + " OPEN rows = SORRIES.md pinned baseline, no-increase",
+                  "statuses_machine_derived": True,
+                  "doctrine": "v11",
+              },
+          }
+          with open("estate_benchmark_snapshot.json", "w", encoding="utf-8") as fh:
+              json.dump(snapshot, fh, indent=2, sort_keys=True)
+              fh.write("\n")
+          PY
+
+      - name: Upload estate-benchmark snapshot artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: estate-benchmark-snapshot-${{ github.sha }}
+          path: estate_benchmark_snapshot.json
+          if-no-files-found: error
