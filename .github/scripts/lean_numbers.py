@@ -429,6 +429,25 @@ EXPERIMENTAL_SCOPES = (
     # Hubel & Wiesel (Nobel 1981); Bienenstock–Cooper–Munro (1982). Excluded from ALL v11
     # numbers, so the locked baseline is untouched.
     os.path.join("Lutar", "Neuroplasticity.lean"),
+    # Memory Covenant v0.4 DenyMonotonic pack (feat/covenant-v04-deny-monotonic) -
+    # additive, EXPERIMENTAL, NOT folded into the locked v11 baseline (stays
+    # EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}) and NOT into the live-counter
+    # baseline (1402/26/25/311/260 in .github/data/lean_numbers.json, NOT bumped
+    # by this pack). One file Lutar/Covenant/DenyMonotonic.lean (namespace
+    # Lutar.Covenant): the hard-deny ABSORBING-STATE core of the Memory Covenant
+    # v0.4 (szl-frontier docs/COVENANT_V0_4_COUNTERSIGN_SPEC_2026-11-15.md 2.1):
+    # OpClass/PolicyState/gate/approveStep/approvals/approveSeq policy semantics
+    # + denyMonotonic (NO sequence of approvals lifts a hard deny) + per-class
+    # corollaries (recon/foreignWrite/weaponize) + List.foldl sequence fidelity
+    # + hardDeny_ne_release + benign_lifts_with_one_approval. Mathlib-FREE
+    # (Lean 4 core only), kernel-clean (every #print axioms in the file reports
+    # NO axiom dependency), NO proof placeholder / NO new declared axiom token.
+    # Lambda UNCONDITIONAL uniqueness STAYS Conjecture 1 (machine-checked FALSE);
+    # Byzantine BFT safety stays Khipu Conjecture 2. Adds NOTHING to
+    # locked-proven; the software gates (khipu-consensus v0.4 witness
+    # countersign + receipt tree + recall gate, fail-closed, UNKNOWN never
+    # PASS) remain the enforcement (spec 2.3). Excluded from ALL v11 numbers.
+    os.path.join("Lutar", "Covenant") + os.sep,
 )
 
 
