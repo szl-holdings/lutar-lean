@@ -409,13 +409,78 @@ def test_anchor_workflow_uses_bound_snapshot() -> None:
         for name, snapshot, expected, exit_code in cases:
             _write(out, json.dumps(snapshot))
             env = dict(os.environ, SNAPSHOT_FILE=str(out), KIND="theorem-u",
-                       EXPECTED_KERNEL_COMMIT=expected)
+                       EXPECTED_KERNEL_COMMIT=expected, SOURCE_ROOT=str(SCRIPTS_DIR.parents[1]))
             checked = subprocess.run([sys.executable, "-c", code], cwd=SCRIPTS_DIR.parents[1],
                                      env=env, capture_output=True, text=True)
             assert checked.returncode == exit_code, (
                 f"{name}: anchor admission returned {checked.returncode}, expected {exit_code}: "
                 + checked.stdout + checked.stderr
             )
+
+
+
+def test_historical_source_root_preserves_current_policy() -> None:
+    """Hash selected revision bytes without importing or executing historical code."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        proc, out = _run_build(tmp, [])
+        assert proc.returncode == 0, proc.stderr
+        snapshot = json.loads(out.read_text(encoding="utf-8"))
+        source_root = tmp / "historical-source"
+        for relative in G.INPUT_PATHS:
+            target = source_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((G.REPO_ROOT / relative).read_bytes())
+        # A harmless historical producer comment changes its byte digest. Current
+        # validator/policy still run; no module is loaded from this source root.
+        historical_builder = source_root / ".github/scripts/build_locked_formula_evidence.py"
+        historical_builder.write_bytes(historical_builder.read_bytes() + b"\n# historical source fixture\n")
+        evidence = snapshot["locked_formula_evidence"]
+        evidence["inputs"][".github/scripts/build_locked_formula_evidence.py"] = G.sha256_file(historical_builder)
+        evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(out, json.dumps(snapshot))
+        assert G.validate_snapshot_file(out, "0" * 40), "wrong/current input root accepted historical digests"
+        assert not G.validate_snapshot_file(out, "0" * 40, source_root=source_root)
+        assert G.validate_snapshot_file(out, "1" * 40, source_root=source_root), "wrong source run accepted"
+        # A source revision can pin a different Lean toolchain without importing
+        # its validator or changing today's carrier/trust policy. This synthetic
+        # fixture records metadata only; it does not claim to run that Lean build.
+        historical_toolchain = source_root / "lean-toolchain"
+        historical_toolchain.write_bytes(b"leanprover/lean4:v4.34.0\n")
+        historical_claims = source_root / G.CLAIM_MAP_PATH
+        source_claims = json.loads(historical_claims.read_text(encoding="utf-8"))
+        source_claims["lean_toolchain"] = "leanprover/lean4:v4.34.0"
+        _write(historical_claims, json.dumps(source_claims))
+        evidence["lean_toolchain"] = source_claims["lean_toolchain"]
+        for path in ("lean-toolchain", G.CLAIM_MAP_PATH.as_posix()):
+            evidence["inputs"][path] = G.sha256_file(source_root / path)
+        evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(out, json.dumps(snapshot))
+        assert not G.validate_snapshot_file(out, "0" * 40, source_root=source_root)
+        assert G.validate_snapshot_file(out, "0" * 40), "current input root accepted another source pin"
+        evidence["lean_toolchain"] = "leanprover/lean4:wrong-fixture"
+        evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(out, json.dumps(snapshot))
+        assert G.validate_snapshot_file(out, "0" * 40, source_root=source_root), "wrong toolchain accepted"
+        evidence["lean_toolchain"] = source_claims["lean_toolchain"]
+        # A coherent input digest does not let the historical registry substitute
+        # a new carrier while the embedded evidence still names today's carrier.
+        original_name = source_claims["claims"][0]["theorem_declarations"][0]
+        source_claims["claims"][0]["theorem_declarations"][0] = "different_carrier"
+        _write(historical_claims, json.dumps(source_claims))
+        evidence["inputs"][G.CLAIM_MAP_PATH.as_posix()] = G.sha256_file(historical_claims)
+        evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(out, json.dumps(snapshot))
+        assert G.validate_snapshot_file(out, "0" * 40, source_root=source_root), "historical carrier substitution accepted"
+        source_claims["claims"][0]["theorem_declarations"][0] = original_name
+        _write(historical_claims, json.dumps(source_claims))
+        evidence["inputs"][G.CLAIM_MAP_PATH.as_posix()] = G.sha256_file(historical_claims)
+        # Even coherent historical metadata may not replace today's locked-eight policy.
+        evidence["locked_ids"] = ["F1", "F11", "F12", "F18", "F19"]
+        snapshot["honesty"]["locked_set"] = list(evidence["locked_ids"])
+        evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(out, json.dumps(snapshot))
+        assert G.validate_snapshot_file(out, "0" * 40, source_root=source_root), "historical five-set bypassed current policy"
 
 
 def test_chain_position_genesis_and_advance() -> None:
@@ -501,6 +566,7 @@ TESTS = [
     ("snapshot locked binding rejects drift", test_snapshot_binding_rejects_drift),
     ("profile cannot override locked evidence", test_profile_cannot_override_locked_evidence),
     ("anchor workflow enforces bound evidence before signing", test_anchor_workflow_uses_bound_snapshot),
+    ("historical source roots preserve current locked policy", test_historical_source_root_preserves_current_policy),
     ("anchor chain_position genesis + advance", test_chain_position_genesis_and_advance),
     ("anchor idempotency tuple", test_idempotency_tuple),
     ("canonical_hash order independence", test_canonical_hash_order_independent),

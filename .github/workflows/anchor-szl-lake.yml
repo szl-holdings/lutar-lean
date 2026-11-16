@@ -145,9 +145,17 @@ jobs:
           github-token: ${{ github.token }}
           path: .
 
+      - name: Checkout immutable proof inputs (read only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.src.outputs.head_sha }}
+          path: proof-source
+          persist-credentials: false
+
       - name: Assert snapshot is a kernel-only proof-milestone snapshot
         env:
           EXPECTED_KERNEL_COMMIT: ${{ steps.src.outputs.head_sha }}
+          SOURCE_ROOT: proof-source
         run: |
           set -euo pipefail
           test -f "$SNAPSHOT_FILE" || { echo "::error::snapshot $SNAPSHOT_FILE missing"; exit 1; }
@@ -163,9 +171,11 @@ jobs:
           if s.get("kernel_commit") != os.environ["EXPECTED_KERNEL_COMMIT"] or s.get("kind") != kind:
               print("::error::snapshot identity differs from the selected source run/kind"); sys.exit(1)
           if kind in ("theorem-u", "locked-baseline"):
-              problems = validate_snapshot_locked_binding(s)
+              source_root = Path(os.environ["SOURCE_ROOT"])
+              problems = validate_snapshot_locked_binding(s, source_root=source_root)
               if kind == "theorem-u":
-                  problems += validate_snapshot_file(Path(path), os.environ["EXPECTED_KERNEL_COMMIT"])
+                  problems += validate_snapshot_file(
+                      Path(path), os.environ["EXPECTED_KERNEL_COMMIT"], source_root=source_root)
               if problems:
                   print("::error::" + "; ".join(problems)); sys.exit(1)
           ms = s.get("milestone") or s.get("theorem_u") or {}

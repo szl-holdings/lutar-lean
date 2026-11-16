@@ -29,16 +29,20 @@ def evidence_digest(evidence: dict) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def validate_locked_evidence(evidence: object, commit: object, repository: object) -> list[str]:
-    """Validate against the checked-out canonical inputs; missing data fails closed."""
+def validate_locked_evidence(evidence: object, commit: object, repository: object,
+                             *, source_root: Path | None = None) -> list[str]:
+    """Apply current policy to bytes from the selected source revision; never execute them."""
     problems: list[str] = []
     try:
         claims = load_json(REPO_ROOT / CLAIM_MAP_PATH)
+        input_root = source_root if source_root is not None else REPO_ROOT
+        source_claims = load_json(input_root / CLAIM_MAP_PATH)
+        source_toolchain = (input_root / TOOLCHAIN_PATH).read_text(encoding="utf-8").strip()
         expected_inputs = {
-            path.as_posix(): sha256_file(REPO_ROOT / path) for path in INPUT_PATHS
+            path.as_posix(): sha256_file(input_root / path) for path in INPUT_PATHS
         }
-    except (EvidenceError, OSError) as exc:
-        return [f"canonical locked evidence inputs are unavailable: {exc}"]
+    except (EvidenceError, OSError, UnicodeError) as exc:
+        return [f"canonical or selected source evidence inputs are unavailable: {exc}"]
     if not isinstance(evidence, dict):
         return ["missing/invalid locked_formula_evidence object"]
     if evidence.get("schema") != SCHEMA:
@@ -52,13 +56,17 @@ def validate_locked_evidence(evidence: object, commit: object, repository: objec
     if evidence.get("input_files_match_head") is not True:
         problems.append("locked evidence inputs must match the recorded HEAD")
     if evidence.get("inputs") != expected_inputs:
-        problems.append("locked evidence input digests differ from canonical source files")
+        problems.append("locked evidence input digests differ from the selected source revision")
     if evidence.get("evidence_digest") != evidence_digest(evidence):
         problems.append("locked evidence digest is invalid")
     if evidence.get("kernel_query_tool") != "Lean.collectAxioms":
         problems.append("locked evidence must record Lean.collectAxioms")
-    if evidence.get("lean_toolchain") != claims.get("lean_toolchain"):
-        problems.append("locked evidence toolchain differs from the canonical claim map")
+    if (
+        not source_toolchain
+        or evidence.get("lean_toolchain") != source_toolchain
+        or source_claims.get("lean_toolchain") != source_toolchain
+    ):
+        problems.append("locked evidence toolchain differs from the selected source pin/claim map")
 
     locked = claims.get("locked_ids")
     rows = claims.get("claims")
@@ -71,6 +79,21 @@ def validate_locked_evidence(evidence: object, commit: object, repository: objec
         or [row.get("claim_id") for row in rows] != locked
     ):
         return problems + ["canonical locked claim map is malformed"]
+    # Historical bytes may differ, but may not redefine the current locked set,
+    # carrier identities, or trust policy. Descriptive text and toolchain identity
+    # remain attached to the selected revision.
+    for field in ("schema", "repository", "locked_ids", "carrier_theorem_count",
+                  "trust_base", "compiled_path", "guard_path"):
+        if source_claims.get(field) != claims.get(field):
+            problems.append(f"selected source claim map {field} differs from current policy")
+    source_rows = source_claims.get("claims")
+    if (
+        not isinstance(source_rows, list)
+        or any(not isinstance(row, dict) for row in source_rows)
+        or [(row.get("claim_id"), row.get("theorem_declarations")) for row in source_rows]
+        != [(row.get("claim_id"), row.get("theorem_declarations")) for row in rows]
+    ):
+        problems.append("selected source carrier identities differ from current policy")
     if evidence.get("locked_ids") != locked:
         problems.append("locked evidence IDs differ from canonical locked_ids")
     trust_base = claims.get("trust_base")
@@ -111,10 +134,10 @@ def validate_locked_evidence(evidence: object, commit: object, repository: objec
     return problems
 
 
-def validate_snapshot_locked_binding(snapshot: dict) -> list[str]:
+def validate_snapshot_locked_binding(snapshot: dict, *, source_root: Path | None = None) -> list[str]:
     evidence = snapshot.get("locked_formula_evidence")
     problems = validate_locked_evidence(
-        evidence, snapshot.get("kernel_commit"), snapshot.get("repo")
+        evidence, snapshot.get("kernel_commit"), snapshot.get("repo"), source_root=source_root
     )
     honesty = snapshot.get("honesty")
     if not isinstance(honesty, dict):

@@ -76,7 +76,8 @@ def _contains_all(text: object, needles: tuple[str, ...]) -> bool:
     return all(n.lower() in low for n in needles)
 
 
-def validate_snapshot_file(path: Path, expected_commit: str | None = None) -> list[str]:
+def validate_snapshot_file(path: Path, expected_commit: str | None = None,
+                           *, source_root: Path | None = None) -> list[str]:
     """Validate one snapshot JSON file. Returns a list of problems ([] == valid)."""
     try:
         raw = path.read_text(encoding="utf-8")
@@ -144,11 +145,12 @@ def validate_snapshot_file(path: Path, expected_commit: str | None = None) -> li
                 f"(got: {honesty.get('conjecture_1')!r})"
             )
 
-    problems.extend(validate_snapshot_locked_binding(data))
+    problems.extend(validate_snapshot_locked_binding(data, source_root=source_root))
     return problems
 
 
-def check_dir(directory: Path, expected_commit: str | None = None) -> int:
+def check_dir(directory: Path, expected_commit: str | None = None,
+              *, source_root: Path | None = None) -> int:
     """Audit a downloaded artifact directory. Returns a process exit code."""
     if not directory.exists():
         print(
@@ -169,7 +171,7 @@ def check_dir(directory: Path, expected_commit: str | None = None) -> int:
 
     ok = True
     for path in snapshots:
-        problems = validate_snapshot_file(path, expected_commit)
+        problems = validate_snapshot_file(path, expected_commit, source_root=source_root)
         if problems:
             ok = False
             for problem in problems:
@@ -331,6 +333,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dir", help="directory holding the downloaded snapshot artifact")
     ap.add_argument("--snapshot", help="explicit path to the snapshot JSON file")
     ap.add_argument("--expected-commit", help="full source workflow HEAD SHA")
+    ap.add_argument("--source-root", type=Path, help="read-only checkout of that source revision")
     ap.add_argument(
         "--selftest",
         action="store_true",
@@ -345,7 +348,7 @@ def main(argv: list[str] | None = None) -> int:
         if not path.exists():
             print(f"::error::snapshot file '{path}' does not exist (artifact not produced).")
             return 1
-        problems = validate_snapshot_file(path, args.expected_commit)
+        problems = validate_snapshot_file(path, args.expected_commit, source_root=args.source_root)
         if problems:
             for problem in problems:
                 print(f"::error::{path.name}: {problem}")
@@ -353,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[theorem-u-snapshot-guard] OK: {path.name} is non-empty, well-formed and honest.")
         return 0
     if args.dir:
-        return check_dir(Path(args.dir), args.expected_commit)
+        return check_dir(Path(args.dir), args.expected_commit, source_root=args.source_root)
     ap.error("one of --dir, --snapshot or --selftest is required")
     return 2  # unreachable; argparse.error exits 2
 

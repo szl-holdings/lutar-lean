@@ -163,6 +163,13 @@ jobs:
           HEAD_SHA="$(gh run view "${RID}" --repo "${GITHUB_REPOSITORY}" --json headSha --jq .headSha)"
           echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout immutable proof inputs (read only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.target.outputs.head_sha }}
+          path: proof-source
+          persist-credentials: false
+
       - name: Download the theorem-u-snapshot artifact
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -186,7 +193,7 @@ jobs:
       - name: Assert the snapshot is non-empty, well-formed and honest
         env:
           EXPECTED_KERNEL_COMMIT: ${{ steps.target.outputs.head_sha }}
-        run: python .github/scripts/check_theorem_u_snapshot.py --dir snapshot-artifact --expected-commit "$EXPECTED_KERNEL_COMMIT"
+        run: python .github/scripts/check_theorem_u_snapshot.py --dir snapshot-artifact --expected-commit "$EXPECTED_KERNEL_COMMIT" --source-root proof-source
 
       - name: Theorem-U snapshot artifact is intact
         run: echo "green main lake-build published a non-empty, well-formed, honest Theorem-U snapshot artifact."
