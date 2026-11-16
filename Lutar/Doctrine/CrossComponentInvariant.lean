@@ -64,15 +64,16 @@ A cycle is governance-allowed iff:
   2. The operation is allowed under the current OVERWATCH mode (read-only).
   3. The receipt is admitted under the channel capacity (DPI).
 
-This is the formal specification of the composite admission gate that the
-platform runtime enforces across the three subsystems. -/
+This is a formal specification, not a verified refinement of deployed runtime
+code. Arbitrary mode predicates are interpreted with classical decidability. -/
 noncomputable def governanceAllow
     (trace   : ExecutionTrace)
-    (_mode   : OverwatchMode)
-    (_op     : Operation)
+    (mode    : OverwatchMode)
+    (op      : Operation)
     (receipt : Receipt)
-    (capBits : Nat) : Bool :=
-  isHaltEligible trace && dpiAdmit receipt capBits
+    (capBits : Nat) : Bool := by
+  classical
+  exact isHaltEligible trace && decide (mode.allow op) && dpiAdmit receipt capBits
 
 /-! ## The cross-component invariant -/
 
@@ -102,14 +103,14 @@ theorem doctrine_cross_invariant
     (h_overwatch : mode.allow op)
     (h_dpi       : dpiAdmit receipt capBits = true) :
     governanceAllow trace mode op receipt capBits = true := by
-  simp [governanceAllow, h_huklla, h_dpi]
+  simp [governanceAllow, h_huklla, h_overwatch, h_dpi]
 
 /-! ## Converse: composite false implies at least one component fails -/
 
 /-- **doctrine_cross_contrapositive.**
 The refusal-diagnostics converse, now a real theorem (no longer a `:= True`
 shell): if the composite governance decision is `false`, then at least one
-component invariant failed — either HUKLLA halt-eligibility or DPI admission.
+component invariant failed — either HUKLLA halt-eligibility, OVERWATCH allowability, or DPI admission.
 
 This is the admission-controller "deny if any invariant fails" contract stated
 as a Lean theorem. Because `governanceAllow` is a `Bool` conjunction, the
@@ -122,14 +123,16 @@ theorem doctrine_cross_contrapositive
     (receipt : Receipt)
     (capBits : Nat)
     (h_false : governanceAllow trace mode op receipt capBits = false) :
-    isHaltEligible trace = false ∨ dpiAdmit receipt capBits = false := by
-  unfold governanceAllow at h_false
-  exact Bool.and_eq_false_iff.mp h_false
+    isHaltEligible trace = false ∨ ¬ mode.allow op ∨ dpiAdmit receipt capBits = false := by
+  classical
+  simpa only [governanceAllow, Bool.and_eq_false_iff, decide_eq_false_iff_not,
+    or_assoc] using h_false
 
 /-! ## Decidability of composite governance -/
 
-/-- The composite governance predicate is decidable (it returns a `Bool`),
-so its truth is always determinable without classical choice. -/
+/-- Equality of the resulting Boolean is decidable. The specification above is
+noncomputable: arbitrary `mode.allow` predicates use classical decidability.
+This does not provide an executable runtime decider or runtime refinement proof. -/
 noncomputable instance governance_decidable
     (trace   : ExecutionTrace)
     (mode    : OverwatchMode)

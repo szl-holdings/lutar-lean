@@ -274,6 +274,9 @@ jobs:
           fi
           echo "locked-8 axiom guard OK: $OK/$EXPECTED theorems inside {propext, Classical.choice, Quot.sound}"
 
+      - name: Cross-component semantic regression and axiom gate
+        run: lake env lean tools/lean/CrossComponentGuard.lean
+
       - name: Build revision-bound locked-8 evidence manifest
         run: |
           set -euo pipefail
