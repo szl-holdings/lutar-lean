@@ -7,11 +7,11 @@ The snapshot/anchor pipeline (`build_proof_snapshot.py` -> `anchor_szl_lake.py`)
 was generalized from a Theorem-U-only path to an any-milestone path. Three
 contracts are easy to break in a future edit and nothing else in CI guards them:
 
-  (1) BACK-COMPAT — running `build_proof_snapshot.py` with DEFAULT inputs
+  (1) DEFAULT CONTRACT — running `build_proof_snapshot.py` with DEFAULT inputs
       (`--kind theorem-u`) must still reproduce the original Theorem-U snapshot
       SHAPE: schema `szl.proof.snapshot/v1`, kind `theorem-u`, the full Theorem-U
       headline-decl pack, milestone.status `REAL-conditional` + kernel_only True,
-      and the intact honesty block (locked_set {F1,F11,F12,F18,F19}, Theorem U
+      and the intact honesty block (locked_set from canonical revision-bound evidence, Theorem U
       conditional, Conjecture 1 OPEN / machine-checked FALSE). This is the subject
       `lake-build.yml` uploads and the live szl-lake receipt #1 was minted from, so
       its shape must stay stable. We additionally feed the result through the
@@ -37,6 +37,8 @@ Pure stdlib; no network, no Lean toolchain, no signing. Exit 0 = all hold.
 from __future__ import annotations
 
 import json
+import os
+import textwrap
 import subprocess
 import sys
 import tempfile
@@ -60,7 +62,7 @@ THEOREM_U_HEADLINE = sorted([
     "identifiability_forces_lambda",
     "lambda_equiv_to_eq_of_anchored",
 ])
-EXPECTED_LOCKED_SET = {"F1", "F11", "F12", "F18", "F19"}
+EXPECTED_LOCKED_SET = {"F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"}
 
 # The locked-proven baseline (Doctrine v11) meta-invariant headline pack.
 LOCKED_BASELINE_HEADLINE = sorted([
@@ -74,7 +76,7 @@ LOCKED_BASELINE_LOCKED_SET = {"F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22
 
 def _check_theorem_u_honesty(h: dict) -> None:
     """Pin the Theorem-U honesty block: conditional theorem, OPEN conjecture 1."""
-    assert h.get("locked_five_unchanged") is True, h.get("locked_five_unchanged")
+    assert "locked_five_unchanged" not in h, h
     assert set(h.get("locked_set", [])) == EXPECTED_LOCKED_SET, h.get("locked_set")
     assert "REAL-conditional" in (h.get("theorem_u") or ""), h.get("theorem_u")
     conj = h.get("conjecture_1") or ""
@@ -141,7 +143,8 @@ def _fixtures(tmp: Path, decls: list[str] | None = None):
     _write(ax, "\n".join(lines) + "\n")
     numbers = tmp / "lean_numbers.measured.json"
     _write(numbers, json.dumps({
-        "schema": "szl.lean.numbers/v1",
+        "schema": "szl.lean_numbers/v1",
+        "sha": "0" * 40,
         "numbers": {"declarations": 1234, "axioms_unique": 4, "sorries_noncomment": 0},
     }))
     refvec = tmp / "reference-vectors.json"
@@ -149,11 +152,20 @@ def _fixtures(tmp: Path, decls: list[str] | None = None):
     # Empty pack dir => decl_source_sha256 is deterministic + repo-layout-independent.
     packdir = tmp / "emptypack"
     packdir.mkdir()
-    return ax, numbers, refvec, packdir
+    locked = tmp / "locked-formulas.evidence.json"
+    _write(locked, json.dumps(G._selftest_locked_evidence("0" * 40)))
+    return ax, numbers, refvec, packdir, locked
 
 
-def _run_build(tmp: Path, extra_args: list[str], decls: list[str] | None = None):
-    ax, numbers, refvec, packdir = _fixtures(tmp, decls)
+def _run_build(tmp: Path, extra_args: list[str], decls: list[str] | None = None,
+               *, evidence_mutation=None, include_locked=True, reseal=True):
+    ax, numbers, refvec, packdir, locked = _fixtures(tmp, decls)
+    if evidence_mutation is not None:
+        evidence = json.loads(locked.read_text(encoding="utf-8"))
+        evidence_mutation(evidence)
+        if reseal:
+            evidence["evidence_digest"] = G.evidence_digest(evidence)
+        _write(locked, json.dumps(evidence))
     out = tmp / "snapshot.json"
     cmd = [
         sys.executable, str(BUILD),
@@ -164,13 +176,16 @@ def _run_build(tmp: Path, extra_args: list[str], decls: list[str] | None = None)
         "--out", str(out),
         "--commit", "0" * 40,
         "--branch", "main",
-    ] + extra_args
+    ]
+    if include_locked:
+        cmd += ["--locked-evidence", str(locked)]
+    cmd += extra_args
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return proc, out
 
 
 # --------------------------------------------------------------------------- #
-# (1) back-compat: default --kind theorem-u reproduces the canonical shape.
+# (1) default --kind theorem-u emits the canonical shape and evidence binding.
 # --------------------------------------------------------------------------- #
 def test_default_theorem_u_shape() -> None:
     with tempfile.TemporaryDirectory() as t:
@@ -191,7 +206,7 @@ def test_default_theorem_u_shape() -> None:
         assert m.get("headline_decls") == THEOREM_U_HEADLINE, m.get("headline_decls")
 
         h = snap.get("honesty", {})
-        assert h.get("locked_five_unchanged") is True, h.get("locked_five_unchanged")
+        assert "locked_five_unchanged" not in h, h
         assert set(h.get("locked_set", [])) == EXPECTED_LOCKED_SET, h.get("locked_set")
         assert "REAL-conditional" in (h.get("theorem_u") or ""), h.get("theorem_u")
         conj = (h.get("conjecture_1") or "")
@@ -300,6 +315,109 @@ def test_production_kind_without_honesty_is_refused() -> None:
 # --------------------------------------------------------------------------- #
 # (3) anchor chain math + idempotency tuple.
 # --------------------------------------------------------------------------- #
+
+def test_locked_evidence_fail_closed() -> None:
+    """Reject coherent-looking but stale, partial, missing, or disallowed evidence."""
+    five = {"F1", "F11", "F12", "F18", "F19"}
+
+    def old_five(evidence):
+        evidence["locked_ids"] = [item for item in evidence["locked_ids"] if item in five]
+        evidence["claims"] = [row for row in evidence["claims"] if row["claim_id"] in five]
+
+    cases = [
+        ("historical-five", old_five, True),
+        ("wrong-revision", lambda e: e.update(source_commit="1" * 40), True),
+        ("dirty-inputs", lambda e: e.update(input_files_match_head=False), True),
+        ("source-digest-mismatch", lambda e: e["inputs"].update(
+            {"claims/locked-formulas.v1.json": "sha256:" + "0" * 64}), True),
+        ("missing-carrier", lambda e: e["claims"][0]["carriers"].pop(), True),
+        ("disallowed-carrier", lambda e: e["claims"][0]["carriers"][0].update(allowed=False), True),
+        ("custom-axiom", lambda e: e["claims"][0]["carriers"][0].update(axioms=["custom_axiom"]), True),
+        ("sorry-axiom", lambda e: e["claims"][0]["carriers"][0].update(axioms=["sorryAx"]), True),
+        ("invalid-digest", lambda e: e.update(evidence_digest="sha256:" + "0" * 64), False),
+    ]
+    for name, mutation, reseal in cases:
+        with tempfile.TemporaryDirectory() as t:
+            proc, out = _run_build(Path(t), [], evidence_mutation=mutation, reseal=reseal)
+            assert proc.returncode != 0, f"{name}: malformed evidence was accepted"
+            assert not out.exists(), f"{name}: refused build wrote a snapshot"
+    for flags, include_locked in [([], False), (["--locked-evidence", "missing-evidence.json"], True)]:
+        with tempfile.TemporaryDirectory() as t:
+            proc, out = _run_build(Path(t), flags, include_locked=include_locked)
+            assert proc.returncode != 0, "missing evidence was accepted"
+            assert not out.exists(), "missing-evidence refusal wrote a snapshot"
+
+
+def test_snapshot_binding_rejects_drift() -> None:
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        proc, out = _run_build(tmp, [])
+        assert proc.returncode == 0, proc.stderr
+        good = json.loads(out.read_text(encoding="utf-8"))
+        assert good["honesty"]["locked_set"] == good["locked_formula_evidence"]["locked_ids"]
+        assert not G.validate_snapshot_file(out, "0" * 40), "canonical evidence binding was rejected"
+        assert G.validate_snapshot_file(out, "1" * 40), "source workflow mismatch was accepted"
+        mutations = [
+            ("five-set", lambda s: s["honesty"].update(locked_set=["F1", "F11", "F12", "F18", "F19"])),
+            ("missing-set", lambda s: s["honesty"].pop("locked_set")),
+            ("missing-evidence", lambda s: s.pop("locked_formula_evidence")),
+            ("wrong-commit", lambda s: s.update(kernel_commit="1" * 40)),
+            ("legacy-boolean", lambda s: s["honesty"].update(locked_five_unchanged=True)),
+            ("duplicate-id", lambda s: s["honesty"]["locked_set"].append("F1")),
+        ]
+        for name, mutate in mutations:
+            changed = json.loads(json.dumps(good))
+            mutate(changed)
+            _write(out, json.dumps(changed))
+            assert G.validate_snapshot_file(out), f"{name}: snapshot drift was accepted"
+
+
+def test_profile_cannot_override_locked_evidence() -> None:
+    for fields in [
+        {"locked_set": ["F1", "F11", "F12", "F18", "F19"]},
+        {"locked_five_unchanged": True},
+    ]:
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            override = tmp / "dishonest-profile.json"
+            _write(override, json.dumps({"honesty": {"doctrine": "v11", **fields}}))
+            proc, out = _run_build(tmp, ["--profile", str(override)])
+            assert proc.returncode != 0, "profile overrode the canonical locked evidence"
+            assert not out.exists(), "inconsistent profile wrote a snapshot"
+
+
+
+def test_anchor_workflow_uses_bound_snapshot() -> None:
+    """Execute the actual pre-signing assertion block with good and stale evidence."""
+    workflow = (SCRIPTS_DIR.parent / "workflows/anchor-szl-lake.yml").read_text(encoding="utf-8")
+    section = workflow.split("      - name: Assert snapshot is a kernel-only proof-milestone snapshot", 1)[1]
+    code = textwrap.dedent(section.split("python3 - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        proc, out = _run_build(tmp, [])
+        assert proc.returncode == 0, proc.stderr
+        good = json.loads(out.read_text(encoding="utf-8"))
+        cases = [
+            ("canonical", good, "0" * 40, 0),
+            ("wrong-source-run", good, "1" * 40, 1),
+        ]
+        stale = json.loads(json.dumps(good))
+        stale.pop("locked_formula_evidence")
+        stale["honesty"]["locked_set"] = ["F1", "F11", "F12", "F18", "F19"]
+        stale["honesty"]["locked_five_unchanged"] = True
+        cases.append(("historical-five", stale, "0" * 40, 1))
+        for name, snapshot, expected, exit_code in cases:
+            _write(out, json.dumps(snapshot))
+            env = dict(os.environ, SNAPSHOT_FILE=str(out), KIND="theorem-u",
+                       EXPECTED_KERNEL_COMMIT=expected)
+            checked = subprocess.run([sys.executable, "-c", code], cwd=SCRIPTS_DIR.parents[1],
+                                     env=env, capture_output=True, text=True)
+            assert checked.returncode == exit_code, (
+                f"{name}: anchor admission returned {checked.returncode}, expected {exit_code}: "
+                + checked.stdout + checked.stderr
+            )
+
+
 def test_chain_position_genesis_and_advance() -> None:
     assert A.chain_position([]) == (1, None), "genesis must be index 1, prev_hash None"
     existing = [
@@ -374,11 +492,15 @@ def test_baseline_floor_append_only() -> None:
 
 
 TESTS = [
-    ("default theorem-u snapshot shape (back-compat)", test_default_theorem_u_shape),
+    ("default theorem-u snapshot with canonical locked evidence", test_default_theorem_u_shape),
     ("kind without honesty block is refused", test_kind_without_honesty_is_refused),
     ("kind with honesty block is allowed", test_kind_with_honesty_is_allowed),
     ("production milestone kind shapes + honesty", test_production_kind_shapes),
     ("production milestone kind refused without honesty", test_production_kind_without_honesty_is_refused),
+    ("locked evidence fails closed on missing/stale/disallowed records", test_locked_evidence_fail_closed),
+    ("snapshot locked binding rejects drift", test_snapshot_binding_rejects_drift),
+    ("profile cannot override locked evidence", test_profile_cannot_override_locked_evidence),
+    ("anchor workflow enforces bound evidence before signing", test_anchor_workflow_uses_bound_snapshot),
     ("anchor chain_position genesis + advance", test_chain_position_genesis_and_advance),
     ("anchor idempotency tuple", test_idempotency_tuple),
     ("canonical_hash order independence", test_canonical_hash_order_independent),
