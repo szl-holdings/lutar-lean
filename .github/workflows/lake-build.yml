@@ -224,6 +224,9 @@ jobs:
           lake exe check
           lake exe ref_vectors reference-vectors.json
 
+      - name: Reference-vector input contract (compiled negative fixtures)
+        run: python3 tools/test_ref_vectors_contract.py -- .lake/build/bin/ref_vectors
+
       - name: Axiom-hygiene gate (Theorem-U pack, Lutar/Uniqueness/)
         run: |
           set -euo pipefail
