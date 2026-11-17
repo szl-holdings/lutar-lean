@@ -40,7 +40,9 @@ structure RefFile where
   tolRel    : Float
 
 private def asFloat? : Json → Except String Float
-  | .num n => .ok n.toFloat
+  | .num n =>
+      let value := n.toFloat
+      if value.isFinite then .ok value else .error "expected a finite number"
   | _      => .error "expected a number"
 
 private def getStr (j : Json) (k : String) : Except String String := do
@@ -49,9 +51,8 @@ private def getStr (j : Json) (k : String) : Except String String := do
 
 private def getNat (j : Json) (k : String) : Except String Nat := do
   let v ← j.getObjVal? k
-  match v with
-  | .num n => .ok n.toFloat.toUInt64.toNat
-  | _      => .error s!"{k}: expected a number"
+  -- Do not truncate fractional dimensions or round large integers through Float.
+  v.getNat?
 
 private def getFloat (j : Json) (k : String) : Except String Float := do
   let v ← j.getObjVal? k
@@ -69,7 +70,17 @@ def parseVector (j : Json) : Except String RefVector := do
   let lambda ← getFloat j "lambda"
   return { id, axes, lambda }
 
-/-- Parse the full file. -/
+/-- The existing v1 fixture contract. Tightening a tolerance is allowed;
+    widening it requires an explicit checker-policy change under review. -/
+private def supportedSchema := "https://szlholdings.com/schemas/lutar-reference-vectors-v1.json"
+private def supportedFormula := "Λ_k(x) = (∏ xᵢ)^(1/k)"
+private def supportedDimension : Nat := 9
+private def maxToleranceAbs : Float := 0.000000000001
+private def maxToleranceRel : Float := 0.000000001
+
+/-- Parse and validate the supported, nonempty v1 parity corpus.
+    Axes and expected results model finite nonnegative reals. This is an
+    operational Float check, not a proof of runtime refinement or model quality. -/
 def parseFile (raw : String) : Except String RefFile := do
   let j ← Json.parse raw
   let schema  ← getStr j "schema"
@@ -79,6 +90,25 @@ def parseFile (raw : String) : Except String RefFile := do
   let tolRel  ← getFloat j "toleranceRel"
   let vs      ← getArr j "vectors"
   let vectors ← vs.mapM parseVector
+  if schema != supportedSchema then
+    throw "unsupported reference-vector schema"
+  if formula != supportedFormula then
+    throw "unsupported reference-vector formula"
+  if k != supportedDimension then
+    throw "reference-vector k must be 9"
+  if tolAbs < 0 || tolAbs > maxToleranceAbs then
+    throw "toleranceAbs must be between 0 and 1e-12"
+  if tolRel < 0 || tolRel > maxToleranceRel then
+    throw "toleranceRel must be between 0 and 1e-9"
+  if vectors.isEmpty then
+    throw "reference vectors must be nonempty"
+  for v in vectors do
+    if v.axes.size != k then
+      throw s!"{v.id}: expected {k} axes, got {v.axes.size}"
+    if v.axes.any (· < 0) then
+      throw s!"{v.id}: axes must be nonnegative"
+    if v.lambda < 0 then
+      throw s!"{v.id}: lambda must be nonnegative"
   return { schema, formula, k, vectors, tolAbs, tolRel }
 
 /-- Λ₉ as the TS runtime computes it: `exp((1/k) Σ log xᵢ)`.
