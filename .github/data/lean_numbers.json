@@ -5,9 +5,9 @@
   "sha": "400c73617d1f288e07fff1239fe004af4d3ca612",
   "measured_at_utc": "2026-11-17T13:40:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Baseline updated 2026-11-17 for the CodonK4Compress canonicalCodon discharge (374, Lutar/Innovations/round5/CodonK4Compress.lean): the K4-orbit lex-min placeholder is now a computed explicit 4-way minimum (diagonal Jose-Zamudio action); the never-compiled file (ASCII 'x' def bug, no importer) is fixed and wired into the lake build. declarations 1405->1409 are the four new helper defs (nucleotideRank, codonKey, k4Codon, lexMin). sorries_raw 310->309, sorries_noncomment 259->258, sorries_baseline 254->253: one retired live placeholder. Axiom set unchanged (26 raw / 25 unique, same names). Doctrine v11 749/14/163 counter unchanged.",
+  "note": "Baseline updated 2026-11-17 for the CodonK4Compress canonicalCodon discharge (374, Lutar/Innovations/round5/CodonK4Compress.lean): the K4-orbit lex-min placeholder is now a computed explicit 4-way minimum (diagonal Jose-Zamudio action); the never-compiled file (ASCII 'x' def bug, no importer) is fixed and wired into the lake build. declarations 1405->1407: four new helper defs (nucleotideRank, codonKey, k4Codon, lexMin) minus the two duplicate Codon/Nucleotide declarations now imported from CodonRoundTrip. The original 1409 candidate could not be jointly imported: the Lean kernel correctly rejected duplicate constructor constants. sorries_raw 310->309, sorries_noncomment 259->258, sorries_baseline 254->253: one retired live placeholder. Axiom set unchanged (26 raw / 25 unique, same names). Doctrine v11 749/14/163 counter unchanged.",
   "numbers": {
-    "declarations": 1409,
+    "declarations": 1407,
     "axioms_raw": 26,
     "axioms_unique": 25,
     "axiom_names": [

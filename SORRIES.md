@@ -1,6 +1,6 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-17 19:32 UTC_
+_Updated 2026-11-17 21:34 UTC_
 
 - Open `sorry` in the compiled corpus (comment-stripped): **56**
 - Pinned baseline: **56** (no-increase gate)
