@@ -13,14 +13,11 @@ ORCID: 0009-0001-0110-4173
   *unconditional* uniqueness statement `∀ Φ, LutarAxioms Φ → Φ = Λ k` is FALSE
   (machine-checked counterexample `maxAgg_ne_Lambda`, in-tree). This file:
 
-    (1) implements the discharge skeleton for the single analytic blocker
-        `monotone_additive_linear` (the classical Cauchy "monotone + additive ⇒
-        linear" step) via the Mathlib route of PROOF_STRATEGY_V2 §1.4. Steps 1
-        (ℚ-linearity of the additive map) and 3 (dense-equalizer on ℚ via
-        `Continuous.ext_on` + `Rat.denseRange_cast`) are fully written; Step 2
-        (monotone+additive ⇒ continuous) is isolated as a SINGLE named open
-        obligation `STEP2_MONOTONE_ADDITIVE_CONTINUOUS` to be pinned to the exact
-        v4.13.0 `Monotone.continuous*` lemma in CI. It is NOT claimed proved;
+  (1) the single analytic blocker `monotone_additive_linear` (the classical Cauchy
+      "monotone + additive ⇒ linear" step) is CLOSED (2026-11-17): the file-local
+      lemma delegates to the sorry-free `Lutar.Round13.monotone_additive_linear`
+      (rational squeeze, no continuity assumed, zero new axioms). This file
+      carries no open `sorry`;
 
     (2) re-exports the TERMINAL CONDITIONAL THEOREM `lambda_unique_of_factors`
         (already fully proved in `Lutar/Round13/Lambda_Uniqueness.lean`, no open
@@ -59,6 +56,7 @@ import Lutar.Round13.Lambda_Uniqueness
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Lutar.Round13.CauchyND_Closure
 import Mathlib.Algebra.BigOperators.Group.Finset.Pi
 import Mathlib.Algebra.BigOperators.Group.Finset.Powerset
 import Mathlib.Algebra.BigOperators.Group.Finset.Preimage
@@ -75,68 +73,26 @@ open NNReal Real BigOperators
 
 /-! ## §1.4 — The Cauchy step: monotone + additive ⇒ linear
 
-This is the SOLE analytic blocker of the slice machinery (it was a tracked
-`sorry` in `Lutar/Uniqueness.lean`). It is classical (Cauchy 1821; Aczél 1966
-Thm 5.1) and NOT packaged in Mathlib v4.13.0, but every ingredient is. -/
+This was the sole analytic blocker of the slice machinery (a tracked `sorry`
+until 2026-11-17). It is classical (Cauchy 1821; Aczél 1966 Thm 5.1) and NOT
+packaged in Mathlib; the estate canonical closed witness is the Round 13
+rational-squeeze proof, which the lemma below now delegates to. -/
 
 /-- **`monotone_additive_linear`** — a monotone additive `g : ℝ → ℝ` is linear:
     `g t = g 1 * t`.
 
-    Proof (PROOF_STRATEGY_V2 §1.4):
-    * **Step 1 (ℚ-linearity).** Bundle `g` as an additive hom `G : ℝ →+ ℝ` via
-      `AddMonoidHom.mk' g hg_add`. An additive map is automatically ℚ-linear;
-      we derive `g (q : ℝ) = g 1 * q` for every `q : ℚ` from
-      `map_ratCast_smul`/`AddMonoidHom.toRatLinearMap`-style compatibility
-      (`Mathlib.Algebra.Module.LinearMap.Defs`), via the ℤ-then-ℚ scaling that
-      additivity forces (`map_zsmul`, division by the denominator).
-    * **Step 2 (continuity).** A monotone additive `g` has no jump
-      discontinuities, hence is continuous on ℝ. Infrastructure:
-      `Mathlib.Topology.Order.MonotoneContinuity` +
-      `Mathlib.Topology.Order.IntermediateValue` (`Monotone.continuous`-style
-      results; additivity rules out jumps so the range is an interval).
-    * **Step 3 (dense equalizer).** `g` and `fun t => g 1 * t` are continuous and
-      agree on `Set.range ((↑) : ℚ → ℝ)`, which is dense
-      (`Rat.denseRange_cast`). Two continuous maps into the T2 space ℝ that agree
-      on a dense set are equal (`Continuous.ext_on`). -/
+    CLOSED (2026-11-17): delegates to the sorry-free Round 13 proof
+    `Lutar.Round13.monotone_additive_linear` (`Lutar/Round13/CauchyND_Closure.lean`,
+    the rational-squeeze argument; no continuity assumed). This retires the
+    legacy `STEP2_MONOTONE_ADDITIVE_CONTINUOUS` open obligation with ZERO new
+    axioms — same statement, same signature, closed machinery. The historical
+    in-file route (ℚ-linearity via `AddMonoidHom`, Step-2 continuity, dense
+    equalizer via `Continuous.ext_on` + `Rat.denseRange_cast`) is superseded by
+    the stronger already-locked proof. -/
 theorem monotone_additive_linear (g : ℝ → ℝ)
     (hg_add : ∀ u v : ℝ, g (u + v) = g u + g v) (hg_mono : Monotone g) :
-    ∀ t : ℝ, g t = g 1 * t := by
-  -- Bundle the additive structure.
-  let G : ℝ →+ ℝ := AddMonoidHom.mk' g hg_add
-  have hG : ∀ x, G x = g x := fun _ => rfl
-  -- Step 1 (ℚ-linearity) — FULLY DISCHARGEABLE, no analysis.
-  -- An `AddMonoidHom ℝ ℝ` between ℚ-vector spaces commutes with ℚ-scalar
-  -- multiplication: `G (q • x) = q • G x` (`map_rat_smul`/`map_ratCast_smul`).
-  -- Taking `x = 1` and `q • (1:ℝ) = (q:ℝ)` gives `g (q:ℝ) = q • g 1 = g 1 * q`.
-  have hg_rat : ∀ q : ℚ, g (q : ℝ) = g 1 * q := by
-    intro q
-    have hsmul : G ((q : ℝ) • (1 : ℝ)) = (q : ℝ) • G (1 : ℝ) :=
-      map_ratCast_smul G ℝ ℝ q (1 : ℝ)
-    simpa [hG, smul_eq_mul, mul_comm] using hsmul
-  -- Step 2 (monotone + additive ⇒ continuous) — order-topology + IVT route.
-  -- An additive monotone map on ℝ has no jump discontinuities (additivity rules
-  -- them out), so its range is an interval and it is continuous. Mathlib API:
-  -- `Mathlib.Topology.Order.MonotoneContinuity` (`Monotone.continuous*`) +
-  -- `Mathlib.Topology.Order.IntermediateValue`.
-  -- ⚠️ STEP-2 IS THE ONE STEP STILL TO BE CONFIRMED AGAINST THE EXACT v4.13.0
-  --    API IN lutar-lean CI (the precise `Monotone.continuous*` field/lemma name
-  --    + the additive-no-jump argument). It is mathematically routine (Cauchy
-  --    1821; Aczél 1966 §5.1) but the exact lemma form is CI-verified, not
-  --    bare-`lean` verified here. We isolate it as a single named obligation
-  --    rather than ship a fake `rfl`.
-  have hg_cont : Continuous g := by
-    sorry -- STEP2_MONOTONE_ADDITIVE_CONTINUOUS — see note above; closes via
-          -- `Monotone.continuous` infrastructure once the v4.13.0 lemma name is
-          -- pinned in CI. Honest open obligation, NOT claimed proved.
-  -- Step 3 (dense equalizer on ℚ) — FULLY DISCHARGEABLE.
-  -- `g` and `fun t => g 1 * t` are continuous and agree on the dense range of
-  -- `(↑) : ℚ → ℝ` (`Rat.denseRange_cast`); `Continuous.ext_on` finishes.
-  have hlin : Continuous (fun t : ℝ => g 1 * t) := by continuity
-  have key : Set.EqOn g (fun t => g 1 * t) (Set.range ((↑) : ℚ → ℝ)) := by
-    rintro _ ⟨q, rfl⟩
-    simpa using hg_rat q
-  intro t
-  exact congrFun (Continuous.ext_on Rat.denseRange_cast hg_cont hlin key) t
+    ∀ t : ℝ, g t = g 1 * t :=
+  Lutar.Round13.monotone_additive_linear g hg_add hg_mono
 
 /-! ## §1.5 — Assembly that CONSUMES factorization (NOT unconditional)
 

@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-06 17:34 UTC_
+_Updated 2026-11-17 07:30 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **61**
-- Pinned baseline: **61** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **60**
+- Pinned baseline: **60** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **5** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,13 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **61 → 60** (2026-11-17, [#370](https://github.com/szl-holdings/lutar-lean/pull/370)):
+  `Lutar/Puriq/Formulas/F23_Uniqueness.lean` retired its single tracked `sorry`
+  (`STEP2_MONOTONE_ADDITIVE_CONTINUOUS`) by delegating the file-local
+  `monotone_additive_linear` to the sorry-free
+  `Lutar.Round13.monotone_additive_linear` (rational squeeze; no continuity
+  assumed; zero new axioms; same statement and signature). One compiled-corpus
+  `sorry` removed; nothing else changed.
 - **67 → 61** (2026-10-22, [#325](https://github.com/szl-holdings/lutar-lean/pull/325)):
   the gate was ratcheted to the measured count. `count_sorries.py` reported
   `TOTAL_SORRIES=61` outside `proposals/` at `0970b2f1` (2026-10-21), so the old
