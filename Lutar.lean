@@ -514,8 +514,9 @@ import Lutar.Scaling.MetabolicScalingDeep
 -- only), kernel-clean (every #print axioms reports NO axiom dependency), NO
 -- proof placeholder, NO new declared axiom. denyMonotonic: NO sequence of
 -- approvals lifts a hard deny (recon/foreignWrite/weaponize); benign lifts
--- cleanly. The software gates (khipu-consensus v0.4 recall gate, fail-closed,
--- UNKNOWN never PASS) remain the enforcement (spec 2.3). Lambda UNCONDITIONAL
+-- cleanly in the abstract state machine. CovenantGuard enforces empty axiom
+-- sets; correspondence with deployed enforcement requires separate evidence.
+-- Lambda UNCONDITIONAL
 -- uniqueness STAYS Conjecture 1; locked-proven STAYS EXACTLY 8.
 import Lutar.Covenant.DenyMonotonic
 /-!
