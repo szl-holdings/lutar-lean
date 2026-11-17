@@ -2,12 +2,12 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "71e080ed5b70c4d130e6dc16953e63faeb777dca",
-  "measured_at_utc": "2026-10-10T21:43:59Z",
+  "sha": "44888e68d7191d0059dcc8f0fdb0a0076afa445f",
+  "measured_at_utc": "2026-11-17T07:02:37Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Baseline updated 2026-10-10 from lean_numbers.py on main 71e080ed5b70c4d130e6dc16953e63faeb777dca. Counts are text matches over the counter scope, not a proof-quality score and not service readiness. Declarations 1402, axioms_raw 26, axioms_unique 25, sorries_raw 311, sorries_noncomment 260. The three names added to the recorded axiom list, CrystalIsometryClass, PDDFingerprint, and pdd, are existing uninterpreted axioms in Lutar/Materials/PDDInjective.lean. Recording them does not prove PDD injectivity and does not make /api/a11oy/v1/materials/novelty operational. Locked formulas stay F1, F4, F7, F11, F12, F18, F19, and F22. Lambda-Aggregator Uniqueness stays Conjecture 1. Doctrine v11 749/14/163 at c7c0ba17 is a separate counter and is unchanged.",
+  "note": "Baseline updated 2026-11-17 for Tier-B two-axis Pinsker promotion (PR #367, Lutar/Repairs/DPOPinskerPromotion.lean): +3 proven theorems (dpo_klDivergence_nonneg_simplex, dpo_pinsker_two_axis, LambdaGateLID_DPO_stability_two_axis), proven from Wave17 binary_pinsker. Axiom set unchanged (26 raw / 25 unique, same names). sorries_raw 311->313 and sorries_noncomment 260->262 are the token 'sorry' appearing in two honesty-posture docstrings in the new file ('NO sorry' prose), NOT live proof text; no new live sorries. Counts are text matches over the counter scope, not a proof-quality score. Doctrine v11 749/14/163 counter unchanged.",
   "numbers": {
-    "declarations": 1402,
+    "declarations": 1405,
     "axioms_raw": 26,
     "axioms_unique": 25,
     "axiom_names": [
@@ -37,9 +37,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 311,
-    "sorries_noncomment": 260,
+    "sorries_raw": 313,
+    "sorries_noncomment": 262,
     "sorries_putnam": 56,
-    "sorries_baseline": 255
+    "sorries_baseline": 257
   }
 }
