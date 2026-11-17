@@ -421,6 +421,7 @@ jobs:
           python3 .github/scripts/build_proof_snapshot.py \
             --axiomcheck-out theorem_u_axiomcheck.out \
             --numbers lean_numbers.measured.json \
+            --locked-evidence locked-formulas.evidence.json \
             --reference-vectors reference-vectors.json \
             --pack-dir Lutar/Uniqueness \
             --verified-theorems VERIFIED_THEOREMS.generated.md \
@@ -450,6 +451,7 @@ jobs:
             --kind locked-baseline \
             --axiomcheck-out theorem_u_axiomcheck.out \
             --numbers lean_numbers.measured.json \
+            --locked-evidence locked-formulas.evidence.json \
             --reference-vectors reference-vectors.json \
             --pack-dir Lutar/Uniqueness \
             --out locked_baseline_snapshot.json
