@@ -25,11 +25,37 @@ def K4Action : Fin 4 -> Nucleotide -> Nucleotide
   | _, n => n
 
 /-- Codon = ordered triple of nucleotides. -/
-def Codon := Nucleotide x Nucleotide x Nucleotide
+def Codon := Nucleotide × Nucleotide × Nucleotide
 
-/-- K4-orbit canonical representative (placeholder - computes lex-min). -/
-noncomputable def canonicalCodon (c : Codon) : Codon := by
-  sorry -- lex-min over {K4Action k c | k : Fin 4}^3
+/-- Constructor-order rank of a nucleotide: C < A < U < G. -/
+def nucleotideRank : Nucleotide -> Nat
+  | .C => 0 | .A => 1 | .U => 2 | .G => 3
+
+/-- Numeric lex key of a codon (first base most significant). -/
+def codonKey : Codon -> Nat
+  | (n1, n2, n3) =>
+    16 * nucleotideRank n1 + 4 * nucleotideRank n2 + nucleotideRank n3
+
+/-- Diagonal K4 orbit element: the SAME group element k applied to all
+    three positions (the Jose & Zamudio codon-symmetry action). -/
+def k4Codon (k : Fin 4) (c : Codon) : Codon :=
+  (K4Action k c.1, K4Action k c.2.1, K4Action k c.2.2)
+
+/-- Lex-min selector over two codons (smallest key wins; first arg on ties). -/
+def lexMin (a b : Codon) : Codon :=
+  if codonKey a <= codonKey b then a else b
+
+/-- K4-orbit canonical representative: the lex-minimum (constructor order
+    C < A < U < G, first base most significant) over the diagonal K4 orbit
+    {k4Codon k c | k : Fin 4}, which has at most 4 elements.
+
+    CLOSED (2026-11-17): computed by an explicit 4-way minimum over the
+    orbit; fully computable, zero new axioms or imports. The file was
+    previously never compiled (nothing imported it, and its `def Codon`
+    line used a literal ASCII `x` in place of the product symbol); it is
+    now wired into the lake build so the CI kernel checks it. -/
+def canonicalCodon (c : Codon) : Codon :=
+  lexMin (k4Codon 0 c) (lexMin (k4Codon 1 c) (lexMin (k4Codon 2 c) (k4Codon 3 c)))
 
 /-- K4 compression lossless round-trip:
     decode (encode x) = x for any codon triple. -/
