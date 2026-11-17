@@ -83,6 +83,10 @@ import Lutar.Round13.LambdaSeparable
 -- Wave12 CF-13: DEQ/Ouro equilibrium input-Lipschitz well-posedness margin (Mathlib
 -- ContractingWith; kernel-clean, no sorry, no new axiom). Companion to Wave11 CF-3.
 import Lutar.Innovations.round5.OuroLoopInputLipschitz
+-- Innovations/round5: CODON-ROUNDTRIP genetic-code tables (64->21 surjection +
+-- canonical section) now FILLED and sorry-free; wired into the build so the kernel
+-- checks them (structural cases + definitional reduction; zero new axioms).
+import Lutar.Innovations.round5.CodonRoundTrip
 -- Wave12 CF-17: floating-point summation forward-error bound (γ_{n-1}·Σ|xᵢ|; Higham 2002,
 -- rounding model as explicit HYPOTHESIS not axiom; kernel-clean, no sorry, no new axiom).
 import Lutar.Khipu.NumericStability

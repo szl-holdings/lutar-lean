@@ -1,15 +1,28 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-17 07:30 UTC_
+_Updated 2026-11-17 13:07 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **60**
-- Pinned baseline: **60** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **57**
+- Pinned baseline: **57** (no-increase gate)
 - Target: **0** (sorry-free)
-- Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **5** — disclosed, not gated (see proposals/INDEX.md)
+- Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
 CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count above the pinned baseline. The `proposals/` mirror holds LLM candidate proofs staged for PhD review; its sorries are reported here but excluded from the gate because they duplicate corpus originals already inside the baseline.
 
 ## Baseline change log
+
+- **60 → 57** (2026-11-17, [#373](https://github.com/szl-holdings/lutar-lean/pull/373)):
+  `Lutar/Innovations/round5/CodonRoundTrip.lean` retired its three tracked
+  `sorry` obligations by filling the standard genetic-code tables verbatim
+  (64 codon cases → 21 targets, Lenstra 2014 citation already on the file) and
+  the canonical lex-first section (constructor order C < A < U < G); the
+  round-trip theorem is proved by structural cases + definitional reduction
+  (`cases aa <;> rfl`). The file — previously NEVER compiled (nothing imported
+  it; its `def Codon` line used a literal ASCII `x` in place of the product
+  symbol, so it could not have parsed) — is now imported from `Lutar.lean`,
+  so the CI lake build machine-checks it. Zero new axioms; Innovations/round5
+  is outside the locked-8.
+
 
 - **61 → 60** (2026-11-17, [#370](https://github.com/szl-holdings/lutar-lean/pull/370)):
   `Lutar/Puriq/Formulas/F23_Uniqueness.lean` retired its single tracked `sorry`
