@@ -19,7 +19,7 @@ hypothesis-carrying statements into the DPO file's own symbols:
 * dpo_pinsker_two_axis — NEW: the full Pinsker bound
   tvDist p q <= sqrt (klDivergence p q / 2) for TWO-AXIS simplex-interior
   policies, proven from Wave17 binary_pinsker (CF-23). NO axioms.
-* LambdaGateLID_DPO_stability_two_axis — the TH12 stability theorem
+* LambdaGateLID_DPO_stability_two_axis — the TH12 stability result (proven, axiom-free)
   restated for two axes on the simplex interior, with ZERO dependence on the
   two honest-gap axioms (only the Wave14/15/17 proof chain + Mathlib).
 
