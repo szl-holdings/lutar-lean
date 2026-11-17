@@ -11,8 +11,11 @@ Stdlib only: the Tests workflow installs nothing but pytest.
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import sys
+
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +54,61 @@ def test_committed_scoreboard_states_the_enforced_baseline() -> None:
     assert pinned, "SORRIES.md has no pinned-baseline line"
     assert int(pinned.group(1)) == SB.gate_baseline(str(ROOT))
     assert SB.CHANGELOG_HEADING in md
+
+
+
+def test_excluded_scratch_sorries_are_disclosed_but_not_gated() -> None:
+    md = (ROOT / "SORRIES.md").read_text(encoding="utf-8")
+    disclosed = re.search(
+        r"Excluded `proposals/` scratch mirror.*?: \*\*(\d+)\*\*", md
+    )
+    assert disclosed, "excluded proposals must have a named numeric count"
+    all_files = SB.scan(str(ROOT), include_excluded=True)
+    gated_files = SB.scan(str(ROOT))
+    observed = sum(number for path, number in all_files.items() if path not in gated_files)
+    assert int(disclosed.group(1)) == observed
+    assert all("proposals" not in path.split("/")[:1] for path in gated_files)
+
+
+def test_benchmark_manifest_binds_the_current_sorry_gate_pin(tmp_path) -> None:
+    """An authored baseline ratchet must update generated evidence too."""
+    pin = SB.gate_baseline(str(ROOT))
+    manifest = json.loads((ROOT / "benchmark" / "MANIFEST.json").read_text(encoding="utf-8"))
+    assert manifest["authority"]["sorry_gate"] == (
+        f"SORRIES.md pinned baseline {pin} (no-increase)"
+    )
+    # Load the generator without running its writing entrypoint.
+    spec = importlib.util.spec_from_file_location(
+        "benchmark_pin_test", ROOT / "tools" / "build_estate_benchmark.py"
+    )
+    assert spec is not None and spec.loader is not None
+    generator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(generator)
+    assert generator._sorry_baseline() == pin
+    generated, regenerated = generator.build_corpus()
+    assert regenerated["authority"]["sorry_gate"] == manifest["authority"]["sorry_gate"]
+    assert regenerated["corpus_sha256"] == manifest["corpus_sha256"]
+    assert regenerated["total_sorry_rows"] == manifest["total_sorry_rows"]
+    assert generated.encode("utf-8") == (
+        ROOT / "benchmark" / "estate_pinned_v1.jsonl"
+    ).read_bytes().replace(b"\r\n", b"\n")
+
+    # A missing, ambiguous or malformed pin fails rather than silently
+    # retaining a stale integer in the benchmark's authority field.
+    original_path = generator.SORRY_GATE_PATH
+    try:
+        generator.SORRY_GATE_PATH = tmp_path / "sorry-gate.yml"
+        for invalid in (
+            "",
+            "    SORRY_BASELINE: 60\n",
+            '    SORRY_BASELINE: "0"\n',
+            '    SORRY_BASELINE: "60"\n    SORRY_BASELINE: "60"\n',
+        ):
+            generator.SORRY_GATE_PATH.write_text(invalid, encoding="utf-8")
+            with pytest.raises(ValueError, match="SORRY_GATE_PIN_UNAVAILABLE_OR_AMBIGUOUS"):
+                generator._sorry_baseline()
+    finally:
+        generator.SORRY_GATE_PATH = original_path
 
 
 def test_scoreboard_keeps_the_change_log_and_uses_the_gate_pin(tmp_path) -> None:

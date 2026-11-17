@@ -48,12 +48,29 @@ BENCH_DIR = ROOT / "benchmark"
 CORPUS_PATH = BENCH_DIR / "estate_pinned_v1.jsonl"
 MANIFEST_PATH = BENCH_DIR / "MANIFEST.json"
 CLAIMS_PATH = ROOT / "claims" / "locked-formulas.v1.json"
+SORRY_GATE_PATH = ROOT / ".github" / "workflows" / "sorry-gate.yml"
 
 SCHEMA = "szl.lutar.estate-lean-eval/v1"
 
 # Compiled-corpus scope mirrors count_sorries.py (proposals/ excluded), plus
 # this tooling's own directories are excluded (they are not corpus math).
 EXCLUDED_TOP = {"proposals", "benchmark", "tools", ".lake", ".git", "assets"}
+
+def _sorry_baseline() -> int:
+    """Read the one authoritative, literal compiled-corpus CI pin.
+
+    Do not encode a count in this benchmark generator: a pin ratchet
+    must update the generated manifest or the --check gate must fail.
+    """
+    try:
+        source = SORRY_GATE_PATH.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        raise ValueError("SORRY_GATE_UNAVAILABLE") from None
+    matches = re.findall(r'(?m)^\s+SORRY_BASELINE:\s*"([1-9][0-9]{0,5})"\s*$', source)
+    if len(matches) != 1:
+        raise ValueError("SORRY_GATE_PIN_UNAVAILABLE_OR_AMBIGUOUS")
+    return int(matches[0])
+
 
 DECL_RE = re.compile(r"^(theorem|lemma|def|abbrev)\b")
 SORRY_RE = re.compile(r"\bsorry\b")
@@ -209,7 +226,7 @@ def build_corpus():
         "authority": {
             "locked8": "claims/locked-formulas.v1.json (COMPILED_LOCKED_SURFACE)",
             "theorem_u": "szl-lake anchor: REAL-conditional; Conjecture 1 OPEN, machine-checked FALSE",
-            "sorry_gate": "SORRIES.md pinned baseline 61 (no-increase)",
+            "sorry_gate": f"SORRIES.md pinned baseline {_sorry_baseline()} (no-increase)",
         },
         "locked8_carriers": len(carriers),
         "theorem_u_decls": len(HEADLINE_U),
