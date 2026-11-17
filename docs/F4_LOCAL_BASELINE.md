@@ -2,7 +2,7 @@
 
 **Status: code-only research workflow; no model inference or training has been run by this PR.**
 This extends the synthetic F4 theorem-boundary fixture after the merged
-[experiment contract](docs/F4_BOUNDARY_EXPERIMENT.md).
+[experiment contract](F4_BOUNDARY_EXPERIMENT.md).
 
 ## Purpose and scope
 
