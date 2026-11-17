@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-17 13:07 UTC_
+_Updated 2026-11-17 19:32 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **57**
-- Pinned baseline: **57** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **56**
+- Pinned baseline: **56** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,14 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **57 → 56** (2026-11-17, [374](https://github.com/szl-holdings/lutar-lean/pull/374)):
+  `Lutar/Innovations/round5/CodonK4Compress.lean` retired its single tracked
+  `sorry` (`canonicalCodon`, the K4-orbit lex-min) by computing it as an
+  explicit 4-way minimum over the diagonal Klein-four orbit (Jose & Zamudio
+  2017 codon symmetry; constructor order C < A < U < G). Like its sibling
+  (#373) the file was previously never compiled (ASCII `x` def bug, no
+  importer) — now fixed and wired into the lake build. Zero new axioms;
+  Innovations/round5 is outside the locked-8.
 - **60 → 57** (2026-11-17, [#373](https://github.com/szl-holdings/lutar-lean/pull/373)):
   `Lutar/Innovations/round5/CodonRoundTrip.lean` retired its three tracked
   `sorry` obligations by filling the standard genetic-code tables verbatim
