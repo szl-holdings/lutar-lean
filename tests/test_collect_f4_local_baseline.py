@@ -7,7 +7,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from tools import collect_f4_local_baseline as collector
+import importlib.util
+
+# Resolve the file explicitly: GitHub's base-python CI does not install tools/
+# as a package during pytest collection.
+SOURCE = Path(__file__).resolve().parents[1] / "tools" / "collect_f4_local_baseline.py"
+SPEC = importlib.util.spec_from_file_location("f4_local_baseline", SOURCE)
+collector = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(collector)
 
 
 def fixture():
