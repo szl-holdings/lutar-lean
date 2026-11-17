@@ -5,29 +5,29 @@ ORCID: 0009-0001-0110-4173
 
 # Theorem TH10 — Uniqueness of the Lutar Invariant (v2 — PhD-Math Retry)
 
-**Status:** HONEST ASSESSMENT — this file identifies the exact sorry structure
-required and shows which sub-proofs compile and which remain open.
+**Status:** HONEST ASSESSMENT — this file distinguishes the remaining sorry
+from the Cauchy lemma that is already closed in the imported Round13 proof.
 
 **NOT a sorry-free proof.** Λ = Conjecture 1 per Supreme Rules.
 
-## Changes from v1 (Λ Uniqueness Closer patch):
-1. Restructured: `axisSlice_mul_eq` is correctly identified as unprovable from A2 alone;
-   the proof route bypasses it.
-2. `monotone_additive_linear` is extracted as the key standalone lemma.
-3. The ℚ-density sorry is explicitly written as a provable lemma (with skeleton).
-4. Top-level assembly is more explicit.
+## Current source boundary:
+1. Slice multiplicativity is not derivable from A2 alone; it requires an additional
+   hypothesis in the conditional proof route.
+2. `monotone_additive_linear` reuses the completed Round13 rational-squeeze proof.
+3. The former Cauchy sorry is closed; this does not supply the missing factorization.
+4. The legacy unconditional signatures below remain unproved and are false under A1–A5.
 
-## Remaining sorries (honest count):
-- `monotone_additive_linear`: 1 sorry (the core Cauchy step, ~40 lines to close)
-- `lutar_is_geomean`: 1 sorry (top-level assembly, ~50 lines, depends on above)
-Total: 2 sorries (down from 5 in the previous attempt)
+## Remaining proof obligation:
+- `monotone_additive_linear`: no remaining sorry; delegates to the closed Round13 lemma.
+- `lutar_is_geomean`: 1 sorry for an unconditional statement false under A1–A5.
+- `lutar_unique` depends on that unresolved declaration.
+Total: one executable proof placeholder. Conjecture 1 is not a theorem.
 
-## Doctrine (HONEST):
-- BEFORE: 749 decl / 14 axioms / 163 sorries @ c7c0ba17
-- THIS FILE (if merged): 750 decl / 14 axioms / 162 sorries (1 sorry closed: `lambda_perm_invariant`)
-  Wait—this file does NOT close CAUCHY_ND. The sorry count stays at 163 (or goes to 162 if
-  `lambda_perm_invariant` is counted separately from the original CAUCHY_ND).
-  The file contains 2 executable sorries.
+## Historical doctrine and current measurement:
+- Historical v11 snapshot: 749 declarations / 14 unique axioms / 163 sorries @ c7c0ba17.
+- Closing the Cauchy sorry did not establish unconditional uniqueness.
+- Current corpus numbers must come from the canonical counter at a named commit;
+  this file's sorry tally is not a current corpus census. The locked eight are unchanged.
 
 ## References:
 - Aczél, J. (1966). Lectures on Functional Equations. Academic Press. ISBN 0-12-043750-3. Thm 5.1.
@@ -118,10 +118,11 @@ theorem lambda_satisfiesAxioms {k : Nat} (hk : 0 < k) :
     A4 := lambda_isBounded hk,
     A5 := lambda_isPermutationInvariant hk }
 
-/-! ## Key missing Mathlib lemma: monotone additive map on ℝ is linear
+/-! ## Closed lemma: a monotone additive map on ℝ is linear
     (Aczél 1966 Thm 5.1; Cauchy 1821 Chap. V)
 
-This is the SOLE blocking lemma for the entire proof. It is NOT in Mathlib v4.13.0.
+The implementation below reuses the completed Round13 rational-squeeze proof.
+It does not derive multiplicativity or separability of an arbitrary A1–A5 aggregator.
 
 Mathematical proof:
 1. g additive + rational: g(q) = g(1) * q for all q : ℚ (induction on ℤ, then ℚ).
@@ -129,7 +130,7 @@ Mathematical proof:
 3. Two continuous functions g and (· * g(1)) agreeing on ℚ (dense in ℝ) are equal.
 4. Hence g(t) = g(1) * t for all t : ℝ.
 
-Estimated Lean proof size: ~40 lines. -/
+The argument above is background; the imported Round13 proof supplies the implementation. -/
 private theorem monotone_additive_linear
     (g : ℝ → ℝ)
     (hg_add : ∀ u v : ℝ, g (u + v) = g u + g v)
@@ -144,11 +145,12 @@ private theorem monotone_additive_linear
 /-! ## Auxiliary: the single-axis slice
 
 Given Φ satisfying A1–A5, the slice fᵢ(t) = Φ(fun j => if j=i then t else 1)
-satisfies: (i) fᵢ(1) = 1, (ii) fᵢ is monotone, (iii) fᵢ(t) = t^(1/k).
+satisfies: (i) fᵢ(1) = 1 and (ii) fᵢ is monotone. The power-function form
+fᵢ(t) = t^(1/k) does not follow from those facts or from A1–A5 alone.
 
-The multiplicativity fᵢ(s*t) = fᵢ(s)*fᵢ(t) is NOT proved directly from A2.
-Instead we derive the power-function form via the log-space additive Cauchy argument
-applied to gᵢ(u) = log(fᵢ(exp(u))), which is additive and monotone. -/
+The multiplicativity fᵢ(s*t) = fᵢ(s)*fᵢ(t) is NOT derivable from A2.
+The conditional separable route supplies slice multiplicativity as an explicit
+hypothesis before applying the log-space additive Cauchy argument. -/
 
 private noncomputable def axisSlice {k : ℕ} (Φ : Aggregator k) (i : Fin k) :
     NNReal → NNReal :=
@@ -173,35 +175,35 @@ private lemma axisSlice_monotone {k : ℕ} (Φ : Aggregator k)
   · simp [hij, hst]
   · simp [hij]
 
-/-! ## Theorem TH10 — Core uniqueness (2 sorries remain) -/
+/-! ## Legacy TH10 signatures — unconditional uniqueness remains unproved -/
 
-/-- **TH10 (core form).** Any aggregator satisfying A1–A5 equals `Λ k`.
-    
-    This is the KEY THEOREM. It has 1 top-level sorry depending on:
-    1. `monotone_additive_linear` (which has its own sorry).
-    
-    When both sorries are discharged, `lutar_unique` becomes a true theorem.
-    
-    Mathematical proof: correct, via Aczél 1966 Thm 5.1.
-    Lean engineering estimate: ~70 additional lines. -/
+/-- **Legacy TH10 claim.** The signature asserts that any A1–A5 aggregator equals `Λ k`.
+
+    This declaration contains the remaining sorry. The Cauchy lemma no longer has
+    its own sorry, but closing that analytic lemma cannot prove this false statement.
+
+    The max-aggregator counterexample shows why A1–A5 alone are insufficient.
+    The valid conditional results require factorization or the stated separable
+    hypotheses; see `Round13.lambda_unique_of_factors` and
+    `Round13.lambda_unique_of_separable`. No unconditional theorem is claimed. -/
 theorem lutar_is_geomean {k : Nat} (hk : 0 < k)
     (Phi : Aggregator k) (hL : LutarAxioms Phi) :
     Phi = Lutar.Λ k := by
   obtain ⟨hA1, hA2, hA3, hA4, hA5⟩ := hL
   funext x
-  -- The proof:
+  -- The invalid legacy route, retained to make the missing premises explicit:
   -- For each i : Fin k, define fᵢ = axisSlice Phi i.
   -- fᵢ is monotone (axisSlice_monotone).
   -- fᵢ(1) = 1 (axisSlice_one).
   -- Define gᵢ(u) = Real.log (↑(fᵢ (Real.toNNReal (Real.exp u)))).
-  -- gᵢ is additive from A2 (homogeneity at the slice level).
+  -- The missing step: additivity of gᵢ does NOT follow from A2.
   -- gᵢ is monotone from fᵢ monotone.
   -- By monotone_additive_linear: gᵢ(t) = gᵢ(1) * t.
   -- Hence fᵢ(t) = t^(gᵢ(1)) = t^αᵢ.
   -- By A5 (hA5): for any i,j, αᵢ = αⱼ (permutation symmetry of slices).
   -- Hence all αᵢ = α.
   -- By A3 (hA3): Phi(c,...,c) = c ⟹ c^(k*α) = c ⟹ k*α = 1 ⟹ α = 1/k.
-  -- Reconstruction: Phi(x) = (∏ xᵢ)^(1/k) = Λ k x.
+  -- Reconstruction additionally requires separability: it does not follow from A1–A5.
   -- ⚠️ HONEST OPEN OBLIGATION (UNAVOIDABLE — statement is FALSE under A1–A5).
   -- `lutar_is_geomean` is the UNCONDITIONAL claim `LutarAxioms Phi → Phi = Λ k`.
   -- This is machine-checked FALSE: `Lutar.Round13.maxAgg` and `min` satisfy A1–A5
@@ -226,24 +228,16 @@ theorem lutar_unique {k : Nat} (hk : 0 < k)
 end Lutar
 
 /-
-## Honest Sorry Count in This File
+## Current status of the legacy proof route
 
-| Sorry location | What's needed | Effort |
-|---|---|---|
-| `monotone_additive_linear` (line ~100) | `DenseRange.equalizer` API in Mathlib v4.13.0 | ~5 lines |
-| `lutar_is_geomean` (line ~170) | Full assembly of 7 sub-lemmas | ~50 lines |
-| **TOTAL** | **2 sorries** | **~55 lines** |
+| Declaration | Current status |
+|---|---|
+| `monotone_additive_linear` | Closed by the imported Round13 proof |
+| `lutar_is_geomean` | One executable placeholder; unconditional statement false under A1–A5 |
+| `lutar_unique` | Depends on the unresolved unconditional declaration |
 
-## Comparison with Previous Attempt (Λ Uniqueness Closer)
-
-| | Previous attempt | This file |
-|---|---|---|
-| Sorries | 5 | 2 |
-| Mathematical correctness | Correct | Correct |
-| Proof architecture | Over-elaborate | Streamlined |
-| axisSlice_mul_eq | Sorried incorrectly | Removed (not needed) |
-| Cauchy step | Partially sketched | Isolated in standalone lemma |
-
-## Signed-off-by: PhD Math — Functional Analysis Specialist
-## Date: 2026-06-02
+The former two-placeholder estimate and claim of a correct unconditional proof
+are historical errors. They must not be read as a remaining proof-engineering plan.
+The conditional Round13 and Theorem-U results retain their explicit hypotheses.
+Commentary reconciled 2026-11-16; declaration signatures and proof terms unchanged.
 -/

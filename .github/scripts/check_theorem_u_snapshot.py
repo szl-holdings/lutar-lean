@@ -23,8 +23,8 @@ non-empty, parses, and — critically — keeps the honesty block intact:
   * schema == "szl.proof.snapshot/v1" and kind == "theorem-u"
   * milestone.status == "REAL-conditional" and milestone.kernel_only is True
   * milestone.headline_decls is a non-empty list (the Theorem-U headline pack)
-  * honesty.locked_five_unchanged is exactly True (bool)
-  * honesty.locked_set == {F1, F11, F12, F18, F19}
+  * honesty.locked_set matches the canonical claim map and revision-bound evidence
+  * the evidence covers every locked carrier and stays inside the kernel trust base
   * honesty.theorem_u states REAL-conditional (never "proven")
   * honesty.conjecture_1 states OPEN / machine-checked FALSE (never closed)
 
@@ -43,14 +43,19 @@ import json
 import tempfile
 from pathlib import Path
 
+from build_locked_formula_evidence import load_json, sha256_file
+from locked_snapshot_contract import (
+    CLAIM_MAP_PATH, INPUT_PATHS, REPO_ROOT, SCHEMA as LOCKED_EVIDENCE_SCHEMA,
+    evidence_digest, validate_snapshot_locked_binding,
+)
+
 EXPECTED_SCHEMA = "szl.proof.snapshot/v1"
 EXPECTED_KIND = "theorem-u"
 # Theorem U is kernel-verified but CONDITIONAL on its checkable hypotheses; it is
 # NOT part of the locked-proven baseline. The status must never silently flip to
 # "PROVEN" (that would overclaim).
 EXPECTED_STATUS = "REAL-conditional"
-# The five locked-proven formulas. The snapshot must testify they are unchanged.
-EXPECTED_LOCKED_SET = {"F1", "F11", "F12", "F18", "F19"}
+# Locked IDs are read from claims/locked-formulas.v1.json through the shared contract.
 
 
 def _find_snapshots(directory: Path) -> list[Path]:
@@ -71,7 +76,8 @@ def _contains_all(text: object, needles: tuple[str, ...]) -> bool:
     return all(n.lower() in low for n in needles)
 
 
-def validate_snapshot_file(path: Path) -> list[str]:
+def validate_snapshot_file(path: Path, expected_commit: str | None = None,
+                           *, source_root: Path | None = None) -> list[str]:
     """Validate one snapshot JSON file. Returns a list of problems ([] == valid)."""
     try:
         raw = path.read_text(encoding="utf-8")
@@ -95,6 +101,9 @@ def validate_snapshot_file(path: Path) -> list[str]:
         )
     if data.get("kind") != EXPECTED_KIND:
         problems.append(f"kind is '{data.get('kind')}', expected '{EXPECTED_KIND}'")
+
+    if expected_commit is not None and data.get("kernel_commit") != expected_commit:
+        problems.append("snapshot kernel_commit differs from the source workflow run")
 
     # --- milestone: kernel-verified, conditional, headline present ---------- #
     milestone = data.get("milestone")
@@ -123,17 +132,6 @@ def validate_snapshot_file(path: Path) -> list[str]:
     if not isinstance(honesty, dict):
         problems.append("missing/invalid 'honesty' object")
     else:
-        if honesty.get("locked_five_unchanged") is not True:
-            problems.append(
-                f"honesty.locked_five_unchanged is {honesty.get('locked_five_unchanged')!r}, "
-                "expected exactly True"
-            )
-        locked = honesty.get("locked_set")
-        if not isinstance(locked, list) or set(locked) != EXPECTED_LOCKED_SET:
-            problems.append(
-                f"honesty.locked_set is {locked!r}, "
-                f"expected the set {sorted(EXPECTED_LOCKED_SET)}"
-            )
         # Theorem U: REAL-conditional, never "proven".
         if not _contains_all(honesty.get("theorem_u"), ("REAL-conditional",)):
             problems.append(
@@ -147,10 +145,12 @@ def validate_snapshot_file(path: Path) -> list[str]:
                 f"(got: {honesty.get('conjecture_1')!r})"
             )
 
+    problems.extend(validate_snapshot_locked_binding(data, source_root=source_root))
     return problems
 
 
-def check_dir(directory: Path) -> int:
+def check_dir(directory: Path, expected_commit: str | None = None,
+              *, source_root: Path | None = None) -> int:
     """Audit a downloaded artifact directory. Returns a process exit code."""
     if not directory.exists():
         print(
@@ -171,7 +171,7 @@ def check_dir(directory: Path) -> int:
 
     ok = True
     for path in snapshots:
-        problems = validate_snapshot_file(path)
+        problems = validate_snapshot_file(path, expected_commit, source_root=source_root)
         if problems:
             ok = False
             for problem in problems:
@@ -183,15 +183,47 @@ def check_dir(directory: Path) -> int:
                 f"[theorem-u-snapshot-guard] OK: {path.name} "
                 f"kind={data.get('kind')} status={m.get('status')} "
                 f"kernel_only={m.get('kernel_only')} "
-                f"locked_five_unchanged={data.get('honesty', {}).get('locked_five_unchanged')}"
+                f"locked_set={data.get('honesty', {}).get('locked_set')}"
             )
     return 0 if ok else 1
+
+
+def _selftest_locked_evidence(commit: str) -> dict:
+    """Synthetic offline carrier records for tests; this is not kernel evidence."""
+    claims = load_json(REPO_ROOT / CLAIM_MAP_PATH)
+    evidence = {
+        "schema": LOCKED_EVIDENCE_SCHEMA,
+        "repository": claims["repository"],
+        "source_commit": commit,
+        "source_tree": "0" * 40,
+        "input_files_match_head": True,
+        "lean_toolchain": claims["lean_toolchain"],
+        "locked_ids": claims["locked_ids"],
+        "carrier_theorem_count": claims["carrier_theorem_count"],
+        "trust_base": claims["trust_base"],
+        "kernel_query_tool": "Lean.collectAxioms",
+        "inputs": {path.as_posix(): sha256_file(REPO_ROOT / path) for path in INPUT_PATHS},
+        "claims": [
+            {
+                "claim_id": claim["claim_id"],
+                "carriers": [
+                    {"theorem": "Puriq.Formula.Proved." + name, "axioms": [], "allowed": True}
+                    for name in claim["theorem_declarations"]
+                ],
+            }
+            for claim in claims["claims"]
+        ],
+        "limitations": ["Synthetic fixture only; does not attest a Lean build."],
+    }
+    evidence["evidence_digest"] = evidence_digest(evidence)
+    return evidence
 
 
 def _selftest() -> int:
     """Prove the validator passes a good snapshot and rejects broken/dishonest ones."""
     failures: list[str] = []
 
+    locked_evidence = _selftest_locked_evidence("0" * 40)
     good = {
         "schema": EXPECTED_SCHEMA,
         "kind": EXPECTED_KIND,
@@ -216,10 +248,11 @@ def _selftest() -> int:
                 "OPEN: unconditional Lambda uniqueness is Conjecture 1 and is "
                 "machine-checked FALSE as stated."
             ),
-            "locked_five_unchanged": True,
-            "locked_set": ["F1", "F11", "F12", "F18", "F19"],
+            "locked_set": list(locked_evidence["locked_ids"]),
         },
     }
+
+    good["locked_formula_evidence"] = locked_evidence
 
     def mutate(**patch_paths) -> dict:
         """Deep-copy `good` then apply dotted-path overrides."""
@@ -250,8 +283,11 @@ def _selftest() -> int:
         ("kernel-not-clean", lambda d: write(d, json.dumps(mutate(**{"milestone.kernel_only": False}))), 1),
         ("empty-headline", lambda d: write(d, json.dumps(mutate(**{"milestone.headline_decls": []}))), 1),
         ("missing-milestone", lambda d: write(d, json.dumps(mutate(milestone=_DELETE))), 1),
-        ("locked-flag-false", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_five_unchanged": False}))), 1),
-        ("locked-flag-truthy-not-bool", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_five_unchanged": 1}))), 1),
+        ("retired-locked-five-flag", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_five_unchanged": True}))), 1),
+        ("missing-locked-evidence", lambda d: write(d, json.dumps(mutate(locked_formula_evidence=_DELETE))), 1),
+        ("wrong-evidence-commit", lambda d: write(d, json.dumps(mutate(**{"locked_formula_evidence.source_commit": "1" * 40}))), 1),
+        ("five-set-regression", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_set": ["F1", "F11", "F12", "F18", "F19"]}))), 1),
+        ("missing-locked-set", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_set": _DELETE}))), 1),
         ("locked-set-shrunk", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_set": ["F1", "F11", "F12", "F18"]}))), 1),
         ("locked-set-grown", lambda d: write(d, json.dumps(mutate(**{"honesty.locked_set": ["F1", "F11", "F12", "F18", "F19", "F20"]}))), 1),
         ("theorem-u-overclaim", lambda d: write(d, json.dumps(mutate(**{"honesty.theorem_u": "PROVEN unconditionally."}))), 1),
@@ -296,6 +332,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dir", help="directory holding the downloaded snapshot artifact")
     ap.add_argument("--snapshot", help="explicit path to the snapshot JSON file")
+    ap.add_argument("--expected-commit", help="full source workflow HEAD SHA")
+    ap.add_argument("--source-root", type=Path, help="read-only checkout of that source revision")
     ap.add_argument(
         "--selftest",
         action="store_true",
@@ -310,7 +348,7 @@ def main(argv: list[str] | None = None) -> int:
         if not path.exists():
             print(f"::error::snapshot file '{path}' does not exist (artifact not produced).")
             return 1
-        problems = validate_snapshot_file(path)
+        problems = validate_snapshot_file(path, args.expected_commit, source_root=args.source_root)
         if problems:
             for problem in problems:
                 print(f"::error::{path.name}: {problem}")
@@ -318,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[theorem-u-snapshot-guard] OK: {path.name} is non-empty, well-formed and honest.")
         return 0
     if args.dir:
-        return check_dir(Path(args.dir))
+        return check_dir(Path(args.dir), args.expected_commit, source_root=args.source_root)
     ap.error("one of --dir, --snapshot or --selftest is required")
     return 2  # unreachable; argparse.error exits 2
 

@@ -18,8 +18,8 @@ a named milestone:
 Originally Theorem-U-specific; now generalized so ANY green proof milestone (a
 future Conjecture-2 result, an updated doctrine snapshot, etc.) can be anchored
 through the same pipeline by passing `--kind` plus a milestone profile. The
-DEFAULT profile (`--kind theorem-u`) reproduces the original Theorem-U snapshot
-content.
+DEFAULT profile (`--kind theorem-u`) emits the Theorem-U milestone and binds its
+locked set to the canonical revision-bound kernel evidence.
 
 No network, no signing here -- this only emits the *subject* that the anchor
 workflow signs (cosign keyless OIDC) and records in szl-lake. Deterministic given
@@ -35,6 +35,10 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
+
+from build_locked_formula_evidence import EvidenceError, load_json
+from locked_snapshot_contract import validate_locked_evidence
 
 SNAPSHOT_SCHEMA = "szl.proof.snapshot/v1"
 
@@ -46,11 +50,11 @@ KERNEL_TRUST_BASE = {"propext", "funext", "Classical.choice", "Quot.sound"}
 # A profile defines what makes a given milestone snapshot "green": the headline
 # declarations whose axiom footprint must be present + kernel-clean, the human
 # title + module, the milestone status label, and the per-snapshot honesty block.
-# The honesty block is carried VERBATIM into the snapshot and the receipt; it must
-# state the truth for THAT milestone (proven vs conditional vs open), never a
-# blanket "proven".
+# The profile supplies milestone-specific honesty language; the locked set is
+# derived from validated evidence at build time. The receipt preserves that final
+# block, never replacing its conditional/open boundaries with blanket "proven".
 #
-# Default profile = theorem-u (reproduces the original behaviour).
+# Default profile = theorem-u, with canonical locked evidence required.
 # --------------------------------------------------------------------------- #
 PROFILES: dict[str, dict] = {
     "theorem-u": {
@@ -80,8 +84,6 @@ PROFILES: dict[str, dict] = {
                 "OPEN: unconditional Lambda uniqueness is Conjecture 1 and is "
                 "machine-checked FALSE as stated. Theorem U does NOT close it."
             ),
-            "locked_five_unchanged": True,
-            "locked_set": ["F1", "F11", "F12", "F18", "F19"],
         },
     },
     # Second anchored milestone (Task #723): the kernel-verified meta-invariants
@@ -119,7 +121,6 @@ PROFILES: dict[str, dict] = {
                 "those formulas (the formula proofs live in "
                 "Lutar/Puriq/Formulas/ProvedFormulas.lean)."
             ),
-            "locked_set": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
             "theorem_u": (
                 "Theorem U stays REAL-conditional and EXCLUDED from this locked "
                 "baseline (theoremU_excluded_from_locked); anchoring this milestone "
@@ -346,6 +347,8 @@ def main() -> int:
                     help="regenerated canonical numbers (lean_numbers.measured.json)")
     ap.add_argument("--reference-vectors", default=None,
                     help="reference-vectors.json produced by `lake exe ref_vectors`")
+    ap.add_argument("--locked-evidence", default=None,
+                    help="revision-bound locked-formulas.evidence.json from the kernel guard")
     ap.add_argument("--pack-dir", default=None,
                     help="milestone pack source directory (overrides the profile)")
     ap.add_argument("--verified-theorems", default=None,
@@ -374,10 +377,33 @@ def main() -> int:
         print("::error::milestone profile has no pack_dir/module", file=sys.stderr)
         return 1
     honesty = profile.get("honesty")
-    if honesty is None:
+    if not isinstance(honesty, dict) or not honesty:
         print(f"::error::milestone '{args.kind}' has no honesty block; refusing to "
               "anchor without a per-snapshot honesty statement", file=sys.stderr)
         return 1
+
+    locked_evidence = None
+    if args.kind in ("theorem-u", "locked-baseline") or args.locked_evidence:
+        if not args.locked_evidence:
+            print("::error::production snapshots require --locked-evidence", file=sys.stderr)
+            return 1
+        try:
+            locked_evidence = load_json(Path(args.locked_evidence))
+        except EvidenceError as exc:
+            print(f"::error::locked evidence unavailable: {exc}", file=sys.stderr)
+            return 1
+        problems = validate_locked_evidence(locked_evidence, args.commit, args.repo)
+        if "locked_five_unchanged" in honesty:
+            problems.append("retired locked_five_unchanged assertion must be removed")
+        if "locked_set" in honesty and honesty["locked_set"] != locked_evidence.get("locked_ids"):
+            problems.append("honesty override conflicts with the canonical locked evidence")
+        if problems:
+            for problem in problems:
+                print(f"::error::{problem}", file=sys.stderr)
+            return 1
+        # Derive the set from validated kernel evidence, never a success boolean.
+        honesty = dict(honesty)
+        honesty["locked_set"] = list(locked_evidence["locked_ids"])
 
     with open(args.axiomcheck_out, "r", encoding="utf-8", errors="replace") as fh:
         axiom_text = fh.read()
@@ -411,6 +437,9 @@ def main() -> int:
 
     with open(args.numbers, "r", encoding="utf-8") as fh:
         numbers_doc = json.load(fh)
+    if locked_evidence is not None and numbers_doc.get("sha") != args.commit:
+        print("::error::measured numbers SHA differs from the snapshot commit", file=sys.stderr)
+        return 1
     numbers = numbers_doc.get("numbers", {})
 
     numbers_sha = _sha256_file(args.numbers)
@@ -450,6 +479,9 @@ def main() -> int:
         },
         "honesty": honesty,
     }
+
+    if locked_evidence is not None:
+        snapshot["locked_formula_evidence"] = locked_evidence
 
     # Embed EVERY CI-green governed-surface theorem (kernel-checked, drift-gated)
     # so the cosign-signed snapshot/receipt anchored into szl-lake records them all.

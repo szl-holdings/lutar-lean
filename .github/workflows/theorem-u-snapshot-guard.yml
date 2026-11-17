@@ -22,7 +22,7 @@
 # This guard audits the ACTUAL artifact a completed GREEN main lake-build run
 # published. It downloads `theorem-u-snapshot-*` — which FAILS if the run produced
 # no such artifact (total_count 0) — and asserts the snapshot parses AND keeps its
-# honesty block intact: locked_five_unchanged:true, locked_set {F1,F11,F12,F18,F19},
+# honesty block intact: locked_set matches canonical revision-bound kernel evidence,
 # Theorem U = REAL-conditional, Conjecture 1 = OPEN / machine-checked FALSE. A
 # silently-disappearing snapshot, or one whose honesty was quietly loosened to
 # overclaim, can therefore never pass green.
@@ -49,6 +49,9 @@ on:
     paths:
       - ".github/workflows/theorem-u-snapshot-guard.yml"
       - ".github/scripts/check_theorem_u_snapshot.py"
+      - ".github/scripts/locked_snapshot_contract.py"
+      - ".github/scripts/build_proof_snapshot.py"
+      - "claims/locked-formulas.v1.json"
   workflow_dispatch:
     inputs:
       run_id:
@@ -157,6 +160,15 @@ jobs:
           fi
           echo "Auditing lake-build run ${RID}."
           echo "run_id=${RID}" >> "$GITHUB_OUTPUT"
+          HEAD_SHA="$(gh run view "${RID}" --repo "${GITHUB_REPOSITORY}" --json headSha --jq .headSha)"
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout immutable proof inputs (read only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.target.outputs.head_sha }}
+          path: proof-source
+          persist-credentials: false
 
       - name: Download the theorem-u-snapshot artifact
         env:
@@ -179,7 +191,9 @@ jobs:
           find snapshot-artifact -type f -printf '  %p (%s bytes)\n'
 
       - name: Assert the snapshot is non-empty, well-formed and honest
-        run: python .github/scripts/check_theorem_u_snapshot.py --dir snapshot-artifact
+        env:
+          EXPECTED_KERNEL_COMMIT: ${{ steps.target.outputs.head_sha }}
+        run: python .github/scripts/check_theorem_u_snapshot.py --dir snapshot-artifact --expected-commit "$EXPECTED_KERNEL_COMMIT" --source-root proof-source
 
       - name: Theorem-U snapshot artifact is intact
         run: echo "green main lake-build published a non-empty, well-formed, honest Theorem-U snapshot artifact."
