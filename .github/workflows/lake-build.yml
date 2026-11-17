@@ -280,6 +280,20 @@ jobs:
       - name: Cross-component semantic regression and axiom gate
         run: lake env lean tools/lean/CrossComponentGuard.lean
 
+      - name: Covenant proof gate and revision-bound receipt
+        id: covenant_proof
+        run: |
+          python3 scripts/verify_covenant.py --repo-path . \
+            --output-dir "${RUNNER_TEMP}/covenant-verification-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Upload Covenant proof evidence
+        if: always() && steps.covenant_proof.outcome != 'skipped'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: covenant-proof-${{ github.sha }}
+          path: ${{ runner.temp }}/covenant-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+
       - name: Build revision-bound locked-8 evidence manifest
         run: |
           set -euo pipefail
