@@ -54,6 +54,13 @@ def strict_json(raw):
                       parse_float=finite_float)
 
 
+def verify_instruction(manifest, approved_instruction):
+    """The prompt must exactly match the frozen generator source."""
+    require(type(manifest) is dict and type(approved_instruction) is str
+            and manifest.get("prompt_instruction") == approved_instruction,
+            "manifest_instruction_not_source_pinned")
+
+
 def input_hashes(directory):
     """Exact input file hashes before and after inference; no new trust root."""
     result = {}
@@ -208,8 +215,10 @@ def main(argv=None):
         files_before = input_hashes(args.dataset)
         # Existing F4 fixture reader rechecks theorem-source pin, generator and oracle.
         from tools.evaluate_f4_boundary import load_fixture
+        from tools.build_f4_boundary_curriculum import PROMPT_INSTRUCTION
         rows = load_fixture(args.dataset)
         manifest = strict_json((args.dataset / "manifest.json").read_bytes())
+        verify_instruction(manifest, PROMPT_INSTRUCTION)
         prompt_rows = [strict_json(line) for line in
                        (args.dataset / "prompts.jsonl").read_bytes().splitlines()]
         raw, receipt = collect(rows, prompt_rows, manifest, args.model,
