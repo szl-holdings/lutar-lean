@@ -6,12 +6,13 @@
 -- Signed-off-by: Yachay <yachay@szlholdings.ai>
 -- Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
 
+import Lutar.Innovations.round5.CodonRoundTrip
+
 namespace Lutar.Innovations.Round5
 
-/-- Four nucleotides as the base alphabet. -/
-inductive Nucleotide : Type where
-  | C | A | U | G
-  deriving DecidableEq, Repr
+-- Reuse the existing Nucleotide and Codon declarations from CodonRoundTrip.
+-- Declaring them again creates conflicting constructor constants when both
+-- modules are imported by Lutar.lean, and prevents Lean kernel compilation.
 
 /-- Klein four-group action on nucleotides.
     e=identity, a=transition, b=transversion, ab=complementarity.
@@ -24,8 +25,7 @@ def K4Action : Fin 4 -> Nucleotide -> Nucleotide
   | 3, .A => .C | 3, .C => .A | 3, .U => .G | 3, .G => .U
   | _, n => n
 
-/-- Codon = ordered triple of nucleotides. -/
-def Codon := Nucleotide × Nucleotide × Nucleotide
+-- Codon is the shared Nucleotide × Nucleotide × Nucleotide alias.
 
 /-- Constructor-order rank of a nucleotide: C < A < U < G. -/
 def nucleotideRank : Nucleotide -> Nat
