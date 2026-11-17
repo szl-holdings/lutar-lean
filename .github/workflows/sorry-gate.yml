@@ -20,13 +20,13 @@ jobs:
       # lean_numbers.py accounting). The UNVERIFIED proposals/ scratch mirror is
       # excluded but reported (EXCLUDED_PROPOSALS_SORRIES) so nothing is hidden.
       # The one pin: the gate and scoreboard.py both read it (SORRIES.md states it).
-      SORRY_BASELINE: "61"
+      SORRY_BASELINE: "60"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Sorry no-increase gate (compiled-corpus baseline 61, measured 2026-10-21 at 0970b2f1)
+      - name: Sorry no-increase gate (compiled-corpus baseline 60, measured 2026-11-17 (F23 STEP2 retired by Round13 delegation))
         run: python3 count_sorries.py . "$SORRY_BASELINE"
       # Report only (it never gates), but a broken scoreboard must show red
       # rather than be hidden, so neither command has an error mask.

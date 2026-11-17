@@ -4,16 +4,16 @@
   "sorry_gate": "SORRIES.md pinned baseline 61 (no-increase)",
   "theorem_u": "szl-lake anchor: REAL-conditional; Conjecture 1 OPEN, machine-checked FALSE"
  },
- "corpus_rows": 157,
- "corpus_sha256": "19ac444f4b01250655a5cb3fe0d45b266ec31b40eef679f04a7b724f84272aef",
+ "corpus_rows": 156,
+ "corpus_sha256": "51e74abb8e85a1eb485ce97197e82e6ab5d44a06be8c9854b66c33a07a2cd080",
  "counts": {
   "locked8": 24,
   "putnam": 66,
-  "sorry_open": 61,
+  "sorry_open": 60,
   "theorem_u": 6
  },
  "locked8_carriers": 24,
  "schema": "szl.lutar.estate-lean-eval/v1/manifest",
  "theorem_u_decls": 6,
- "total_sorry_rows": 61
+ "total_sorry_rows": 60
 }
