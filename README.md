@@ -136,6 +136,12 @@ printf 'import Lutar.Round13.Lambda_Uniqueness\n#print axioms Lutar.Round13.maxA
 
 ---
 
+## F4 learning experiment contract
+
+The [F4 boundary fixture and evaluator](./docs/F4_BOUNDARY_EXPERIMENT.md) test the difference between exact theorem applicability and actual graph acyclicity. They generate deterministic synthetic triplets and score saved predictions on CPU. Baseline headroom is unmeasured; fixture checks are not evidence that a model learned anything.
+
+---
+
 ## Honest disclosures
 
 - **Open `sorry`s are tracked, not hidden.** Putnam analysis, the xoshiro period bound (GF(2)²⁵⁶ companion-matrix primitivity), Hoeffding–Azuma assembly, Reed–Solomon Singleton, and the Brouwer/cohomology obligations are genuinely hard (multi-day to multi-week or need Mathlib facts absent at v4.18.0). They stay honest `sorry`s with their references intact.

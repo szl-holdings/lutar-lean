@@ -1,0 +1,82 @@
+{
+  "counts": {
+    "by_case": {
+      "cycle": 24,
+      "harmless_hypothesis_violation": 24,
+      "valid_append": 24
+    },
+    "by_split": {
+      "test": 6,
+      "train": 48,
+      "validation": 18
+    },
+    "families": 12,
+    "samples": 72,
+    "triplets": 24
+  },
+  "families": {
+    "f4-family-110c019189265bda6b8e02e6d4c4a39489c413eee9b4ff829202a5220c26cb67": "train",
+    "f4-family-2efc044b1daacef2842a10c3f34451e56a9e62166de9d5126c75dc5c27928e22": "train",
+    "f4-family-539d77f2aad1dff8a25f0883c97c210d7ec99e5015a8c84c5da2ff6827b34c43": "validation",
+    "f4-family-5a54633e5ecd633b8fabc566b0307ff474daf004a8e1daa6cd8307a12167827d": "train",
+    "f4-family-79b8b651888a31dcd7833543abf72966c321194e6a8f6cb2e10eea7ee4928769": "train",
+    "f4-family-84bbbdea4d25b4e797c688d8f5242a714211c04a607578b3d622cba1c6f1e322": "validation",
+    "f4-family-90e9cf09fe63dcf1c22d7bc507b9b3d761e624f7b4bfac4295a7140b778a7f72": "test",
+    "f4-family-aa4cacaef66dadea9336535b86d97fb179026ad0fbb77820ce91d595264f3237": "train",
+    "f4-family-c5fb0fd7453eca445be5f963931e4e33fe3aaca34a0c8433558ff4420d3cf8c6": "train",
+    "f4-family-cc8fbff6ba1b4d02c8043b4ce1b12f3b36d7a2a0d0a3ab7f178dfb7aaf67b379": "train",
+    "f4-family-d7e16c0d6dbfe4b5646517d80e7edfd6c90928713483af7966f90e0f00836ec7": "train",
+    "f4-family-f2c9a6e5aafe7d1c9e7128fb5d71d04f8174774f45ddb8236e1cc0f9d0d58efb": "validation"
+  },
+  "files": {
+    "prompts.jsonl": {
+      "bytes": 23657,
+      "sha256": "833f12aacbc60b3896dbf407f2682fbb8389f6ad993e9e6e224e77bf6657b619"
+    },
+    "samples.jsonl": {
+      "bytes": 49541,
+      "sha256": "59621db7b1163416790ccd4241add5f643b02c2c836d92a2598e231655232f5b"
+    }
+  },
+  "generator": {
+    "path": "tools/build_f4_boundary_curriculum.py",
+    "revision": "f4-boundary-v1",
+    "sha256_lf_utf8": "5745fb57ea5a649b655753fa4a7a8bece56bbfbe2a0cac72268f0fb377d56c0b"
+  },
+  "headroom_gate": {
+    "required_evidence": "Frozen base-model predictions with measurable errors, followed by a predefined matched-budget comparison.",
+    "status": "BASELINE_HEADROOM_NOT_MEASURED",
+    "training_ready": false
+  },
+  "oracle": {
+    "acyclicity": "Independent Kahn indegree elimination crosschecked with runtime DFS",
+    "checked_samples": 72,
+    "disagreements": 0,
+    "hypotheses": "Direct Nat predicates crosschecked with both runtime mirrors"
+  },
+  "parameters": {
+    "families": 12,
+    "relabelings": 2,
+    "seed": 20261116
+  },
+  "prompt_instruction": "Return only a JSON object with exactly two boolean fields: append_theorem_applies and result_is_acyclic. For this exact F4 append theorem, every base edge (src,dst) must satisfy dst<src, and every new edge must have source k and target<k. k need not be fresh or maximal. The second field asks whether the union of base and new edges actually has no directed cycle, independently of whether these hypotheses hold.",
+  "provenance": {
+    "description": "Synthetic graph labels; neither a model evaluation nor runtime receipts.",
+    "kind": "SYNTHETIC_EXPERIMENT_FIXTURE",
+    "learning_demonstrated": false,
+    "model_run": false,
+    "serving_evidence": false
+  },
+  "schema": "szl.f4-boundary.fixture/v1",
+  "source": {
+    "file_sha256_lf_utf8": {
+      "Lutar/Puriq/Formulas/ProvedFormulas.lean": "a9a79ec21074a5e4f8a542a0270050b36ba697654aef8da9cfa1a846ca95413d",
+      "tools/locked_formula_runtime.py": "d7d11386f2c4de5814f7583561052fcc81ebbbcf2d9f6372938083c4913ff41c"
+    },
+    "kernel_rechecked_by_this_tool": false,
+    "repository": "szl-holdings/lutar-lean",
+    "revision": "5e8a92917d2d4bfeb371a2372f87a4c7660d996d",
+    "theorem": "Puriq.Formula.Proved.f4_khipu_dag_acyclic_preserved"
+  },
+  "split_policy": "sha256(order-normalized base-family id) modulo 10: train<6, validation<8, else test"
+}
