@@ -175,6 +175,29 @@ theorem guardedLutar_diagonal_of_axioms {k : Nat} (s : Snapshot)
   classical
   simpa [guardedLutar, h] using (hA.A3.A3_normalize c)
 
+/-- A4: fail-closed admission never increases the score beyond the
+maximum observed axis. This is a bound, not a runtime measurement. -/
+theorem guardedLutar_bounded_of_axioms {k : Nat} (s : Snapshot)
+    (Φ : Lutar.Aggregator k) (hA : Lutar.LutarAxioms Φ)
+    (x : Lutar.Axes k) :
+    guardedLutar s Φ x ≤
+      Finset.univ.sup' ⟨⟨0, hA.A3.k_pos⟩, Finset.mem_univ _⟩ x := by
+  classical
+  by_cases h : Admission s
+  · simpa [guardedLutar, h] using (hA.A4 x)
+  · simp [guardedLutar, h]
+
+/-- A5: the order of evidence axes cannot change the advisory score when
+the underlying aggregator is permutation invariant. -/
+theorem guardedLutar_permutation_of_axioms {k : Nat} (s : Snapshot)
+    (Φ : Lutar.Aggregator k) (hA : Lutar.LutarAxioms Φ)
+    (x : Lutar.Axes k) (σ : Fin k ≃ Fin k) :
+    guardedLutar s Φ (x ∘ ↑σ) = guardedLutar s Φ x := by
+  classical
+  by_cases h : Admission s
+  · simpa [guardedLutar, h] using (hA.A5 x σ)
+  · simp [guardedLutar, h]
+
 /-- The actual Lutar geometric-mean aggregator, no invented replacement
 formula. A1–A5 uniqueness remains Conjecture 1 / false unconditionally. -/
 noncomputable def guardedLambda (s : Snapshot) (k : Nat)
