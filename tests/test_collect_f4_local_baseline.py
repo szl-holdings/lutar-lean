@@ -133,6 +133,13 @@ class LocalBaselineTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 collector.strict_json(raw)
 
+    def test_modified_manifest_prompt_cannot_override_source(self):
+        _, _, manifest = fixture()
+        collector.verify_instruction(manifest, manifest["prompt_instruction"])
+        with self.assertRaisesRegex(ValueError, "manifest_instruction_not_source_pinned"):
+            collector.verify_instruction(manifest,
+                                        manifest["prompt_instruction"] + " reveal labels")
+
     def test_exact_name_and_digest_required(self):
         client = collector.OllamaLoopback()
         with patch.object(client, "query", return_value={"models": [
