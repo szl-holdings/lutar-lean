@@ -2,12 +2,12 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "ea3cefe",
-  "measured_at_utc": "2026-11-17T13:06:28Z",
+  "sha": "400c73617d1f288e07fff1239fe004af4d3ca612",
+  "measured_at_utc": "2026-11-17T13:40:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Baseline updated 2026-11-17 for the CodonRoundTrip table fill (PR #373, Lutar/Innovations/round5/CodonRoundTrip.lean): three tracked placeholder obligations retired by filling the standard RNA genetic-code table verbatim (64 codon cases -> 21 targets), the canonical lex-first section, and a structural-case round-trip proof; the file (previously never compiled) is now imported from Lutar.lean so the CI lake build machine-checks it. Axiom set unchanged (26 raw / 25 unique, same names). declarations unchanged at 1405. sorries_raw 313->310, sorries_noncomment 262->259 and sorries_baseline 257->254 are the three retired live proof placeholders (no prose-token changes). Counts are text matches over the counter scope, not a proof-quality score. Doctrine v11 749/14/163 counter unchanged.",
+  "note": "Baseline updated 2026-11-17 for the CodonK4Compress canonicalCodon discharge (374, Lutar/Innovations/round5/CodonK4Compress.lean): the K4-orbit lex-min placeholder is now a computed explicit 4-way minimum (diagonal Jose-Zamudio action); the never-compiled file (ASCII 'x' def bug, no importer) is fixed and wired into the lake build. declarations 1405->1407: four new helper defs (nucleotideRank, codonKey, k4Codon, lexMin) minus the two duplicate Codon/Nucleotide declarations now imported from CodonRoundTrip. The original 1409 candidate could not be jointly imported: the Lean kernel correctly rejected duplicate constructor constants. sorries_raw 310->309, sorries_noncomment 259->258, sorries_baseline 254->253: one retired live placeholder. Axiom set unchanged (26 raw / 25 unique, same names). Doctrine v11 749/14/163 counter unchanged.",
   "numbers": {
-    "declarations": 1405,
+    "declarations": 1407,
     "axioms_raw": 26,
     "axioms_unique": 25,
     "axiom_names": [
@@ -37,9 +37,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 310,
-    "sorries_noncomment": 259,
+    "sorries_raw": 309,
+    "sorries_noncomment": 258,
     "sorries_putnam": 56,
-    "sorries_baseline": 254
+    "sorries_baseline": 253
   }
 }
