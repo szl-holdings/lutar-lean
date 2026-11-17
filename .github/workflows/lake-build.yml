@@ -64,6 +64,9 @@ jobs:
       - name: Self-test the snapshot build + anchor chain-math invariants
         run: python3 .github/scripts/test_anchor_and_snapshot.py
 
+      - name: Check source-bound release admission refusal matrix (stdlib-only)
+        run: python3 tools/test_release_admission.py
+
   build:
     name: lake build + numbers
     runs-on: ubuntu-latest
