@@ -1,3 +1,4 @@
+import Lean
 /-!
 # ReleaseAdmissionWitness — source-bound, noncompensatory admission
 Experimental Lean/Core specification. This is NOT a proof of an actual GitHub,
@@ -8,7 +9,6 @@ The trusted gate is a meet (AND) of required conditions. Neither historic
 success nor a high advisory Lambda score can compensate for a failed gate.
 No new axiom declarations; no proof placeholders. Not in the locked eight.
 -/
-import Lean
 
 namespace Lutar.ReleaseAdmission
 
