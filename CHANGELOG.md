@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CPU-only F4 boundary fixture generator and saved-prediction evaluator, with exact append hypotheses, independent Kahn/DFS agreement checks, family-preserving splits, frozen synthetic provenance, strict output parsing and full scoring denominators. The fixture records unmeasured baseline headroom and supplies no model-learning or serving evidence. See `docs/F4_BOUNDARY_EXPERIMENT.md`.
+
 ### Fixed
 - `RefVectors` now rejects empty or unsupported v1 parity corpora before comparing values. The checker enforces the existing schema/formula, natural-number `k = 9`, nine finite nonnegative axes per vector, finite nonnegative expected results, and finite nonnegative tolerances no looser than the canonical absolute `1e-12` / relative `1e-9` limits. The original ten-vector fixture and geometric-mean calculation are unchanged. A compiler-backed fixture gate covers valid inputs, malformed corpora, tolerance inflation, and a valid-contract wrong answer in the required Lake CI job. This is operational Float-parity validation, not a theorem or model-quality claim.
 - `tools/locked_formula_runtime.py` (runtime bridge for the locked-8 Lean statements) now admits only each statement's domain and raises `LockedDomainError` (a `ValueError` subclass) outside it: `replay_eq` accepts only JSON-canonical values (no NaN or infinities, tuples, or custom classes), the F4 edge helpers accept only `Nat × Nat` edges and read an edge iterable exactly once (a one-shot iterator could previously get a false "acyclic" result), and the F7/F18/F22 helpers reject bools, floats and negative values. The cycle search is now an iterative memoized DFS (no `RecursionError` on long chains, linear time). New `khipu_append_hypothesis` / `khipu_append_preserves_acyclic` mirror the Lean F4 append hypothesis, which does not require a fresh or maximal node. These are software checks; no Lean file, claim map or receipt changed.
