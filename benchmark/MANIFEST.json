@@ -1,7 +1,7 @@
 {
  "authority": {
   "locked8": "claims/locked-formulas.v1.json (COMPILED_LOCKED_SURFACE)",
-  "sorry_gate": "SORRIES.md pinned baseline 61 (no-increase)",
+  "sorry_gate": "SORRIES.md pinned baseline 57 (no-increase)",
   "theorem_u": "szl-lake anchor: REAL-conditional; Conjecture 1 OPEN, machine-checked FALSE"
  },
  "corpus_rows": 153,
