@@ -161,7 +161,7 @@ theorem hardDenied_never_applied (r : ReceiptPayload)
     (hwf2 : r.applied = true -> r.state = PolicyState.release) :
     r.applied = false := by
   cases hap : r.applied with
-  | false => exact hap
+  | false => rfl
   | true =>
     exfalso
     have hrel : r.state = PolicyState.release := hwf2 hap
@@ -255,7 +255,7 @@ across lengths: heads must always be countersigned with (or inside, RFC
 theorem countersign_length_binding {Hs : Type} {Sig : Prod Nat Hs -> Nat}
     (hSig : Inj Sig) {n m : Nat} {r s : Hs}
     (h : Sig (n, r) = Sig (m, s)) : n = m /\ r = s :=
-  Prod.ext_iff.mp (hSig h)
+  Prod.ext_iff.mp (hSig (n, r) (m, s) h)
 
 /-- **Countersigned-head verification soundness** (the `obsigna receipt verify`
 shape). If the countersigned (length, head) records of two same-length receipt
@@ -271,7 +271,7 @@ theorem countersigned_head_consistency {P Hs : Type}
     (h : Sig (n, headHash n { seed := seed, payload := p, H := H })
           = Sig (n, headHash n { seed := seed, payload := q, H := H })) :
     forall i, p i = q i :=
-  chain_consistency H hH seed n p q (Prod.ext_iff.mp (hSig h)).2
+  chain_consistency H hH seed n p q (Prod.ext_iff.mp (hSig (n, headHash n { seed := seed, payload := p, H := H }) (n, headHash n { seed := seed, payload := q, H := H }) h)).2
 
 /-! ## Axiom audit (supplementary output, as in the DenyMonotonic pack) -/
 #print axioms denyMonotonic
