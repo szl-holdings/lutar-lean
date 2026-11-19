@@ -30,7 +30,7 @@ theorem tetractys_hm_bottleneck
   -- Bridge the toolchain-sensitive rpow (-1) summands to clean inverses.
   have hconv : forall i, (x i)^(-(1:Real)) = (x i)⁻¹ := by
     intro i
-    rw [Real.rpow_neg_one (ne_of_gt (hx i))]
+    rw [Real.rpow_neg_one (x i)]
   -- Lift the hypothesis to the clean-inverse sum, then delegate the pure
   -- order/field core to Wave13's kernel-checked companion.
   have hlow : (n : Real) / (Finset.univ.sum (fun i => (x i)⁻¹)) < threshold := by
