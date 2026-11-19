@@ -80,10 +80,12 @@ lemma inv_one : (1 : ZMod p)⁻¹ = 1 := by
 -- I(p-1) = p-1 (since (p-1)(p-1) = p²-2p+1 ≡ 1 mod p)
 lemma inv_neg_one : ((p - 1 : ℕ) : ZMod p)⁻¹ = (p - 1 : ℕ) := by
   -- (p-1) ≡ -1 (mod p), and (-1)·(-1) = 1, so (-1)⁻¹ = -1
-  have : ((p - 1 : ℕ) : ZMod p) = -1 := by
-    simp [ZMod.natCast_self_eq_zero]
-    sorry -- sorry_p_B5_neg_one: needs ZMod arithmetic
-  rw [this]
+  have hneg : ((p - 1 : ℕ) : ZMod p) = -1 := by
+    have h13 : (1 : ℕ) < 3 := by decide
+    have h1 : (1 : ℕ) ≤ p := Nat.le_of_lt (Nat.lt_trans h13 hp3)
+    rw [Nat.cast_sub h1, ZMod.natCast_self]
+    simp
+  rw [hneg]
   simp [ZMod.inv_neg_one (by exact Fact.out)]
 
 -- The # of ascending pairs + # of descending pairs = p-2
@@ -99,10 +101,10 @@ lemma ascent_plus_descent :
 - `putnam_B5_correct`: TRACKED — 1 sorry (sorry_p_B5_main)
 - `inversion_telescopes`: REAL (Finset.sum_range_succ_sub_sum)
 - `inv_one`: REAL (ZMod.inv_one)
-- `inv_neg_one`: TRACKED — 1 sorry (sorry_p_B5_neg_one)
+- `inv_neg_one`: REAL (ZMod arithmetic: (p-1 : ZMod p) = -1 via Nat.cast_sub + ZMod.natCast_self + zero_sub; discharged 2026-11-19)
 - `ascent_plus_descent`: TRACKED — 1 sorry (sorry_p_B5_partition)
 - `descent_count`: REAL definition
-- Sorry count: 3 (sorry_p_B5_main, sorry_p_B5_neg_one, sorry_p_B5_partition)
+- Sorry count: 2 (sorry_p_B5_main, sorry_p_B5_partition)
 -/
 
 end Lutar.Putnam.P_B5
