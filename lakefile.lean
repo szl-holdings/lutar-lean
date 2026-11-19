@@ -96,3 +96,19 @@ lean_exe «ref_vectors» where
   -- Reads reference-vectors.json (TS-generated) and asserts Λ₉ parity
   -- between the Lean-side Float implementation and the production TS
   -- runtime. CI invokes:  lake exe ref_vectors <path-to-json>
+
+@[default_target]
+lean_lib «DiscoveryWitness» where
+  -- Proof-to-Discovery witness (DiscoveryWitness.lean). EXPERIMENTAL, additive;
+  -- Mathlib-free, core Lean only (house precedent: FrontierShowcase libs),
+  -- kernel-checked, zero `sorry`. Formalizes the a11oy
+  -- Proof-to-Discovery decision logic (szl.discovery/v1): fail-closed verdicts
+  -- (any non-PROVEN question forces HOLD), absence of evidence is UNRESOLVED
+  -- never PROVEN, no promotion without a RECOMMENDED reward verdict, and the
+  -- owner-gated witness theorem (no candidate is PROMOTION_ELIGIBLE while
+  -- independently_witnessed is UNRESOLVED). Honest scope: kernel-checks the
+  -- ENGINE LOGIC, not the evidence and not the witness itself (owner-gated).
+  -- Lives outside Lutar/ so it is NOT counted by
+  -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
+  -- baseline. Built by `lake build` (default).
+  roots := #[`DiscoveryWitness]
