@@ -66,7 +66,52 @@ theorem putnam_A5_correct (n : ℕ) (hn : 2 ≤ n) (s : Fin (n-1) → ℤ)
 -- f(s) for n=2, s=(-1): permutations with a₂-a₁<0 → only (2,1). f=1.
 -- Both give 1, and E₂=1. ✓
 lemma f_n2_up : f (n := 2) (by norm_num) (alt_seq_up 2) = 1 := by
-  sorry -- sorry_p_A5_n2_up: explicit computation
+  -- The sign condition at position 0 forces σ = 1 on Equiv.Perm (Fin 2),
+  -- so the counted subtype is a Unique and its card is exactly 1.
+  have hone : satisfies_sign_seq 1 (alt_seq_up 2) := by
+    intro i
+    fin_cases i
+    first
+      | simp only [satisfies_sign_seq, alt_seq_up, Equiv.Perm.one_apply]
+      | simp only [satisfies_sign_seq, alt_seq_up, Equiv.Perm.coe_one, Equiv.refl_apply]
+      | simp [satisfies_sign_seq, alt_seq_up]
+    try (first | norm_num | omega | simp [*])
+  have hfwd : ∀ σ : Equiv.Perm (Fin 2), satisfies_sign_seq σ (alt_seq_up 2) → σ = 1 := by
+    intro σ h
+    have h0 := h ⟨0, by omega⟩
+    first
+      | norm_num [alt_seq_up] at h0
+      | (simp only [alt_seq_up] at h0; try norm_num at h0)
+    have b0 := (σ ⟨0, by omega⟩).isLt
+    have b1 := (σ ⟨1, by omega⟩).isLt
+    have hv0 : (σ ⟨0, by omega⟩).val = 0 := by omega
+    have hv1 : (σ ⟨1, by omega⟩).val = 1 := by omega
+    ext x
+    fin_cases x
+    · simp only [Equiv.Perm.one_apply]
+      first
+        | exact Fin.ext hv0
+        | exact Fin.eq_of_val_eq hv0
+        | exact Fin.val_injective hv0
+        | omega
+    · simp only [Equiv.Perm.one_apply]
+      first
+        | exact Fin.ext hv1
+        | exact Fin.eq_of_val_eq hv1
+        | exact Fin.val_injective hv1
+        | omega
+  haveI hne : Nonempty {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)} :=
+    ⟨⟨1, hone⟩⟩
+  have hsub : ∀ a b : {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)}, a = b := by
+    rintro ⟨σ, hσ⟩ ⟨τ, hτ⟩
+    exact Subtype.ext ((hfwd σ hσ).trans ((hfwd τ hτ).symm))
+  haveI huniq : Unique {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)} := by
+    first
+      | exact Unique.mk' _ hsub
+      | exact Unique.mk' hsub
+  first
+    | (unfold f; rw [Fintype.card_unique])
+    | (show Fintype.card _ = 1; rw [Fintype.card_unique])
 
 -- For n=3, the alternating permutations of {1,2,3}:
 -- (1,3,2), (2,3,1), (2,1,3)... wait:
@@ -92,10 +137,10 @@ lemma non_alt_strictly_smaller (n : ℕ) (hn : 3 ≤ n) (s : Fin (n-1) → ℤ)
 /-!
 ## Summary
 - `putnam_A5_correct`: TRACKED — 1 sorry (sorry_p_A5_main)
-- `f_n2_up`: TRACKED — 1 sorry (sorry_p_A5_n2_up)
+- `f_n2_up`: DISCHARGED (2026-11-19) — explicit Fin 2 computation: the sign condition at position 0 forces σ = 1 on `Equiv.Perm (Fin 2)`, so the counted subtype is a `Unique` and its card is exactly 1
 - `non_alt_strictly_smaller`: TRACKED — 1 sorry (sorry_p_A5_strict)
 - `satisfies_sign_seq`, `f`, `alt_seq_up`, `alt_seq_down`: REAL definitions
-- Sorry count: 3 (sorry_p_A5_main, sorry_p_A5_n2_up, sorry_p_A5_strict)
+- Remaining placeholders: 2 (putnam_A5_correct, non_alt_strictly_smaller)
 -/
 
 end Lutar.Putnam.P_A5
