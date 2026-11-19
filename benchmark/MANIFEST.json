@@ -1,19 +1,19 @@
 {
  "authority": {
   "locked8": "claims/locked-formulas.v1.json (COMPILED_LOCKED_SURFACE)",
-  "sorry_gate": "SORRIES.md pinned baseline 54 (no-increase)",
+  "sorry_gate": "SORRIES.md pinned baseline 53 (no-increase)",
   "theorem_u": "szl-lake anchor: REAL-conditional; Conjecture 1 OPEN, machine-checked FALSE"
  },
- "corpus_rows": 150,
- "corpus_sha256": "32c23e0881876efe7839e07f5ab9a991cf45c581684e8b94d5d182d574e65810",
+ "corpus_rows": 149,
+ "corpus_sha256": "5bec972f114cfedf0f661134f83c952c35d5a6db87443eaf61eb8ce86067dade",
  "counts": {
   "locked8": 24,
   "putnam": 66,
-  "sorry_open": 54,
+  "sorry_open": 53,
   "theorem_u": 6
  },
  "locked8_carriers": 24,
  "schema": "szl.lutar.estate-lean-eval/v1/manifest",
  "theorem_u_decls": 6,
- "total_sorry_rows": 54
+ "total_sorry_rows": 53
 }
