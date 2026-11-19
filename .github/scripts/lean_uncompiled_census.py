@@ -61,7 +61,7 @@ def compile_one(m):
     env["LEAN_PATH"] = outdir + ":" + lean_path
     s = time.time()
     try:
-        r = sh(["lake", "env", "lean", "-o", o + ".olean", "-i", o + ".ilean", p],
+        r = sh(["lean", "-o", o + ".olean", "-i", o + ".ilean", p],
                env=env, timeout=a.per_file_timeout)
     except subprocess.TimeoutExpired:
         return m, {"status": "TIMEOUT", "seconds": a.per_file_timeout, "sorry_warnings": None, "errors": []}
