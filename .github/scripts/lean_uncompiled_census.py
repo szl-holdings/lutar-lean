@@ -6,7 +6,7 @@ A module under SCOPE (default `Lutar/`) is "uncompiled" when, after a successful
 dependency order with `lake env lean -o`, so modules that import each other work.
 
 Per-module status: OK | FAILED | BLOCKED_BY_IMPORT | TIMEOUT | NOT_RUN.
-It also records `declaration uses 'sorry'` warnings per module.
+It also records `declaration uses [`']sorry[`']` warnings per module.
 This script never edits sources and never hides a failure: exit code is 0 unless
 a --baseline file is given and a module fails that the baseline does not list.
 """
@@ -29,6 +29,10 @@ lean_path = sh(["lake", "env", "printenv", "LEAN_PATH"]).stdout.strip()
 build_lib = ".lake/build/lib/lean"
 outdir = os.path.abspath(".lake/uncompiled-census/lean")
 os.makedirs(outdir, exist_ok=True)
+# Lean resolves a module by the FIRST search-path root that contains its top-level
+# package directory (e.g. Lutar/), so freshly built oleans must live in the same tree
+# as the lake-built ones. Copy the built tree, then put it first on LEAN_PATH.
+subprocess.run(["cp", "-a", build_lib + "/.", outdir], check=True)
 
 mods = {}
 for root, dirs, fs in os.walk(a.scope):
@@ -54,7 +58,7 @@ def compile_one(m):
     o = os.path.join(outdir, m.replace(".", "/"))
     os.makedirs(os.path.dirname(o), exist_ok=True)
     env = dict(os.environ)
-    env["LEAN_PATH"] = lean_path + ":" + outdir
+    env["LEAN_PATH"] = outdir + ":" + lean_path
     s = time.time()
     try:
         r = sh(["lake", "env", "lean", "-o", o + ".olean", "-i", o + ".ilean", p],
@@ -62,9 +66,9 @@ def compile_one(m):
     except subprocess.TimeoutExpired:
         return m, {"status": "TIMEOUT", "seconds": a.per_file_timeout, "sorry_warnings": None, "errors": []}
     out = r.stdout + r.stderr
-    errs = [l for l in out.split("\n") if re.search(r"\berror\b", l)][:6]
+    errs = [l[:300] for l in out.split("\n") if re.search(r"\berror\b", l)][:6]
     return m, {"status": "OK" if r.returncode == 0 else "FAILED", "seconds": round(time.time() - s, 1),
-               "sorry_warnings": len(re.findall(r"declaration uses 'sorry'", out)), "errors": errs}
+               "sorry_warnings": len(re.findall(r"declaration uses [`']sorry[`']", out)), "errors": errs}
 
 pending = set(mods)
 with cf.ThreadPoolExecutor(a.workers) as ex:
