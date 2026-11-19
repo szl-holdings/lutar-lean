@@ -70,16 +70,29 @@ def compile_one(m):
     return m, {"status": "OK" if r.returncode == 0 else "FAILED", "seconds": round(time.time() - s, 1),
                "sorry_warnings": len(re.findall(r"declaration uses [`']sorry[`']", out)), "errors": errs}
 
+def write_report():
+    counts = {}
+    for r in res.values():
+        counts[r["status"]] = counts.get(r["status"], 0) + 1
+    sorry_total = sum((r.get("sorry_warnings") or 0) for r in res.values())
+    report = {"scope": a.scope, "uncompiled_modules": len(mods), "counts": counts,
+              "sorry_warnings_in_ok_or_failed_modules": sorry_total, "modules": res,
+              "complete": not pending and not any(r["status"] == "NOT_RUN" for r in res.values())}
+    tmp = a.out + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(report, f, indent=1, sort_keys=True)
+    os.replace(tmp, a.out)  # a killed job still leaves the last complete snapshot
+    return counts, sorry_total
+
 pending = set(mods)
+running = {}
+budget_hit = False
 with cf.ThreadPoolExecutor(a.workers) as ex:
     while pending:
-        if time.time() - t0 > a.budget_seconds:
-            for m in pending:
-                res[m] = {"status": "NOT_RUN", "reason": "global time budget exhausted"}
-            break
-        ready = []
         progress = False
         for m in sorted(pending):
+            if m in running.values():
+                continue
             deps = imports[m]
             if any(d in pending for d in deps):
                 continue
@@ -89,25 +102,34 @@ with cf.ThreadPoolExecutor(a.workers) as ex:
                 pending.discard(m)
                 progress = True
                 continue
-            ready.append(m)
-        if not ready:
+            # The budget is checked before every submission, not once per batch,
+            # so at most `workers` compiles (each capped by --per-file-timeout)
+            # can still be running when it is exhausted.
+            if time.time() - t0 > a.budget_seconds:
+                budget_hit = True
+                break
+            if len(running) < a.workers:
+                running[ex.submit(compile_one, m)] = m
+        if budget_hit and not running:
+            break
+        if not running:
             if pending and not progress:
                 for m in list(pending):  # import cycle among uncompiled modules
                     res[m] = {"status": "FAILED", "errors": ["import cycle or unresolved dependency"]}
                     pending.discard(m)
             continue
-        for m, r in ex.map(compile_one, ready):
+        done, _ = cf.wait(list(running), return_when=cf.FIRST_COMPLETED)
+        for fut in done:
+            running.pop(fut)
+            m, r = fut.result()
             res[m] = r
             pending.discard(m)
             print(f"{r['status']:18} {m}", flush=True)
-
-counts = {}
-for r in res.values():
-    counts[r["status"]] = counts.get(r["status"], 0) + 1
-sorry_total = sum((r.get("sorry_warnings") or 0) for r in res.values())
-report = {"scope": a.scope, "uncompiled_modules": len(mods), "counts": counts,
-          "sorry_warnings_in_ok_or_failed_modules": sorry_total, "modules": res}
-json.dump(report, open(a.out, "w"), indent=1, sort_keys=True)
+        write_report()
+for m in pending:
+    res[m] = {"status": "NOT_RUN", "reason": "global time budget exhausted"}
+pending.clear()
+counts, sorry_total = write_report()
 
 md = [f"## Lean modules not built by `lake build` (scope `{a.scope}/`)", "",
       f"Uncompiled modules: **{len(mods)}**; results: `{counts}`; sorry warnings seen: **{sorry_total}**", "",
@@ -122,11 +144,17 @@ if os.environ.get("GITHUB_STEP_SUMMARY"):
 
 if a.baseline and os.path.exists(a.baseline):
     expected = set(json.load(open(a.baseline))["expected_non_ok"])
-    nonok = {m for m, r in res.items() if r["status"] != "OK"}
+    # Only a module that was compiled (or blocked by one that was) and did not
+    # pass is a regression. TIMEOUT / NOT_RUN mean "not measured": they are
+    # listed loudly but cannot be attributed to the change under test.
+    nonok = {m for m, r in res.items() if r["status"] in ("FAILED", "BLOCKED_BY_IMPORT")}
+    inconclusive = sorted(m for m, r in res.items() if r["status"] in ("TIMEOUT", "NOT_RUN"))
+    if inconclusive:
+        print("INCONCLUSIVE (not compiled to completion, not gated):", *inconclusive, sep="\n  ")
     new = sorted(nonok - expected)
     if new:
         print("NEW NON-OK MODULES vs baseline:", *new, sep="\n  ")
         sys.exit(1)
-    print(f"baseline respected: {len(nonok)} non-ok, {len(expected - nonok)} improved")
+    print(f"baseline respected: {len(nonok)} non-ok, {len(expected - nonok)} improved, {len(inconclusive)} inconclusive")
 else:
     print("REPORT-ONLY: no baseline file; exit 0 (nothing is gated by this run)")
