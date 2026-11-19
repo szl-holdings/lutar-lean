@@ -8,7 +8,7 @@ doi: "10.5281/zenodo.20434307"
 date-released: "2026-06-09"
 license: Apache-2.0
 repository-code: "https://github.com/szl-holdings/lutar-lean"
-url: "https://szlholdings.ai"
+url: "https://a-11-oy.com"
 abstract: >
   Lean 4 + Mathlib formalization of the Lutar Invariant (the Λ trust
   aggregator) and the audit-fiber, receipt and quorum theorems behind the SZL
@@ -29,5 +29,5 @@ authors:
     orcid: "https://orcid.org/0009-0001-0110-4173"
     affiliation: "SZL Holdings"
 contact:
-  - email: "hello@szlholdings.ai"
+  - email: "hello@szlholdings.com"
     name: "SZL Holdings"
