@@ -1,0 +1,66 @@
+name: Lean uncompiled-module census
+
+# REPORT-ONLY. Lists every Lutar/**/*.lean module that `lake build` does not
+# compile (no .olean after a successful build), then compiles each one in
+# dependency order and records OK / FAILED / BLOCKED_BY_IMPORT / TIMEOUT plus
+# `sorry` warnings. It changes no source and gates nothing by itself.
+# If a lean-uncompiled-baseline.json is later committed, new non-OK modules fail the job.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/lean-uncompiled-census.yml"
+      - ".github/scripts/lean_uncompiled_census.py"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  census:
+    name: census
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install elan (pinned script, checksum verified)
+        run: |
+          ELAN_SHA=35628cce104e81a25514c4dcd224491351145818
+          EXPECTED=a620ff1641616222c8d37c54845492004bb84d6877cdbc944dd65c1aa685bf53
+          curl -sSfL "https://raw.githubusercontent.com/leanprover/elan/$ELAN_SHA/elan-init.sh" -o /tmp/elan-init.sh
+          echo "$EXPECTED  /tmp/elan-init.sh" | sha256sum -c
+          sh /tmp/elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Require the committed dependency manifest
+        run: |
+          lake --version
+          git ls-files --error-unmatch lake-manifest.json
+          git diff --exit-code HEAD -- lake-manifest.json
+
+      - name: Get Mathlib binary cache
+        run: |
+          lake exe cache get
+          git diff --exit-code HEAD -- lake-manifest.json
+
+      - name: lake build (default targets)
+        run: lake build
+
+      - name: Compile modules that lake build does not compile
+        run: python3 .github/scripts/lean_uncompiled_census.py --scope Lutar --baseline lean-uncompiled-baseline.json --out lean-uncompiled-census.json
+
+      - name: Upload census
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lean-uncompiled-census-${{ github.sha }}
+          path: lean-uncompiled-census.json
+          if-no-files-found: warn
