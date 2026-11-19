@@ -37,6 +37,13 @@ def satisfies_sign_seq {n : ℕ} (σ : Equiv.Perm (Fin n))
   ∀ i : Fin (n-1),
     s i * ((σ ⟨i.val + 1, by omega⟩).val - (σ ⟨i.val, by omega⟩).val : ℤ) > 0
 
+-- Fix 2026-11-19 (code-level, honest: sorries remain): the subtype
+-- {sigma // satisfies_sign_seq sigma s} needs an explicit DecidablePred so
+-- Subtype.fintype fires for Fintype.card; without it the file fails at
+-- lean.synthInstanceFailed (receipt-verified error at 42:2 in iteration 4).
+instance {n : ℕ} (σ : Equiv.Perm (Fin n)) (s : Fin (n-1) → ℤ) :
+    Decidable (satisfies_sign_seq σ s) :=
+  Fintype.decidableForallFintype
 -- Count function f(s)
 noncomputable def f {n : ℕ} (hn : 2 ≤ n) (s : Fin (n-1) → ℤ) : ℕ :=
   Fintype.card {σ : Equiv.Perm (Fin n) // satisfies_sign_seq σ s}
