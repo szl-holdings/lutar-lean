@@ -2,10 +2,10 @@
   "schema": "szl.lean_numbers/v1",
   "repo": "szl-holdings/lutar-lean",
   "ref": "main",
-  "sha": "80e35f859801d80fce7cf81e4d9b0c8bdf91cfea",
-  "measured_at_utc": "2026-11-19T00:00:00Z",
+  "sha": "55bf2202610ac04d86e2c641b962e83e1cddb5ec",
+  "measured_at_utc": "2026-11-19T07:45:00Z",
   "method": "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
-  "note": "Baseline updated 2026-11-19 for the Putnam B5 inv_neg_one discharge (#376, Lutar/Putnam/P_B5.lean): the tracked ZMod-arithmetic placeholder is now the explicit computation Nat.cast_sub + ZMod.natCast_self + zero_sub, closing the lemma after the pre-existing ZMod.inv_neg_one application. Declarations unchanged (1407). sorries_raw 309->307, sorries_noncomment 258->256, sorries_putnam 56->54: one retired live sub-sorry plus its in-file tracking markers. sorries_baseline stays 253. Axiom set unchanged (26 raw / 25 unique, same names). Doctrine v11 749/14/163 counter unchanged.",
+  "note": "Baseline updated 2026-11-19 for the TetractysHM bottleneck discharge (#377, Lutar/Innovations/round5/TetractysHMBottleneck.lean): the rpow (-1) placeholder is discharged by bridging to clean inverses (Real.rpow_neg_one) and delegating the pure order/field core to the kernel-checked Lutar.Wave13.Sweep.hm_bottleneck_clean; the module is newly wired into Lutar.lean so lake build compiles it. Declarations unchanged (1407). sorries_raw 307->306, sorries_noncomment 256->255, sorries_baseline 253->252: one retired live placeholder. sorries_putnam 54 unchanged. Axiom set unchanged (26 raw / 25 unique, same names). Doctrine v11 749/14/163 counter unchanged.",
   "numbers": {
     "declarations": 1407,
     "axioms_raw": 26,
@@ -37,9 +37,9 @@
       "sha256",
       "sha256_collision_resistant"
     ],
-    "sorries_raw": 307,
-    "sorries_noncomment": 256,
+    "sorries_raw": 306,
+    "sorries_noncomment": 255,
     "sorries_putnam": 54,
-    "sorries_baseline": 253
+    "sorries_baseline": 252
   }
 }

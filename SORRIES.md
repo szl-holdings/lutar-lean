@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-19 06:57 UTC_
+_Updated 2026-11-19 07:42 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **55**
-- Pinned baseline: **55** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **54**
+- Pinned baseline: **54** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,16 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **55 → 54** (2026-11-19, [#377](https://github.com/szl-holdings/lutar-lean/pull/377)):
+  `Lutar/Innovations/round5/TetractysHMBottleneck.lean` retired its single tracked
+  ‘HM bottleneck’ placeholder by DELEGATION: each rpow (-1) summand is bridged to a
+  clean inverse (`Real.rpow_neg_one`), then the pure order/field core is delegated to
+  the placeholder-free, kernel-checked `Lutar.Wave13.Sweep.hm_bottleneck_clean`
+  (Hardy–Littlewood–Pólya 1934 sec 2.5, landed in Wave13 as the clean-statement
+  companion). Like #373/#374 the module was previously never compiled (nothing
+  imported it) — it is now wired into `Lutar.lean` so the CI lake build
+  machine-checks the whole delegation. Zero new axioms; Innovations/round5 is
+  outside the locked-8.
 - **56 → 55** (2026-11-19, [#376](https://github.com/szl-holdings/lutar-lean/pull/376)):
   `Lutar/Putnam/P_B5.lean` retired one of its three tracked sub-sorries: the
   `inv_neg_one` helper's placeholder (“needs ZMod arithmetic”) is now the explicit
