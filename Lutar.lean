@@ -532,6 +532,23 @@ import Lutar.Scaling.MetabolicScalingDeep
 -- Lambda UNCONDITIONAL
 -- uniqueness STAYS Conjecture 1; locked-proven STAYS EXACTLY 8.
 import Lutar.Covenant.DenyMonotonic
+-- Covenant ReceiptChain v1: memory-operation receipt-chain soundness core
+-- - additive, EXPERIMENTAL, same registered EXPERIMENTAL_SCOPES entry as the
+-- DenyMonotonic pack above (Lutar/Covenant/; NOT counted in the locked v11
+-- baseline; .github/data/lean_numbers.json NOT bumped). Mathlib-FREE (Lean 4
+-- core only). NO proof placeholder, NO new declared axiom; collision
+-- resistance and signature injectivity are explicit HYPOTHESES (Wave8 M2
+-- posture), not axioms. 9 theorems incl. hardDenied_never_applied (a
+-- well-formed receipt for a hard-denied memory op NEVER records applied=true,
+-- for ANY approval count - the deny-by-default memory-plane property),
+-- chain_consistency / chain_tamper_evident (append-only consistency over
+-- structured receipts), countersign_length_binding +
+-- countersigned_head_consistency ((length, head) countersigning; obsigna
+-- receipt-verify-shaped verification soundness). Per-theorem #print axioms
+-- audit embedded in-file; kernel verification is CI-delegated (remote
+-- compute, laptop-rules v1). Lambda UNCONDITIONAL uniqueness STAYS
+-- Conjecture 1; locked-proven STAYS EXACTLY 8.
+import Lutar.Covenant.ReceiptChain
 /-!
 # Lutar — root module
 
