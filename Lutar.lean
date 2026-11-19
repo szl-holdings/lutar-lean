@@ -91,6 +91,11 @@ import Lutar.Innovations.round5.CodonRoundTrip
 -- (explicit 4-way lex-min over the diagonal K4 orbit, Jose & Zamudio 2017) and
 -- sorry-free; wired into the build so the kernel checks it (zero new axioms).
 import Lutar.Innovations.round5.CodonK4Compress
+-- Innovations/round5: TETRACTYS-HM-BOTTLENECK discharged by DELEGATION to the
+-- placeholder-free Wave13 clean-statement companion (hm_bottleneck_clean); each
+-- rpow (-1) summand is bridged to a clean inverse (Real.rpow_neg_one) first.
+-- Wired into the build so the kernel checks it (zero new axioms).
+import Lutar.Innovations.round5.TetractysHMBottleneck
 -- Wave12 CF-17: floating-point summation forward-error bound (γ_{n-1}·Σ|xᵢ|; Higham 2002,
 -- rounding model as explicit HYPOTHESIS not axiom; kernel-clean, no sorry, no new axiom).
 import Lutar.Khipu.NumericStability
