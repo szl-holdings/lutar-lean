@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-19 07:42 UTC_
+_Updated 2026-11-19 08:07 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **54**
-- Pinned baseline: **54** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **53**
+- Pinned baseline: **53** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,14 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **54 → 53** (2026-11-19, [#378](https://github.com/szl-holdings/lutar-lean/pull/378)):
+  `Lutar/Putnam/P_A4.lean` retired the `k_eq_one_impossible` tracked sub-sorry
+  (`sorry_p_A4_k1_impossible`): after `rw [h02] at hiff`, the pair (0, 2)
+  commutes by the file's own 1x1 `all_commute` lemma, `hiff.mp` turns that
+  into (2 : N) in {0, 1, 2024}, and `hmem` (`norm_num` on set membership)
+  finishes the contradiction. The dead `simp at hiff` rewrite is removed.
+  `putnam_A4_correct` keeps its two genuinely open construction placeholders.
+  Zero new axioms; Putnam/ is outside the locked-8.
 - **55 → 54** (2026-11-19, [#377](https://github.com/szl-holdings/lutar-lean/pull/377)):
   `Lutar/Innovations/round5/TetractysHMBottleneck.lean` retired its single tracked
   ‘HM bottleneck’ placeholder by DELEGATION: each rpow (-1) summand is bridged to a

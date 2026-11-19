@@ -60,10 +60,10 @@ lemma k_eq_one_impossible :
   have h02 : (0 : Fin 2025).val.dist 2 = 2 := by decide
   have hiff := hA 0 2
   rw [h02] at hiff
-  simp at hiff
-  -- hiff says: (A 0 * A 2 = A 2 * A 0) ↔ False (since 2 ∉ {0,1,2024})
-  -- But we showed all_commute, so A 0 * A 2 = A 2 * A 0 is True
-  sorry -- sorry_p_A4_k1_impossible: need to verify 2 ∉ {0,1,2024}
+  -- The pair (0, 2) commutes (all 1×1 matrices do) but its distance is 2,
+  -- which is NOT one of {0, 1, 2024} — contradiction with the iff.
+  have hmem : ¬ ((2 : ℕ) ∈ ({0, 1, 2024} : Set ℕ)) := by norm_num
+  exact hmem (hiff.mp (all_commute 0 2))
 
 /-- The minimal k is 2. TRACKED-PROP. -/
 theorem putnam_A4_correct :
@@ -114,10 +114,10 @@ lemma commutativity_graph_is_cycle :
 
 /-!
 ## Summary
-- `putnam_A4_correct`: TRACKED — 2 sorries (sorry_p_A4_construction, sorry_p_A4_k1)
-- `k_eq_one_impossible`: TRACKED — 1 sorry (sorry_p_A4_k1_impossible)
+- `putnam_A4_correct`: TRACKED — 2 proof placeholders (sorry_p_A4_construction, sorry_p_A4_k1; the explicit 2×2 construction is genuinely open)
+- `k_eq_one_impossible`: REAL ( discharged 2026-11-19: the commuting pair (0, 2) has distance 2 which is not one of {0, 1, 2024} — norm_num on set membership + the iff's forward direction )
 - `commutativity_graph_is_cycle`: REAL proof (simp + rcases)
-- Sorry count: 3 (sorry_p_A4_construction, sorry_p_A4_k1, sorry_p_A4_k1_impossible)
+- Placeholder count: 2 (sorry_p_A4_construction, sorry_p_A4_k1)
 -/
 
 end Lutar.Putnam.P_A4
