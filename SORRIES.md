@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-17 21:34 UTC_
+_Updated 2026-11-19 06:57 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **56**
-- Pinned baseline: **56** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **55**
+- Pinned baseline: **55** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,15 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **56 → 55** (2026-11-19, [#376](https://github.com/szl-holdings/lutar-lean/pull/376)):
+  `Lutar/Putnam/P_B5.lean` retired one of its three tracked sub-sorries: the
+  `inv_neg_one` helper's placeholder (“needs ZMod arithmetic”) is now the explicit
+  three-step computation — `Nat.cast_sub` (`1 ≤ p` derived from the standing
+  `hp3 : 3 < p`), `ZMod.natCast_self`, `zero_sub` — after which the pre-existing
+  `ZMod.inv_neg_one` invocation closes the lemma. The B5 Weil-bound core
+  (`putnam_B5_correct`) and the partition lemma remain TRACKED with their sorries;
+  nothing outside `Lutar/Putnam/P_B5.lean` changed. Zero new axioms; Putnam/ is
+  outside the locked-8.
 - **57 → 56** (2026-11-17, [374](https://github.com/szl-holdings/lutar-lean/pull/374)):
   `Lutar/Innovations/round5/CodonK4Compress.lean` retired its single tracked
   `sorry` (`canonicalCodon`, the K4-orbit lex-min) by computing it as an
