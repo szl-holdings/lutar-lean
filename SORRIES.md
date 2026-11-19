@@ -1,9 +1,9 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-19 08:07 UTC_
+_Updated 2026-11-19 19:56 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **53**
-- Pinned baseline: **53** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **52**
+- Pinned baseline: **52** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
@@ -11,6 +11,15 @@ CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count ab
 
 ## Baseline change log
 
+- **53 → 52** (2026-11-19, [#384](https://github.com/szl-holdings/lutar-lean/pull/384)):
+  `Lutar/Putnam/P_A5.lean` retired the `f_n2_up` tracked sub-sorry
+  (`sorry_p_A5_n2_up`): the n=2 alternating count is closed by a Unique-card argument.
+  The sign condition at position 0 (alt_seq_up 2 is all +1 on Fin 1) forces
+  σ applied to position 1 to exceed σ applied to position 0;
+  with both Fin 2 values in {0, 1}, omega pins them to 1 and 0, Equiv ext
+  forces the permutation to be the identity, so the counted subtype is a
+  singleton and `Fintype.card_unique` returns exactly 1.
+  `putnam_A5_correct` and `non_alt_strictly_smaller` keep their open placeholders.
 - **54 → 53** (2026-11-19, [#378](https://github.com/szl-holdings/lutar-lean/pull/378)):
   `Lutar/Putnam/P_A4.lean` retired the `k_eq_one_impossible` tracked sub-sorry
   (`sorry_p_A4_k1_impossible`): after `rw [h02] at hiff`, the pair (0, 2)
