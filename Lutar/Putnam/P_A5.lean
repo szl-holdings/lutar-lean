@@ -82,33 +82,23 @@ lemma f_n2_up : f (n := 2) (by norm_num) (alt_seq_up 2) = 1 := by
     first
       | norm_num [alt_seq_up] at h0
       | (simp only [alt_seq_up] at h0; try norm_num at h0)
-    have b0 := (σ ⟨0, by omega⟩).isLt
-    have b1 := (σ ⟨1, by omega⟩).isLt
-    have hv0 : (σ ⟨0, by omega⟩).val = 0 := by omega
-    have hv1 : (σ ⟨1, by omega⟩).val = 1 := by omega
+    have b0 := (σ (0 : Fin 2)).isLt
+    have b1 := (σ (1 : Fin 2)).isLt
+    have hv0 : (σ (0 : Fin 2)).val = 0 := by omega
+    have hv1 : (σ (1 : Fin 2)).val = 1 := by omega
     ext x
     fin_cases x
     · simp only [Equiv.Perm.one_apply]
-      first
-        | exact Fin.ext hv0
-        | exact Fin.eq_of_val_eq hv0
-        | exact Fin.val_injective hv0
-        | omega
+      exact hv0
     · simp only [Equiv.Perm.one_apply]
-      first
-        | exact Fin.ext hv1
-        | exact Fin.eq_of_val_eq hv1
-        | exact Fin.val_injective hv1
-        | omega
+      exact hv1
   haveI hne : Nonempty {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)} :=
     ⟨⟨1, hone⟩⟩
   have hsub : ∀ a b : {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)}, a = b := by
     rintro ⟨σ, hσ⟩ ⟨τ, hτ⟩
     exact Subtype.ext ((hfwd σ hσ).trans ((hfwd τ hτ).symm))
-  haveI huniq : Unique {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)} := by
-    first
-      | exact Unique.mk' _ hsub
-      | exact Unique.mk' hsub
+  haveI huniq : Unique {σ : Equiv.Perm (Fin 2) // satisfies_sign_seq σ (alt_seq_up 2)} :=
+    ⟨⟨1, hone⟩, fun a => hsub a ⟨1, hone⟩⟩
   first
     | (unfold f; rw [Fintype.card_unique])
     | (show Fintype.card _ = 1; rw [Fintype.card_unique])
