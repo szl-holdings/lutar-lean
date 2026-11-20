@@ -1,9 +1,9 @@
 {
     "schema":  "szl.lean_numbers/v1",
     "repo":  "szl-holdings/lutar-lean",
-    "ref":  "main",
-    "sha":  "db4bfbc6240495af250ea4977ae7e697f0b3b159",
-    "measured_at_utc":  "2026-11-19T23:24:44Z",
+    "ref":  "peer3-entry-bound-induction-20261120",
+    "sha":  "bbd1e081c69fabf4cbfd7a2b5536ca27c02655be",
+    "measured_at_utc":  "2026-11-20T10:41:23.109Z",
     "method":  "see .github/scripts/lean_numbers.py docstring (fixed grep-equivalent regexes)",
     "numbers":  {
                     "declarations":  1410,
@@ -36,10 +36,10 @@
                                         "sha256",
                                         "sha256_collision_resistant"
                                     ],
-                    "sorries_raw":  302,
-                    "sorries_noncomment":  251,
-                    "sorries_putnam":  50,
+                    "sorries_raw":  301,
+                    "sorries_noncomment":  250,
+                    "sorries_putnam":  49,
                     "sorries_baseline":  252
                 },
-    "note":  "Baseline updated 2026-11-19 for the Tier-B n-axis DPO Pinsker promotion (Lutar/Repairs/DPOPinskerNAxis.lean, generalizes merged #367 to every dimension n): dpo_pinsker_n_axis (full Pinsker tvDist \u003c= sqrt(KL/2) for simplex-interior policies of ANY n, via Wave14 log_sum_inequality + Wave17 binary_pinsker) and LambdaGateLID_DPO_stability_simplex (TH12 for every n without either honest-gap axiom). Declarations 1408-\u003e1410: two new source-scoped Lean declarations checked under explicit simplex-interior hypotheses. Axiom set unchanged (26 raw / 25 unique, same names; the false-as-stated pinsker token intentionally untouched per #367 doctrine). Sorry counts unchanged (302 raw / 251 noncomment / 50 putnam / 252 baseline); the new file deliberately contains zero sorry tokens including prose. Lake build of the new module green: LAKE_EXIT 0, both #print axioms report [propext, Classical.choice, Quot.sound]."
+    "note":  "Baseline updated 2026-11-19 for the Tier-B n-axis DPO Pinsker promotion (Lutar/Repairs/DPOPinskerNAxis.lean, generalizes merged #367 to every dimension n): dpo_pinsker_n_axis (full Pinsker tvDist <= sqrt(KL/2) for simplex-interior policies of ANY n, via Wave14 log_sum_inequality + Wave17 binary_pinsker) and LambdaGateLID_DPO_stability_simplex (TH12 for every n without either honest-gap axiom). Declarations 1408->1410: two new source-scoped Lean declarations checked under explicit simplex-interior hypotheses. Axiom set unchanged (26 raw / 25 unique, same names; the false-as-stated pinsker token intentionally untouched per #367 doctrine). Sorry counts unchanged (302 raw / 251 noncomment / 50 putnam / 252 baseline); the new file deliberately contains zero sorry tokens including prose. Lake build of the new module green: LAKE_EXIT 0, both #print axioms report [propext, Classical.choice, Quot.sound]. 2026-11-20 PR #390 source-only P_B4.entry_bound proof candidate validated by the targeted pinned Lean 4.35.0 / Mathlib 4.35.0 compiler and no-sorryAx gate in GitHub Actions; counts in this branch now 301 raw / 250 noncomment / 49 putnam / 252 baseline. Main and production are not promoted; independent review and all CI guards remain mandatory."
 }

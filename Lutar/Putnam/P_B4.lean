@@ -68,7 +68,51 @@ def N_count {n : ℕ} {hn : 2 ≤ n} (M : PutnamMatrix n hn) : ℕ :=
 lemma entry_bound {n : ℕ} {hn : 2 ≤ n} (M : PutnamMatrix n hn)
     (i j : Fin n) (hij : i.val + j.val + 2 > n) :
     M.a i j ≤ i.val + j.val + 2 - n := by
-  sorry -- sorry_p_B4_entry_bound: induction on distance from anti-diagonal
+  -- Stronger unconditional induction invariant; the zero region is the base.
+  have key : ∀ d : ℕ, ∀ i j : Fin n, i.val + j.val = d →
+      M.a i j ≤ i.val + j.val + 2 - n := by
+    intro d
+    induction d using Nat.strong_induction_on with
+    | h d ih =>
+      intro i j hd
+      by_cases hz : i.val + j.val + 2 ≤ n
+      · rw [M.zero_below i j hz]
+        exact Nat.zero_le _
+      · by_cases hi : 0 < i.val
+        · let p : Fin n := ⟨i.val - 1, by omega⟩
+          have hp : p.val + 1 < n := by dsimp [p]; omega
+          have hidx : (⟨p.val + 1, hp⟩ : Fin n) = i := by
+            apply Fin.ext
+            dsimp [p]
+            omega
+          have hval : p.val + 1 = i.val := by dsimp [p]; omega
+          have hsmall : p.val + j.val < d := by dsimp [p]; omega
+          have hprev : M.a p j ≤ p.val + j.val + 2 - n :=
+            ih (p.val + j.val) hsmall p j rfl
+          rcases M.row_inc p j hp with hstay | hinc
+          · rw [hidx] at hstay
+            omega
+          · rw [hidx] at hinc
+            omega
+        · have hj : 0 < j.val := by
+            have hjlt := j.isLt
+            omega
+          let p : Fin n := ⟨j.val - 1, by omega⟩
+          have hp : p.val + 1 < n := by dsimp [p]; omega
+          have hidx : (⟨p.val + 1, hp⟩ : Fin n) = j := by
+            apply Fin.ext
+            dsimp [p]
+            omega
+          have hval : p.val + 1 = j.val := by dsimp [p]; omega
+          have hsmall : i.val + p.val < d := by dsimp [p]; omega
+          have hprev : M.a i p ≤ i.val + p.val + 2 - n :=
+            ih (i.val + p.val) hsmall i p rfl
+          rcases M.col_inc i p hp with hstay | hinc
+          · rw [hidx] at hstay
+            omega
+          · rw [hidx] at hinc
+            omega
+  exact key _ i j rfl
 
 -- Main theorem: S ≤ (n+2)*N/3
 theorem putnam_B4_correct {n : ℕ} (hn : 2 ≤ n) (M : PutnamMatrix n hn) :

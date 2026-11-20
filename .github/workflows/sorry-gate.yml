@@ -20,7 +20,7 @@ jobs:
       # lean_numbers.py accounting). The UNVERIFIED proposals/ scratch mirror is
       # excluded but reported (EXCLUDED_PROPOSALS_SORRIES) so nothing is hidden.
       # The one pin: the gate and scoreboard.py both read it (SORRIES.md states it).
-      SORRY_BASELINE: "52"
+      SORRY_BASELINE: "51"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
