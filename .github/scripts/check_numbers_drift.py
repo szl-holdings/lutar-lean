@@ -56,12 +56,12 @@ def main() -> int:
             print(f"  {key}: {base.get(key)}")
         return 0
 
-    print("DRIFT DETECTED — live Lean numbers differ from committed baseline.")
+    print("DRIFT DETECTED -- live Lean numbers differ from committed baseline.")
     print("(.github/data/lean_numbers.json). To accept, update that file in this PR.\n")
     for key, b, m in diffs:
         print(f"  {key}: baseline={b}  measured={m}")
     if added:
-        print(f"  NEW AXIOMS (Doctrine v7 §3 — needs founder approval): {added}")
+        print(f"  NEW AXIOMS (Doctrine v7 Sec. 3 -- needs founder approval): {added}")
     if removed:
         print(f"  REMOVED AXIOMS: {removed}")
     return 1
