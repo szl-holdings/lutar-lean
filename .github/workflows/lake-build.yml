@@ -214,6 +214,31 @@ jobs:
           # -Klinter.all=true promotes lints; the build still fails on any error.
           lake build
 
+      # The default target does not necessarily import the Putnam showcase source.
+      # Explicitly typecheck that exact module and interrogate entry_bound's axioms.
+      # Work in /tmp so the canonical repository-wide sorry census is untouched.
+      - name: Putnam B4 entry_bound targeted Lean and axiom check
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          source = Path("Lutar/Putnam/P_B4.lean").read_text(encoding="utf-8")
+          marker = "\nend Lutar.Putnam.P_B4"
+          if source.count(marker) != 1:
+              raise SystemExit("B4 module boundary not uniquely found")
+          Path("/tmp/P_B4_TargetCheck.lean").write_text(
+              source.replace(marker, "\n#print axioms entry_bound" + marker),
+              encoding="utf-8",
+          )
+          PYTHON
+          lake env lean /tmp/P_B4_TargetCheck.lean 2>&1 | tee /tmp/putnam-b4-target-check.out
+          if ! grep -q '^' /tmp/putnam-b4-target-check.out; then
+            echo "::error::B4 axiom interrogation produced no output"; exit 1
+          fi
+          if grep -q 'sorryAx' /tmp/putnam-b4-target-check.out; then
+            echo "::error::P_B4.entry_bound proof depends on sorryAx"; exit 1
+          fi
+
       - name: Save Lake build cache
         if: success()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
