@@ -1,15 +1,19 @@
 # Sorry Scoreboard
 
-_Updated 2026-11-19 19:56 UTC_
+_Updated 2026-11-20 UTC_
 
-- Open `sorry` in the compiled corpus (comment-stripped): **52**
-- Pinned baseline: **52** (no-increase gate)
+- Open `sorry` in the compiled corpus (comment-stripped): **51**
+- Pinned baseline: **51** (no-increase gate)
 - Target: **0** (sorry-free)
 - Excluded `proposals/` scratch mirror (UNVERIFIED, not in `lake build`): **6** — disclosed, not gated (see proposals/INDEX.md)
 
 CI (`sorry-gate`) rejects any change that increases the COMPILED-corpus count above the pinned baseline. The `proposals/` mirror holds LLM candidate proofs staged for PhD review; its sorries are reported here but excluded from the gate because they duplicate corpus originals already inside the baseline.
 
 ## Baseline change log
+
+- **52 → 51** (2026-11-20, [#390](https://github.com/szl-holdings/lutar-lean/pull/390), branch under review):
+  `Lutar/Putnam/P_B4.lean` replaced the tracked `entry_bound` sorry with a strong-induction predecessor proof. The targeted GitHub Actions Lean 4.35.0/Mathlib 4.35.0 step compiled the exact file and checked `#print axioms entry_bound` for `sorryAx`. This ratchet counts one fewer source placeholder; the PR still requires complete green CI and independent human review, and is not a main-branch/production promotion. `putnam_B4_correct` and `n2_base_case` remain open.
+
 
 - **53 → 52** (2026-11-19, [#384](https://github.com/szl-holdings/lutar-lean/pull/384)):
   `Lutar/Putnam/P_A5.lean` retired the `f_n2_up` tracked sub-sorry
