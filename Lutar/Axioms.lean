@@ -5,8 +5,10 @@ ORCID: 0009-0001-0110-4173
 
 # Lutar — Axioms A1..A5
 
-The Lutar Invariant Λ_k : (Fin k → ℝ≥0) → ℝ≥0 is the unique scalar
-runtime-trust aggregator that satisfies the five axioms below.
+The Lutar invariant Λ_k is an admissible scalar aggregator under A1--A5,
+NOT the unique one. The max aggregator satisfies A1--A5 but differs
+from Λ, as checked in Lutar/Round13/Lambda_Uniqueness.lean.
+Uniqueness holds only under additional, explicitly stated hypotheses.
 
 We follow the convention used in `packages/ouroboros-invariant`:
 weights are Egyptian unit fractions (1/k), values are in [0,1].
@@ -17,11 +19,11 @@ The original A3 field `weight_eq : (1:ℚ)/k = (1:ℚ)/k` was a tautology —
 it did not constrain the aggregator at all. PhD-Math audit (V14-C1) flagged
 this: any aggregator satisfied A3 vacuously.
 
-The fix (V14PF-T1): replace with `A3_normalize`, the equal-weight diagonal
-commitment S1: `∀ c, Λ (fun _ => c) = c`. This constrains Λ to be exactly
-the geometric mean on the diagonal, which (together with A1, A2, A5) forces
-uniqueness via the Cauchy functional equation argument documented in
-`Lutar/Uniqueness.lean`.
+The fix (V14PF-T1) replaces the tautology with `A3_normalize`, the
+diagonal commitment S1: `∀ c, Λ (fun _ => c) = c`. This fixes the
+constant-vector behavior only. It does not force unrestricted uniqueness
+from A1--A5; maxAgg satisfies them all. Conditional uniqueness additionally
+requires a declared factorization or block-consistency assumption.
 
 The concrete proof that `Lutar.Λ k` satisfies `A3_normalize` is provided in
 `Lutar/Invariant.lean` as `theorem a3_normalize_proof`, to avoid a circular
@@ -41,7 +43,9 @@ A1–A4 but is not equal to Λ₂ = (x₁·x₂)^(1/2).
 
 A5 is NECESSARY at step 7 of the Aczél 1966 Thm 5.1 proof: without it,
 each axis exponent αᵢ is unconstrained (α₁=2/3, α₂=1/3 in the counterexample).
-With A5, all αᵢ must equal α = 1/k.
+Within a separately assumed multiplicative-power family, A5 forces
+equal axis exponents. A5 is not sufficient for uniqueness over all
+A1--A5 aggregators (maxAgg remains a counterexample).
 
 References:
 - THESIS_LEAN_RECONCILIATION.md (2026-06-02): full counterexample analysis
@@ -94,7 +98,9 @@ def IsHomogeneous {k : ℕ} (Λ : Aggregator k) : Prop :=
   ∀ (c : NNReal) (x : Axes k), Λ (fun i => c * x i) = c * Λ x
 
 /-- **A3 — Egyptian-exact diagonal normalization (V14PF-T1 fix).**
-All `k` axes share the same unit-fraction weight `1/k`.
+The intended Λ uses equal unit-fraction weights `1/k`, but this structure
+encodes only `k_pos` and diagonal normalization; it does not constrain
+the weight law of an arbitrary aggregator.
 The *meaningful* constraint (S1 from Uniqueness.lean §S1): `Λ (fun _ => c) = c`.
 
 This replaces the tautological `weight_eq : (1:ℚ)/k = (1:ℚ)/k` that was
