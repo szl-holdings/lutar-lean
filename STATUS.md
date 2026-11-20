@@ -1,14 +1,19 @@
 # STATUS.md — lutar-lean (Lean 4 Proof Kernel)
 
-**Updated:** 2026-06-12
-**Doctrine v11 — 749 / 14 / 163 — replay hash c7c0ba17**
+**Historical snapshot:** 2026-06-12; locked Doctrine v11 at `c7c0ba17`.
+**Historical locked counts:** 749 declarations / 14 unique axioms / 163 tracked sorries.
+**Not a current estate census.** For a newer, distinct whole-repository lexical inventory,
+read `.github/data/lean_numbers.json` at its recorded source commit. The
+2026-11-19 measured snapshot (`db4bfbc...`) records 1,410 declarations,
+25 unique declared axiom names and 251 non-comment `sorry` occurrences.
+These counts concern different scopes and do not say 1,410 theorems are proven.
 
 ---
 
 ## What's Live
 
 - **Lean 4 proof kernel** — formal proofs of the Λ aggregator
-- **Canonical numbers** — 749 declarations · 14 unique axioms (15 raw, 1 duplicate) · 163 tracked sorries (112 baseline + 51 Putnam)
+- **Historical locked-v11 numbers only** — 749 declarations / 14 unique axioms (15 raw, 1 duplicate) / 163 tracked sorries (112 baseline + 51 Putnam); see the newer inventory for repo-wide counts.
 - **Replay hash** — c7c0ba17
 - **`lean_numbers.py`** — CI script regenerates canonical numbers on every push
 - **CITATION.cff** — citable, ORCID 0009-0001-0110-4173
