@@ -112,3 +112,9 @@ lean_lib «DiscoveryWitness» where
   -- .github/scripts/lean_numbers.py and does not touch the locked Doctrine-v11
   -- baseline. Built by `lake build` (default).
   roots := #[`DiscoveryWitness]
+
+@[default_target]
+lean_lib «WitnessQuorumShowcase» where
+  -- Core-only EXPERIMENTAL results outside the locked Lutar/ baseline.
+  roots := #[`Showcase.WitnessQuorum.ReceiptHistory, `Showcase.WitnessQuorum.HonestOverlap,
+             `Showcase.WitnessQuorum.BoundaryChecks]
