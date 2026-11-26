@@ -56,7 +56,10 @@ def snapshot(repo: Path) -> dict:
     return {
         "commit": git(repo, "rev-parse", "HEAD"),
         "tree": git(repo, "rev-parse", "HEAD^{tree}"),
-        "tracked_status": git(repo, "status", "--porcelain=v1", "--untracked-files=no"),
+        "tracked_status": git(
+            repo, "status", "--porcelain=v1", "--untracked-files=no",
+            "--", *INPUTS,
+        ),
         "inputs": files,
     }
 
@@ -163,7 +166,8 @@ def main() -> int:
     output.mkdir(parents=True, exist_ok=False)
     receipt = verify(args.repo_path.resolve(), output)
     temporary = output / "receipt.json.tmp"
-    temporary.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "
+", encoding="utf-8")
     os.replace(temporary, output / "receipt.json")
     print("COVENANT_VERIFICATION " + receipt["status"] + ": " + receipt["reason"])
     return 0 if receipt["status"] == "PASS" else 1
