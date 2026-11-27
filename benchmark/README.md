@@ -7,7 +7,7 @@ machine-derived.
 
 | File | Contents |
 |---|---|
-| `estate_pinned_v1.jsonl` | 157 rows: 24 locked-8 carriers · 6 Theorem-U headline decls · 66 Putnam decls · 61 sorry targets |
+| `estate_pinned_v1.jsonl` | 147 rows: 24 locked-8 carriers · 6 Theorem-U headline decls · 66 Putnam decls · 51 sorry targets |
 | `MANIFEST.json` | Counts, per-kind breakdown, corpus sha256 (self-bound) |
 
 ## Kinds and statuses (all machine-derived, never asserted)
