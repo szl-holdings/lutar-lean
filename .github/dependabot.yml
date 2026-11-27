@@ -56,5 +56,11 @@ updates:
       # szl-lake's publisher pins the Hub client; move it only together with
       # szl-lake (tests/test_szl_lake_writer_contract.py enforces the pin).
       - dependency-name: "huggingface-hub"
+      # requirements/ci/anchor.in keeps pyarrow on szl-lake's range (>=16,<24).
+      # Without this, Dependabot proposes pyarrow 24+, cannot rewrite the capped
+      # range, and the whole ci-python update job fails ("Expected content to
+      # change!", run 45181562611). Move the cap only together with szl-lake.
+      - dependency-name: "pyarrow"
+        versions: [">=24"]
     cooldown:
       default-days: 3
