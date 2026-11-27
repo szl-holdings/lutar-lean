@@ -56,6 +56,7 @@ def snapshot(repo: Path) -> dict:
     return {
         "commit": git(repo, "rev-parse", "HEAD"),
         "tree": git(repo, "rev-parse", "HEAD^{tree}"),
+        # Only declared covenant inputs must remain pristine. PR documentation and other unrelated files may change.
         "tracked_status": git(
             repo, "status", "--porcelain=v1", "--untracked-files=no",
             "--", *INPUTS,
