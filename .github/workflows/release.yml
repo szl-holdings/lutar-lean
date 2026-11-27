@@ -9,6 +9,7 @@ on:
 permissions: read-all
 jobs:
   attest:
+    environment: release
     runs-on: ubuntu-latest
     permissions:
       id-token: write       # OIDC keyless signing / attestation
